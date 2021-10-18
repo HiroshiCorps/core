@@ -1,0 +1,46 @@
+group 'fr.redxil.core'
+version '1.0.0'
+
+apply plugin: 'java-library'
+
+compileJava.options.encoding = 'UTF-8'
+
+configurations.implementation.setCanBeResolved(true)
+
+repositories {
+    mavenCentral()
+
+    flatDir {
+        dirs "../api/build/libs/"
+        dirs "../api/libs/"
+    }
+
+    maven {
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
+    }
+
+    maven {
+        url = "https://mvnrepository.com/artifact/org.redisson/redisson"
+    }
+
+    maven {
+        url 'https://repo.velocitypowered.com/snapshots/'
+    }
+
+}
+
+dependencies {
+    implementation name: 'api-4.0.0'
+    compileOnly name: 'spigot-1.12.2'
+    implementation group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Main-Class': 'fr.redxil.core.CorePlugin'
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
