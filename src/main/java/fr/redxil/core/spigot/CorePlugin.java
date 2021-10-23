@@ -147,7 +147,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
             if (apiPlayer != null)
                 if (apiPlayer.getServer().getServerName().equals(serverName)) {
                     log(Level.SEVERE, SystemColor.GREEN + "Saving player: " + apiPlayer.getName() + SystemColor.RESET);
-                    apiPlayer.disconnectPlayer();
+                    apiPlayer.unloadPlayer();
                 }
         }
 

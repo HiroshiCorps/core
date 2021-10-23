@@ -166,7 +166,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
                     if (lastSpigotServer != null)
                         lastSpigotServer.removePlayerInServer(playerUUID);
 
-                    apiPlayer.disconnectPlayer();
+                    apiPlayer.unloadPlayer();
 
                 }
 

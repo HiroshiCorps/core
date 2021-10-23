@@ -158,7 +158,7 @@ public class JoinListener {
 
         Long moderatorId = (Long) CoreAPI.get().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
         CoreAPI.get().getServer().removePlayerInServer(player.getUniqueId());
-        apiPlayer.disconnectPlayer();
+        apiPlayer.unloadPlayer();
 
         if (moderatorId != null)
             BanCmd.banPlayer(CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", CoreAPI.get().getModeratorManager().getModerator(moderatorId), "{Core} Déconnexion en inspection");

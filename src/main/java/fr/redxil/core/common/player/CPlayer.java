@@ -102,7 +102,7 @@ public class CPlayer implements APIPlayer {
     }
 
     @Override
-    public void disconnectPlayer() {
+    public void unloadPlayer() {
         if (!CoreAPI.get().isBungee()) return;
 
         String name = getName();
