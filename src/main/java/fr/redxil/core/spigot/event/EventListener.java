@@ -18,6 +18,7 @@ import fr.redxil.api.spigot.event.PlayerLoggedEvent;
 import fr.redxil.api.spigot.itemstack.APIItemStack;
 import fr.redxil.api.spigot.minigame.GameBuilder;
 import fr.redxil.api.spigot.minigame.teams.TeamsGUI;
+import fr.redxil.api.spigot.utils.NBTEditor;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.spigot.CorePlugin;
 import fr.redxil.core.spigot.hosts.HostScoreboard;
@@ -35,6 +36,7 @@ import org.bukkit.event.player.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class EventListener implements Listener {
 
@@ -289,6 +291,9 @@ public class EventListener implements Listener {
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
+            if(!NBTEditor.contains(event.getItemDrop(), "uuid"))
+                NBTEditor.set(event.getItemDrop(), UUID.randomUUID(), "uuid");
+
     }
 
     @EventHandler
@@ -299,6 +304,10 @@ public class EventListener implements Listener {
         APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(event.getEntity().getUniqueId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
+
+
+        if(!NBTEditor.contains(event.getItem(), "uuid"))
+            NBTEditor.set(event.getItem(), UUID.randomUUID(), "uuid");
 
     }
 

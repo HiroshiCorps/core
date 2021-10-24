@@ -17,6 +17,7 @@ import fr.redxil.core.spigot.cmd.*;
 import fr.redxil.core.spigot.event.EventListener;
 import fr.redxil.core.spigot.freeze.FreezeMessageGestion;
 import fr.redxil.core.spigot.minigame.PlayerListener;
+import fr.redxil.core.spigot.moderatormode.UUIDCheckCmd;
 import fr.redxil.core.spigot.receiver.Receiver;
 import fr.redxil.core.spigot.receiver.UpdaterReceiver;
 import fr.redxil.core.spigot.team.TeamListener;
@@ -119,6 +120,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         this.getCommand("freeze").setExecutor(new FreezeCmd());
         this.getCommand("vanish").setExecutor(new VanishCmd());
         this.getCommand("fly").setExecutor(new FlyCmd());
+        this.getCommand("uuid").setExecutor(new UUIDCheckCmd());
 
         log(SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
