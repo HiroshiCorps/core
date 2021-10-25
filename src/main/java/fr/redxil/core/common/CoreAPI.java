@@ -26,6 +26,7 @@ import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.api.common.team.TeamManager;
 import fr.redxil.api.common.utils.ServerAccessEnum;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.game.CGameManager;
 import fr.redxil.core.common.game.team.CTeamManager;
 import fr.redxil.core.common.moderator.CModeratorManager;
@@ -194,6 +195,13 @@ public class CoreAPI extends API {
     @Override
     public boolean isGameServer() {
         return getGamesManager().isGameExist(getPluginEnabler().getServerName());
+    }
+
+    public static PlayerDataValue getPlayerDataAccessEquivalent(){
+        if(API.get().getServerAccessEnum() == ServerAccessEnum.CRACK)
+            return PlayerDataValue.PLAYER_NAME_SQL;
+        else
+            return PlayerDataValue.PLAYER_UUID_SQL;
     }
 
 }

@@ -9,7 +9,7 @@ package fr.redxil.core.bungee.commands.mod;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.data.SanctionType;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.moderators.APIPlayerModerator;

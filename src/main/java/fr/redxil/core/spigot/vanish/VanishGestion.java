@@ -6,7 +6,7 @@
 
 package fr.redxil.core.spigot.vanish;
 
-import fr.redxil.api.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.moderators.ModeratorManager;
 import fr.redxil.api.common.player.APIOfflinePlayer;

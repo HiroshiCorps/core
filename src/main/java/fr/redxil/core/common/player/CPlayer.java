@@ -10,9 +10,10 @@ import de.dytanic.cloudnet.driver.CloudNetDriver;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.data.PlayerDataValue;
-import fr.redxil.api.common.data.SanctionType;
-import fr.redxil.api.common.data.utils.DataType;
+import fr.redxil.api.common.player.data.PlayerData;
+import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
@@ -44,11 +45,9 @@ public class CPlayer implements APIPlayer {
 
     //model variable
     private final long memberID;
-    private final String name;
 
     public CPlayer(long memberID) {
         this.memberID = memberID;
-        this.name = CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this));
     }
 
 
@@ -60,7 +59,7 @@ public class CPlayer implements APIPlayer {
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(null), uuid.toString());
             this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), RankList.JOUEUR.getRankPower().toString());
-        }}, "WHERE " + API.get().getServerAccessEnum().getPlayerDataValueEquivalent().getString() + " = ?", API.get().getDataForGetAndSet(name, uuid));
+        }}, "WHERE " + CoreAPI.getPlayerDataAccessEquivalent().getString() + " = ?", API.get().getDataForGetAndSet(name, uuid));
 
         long memberID = PlayerModel.getMemberId();
 
@@ -70,8 +69,8 @@ public class CPlayer implements APIPlayer {
 
         MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
-            this.put("member_solde", 0);
-            this.put("member_coins", 0);
+            this.put(PlayerDataValue.PLAYER_SOLDE_SQL.getString(), 0);
+            this.put(PlayerDataValue.PLAYER_COINS_SQL.getString(), 0);
         }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
 
         PlayerDataValue.clearRedisData(DataType.PLAYER, name, memberID);
@@ -133,8 +132,8 @@ public class CPlayer implements APIPlayer {
         /// Money Part
 
         if (moneyModel != null) {
-            moneyModel.set("member_solde", getSolde());
-            moneyModel.set("member_coins", getCoins());
+            moneyModel.set(PlayerDataValue.PLAYER_SOLDE_SQL.getString(), getSolde());
+            moneyModel.set(PlayerDataValue.PLAYER_COINS_SQL.getString(), getCoins());
         }
 
         /// APIPlayer Part
@@ -293,7 +292,7 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public String getName() {
-        return name;
+        return CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this));
     }
 
     @Override
@@ -309,7 +308,7 @@ public class CPlayer implements APIPlayer {
     public void setName(String s) {
         if(s != null) {
             CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(getName());
-            CoreAPI.get().getRedisManager().getRedissonClient().getBucket(PlayerDataValue.PLAYER_NAME_REDIS.getString(this)).set(getName());
+            CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this), s);
             CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).put(getName(), memberID);
         }
     }
@@ -328,7 +327,7 @@ public class CPlayer implements APIPlayer {
     public void setUUID(UUID uuid) {
         if(uuid != null) {
             CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).remove(getUUID().toString());
-            CoreAPI.get().getRedisManager().getRedissonClient().getBucket(PlayerDataValue.PLAYER_UUID_REDIS.getString(this)).set(uuid);
+            CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(this), uuid.toString());
             CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).put(uuid.toString(), memberID);
         }
     }

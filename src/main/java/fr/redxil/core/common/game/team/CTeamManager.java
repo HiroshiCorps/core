@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.game.team;
 
-import fr.redxil.api.common.data.TeamDataValue;
+import fr.redxil.core.common.data.TeamDataValue;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.team.Team;

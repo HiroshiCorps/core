@@ -7,8 +7,8 @@
 package fr.redxil.core.common.player;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.data.PlayerDataValue;
-import fr.redxil.api.common.data.SanctionType;
+import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;

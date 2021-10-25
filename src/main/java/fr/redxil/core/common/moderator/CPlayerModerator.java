@@ -6,9 +6,9 @@
 
 package fr.redxil.core.common.moderator;
 
-import fr.redxil.api.common.data.ModeratorDataValue;
-import fr.redxil.api.common.data.PlayerDataValue;
-import fr.redxil.api.common.data.utils.DataType;
+import fr.redxil.core.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.redis.RedisManager;

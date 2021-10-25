@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.game;
 
-import fr.redxil.api.common.data.GameDataValue;
+import fr.redxil.core.common.data.GameDataValue;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.HostAccess;

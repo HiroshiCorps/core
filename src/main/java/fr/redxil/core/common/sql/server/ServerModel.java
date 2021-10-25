@@ -8,7 +8,7 @@
 
 package fr.redxil.core.common.sql.server;
 
-import fr.redxil.api.common.data.ServerDataValue;
+import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.core.common.sql.SQLModel;
 

@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.moderator;
 
-import fr.redxil.api.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.moderators.ModeratorManager;
@@ -43,7 +43,7 @@ public class CModeratorManager implements ModeratorManager {
     /**
      * Get the moderator with the APIPlayer
      *
-     * @param APIPlayer Of course, the APIPlayer
+     * @param apiPlayer Of course, the APIPlayer
      * @return APIPlayerModerator or null if player is not loaded or not a moderator
      */
 

@@ -8,7 +8,7 @@
 
 package fr.redxil.core.common.sql.sanction;
 
-import fr.redxil.api.common.data.SanctionType;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.time.DateUtility;

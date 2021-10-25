@@ -6,8 +6,8 @@
 
 package fr.redxil.core.spigot.cmd;
 
-import fr.redxil.api.common.data.PlayerDataValue;
-import fr.redxil.api.common.data.ServerDataValue;
+import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.spigot.command.CommandBuilder;
 import fr.redxil.api.spigot.command.CommandInfo;

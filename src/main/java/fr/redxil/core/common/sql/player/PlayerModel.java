@@ -8,7 +8,7 @@
 
 package fr.redxil.core.common.sql.player;
 
-import fr.redxil.api.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.core.common.sql.SQLModel;
 

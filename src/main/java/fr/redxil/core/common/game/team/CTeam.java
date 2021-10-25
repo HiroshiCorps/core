@@ -7,14 +7,14 @@
 package fr.redxil.core.common.game.team;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
-import fr.redxil.api.common.data.IDDataValue;
-import fr.redxil.api.common.data.ServerDataValue;
-import fr.redxil.api.common.data.TeamDataValue;
-import fr.redxil.api.common.data.utils.DataType;
+import fr.redxil.core.common.data.IDDataValue;
+import fr.redxil.core.common.data.ServerDataValue;
+import fr.redxil.core.common.data.TeamDataValue;
+import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
-import fr.redxil.api.common.redis.IDGenerator;
+import fr.redxil.core.common.redis.IDGenerator;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.team.Team;
 import fr.redxil.api.spigot.minigame.GameBuilder;

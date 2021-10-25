@@ -6,15 +6,15 @@
 
 package fr.redxil.core.common.party;
 
-import fr.redxil.api.common.data.IDDataValue;
-import fr.redxil.api.common.data.PartyDataValue;
-import fr.redxil.api.common.data.utils.DataType;
+import fr.redxil.core.common.data.IDDataValue;
+import fr.redxil.core.common.data.PartyDataValue;
+import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyAccess;
 import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
-import fr.redxil.api.common.redis.IDGenerator;
+import fr.redxil.core.common.redis.IDGenerator;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.CoreAPI;
 import org.redisson.api.RMap;

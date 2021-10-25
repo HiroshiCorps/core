@@ -6,7 +6,7 @@
 
 package fr.redxil.core.spigot.moderatormode;
 
-import fr.redxil.api.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.spigot.event.PlayerJoinModerationEvent;
 import fr.redxil.api.spigot.event.PlayerQuitModerationEvent;

@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.party;
 
-import fr.redxil.api.common.data.PartyDataValue;
+import fr.redxil.core.common.data.PartyDataValue;
 import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.player.APIPlayer;

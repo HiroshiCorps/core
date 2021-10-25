@@ -6,7 +6,7 @@
 
 package fr.redxil.core.spigot.freeze;
 
-import fr.redxil.api.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.spigot.utils.Title;

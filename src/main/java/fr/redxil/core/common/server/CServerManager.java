@@ -9,7 +9,7 @@ package fr.redxil.core.common.server;
 import de.dytanic.cloudnet.driver.CloudNetDriver;
 import de.dytanic.cloudnet.driver.service.ServiceInfoSnapshot;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.data.ServerDataValue;
+import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerTasks;
