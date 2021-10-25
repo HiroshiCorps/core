@@ -42,6 +42,8 @@ fr/redxil/core/common/game/team/CTeam.java
 fr/redxil/core/common/server/CServer.java
  fr.redxil.core.common.server.CServer
  fr.redxil.core.common.server.CServer$1
+fr/redxil/core/spigot/moderatormode/UUIDCheckCmd.java
+ fr.redxil.core.spigot.moderatormode.UUIDCheckCmd
 fr/redxil/core/bungee/pmsListener/PlayerSwitchListener.java
  fr.redxil.core.bungee.pmsListener.PlayerSwitchListener
 fr/redxil/core/common/server/CServerManager.java
