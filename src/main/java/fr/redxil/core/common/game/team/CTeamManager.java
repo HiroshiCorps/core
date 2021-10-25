@@ -6,12 +6,12 @@
 
 package fr.redxil.core.common.game.team;
 
-import fr.redxil.core.common.data.TeamDataValue;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.team.Team;
 import fr.redxil.api.common.team.TeamManager;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.TeamDataValue;
 
 import java.util.ArrayList;
 import java.util.List;

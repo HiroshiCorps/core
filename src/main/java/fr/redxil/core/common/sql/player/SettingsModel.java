@@ -8,8 +8,8 @@
 
 package fr.redxil.core.common.sql.player;
 
-import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.api.common.player.data.Setting;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModel;
 
 public class SettingsModel extends SQLModel implements Setting {
@@ -40,7 +40,7 @@ public class SettingsModel extends SQLModel implements Setting {
     }
 
     @Override
-    public void setValue(String value){
+    public void setValue(String value) {
         this.set("settings_value", value);
     }
 

@@ -7,11 +7,11 @@
 package fr.redxil.core.common.player;
 
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.player.PlayerModel;
 

@@ -6,11 +6,11 @@
 
 package fr.redxil.core.spigot.freeze;
 
-import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.spigot.utils.Title;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.spigot.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

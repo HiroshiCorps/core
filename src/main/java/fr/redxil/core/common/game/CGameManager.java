@@ -6,13 +6,13 @@
 
 package fr.redxil.core.common.game;
 
-import fr.redxil.core.common.data.GameDataValue;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.Games;
 import fr.redxil.api.common.game.GamesManager;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.GameDataValue;
 
 import java.util.ArrayList;
 import java.util.List;

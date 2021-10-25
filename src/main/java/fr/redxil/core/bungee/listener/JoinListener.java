@@ -18,9 +18,6 @@ import de.dytanic.cloudnet.driver.CloudNetDriver;
 import de.dytanic.cloudnet.driver.permission.IPermissionManagement;
 import de.dytanic.cloudnet.driver.permission.IPermissionUser;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
-import fr.redxil.core.common.data.PlayerDataValue;
-import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
@@ -28,10 +25,11 @@ import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.api.common.utils.ServerAccessEnum;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.bungee.commands.mod.action.punish.BanCmd;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.PlayerDataValue;
 import net.kyori.adventure.text.Component;
 
 import java.util.Collection;
@@ -69,7 +67,7 @@ public class JoinListener {
             return;
         }
 
-        if(API.get().getServerAccessEnum() == ServerAccessEnum.CRACK)
+        if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
             if (CoreAPI.get().getPlayerManager().isLoadedPlayer(player.getUsername())) {
                 player.disconnect((Component) TextComponentBuilder.createTextComponent(
                         "§4§lSERVER NETWORK§r\n"
@@ -80,12 +78,12 @@ public class JoinListener {
             }
 
         APIOfflinePlayer apiOfflinePlayer;
-        if(API.get().getServerAccessEnum() == ServerAccessEnum.CRACK){
+        if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK) {
             apiOfflinePlayer = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUsername());
             APIOfflinePlayer previousWithUUID = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUniqueId());
-            if(previousWithUUID != null)
+            if (previousWithUUID != null)
                 previousWithUUID.setUUID(null);
-        }else apiOfflinePlayer = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUniqueId());
+        } else apiOfflinePlayer = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
         if (apiOfflinePlayer != null) {
             SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);

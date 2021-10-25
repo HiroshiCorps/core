@@ -291,8 +291,8 @@ public class EventListener implements Listener {
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
-            if(!NBTEditor.contains(event.getItemDrop(), "uuid"))
-                NBTEditor.set(event.getItemDrop(), UUID.randomUUID(), "uuid");
+        if (!NBTEditor.contains(event.getItemDrop(), "uuid"))
+            NBTEditor.set(event.getItemDrop(), UUID.randomUUID(), "uuid");
 
     }
 
@@ -306,7 +306,7 @@ public class EventListener implements Listener {
             if (spm.isModeratorMod()) event.setCancelled(true);
 
 
-        if(!NBTEditor.contains(event.getItem(), "uuid"))
+        if (!NBTEditor.contains(event.getItem(), "uuid"))
             NBTEditor.set(event.getItem(), UUID.randomUUID(), "uuid");
 
     }

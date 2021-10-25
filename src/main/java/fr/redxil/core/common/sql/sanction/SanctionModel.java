@@ -8,10 +8,10 @@
 
 package fr.redxil.core.common.sql.sanction;
 
-import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.sql.SQLModel;
 
 import java.sql.Timestamp;
@@ -119,7 +119,7 @@ public class SanctionModel extends SQLModel implements SanctionInfo {
         tcb.appendText("\n\n§r§7Raison: §e" + getReason());
         tcb.appendText("\n§r§7Expiration: §c" + DateUtility.getMessage(getSanctionEndTS()));
         tcb.appendText("\n\n§r§7Sagit-il d'une erreur ? Faites une réclamation");
-        tcb.appendNewComponentBuilder("\n§r§bredxil.net/reclam").setOnClickExecCommand("redxil.net/reclam").appendNewComponentBuilder("\n§7ID Sanction: "+getSanctionID());
+        tcb.appendNewComponentBuilder("\n§r§bredxil.net/reclam").setOnClickExecCommand("redxil.net/reclam").appendNewComponentBuilder("\n§7ID Sanction: " + getSanctionID());
 
         return tcb;
 

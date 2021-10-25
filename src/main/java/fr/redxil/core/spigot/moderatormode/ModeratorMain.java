@@ -6,13 +6,13 @@
 
 package fr.redxil.core.spigot.moderatormode;
 
-import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.spigot.event.PlayerJoinModerationEvent;
 import fr.redxil.api.spigot.event.PlayerQuitModerationEvent;
 import fr.redxil.api.spigot.utils.ModeratorTools;
 import fr.redxil.api.spigot.utils.Title;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.ModeratorDataValue;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

@@ -10,9 +10,9 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.team.Team;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
-import fr.redxil.api.common.team.Team;
 import org.redisson.api.RedissonClient;
 
 public enum TeamDataValue {

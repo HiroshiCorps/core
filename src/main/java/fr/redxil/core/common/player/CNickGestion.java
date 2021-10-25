@@ -45,7 +45,7 @@ public class CNickGestion implements NickGestion {
         redis.getMapCache("nick/playerToNickList").put(apiPlayer.getMemberId(), nickData.getName());
         redis.getMapCache("nick/rankList").put(apiPlayer.getMemberId(), nickData.getRank().getRankPower());
 
-        if(apiPlayer instanceof APIPlayer)
+        if (apiPlayer instanceof APIPlayer)
             nickUpdate((APIPlayer) apiPlayer);
 
         return true;
@@ -65,8 +65,8 @@ public class CNickGestion implements NickGestion {
         redis.getMapCache("nick/playerToNickList").remove(playerID);
         redis.getMapCache("nick/rankList").remove(playerID);
 
-        if(apiPlayer instanceof APIPlayer)
-        nickUpdate((APIPlayer) apiPlayer);
+        if (apiPlayer instanceof APIPlayer)
+            nickUpdate((APIPlayer) apiPlayer);
 
         return true;
 

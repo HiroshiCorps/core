@@ -9,12 +9,12 @@ package fr.redxil.core.bungee.commands.msg;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.PlayerDataValue;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.UUID;

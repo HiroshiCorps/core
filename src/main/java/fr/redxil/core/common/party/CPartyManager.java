@@ -6,11 +6,11 @@
 
 package fr.redxil.core.common.party;
 
-import fr.redxil.core.common.data.PartyDataValue;
 import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.PartyDataValue;
 
 public class CPartyManager implements PartyManager {
 

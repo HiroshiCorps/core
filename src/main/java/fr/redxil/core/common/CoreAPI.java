@@ -16,6 +16,7 @@ import fr.redxil.api.common.game.GamesManager;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.moderators.ModeratorManager;
 import fr.redxil.api.common.party.PartyManager;
+import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.nick.NickGestion;
 import fr.redxil.api.common.redis.RedisManager;
@@ -25,7 +26,6 @@ import fr.redxil.api.common.server.type.ServerTasks;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.api.common.team.TeamManager;
-import fr.redxil.api.common.utils.ServerAccessEnum;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.game.CGameManager;
 import fr.redxil.core.common.game.team.CTeamManager;
@@ -39,6 +39,7 @@ import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.CSQLConnection;
 
 import java.io.File;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class CoreAPI extends API {
@@ -52,9 +53,12 @@ public class CoreAPI extends API {
     private SQLConnection sqlConnection;
     private PartyManager partyManager;
     private CTeamManager cTeamManager;
+    private final ServerAccessEnum sea;
 
     public CoreAPI(PluginEnabler plugin, ServerAccessEnum sea) {
-        super(plugin, sea);
+        super(plugin);
+
+        this.sea = sea;
 
         File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlUser.json");
         File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlPass.json");
@@ -101,6 +105,10 @@ public class CoreAPI extends API {
 
         CoreAPI.setEnabled(true);
 
+    }
+
+    public static CoreAPI getInstance() {
+        return (CoreAPI) API.get();
     }
 
     @Override
@@ -197,11 +205,32 @@ public class CoreAPI extends API {
         return getGamesManager().isGameExist(getPluginEnabler().getServerName());
     }
 
-    public static PlayerDataValue getPlayerDataAccessEquivalent(){
-        if(API.get().getServerAccessEnum() == ServerAccessEnum.CRACK)
-            return PlayerDataValue.PLAYER_NAME_SQL;
-        else
-            return PlayerDataValue.PLAYER_UUID_SQL;
+    public ServerAccessEnum getServerAccessEnum() {
+        return this.sea;
+    }
+
+    public String getDataForGetAndSet(APIOfflinePlayer aop) {
+        return getServerAccessEnum() == ServerAccessEnum.CRACK ? aop.getName() : aop.getUUID().toString();
+    }
+
+    public String getDataForGetAndSet(String name, UUID uuid) {
+        return getServerAccessEnum() == ServerAccessEnum.CRACK ? name : uuid.toString();
+    }
+
+    public enum ServerAccessEnum {
+
+        PRENIUM(PlayerDataValue.PLAYER_UUID_SQL),
+        CRACK(PlayerDataValue.PLAYER_NAME_SQL);
+
+        final PlayerDataValue pdv;
+
+        ServerAccessEnum(PlayerDataValue playerDataValue) {
+            this.pdv = playerDataValue;
+        }
+
+        public PlayerDataValue getPdv() {
+            return pdv;
+        }
     }
 
 }

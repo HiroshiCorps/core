@@ -6,12 +6,12 @@
 
 package fr.redxil.core.common.moderator;
 
-import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.moderators.ModeratorManager;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.ModeratorDataValue;
 
 import java.util.ArrayList;
 import java.util.Collection;

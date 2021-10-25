@@ -8,8 +8,8 @@
 
 package fr.redxil.core.common.sql.server;
 
-import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.api.common.server.type.ServerType;
+import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.core.common.sql.SQLModel;
 
 public class ServerModel extends SQLModel {
@@ -43,8 +43,7 @@ public class ServerModel extends SQLModel {
 
     public boolean getMaintenance() {
         int bool = this.getInt(ServerDataValue.SERVER_MAINTENANCE_SQL.getString(null));
-        if (bool == 1) return true;
-        else return false;
+        return bool == 1;
     }
 
     public ServerType getServerType() {

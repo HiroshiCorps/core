@@ -20,14 +20,14 @@ public class UUIDCheckCmd implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        if(!(commandSender instanceof Player))
-        return false;
+        if (!(commandSender instanceof Player))
+            return false;
         Player player = ((Player) commandSender).getPlayer();
-        if(NBTEditor.contains(player.getInventory().getItemInMainHand(), "uuid")){
+        if (NBTEditor.contains(player.getInventory().getItemInMainHand(), "uuid")) {
 
             player.sendMessage(NBTEditor.getString(player.getInventory().getItemInMainHand(), "uuid"));
 
-        }else
+        } else
             player.sendMessage("No UUID");
         return true;
     }

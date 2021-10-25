@@ -6,7 +6,6 @@
 
 package fr.redxil.core.common.game;
 
-import fr.redxil.core.common.data.GameDataValue;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.HostAccess;
@@ -14,6 +13,7 @@ import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.GameDataValue;
 
 import java.util.List;
 
@@ -61,8 +61,7 @@ public class CHost extends CGame implements Hosts {
                     return false;
                 if (getMaxPlayerSpec() <= getOutGameSpectators().size())
                     return false;
-                if (!isAllowSpectator(apiPlayer.getName()))
-                    return false;
+                return isAllowSpectator(apiPlayer.getName());
             }
             return true;
         }

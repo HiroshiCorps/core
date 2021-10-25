@@ -7,16 +7,15 @@
 package fr.redxil.core.common.player;
 
 import fr.redxil.api.common.API;
-import fr.redxil.core.common.data.PlayerDataValue;
-import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.rank.RankList;
-import fr.redxil.api.common.utils.ServerAccessEnum;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.money.MoneyModel;
 import fr.redxil.core.common.sql.player.PlayerFriendModel;
@@ -30,8 +29,9 @@ import java.util.UUID;
 
 public class CPlayerOffline implements APIOfflinePlayer {
 
+    List<SanctionInfo> sanctionModelList = null;
+    List<Setting> settingsModelList = null;
     private long memberID;
-
     private PlayerModel model = null;
     private MoneyModel moneyModel;
     private PlayerFriendModel friendModel = null;
@@ -50,6 +50,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     }
 
+
     public CPlayerOffline(long memberID) {
         initPlayer(memberID);
     }
@@ -64,7 +65,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
         this.friendModel = new SQLModels<>(PlayerFriendModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
 
     }
-
 
     @Override
     public void addSolde(long i) {
@@ -102,6 +102,11 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
+    public void setRank(RankList rankList) {
+        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), rankList.getRankPower().toString());
+    }
+
+    @Override
     public RankList getRank(boolean nickCare) {
         return RankList.getRank(getRankPower(nickCare));
     }
@@ -119,11 +124,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
                 return nick.getRank().getRankPower();
         }
         return getRankPower();
-    }
-
-    @Override
-    public void setRank(RankList rankList) {
-        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), rankList.getRankPower().toString());
     }
 
     @Override
@@ -147,6 +147,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
+    public void setName(String s) {
+        if (s != null || CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
+            model.set(PlayerDataValue.PLAYER_NAME_SQL.getString(), s);
+    }
+
+    @Override
     public String getName(boolean nickCare) {
         if (nickCare) {
             NickData nickData = API.get().getNickGestion().getNickData(this);
@@ -156,21 +162,15 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public void setName(String s) {
-        if(s != null || API.get().getServerAccessEnum() == ServerAccessEnum.PRENIUM)
-        model.set(PlayerDataValue.PLAYER_NAME_SQL.getString(), s);
-    }
-
-    @Override
     public UUID getUUID() {
         return model.getUUID();
     }
 
     @Override
     public void setUUID(UUID uuid) {
-        if(uuid != null)
+        if (uuid != null)
             model.set(PlayerDataValue.PLAYER_UUID_SQL.getString(), uuid.toString());
-        else if(API.get().getServerAccessEnum() == ServerAccessEnum.CRACK)
+        else if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
             model.set(PlayerDataValue.PLAYER_UUID_SQL.getString(), null);
     }
 
@@ -188,7 +188,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public boolean isNick() {
         return CoreAPI.get().getNickGestion().hasNick(this);
     }
-
 
     @Override
     public List<String> getFriendInviteReceived() {
@@ -208,12 +207,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     }
 
-
     @Override
     public List<String> getFriendInviteSended() {
         return friendModel.getSendedList();
     }
-
 
     @Override
     public List<String> getFriendList() {
@@ -229,7 +226,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     }
 
-
     @Override
     public boolean acceptFriendInviteReceived(APIOfflinePlayer s) {
         if (!hasFriendSend(s)) return false;
@@ -244,7 +240,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
         return true;
     }
-
 
     @Override
     public List<String> getBlackList() {
@@ -284,10 +279,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (fList.remove(s.getName()))
             friendModel.setSendedList(fList);
     }
-
-
-    List<SanctionInfo> sanctionModelList = null;
-    List<Setting> settingsModelList = null;
 
     @Override
     public void loadSettings() {

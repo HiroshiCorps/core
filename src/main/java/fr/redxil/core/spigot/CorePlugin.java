@@ -11,19 +11,18 @@ import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.utils.ServerAccessEnum;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.spigot.cmd.*;
 import fr.redxil.core.spigot.event.EventListener;
+import fr.redxil.core.spigot.event.INVEventListener;
 import fr.redxil.core.spigot.freeze.FreezeMessageGestion;
 import fr.redxil.core.spigot.minigame.PlayerListener;
+import fr.redxil.core.spigot.moderatormode.ModeratorMain;
 import fr.redxil.core.spigot.moderatormode.UUIDCheckCmd;
 import fr.redxil.core.spigot.receiver.Receiver;
 import fr.redxil.core.spigot.receiver.UpdaterReceiver;
 import fr.redxil.core.spigot.team.TeamListener;
 import fr.redxil.core.spigot.vanish.VanishGestion;
-import fr.redxil.core.spigot.event.INVEventListener;
-import fr.redxil.core.spigot.moderatormode.ModeratorMain;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -85,7 +84,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         log(SystemColor.GREEN + "Servername found: " + serverName + SystemColor.RESET);
 
         log(SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
-        new CoreAPI(this, ServerAccessEnum.PRENIUM);
+        new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
 
         if (!CoreAPI.get().isEnabled()) {
             log(SystemColor.RED + "Error while loading API, please check error code below" + SystemColor.RESET);

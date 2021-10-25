@@ -8,20 +8,20 @@ package fr.redxil.core.common.game;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redxil.api.common.API;
-import fr.redxil.core.common.data.GameDataValue;
-import fr.redxil.core.common.data.IDDataValue;
-import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.Games;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.core.common.redis.IDGenerator;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.team.Team;
 import fr.redxil.api.spigot.minigame.GameBuilder;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.GameDataValue;
+import fr.redxil.core.common.data.IDDataValue;
+import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.redis.IDGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +76,7 @@ public class CGame implements Games {
         GameDataValue.clearRedisData(DataType.SERVER, name, id);
 
         CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).remove(name);
-        if(host)
+        if (host)
             CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).remove(name);
     }
 
@@ -174,7 +174,7 @@ public class CGame implements Games {
 
     @Override
     public boolean setSpectator(String s, boolean b) {
-        if(b == isSpectator(s)) return false;
+        if (b == isSpectator(s)) return false;
         if (b) {
             getPlayers().remove(s);
             getInGameSpectators().add(s);
@@ -252,7 +252,7 @@ public class CGame implements Games {
     }
 
     @Override
-    public List<String> getSpectators(){
+    public List<String> getSpectators() {
         List<String> specList = new ArrayList<>(getInGameSpectators());
         specList.addAll(getOutGameSpectators());
         return specList;

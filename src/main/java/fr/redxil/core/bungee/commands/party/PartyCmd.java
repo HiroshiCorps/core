@@ -25,8 +25,8 @@ import java.util.Map;
 
 public class PartyCmd implements Command {
 
-    private int timeMax = 15;
-    private int time = 0;
+    private final int timeMax = 15;
+    private final int time = 0;
 
     public void execute(CommandSource sender, String @NonNull [] args) {
 

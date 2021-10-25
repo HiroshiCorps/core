@@ -11,9 +11,9 @@ package fr.redxil.core.common.sql;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.Callback;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.api.common.utils.Scheduler;
-import fr.redxil.api.common.Callback;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

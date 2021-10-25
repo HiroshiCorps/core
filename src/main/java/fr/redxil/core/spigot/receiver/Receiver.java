@@ -9,8 +9,8 @@ package fr.redxil.core.spigot.receiver;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.core.spigot.event.EventListener;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.spigot.event.EventListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

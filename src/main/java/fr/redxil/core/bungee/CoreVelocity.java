@@ -19,16 +19,10 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.utils.ServerAccessEnum;
 import fr.redxil.api.velocity.Velocity;
-import fr.redxil.core.bungee.commands.mod.action.punish.BanCmd;
-import fr.redxil.core.bungee.listener.PlayerListener;
-import fr.redxil.core.bungee.pmsListener.UpdaterReceiver;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.bungee.commands.NickCmd;
 import fr.redxil.core.bungee.commands.ProxyCmd;
 import fr.redxil.core.bungee.commands.ShutdownCmd;
@@ -39,6 +33,7 @@ import fr.redxil.core.bungee.commands.mod.InfoCmd;
 import fr.redxil.core.bungee.commands.mod.NickCheckCmd;
 import fr.redxil.core.bungee.commands.mod.action.cancel.UnBanCmd;
 import fr.redxil.core.bungee.commands.mod.action.cancel.UnMuteCmd;
+import fr.redxil.core.bungee.commands.mod.action.punish.BanCmd;
 import fr.redxil.core.bungee.commands.mod.action.punish.KickCmd;
 import fr.redxil.core.bungee.commands.mod.action.punish.MuteCmd;
 import fr.redxil.core.bungee.commands.mod.action.punish.WarnCmd;
@@ -48,7 +43,10 @@ import fr.redxil.core.bungee.commands.msg.MsgCmd;
 import fr.redxil.core.bungee.commands.msg.RCmd;
 import fr.redxil.core.bungee.commands.party.PartyCmd;
 import fr.redxil.core.bungee.listener.JoinListener;
+import fr.redxil.core.bungee.listener.PlayerListener;
 import fr.redxil.core.bungee.pmsListener.PlayerSwitchListener;
+import fr.redxil.core.bungee.pmsListener.UpdaterReceiver;
+import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
@@ -94,7 +92,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     public void onEnable(ProxyInitializeEvent pie) {
         String[] ipString = proxyServer.getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
-        new CoreAPI(this, ServerAccessEnum.PRENIUM);
+        new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
         if (CoreAPI.get().isEnabled()) {
             checkCrash();
 

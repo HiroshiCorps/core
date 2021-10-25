@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class CSQLRowSet implements SQLRowSet {
 
-    private HashMap<Integer, ResultSetRow> rows = new HashMap<>();
+    private final HashMap<Integer, ResultSetRow> rows = new HashMap<>();
     private int index = -1;
     private int size;
     private ResultSetMetaData metadata;
@@ -215,10 +215,7 @@ public class CSQLRowSet implements SQLRowSet {
         if (!this.rows.get(this.index).getColumns().containsKey(columnName)) {
             return true;
         }
-        if (checkNotNull && this.rows.get(this.index).getColumns().get(columnName).getValue() == null) {
-            return true;
-        }
-        return false;
+        return checkNotNull && this.rows.get(this.index).getColumns().get(columnName).getValue() == null;
     }
 
     @Override

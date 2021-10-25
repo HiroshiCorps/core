@@ -6,17 +6,17 @@
 
 package fr.redxil.core.common.party;
 
-import fr.redxil.core.common.data.IDDataValue;
-import fr.redxil.core.common.data.PartyDataValue;
-import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyAccess;
 import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
-import fr.redxil.core.common.redis.IDGenerator;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.IDDataValue;
+import fr.redxil.core.common.data.PartyDataValue;
+import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.redis.IDGenerator;
 import org.redisson.api.RMap;
 
 import java.util.ArrayList;
@@ -94,7 +94,7 @@ public class CParty implements Party {
 
         RMap<String, String> rankMap = CoreAPI.get().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this));
         rankMap.remove(apiPlayer1.getName());
-        rankMap.put(apiPlayer1 .getName(), partyRank.getRankName());
+        rankMap.put(apiPlayer1.getName(), partyRank.getRankName());
 
         return true;
     }

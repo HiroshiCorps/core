@@ -10,9 +10,9 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Games;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
-import fr.redxil.api.common.game.Games;
 import org.redisson.api.RedissonClient;
 
 public enum GameDataValue {

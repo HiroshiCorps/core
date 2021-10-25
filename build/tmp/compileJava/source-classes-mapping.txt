@@ -56,19 +56,26 @@ fr/redxil/core/bungee/commands/mod/action/cancel/UnMuteCmd.java
  fr.redxil.core.bungee.commands.mod.action.cancel.UnMuteCmd
 fr/redxil/core/spigot/receiver/DataActualise.java
  fr.redxil.core.spigot.receiver.DataActualise
+fr/redxil/core/common/data/TeamDataValue.java
+ fr.redxil.core.common.data.TeamDataValue
 fr/redxil/core/spigot/hosts/settings/SettingsListener.java
  fr.redxil.core.spigot.hosts.settings.SettingsListener
 fr/redxil/core/common/CoreAPI.java
  fr.redxil.core.common.CoreAPI
+ fr.redxil.core.common.CoreAPI$ServerAccessEnum
 fr/redxil/core/bungee/commands/NickCmd.java
  fr.redxil.core.bungee.commands.NickCmd
 fr/redxil/core/common/sql/money/MoneyModel.java
  fr.redxil.core.common.sql.money.MoneyModel
+fr/redxil/core/common/data/ModeratorDataValue.java
+ fr.redxil.core.common.data.ModeratorDataValue
 fr/redxil/core/bungee/commands/mod/CibleCmd.java
  fr.redxil.core.bungee.commands.mod.CibleCmd
 fr/redxil/core/spigot/vanish/VanishGestion.java
  fr.redxil.core.spigot.vanish.VanishGestion
  fr.redxil.core.spigot.vanish.VanishGestion$1
+fr/redxil/core/common/data/utils/Data.java
+ fr.redxil.core.common.data.utils.Data
 fr/redxil/core/common/game/CGame.java
  fr.redxil.core.common.game.CGame
 fr/redxil/core/common/game/team/CTeamManager.java
@@ -84,6 +91,8 @@ fr/redxil/core/bungee/commands/mod/action/punish/WarnCmd.java
  fr.redxil.core.bungee.commands.mod.action.punish.WarnCmd
 fr/redxil/core/bungee/commands/mod/InfoCmd.java
  fr.redxil.core.bungee.commands.mod.InfoCmd
+fr/redxil/core/common/data/PartyDataValue.java
+ fr.redxil.core.common.data.PartyDataValue
 fr/redxil/core/spigot/cmd/ModCmd.java
  fr.redxil.core.spigot.cmd.ModCmd
 fr/redxil/core/spigot/receiver/Receiver.java
@@ -104,6 +113,8 @@ fr/redxil/core/common/party/CParty.java
  fr.redxil.core.common.party.CParty$2
  fr.redxil.core.common.party.CParty$3
  fr.redxil.core.common.party.CParty$4
+fr/redxil/core/common/data/PlayerDataValue.java
+ fr.redxil.core.common.data.PlayerDataValue
 fr/redxil/core/common/sql/server/ServerModel.java
  fr.redxil.core.common.sql.server.ServerModel
 fr/redxil/core/bungee/commands/mod/NickCheckCmd.java
@@ -116,6 +127,8 @@ fr/redxil/core/spigot/event/INVEventListener.java
  fr.redxil.core.spigot.event.INVEventListener
 fr/redxil/core/common/party/CPartyManager.java
  fr.redxil.core.common.party.CPartyManager
+fr/redxil/core/common/data/utils/DataType.java
+ fr.redxil.core.common.data.utils.DataType
 fr/redxil/core/common/pmsListener/ShutdownOrderListener.java
  fr.redxil.core.common.pmsListener.ShutdownOrderListener
 fr/redxil/core/common/sql/SQLModel.java
@@ -126,11 +139,15 @@ fr/redxil/core/spigot/cmd/FreezeCmd.java
  fr.redxil.core.spigot.cmd.FreezeCmd
 fr/redxil/core/common/player/CPlayerManager.java
  fr.redxil.core.common.player.CPlayerManager
+fr/redxil/core/common/redis/IDGenerator.java
+ fr.redxil.core.common.redis.IDGenerator
 fr/redxil/core/bungee/commands/ShutdownCmd.java
  fr.redxil.core.bungee.commands.ShutdownCmd
 fr/redxil/core/bungee/commands/party/PartyCmd.java
  fr.redxil.core.bungee.commands.party.PartyCmd
  fr.redxil.core.bungee.commands.party.PartyCmd$listCmd
+fr/redxil/core/common/data/IDDataValue.java
+ fr.redxil.core.common.data.IDDataValue
 fr/redxil/core/common/sql/moderator/ModLogsModels.java
  fr.redxil.core.common.sql.moderator.ModLogsModels
 fr/redxil/core/spigot/inventory/ServersInventory.java
@@ -161,6 +178,8 @@ fr/redxil/core/bungee/commands/mod/action/punish/MuteCmd.java
  fr.redxil.core.bungee.commands.mod.action.punish.MuteCmd
 fr/redxil/core/spigot/team/TeamListener.java
  fr.redxil.core.spigot.team.TeamListener
+fr/redxil/core/common/data/ServerDataValue.java
+ fr.redxil.core.common.data.ServerDataValue
 fr/redxil/core/common/moderator/CPlayerModerator.java
  fr.redxil.core.common.moderator.CPlayerModerator
  fr.redxil.core.common.moderator.CPlayerModerator$1
@@ -170,10 +189,14 @@ fr/redxil/core/common/sql/SQLModels.java
 fr/redxil/core/bungee/CoreVelocity.java
  fr.redxil.core.bungee.CoreVelocity
  fr.redxil.core.bungee.CoreVelocity$1
+fr/redxil/core/common/data/GameDataValue.java
+ fr.redxil.core.common.data.GameDataValue
 fr/redxil/core/common/sql/party/PartyModel.java
  fr.redxil.core.common.sql.party.PartyModel
 fr/redxil/core/spigot/event/EventListener.java
  fr.redxil.core.spigot.event.EventListener
+fr/redxil/core/common/data/utils/DataBaseType.java
+ fr.redxil.core.common.data.utils.DataBaseType
 fr/redxil/core/common/sql/CSQLRowSet.java
  fr.redxil.core.common.sql.CSQLRowSet
 fr/redxil/core/spigot/cmd/VanishCmd.java
