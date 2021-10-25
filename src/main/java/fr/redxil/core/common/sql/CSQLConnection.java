@@ -10,6 +10,7 @@ package fr.redxil.core.common.sql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.api.common.utils.Scheduler;
 import fr.redxil.api.common.Callback;
@@ -22,27 +23,18 @@ import java.util.logging.Logger;
 
 public class CSQLConnection implements SQLConnection {
 
-    private final String host, port, database, username, password;
-    private final Logger logs = Logger.getLogger("CSQLConnection");
+    private final Logger logs = Logger.getLogger(CSQLConnection.class.getName());
     private HikariDataSource pool = null;
 
-    public CSQLConnection(String host, String port, String database, String username, String password) {
-        this.host = host;
-        this.port = port;
-        this.database = database;
-        this.username = username;
-        this.password = password;
-        this.initConnection();
-    }
-
     @Override
-    public void initConnection() {
+    public void connect(IpInfo ipInfo, String database, String username, String password) {
         try {
             Class.forName("org.mariadb.jdbc.MariaDbDataSource");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return;
         }
+
         HikariConfig config = new HikariConfig();
 /*        config.setJdbcUrl("jdbc:mariadb://" + this.host + ":" + this.port + "/" + this.database
                 //        + "?verifyServerCertificate=false"
@@ -55,9 +47,9 @@ public class CSQLConnection implements SQLConnection {
 */
 
         config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
-        config.addDataSourceProperty("url", "jdbc:mariadb://" + this.host + ":" + this.port + "/" + this.database);
-        config.addDataSourceProperty("user", this.username);
-        config.addDataSourceProperty("password", this.password);
+        config.addDataSourceProperty("url", "jdbc:mariadb://" + ipInfo.getIp() + ":" + ipInfo.getPort() + "/" + database);
+        config.addDataSourceProperty("user", username);
+        config.addDataSourceProperty("password", password);
 
         // + "?user="+ this.username + "&password=" + this.password
         // + "?verifyServerCertificate=false" + "&useSSL=false"
@@ -84,7 +76,7 @@ public class CSQLConnection implements SQLConnection {
 
     @Override
     public boolean isConnected() {
-        return this.pool != null && !this.pool.isClosed();
+        return this.pool != null && this.pool.isClosed();
     }
 
     @Override

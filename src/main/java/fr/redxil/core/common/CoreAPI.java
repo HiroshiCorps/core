@@ -8,6 +8,7 @@ package fr.redxil.core.common;
 
 import fr.redline.pms.connect.linker.SocketGestion;
 import fr.redline.pms.utils.GSONSaver;
+import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.game.Games;
@@ -77,7 +78,8 @@ public class CoreAPI extends API {
             return;
         }
 
-        this.sqlConnection = new CSQLConnection("127.0.0.1", "3306", "SERVER", sqlUser, sqlPass);
+        this.sqlConnection = new CSQLConnection();
+        this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "SERVER", sqlUser, sqlPass);
         this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisPass);
 
         this.serverManager = new CServerManager();
