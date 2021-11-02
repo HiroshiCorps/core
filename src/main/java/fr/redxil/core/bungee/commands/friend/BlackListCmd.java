@@ -6,6 +6,9 @@
 
 package fr.redxil.core.bungee.commands.friend;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -15,10 +18,66 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.TextComponent;
 
 import java.util.UUID;
 
 public class BlackListCmd implements Command {
+
+    public BrigadierCommand getCommand() {
+
+        LiteralCommandNode<CommandSource> blackList =
+                LiteralArgumentBuilder.<CommandSource>literal("blacklist")
+                        .executes(commandContext -> {
+                            CommandSource commandSource = commandContext.getSource();
+                            commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Erreur, mauvaise syntaxe: /blacklist (name)").setColor(Color.RED).getTextComponent());
+                            return 1;
+                        }).build();
+
+        LiteralCommandNode<CommandSource> addorrm =
+                LiteralArgumentBuilder.<CommandSource>literal("addorrm")
+                        .executes(commandContext -> {
+                            CommandSource commandSource = commandContext.getSource();
+                            commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Erreur, mauvaise syntaxe: /blacklist (add ou rm) (name)").setColor(Color.RED).getTextComponent());
+                            return 1;
+                        }).build();
+
+        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("name")
+                .executes(commandContext -> {
+
+                    CommandSource commandSource = commandContext.getSource();
+
+                    if (!(commandSource instanceof Player)) {
+                        return 0;
+                    }
+
+                    String playerName = commandContext.getArgument("name", String.class);
+
+                    APIOfflinePlayer osp = CoreAPI.get().getPlayerManager().getOfflinePlayer(playerName);
+
+                    if (osp == null) {
+                        commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Erreur, personne introuvable").setColor(Color.RED).getTextComponent());
+                        return 0;
+                    }
+
+                    if (commandContext.getArgument("addorrm", String.class).equals("add")) {
+                        CoreAPI.get().getPlayerManager().getPlayer(((Player) commandSource).getUniqueId()).addBlackList(osp);
+                        commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Joueur BlackList").setColor(Color.GREEN));
+                    } else {
+                        CoreAPI.get().getPlayerManager().getPlayer(((Player) commandSource).getUniqueId()).removeBlackList(osp);
+                        commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Joueur plus BlackList").setColor(Color.GREEN));
+                    }
+
+                    return 1;
+
+                }).build();
+
+        blackList.addChild(addorrm);
+        addorrm.addChild(lcn);
+
+        return new BrigadierCommand(blackList);
+
+    }
 
     public void execute(CommandSource sender, String[] args) {
 

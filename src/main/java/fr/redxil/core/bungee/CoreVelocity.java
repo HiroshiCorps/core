@@ -79,7 +79,10 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         this.pathFile = folder.toFile();
         this.cm = commandManager;
         if (!pathFile.exists())
-            pathFile.mkdirs();
+            if (!pathFile.mkdirs()) {
+                server.shutdown();
+                return;
+            }
         server.getEventManager().register(this, this);
         logger.info("Hello there, it's a test plugin I made!");
     }
@@ -120,7 +123,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             cm.register("nick", new NickCmd());
             cm.register("proxy", new ProxyCmd());
             cm.register("friend", new FriendCmd());
-            cm.register("blacklist", new BlackListCmd(), "bl");
+            cm.register(new BlackListCmd().getCommand());
 
             cm.register("msg", new MsgCmd());
             cm.register("r", new RCmd());
