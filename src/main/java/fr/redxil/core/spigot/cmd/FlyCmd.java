@@ -6,7 +6,7 @@
 
 package fr.redxil.core.spigot.cmd;
 
-import fr.redxil.api.common.moderators.APIPlayerModerator;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.common.CoreAPI;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

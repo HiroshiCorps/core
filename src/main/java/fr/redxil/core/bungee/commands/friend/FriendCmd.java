@@ -6,6 +6,10 @@
 
 package fr.redxil.core.bungee.commands.friend;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -13,177 +17,193 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.kyori.adventure.text.TextComponent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FriendCmd implements Command {
 
-    public void execute(CommandSource sender, String @NonNull [] args) {
+    public BrigadierCommand getCommand() {
 
-        if (!(sender instanceof Player)) return;
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) sender).getUniqueId());
+        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("friend")
+                .executes(this::sendCommandList)
+                .build();
 
-        if (args.length == 0) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur: Merci de faire /friend help").setColor(Color.RED)
-                    .sendTo(apiPlayer);
-            return;
-        }
+        LiteralCommandNode<CommandSource> cmd = LiteralArgumentBuilder.<CommandSource>literal("cmd")
+                .executes(commandContext -> {
 
-        if (args.length == 2)
-            if (args[1].equals(apiPlayer.getName())) {
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                        .appendNewComponentBuilder("Hmm très intéressant, quel est ta vie pour intérargir avec toi-même ?").setColor(Color.RED)
-                        .sendTo(apiPlayer);
-                return;
-            }
+                    if (!(commandContext.getSource() instanceof Player)) {
+                        return 0;
+                    }
 
-        if (args[0].equalsIgnoreCase("help"))
-            helpCmd(apiPlayer);
-        else if (args[0].equalsIgnoreCase("invite"))
-            inviteCmd(apiPlayer, args);
-        else if (args[0].equalsIgnoreCase("accept"))
-            acceptCmd(apiPlayer, args);
-        else if (args[0].equalsIgnoreCase("refuse"))
-            refuseCmd(apiPlayer, args);
-        else if (args[0].equalsIgnoreCase("revoke"))
-            revokeCmd(apiPlayer, args);
-        else if (args[0].equalsIgnoreCase("list"))
-            listCmd(apiPlayer);
-        else if (args[0].equalsIgnoreCase("remove"))
-            removeCmd(apiPlayer, args);
-        else helpCmd(apiPlayer);
+                    Player player = (Player) commandContext.getSource();
+
+                    FriendCmd.ListCmd usedCmd = FriendCmd.ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
+                    if (usedCmd == null) {
+                        return this.sendCommandList(commandContext);
+                    }
+
+                    if (!FriendCmd.ListCmd.getCommand(1).contains(usedCmd)) {
+                        player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /party " + usedCmd.getName() + " (nom/joueur)").setColor(Color.RED).getTextComponent());
+                        return 1;
+                    }
+
+                    switch (usedCmd) {
+
+                        case LIST: {
+                            return listCmd(commandContext, player, null);
+                        }
+
+                    }
+                    return 1;
+                })
+                .build();
+
+        LiteralCommandNode<CommandSource> name = LiteralArgumentBuilder.<CommandSource>literal("name")
+                .executes(commandContext -> {
+
+                    if (!(commandContext.getSource() instanceof Player)) {
+                        return 0;
+                    }
+
+                    Player player = (Player) commandContext.getSource();
+
+                    FriendCmd.ListCmd usedCmd = FriendCmd.ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
+                    if (usedCmd == null) {
+                        return this.sendCommandList(commandContext);
+                    }
+
+                    if (!FriendCmd.ListCmd.getCommand(2).contains(usedCmd)) {
+                        player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /party " + usedCmd.getName()).setColor(Color.RED).getTextComponent());
+                        return 1;
+                    }
+
+                    String nameArg = commandContext.getArgument("name", String.class);
+
+                    switch (usedCmd) {
+                        case REMOVE: {
+                            return removeCmd(commandContext, player, nameArg);
+                        }
+                        case REVOKE: {
+                            return revokeCmd(commandContext, player, nameArg);
+                        }
+                        case REFUSE: {
+                            return refuseCmd(commandContext, player, nameArg);
+                        }
+                        case ACCEPT: {
+                            return acceptCmd(commandContext, player, nameArg);
+                        }
+                    }
+                    return 1;
+                })
+                .build();
+
+        lcn.addChild(cmd);
+
+        cmd.addChild(name);
+
+        return new BrigadierCommand(lcn);
 
     }
 
-    public void helpCmd(APIPlayer apiPlayer) {
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("help\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("invite\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("accept\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("refuse\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("revoke\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("list\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("remove\n").setColor(Color.WHITE).sendTo(apiPlayer);
-
+    public int sendCommandList(CommandContext<CommandSource> commandContext) {
+        CommandSource commandSource = commandContext.getSource();
+        TextComponentBuilder textComponentBuilder = TextComponentBuilder.createTextComponent("Veuillez utiliser l'une des composantes suivantes:");
+        for (FriendCmd.ListCmd cmd : FriendCmd.ListCmd.values()) {
+            textComponentBuilder.appendNewComponentBuilder("\n" + Color.GRAY + "> /friend " +
+                    cmd.getName() + ": " + Color.BLUE + " " + cmd.getUtility());
+        }
+        commandSource.sendMessage((TextComponent) textComponentBuilder.getFinalTextComponent());
+        return 1;
     }
 
-    public void inviteCmd(APIPlayer apiPlayer, String[] subArgs) {
+    public void inviteCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        if (subArgs.length != 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, merci de faire /friend invite (pseudo)").setColor(Color.RED).sendTo(apiPlayer);
-            return;
-        }
-
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(subArgs[1]);
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
             return;
         }
 
         apiPlayer.sendFriendInvite(target);
+        TextComponentBuilder.createTextComponent("Demande d'amis envoyée").setColor(Color.GREEN).sendTo(apiPlayer);
 
     }
 
-    public void acceptCmd(APIPlayer apiPlayer, String[] subArgs) {
+    public int acceptCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        if (subArgs.length != 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, merci de faire /friend accept (pseudo)").setColor(Color.RED).sendTo(apiPlayer);
-            return;
-        }
-
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(subArgs[1]);
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
-            return;
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
         }
 
         apiPlayer.acceptFriendInvite(target);
+        TextComponentBuilder.createTextComponent("Sa demande d'amis à été accepté").setColor(Color.GREEN).sendTo(apiPlayer);
+        return 1;
 
     }
 
-    public void refuseCmd(APIPlayer apiPlayer, String[] subArgs) {
+    public int refuseCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        if (subArgs.length != 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, merci de faire /friend refuse (pseudo)").setColor(Color.RED).sendTo(apiPlayer);
-            return;
-        }
-
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(subArgs[1]);
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
-            return;
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
         }
 
         apiPlayer.refusedFriendInvite(target);
+        TextComponentBuilder.createTextComponent("Sa demande d'amis à été refusée").setColor(Color.GREEN).sendTo(apiPlayer);
+        return 1;
 
     }
 
-    public void revokeCmd(APIPlayer apiPlayer, String[] subArgs) {
+    public int revokeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        if (subArgs.length != 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, merci de faire /friend revoke (pseudo)").setColor(Color.RED).sendTo(apiPlayer);
-            return;
-        }
-
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(subArgs[1]);
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
-            return;
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
         }
 
         apiPlayer.revokeFriendInvite(target);
+        TextComponentBuilder.createTextComponent("Votre demande d'amis à été retiré").setColor(Color.GREEN).sendTo(apiPlayer);
+
+        return 1;
 
     }
 
-    public void removeCmd(APIPlayer apiPlayer, String[] subArgs) {
-
-        if (subArgs.length != 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, merci de faire /friend remove (pseudo)").setColor(Color.RED).sendTo(apiPlayer);
-            return;
-        }
-
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(subArgs[1]);
+    public int removeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
-            return;
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
         }
 
         apiPlayer.removeFriend(target);
+        TextComponentBuilder.createTextComponent("Joueur retiré de vos Amis").setColor(Color.GREEN).sendTo(apiPlayer);
 
+        return 1;
     }
 
-    public void listCmd(APIPlayer apiPlayer) {
+    public int listCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
         List<String> amisList = apiPlayer.getFriendList();
 
         if (amisList.size() == 0) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").setColor(Color.GREEN).sendTo(apiPlayer);
-            return;
+            TextComponentBuilder.createTextComponent("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").setColor(Color.GREEN).sendTo(apiPlayer);
+            return 1;
         }
 
-        TextComponentBuilder tcb = TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Heuresement pour toi, tu as ").setColor(Color.GREEN).appendNewComponentBuilder(Integer.valueOf(amisList.size()).toString()).setColor(Color.BLUE).appendNewComponentBuilder(" amis").setColor(Color.GREEN);
+        TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("Heuresement pour toi, tu as ").setColor(Color.GREEN).appendNewComponentBuilder(Integer.valueOf(amisList.size()).toString()).setColor(Color.BLUE).appendNewComponentBuilder(" amis").setColor(Color.GREEN);
 
         for (String ami : amisList) {
             String connect = "Déconnecté";
@@ -192,11 +212,66 @@ public class FriendCmd implements Command {
                 connect = "Connecté";
                 bc = Color.GREEN;
             }
-            tcb.appendNewComponentBuilder("\n" + TextUtils.getPrefix("amis")).appendNewComponentBuilder(ami + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
+            tcb.appendNewComponentBuilder("\n" + ami + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
         }
 
         tcb.sendTo(apiPlayer);
 
+        return 1;
+
+    }
+
+    public enum ListCmd {
+        INVITE("invite", "Envoyer une demande d'amis", 2),
+        ACCEPT("accept", "Accepter une demande d'amis", 2),
+        REFUSE("refuse", "Refuser une demande d'amis", 2),
+        REVOKE("revoke", "Retire votre demande d'amis", 2),
+        REMOVE("remove", "Remove un joueur de la liste", 2),
+        LIST("list", "Permet de voir la liste des joueurs", 1); /// *
+
+        String name;
+        String utility;
+        int argument;
+
+        ListCmd(String name, String utility, int argument) {
+            this.name = name;
+            this.utility = utility;
+            this.argument = argument;
+        }
+
+        public static FriendCmd.ListCmd getCommand(String name) {
+
+            for (FriendCmd.ListCmd cmd : FriendCmd.ListCmd.values()) {
+                if (cmd.getName().equalsIgnoreCase(name)) {
+                    return cmd;
+                }
+            }
+            return null;
+        }
+
+        public static List<FriendCmd.ListCmd> getCommand(int argument) {
+
+            List<FriendCmd.ListCmd> cmdList = new ArrayList<>();
+
+            for (FriendCmd.ListCmd cmd : FriendCmd.ListCmd.values()) {
+                if (cmd.getArgument() == argument) {
+                    cmdList.add(cmd);
+                }
+            }
+            return cmdList;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getUtility() {
+            return utility;
+        }
+
+        public int getArgument() {
+            return argument;
+        }
     }
 
 }

@@ -6,7 +6,10 @@
 
 package fr.redxil.core.bungee.commands.party;
 
-import com.velocitypowered.api.command.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -16,217 +19,285 @@ import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.rank.RankList;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.kyori.adventure.text.TextComponent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 
-public class PartyCmd implements Command {
+public class PartyCmd {
 
-    private final int timeMax = 15;
-    private final int time = 0;
+    public BrigadierCommand getCommand() {
 
-    public void execute(CommandSource sender, String @NonNull [] args) {
+        LiteralCommandNode<CommandSource> cmd = LiteralArgumentBuilder.<CommandSource>literal("cmd")
+                .executes(commandContext -> {
 
-        if (!(sender instanceof Player)) {
-            return;
-        }
-
-        Player player = (Player) sender;
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-
-        PartyManager partyManager = CoreAPI.get().getPartyManager();
-
-        if (apiPlayer.hasPermission(RankList.JOUEUR.getRankPower())) {
-
-            if (args.length == 0) {
-
-                player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Liste des commandes").setColor(Color.GREEN)).getFinalTextComponent());
-
-                for (listCmd cmd : listCmd.values()) {
-
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GRAY + "> /p " +
-                                    cmd.getName() + ": " + Color.BLUE + " " + cmd.getUtility())).getFinalTextComponent()
-                    );
-
-                }
-
-                return;
-            }
-
-
-            if (args[0].equalsIgnoreCase(listCmd.CREATE.getName())) {
-
-                if (partyManager.createParty(apiPlayer) != null) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous venez de creer une partie.").setColor(Color.GREEN)).getFinalTextComponent()
-                    );
-                } else {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous êtes déjà dans une partie " +
-                                    Color.BLUE + "/party leave " +
-                                    Color.GREEN + "pour quitter votre partie.")).getFinalTextComponent()
-                    );
-                }
-
-                return;
-            }
-
-            if (args[0].equalsIgnoreCase(listCmd.INVITE.getName())) {
-
-                if (args.length != 2) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Indiquez le joueur que vous voulez inviter")).getFinalTextComponent()
-                    );
-                    return;
-                }
-
-                if (!partyManager.hasParty(apiPlayer)) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'êtes pas dans une partie.")).getFinalTextComponent()
-                    );
-                    return;
-                }
-
-                if (!partyManager.isOwner(apiPlayer)) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être le chef de la partie.")).getFinalTextComponent()
-                    );
-                    return;
-                }
-
-                APIPlayer targetPlayer = CoreAPI.get().getPlayerManager().getPlayer(args[1]);
-
-                if (partyManager.hasParty(targetPlayer)) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur est déja dans une partie.")).getFinalTextComponent()
-                    );
-                    return;
-                }
-
-                if (partyManager.getParty(apiPlayer).invitePlayer(targetPlayer)) {
-                    TextComponentBuilder.createTextComponent(Color.WHITE + "Vous avez été invité par " + Color.GREEN + apiPlayer.getName(true));
-                    player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous venez d'inviter " + Color.GREEN + args[1])).getFinalTextComponent());
-                } else {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous n'avez pas pûes inviter " + Color.RED + args[1])).getFinalTextComponent()
-                    );
-                }
-
-            }
-
-            if (args[0].equalsIgnoreCase(listCmd.JOIN.getName())) {
-
-                if (args.length != 2) {
-                    player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Merci de faire /party join (player)")).getFinalTextComponent());
-                    return;
-                }
-
-                APIPlayer owner = CoreAPI.get().getPlayerManager().getPlayer(args[1]);
-                if (owner == null) {
-                    player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'existe pas")).getFinalTextComponent());
-                    return;
-                }
-
-                Party party = CoreAPI.get().getPartyManager().getParty(owner);
-                if (party == null) {
-                    player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'a pas de partie")).getFinalTextComponent());
-                    return;
-                }
-
-                if (party.joinParty(apiPlayer)) {
-
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous venez de rejoindre la partie.")).getFinalTextComponent()
-                    );
-
-                } else {
-
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'avez pas pûes rejoindre la partie.")).getFinalTextComponent()
-                    );
-
-                }
-                return;
-            }
-
-            if (args[0].equalsIgnoreCase(listCmd.LEAVE.getName())) {
-                if (!partyManager.hasParty(apiPlayer)) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous devez être dans une partie.")).getFinalTextComponent()
-                    );
-                    return;
-                }
-
-                partyManager.getParty(apiPlayer).quitParty(apiPlayer);
-
-                player.sendMessage(
-                        ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous avez quitté votre partie.")).getFinalTextComponent()
-                );
-                return;
-            }
-
-            if (args[0].equalsIgnoreCase(listCmd.LIST.getName())) {
-
-                if (!partyManager.hasParty(apiPlayer)) {
-                    player.sendMessage(
-                            ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être dans une partie pour faire ceci.")).getFinalTextComponent()
-                    );
-                    return;
-                }
-
-                player.sendMessage(
-                        ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Liste des membres de la partie:")).getFinalTextComponent()
-                );
-
-                for (Map.Entry<String, PartyRank> members : partyManager.getParty(apiPlayer).getList().entrySet()) {
-                    String name = members.getKey();
-                    if (members.getValue() == PartyRank.OWNER) {
-                        player.sendMessage(
-                                ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + name + Color.YELLOW + " > " + members.getValue().getRankName())).getFinalTextComponent()
-                        );
+                    if (!(commandContext.getSource() instanceof Player)) {
+                        return 0;
                     }
 
-                    if (members.getValue() == PartyRank.PLAYER) {
-                        player.sendMessage(
-                                ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + name + Color.BLUE + " > Membre")).getFinalTextComponent()
-                        );
+                    Player player = (Player) commandContext.getSource();
+
+                    ListCmd usedCmd = ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
+                    if (usedCmd == null) {
+                        return this.sendCommandList(commandContext);
                     }
-                }
 
-            }
+                    if (!ListCmd.getCommand(1).contains(usedCmd)) {
+                        player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /party " + usedCmd.getName() + " (nom/joueur)").setColor(Color.RED).getTextComponent());
+                        return 1;
+                    }
 
-        }
+                    switch (usedCmd) {
+                        case LEAVE: {
+                            return leaveCmd(commandContext, player, null);
+                        }
+                        case LIST: {
+                            return listCmd(commandContext, player, null);
+                        }
+                        case CREATE: {
+                            return createCmd(commandContext, player, null);
+                        }
+
+                    }
+                    return 1;
+                })
+                .build();
+
+        LiteralCommandNode<CommandSource> name = LiteralArgumentBuilder.<CommandSource>literal("name")
+                .executes(commandContext -> {
+
+                    if (!(commandContext.getSource() instanceof Player)) {
+                        return 0;
+                    }
+
+                    Player player = (Player) commandContext.getSource();
+
+                    ListCmd usedCmd = ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
+                    if (usedCmd == null) {
+                        return this.sendCommandList(commandContext);
+                    }
+
+                    if (!ListCmd.getCommand(2).contains(usedCmd)) {
+                        player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /party " + usedCmd.getName()).setColor(Color.RED).getTextComponent());
+                        return 1;
+                    }
+
+                    String nameArg = commandContext.getArgument("name", String.class);
+
+                    switch (usedCmd) {
+                        case JOIN: {
+                            return joinCmd(commandContext, player, nameArg);
+                        }
+                        case INVITE: {
+                            return inviteCmd(commandContext, player, nameArg);
+                        }
+                    }
+                    return 1;
+                })
+                .build();
+
+        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("party")
+                .then(cmd)
+                .build();
+
+        cmd.addChild(name);
+
+        return new BrigadierCommand(lcn);
 
     }
 
+    public int sendCommandList(CommandContext<CommandSource> commandContext) {
+        CommandSource commandSource = commandContext.getSource();
+        TextComponentBuilder textComponentBuilder = TextComponentBuilder.createTextComponent("Veuillez utiliser l'une des composantes suivantes:");
+        for (ListCmd cmd : ListCmd.values()) {
+            textComponentBuilder.appendNewComponentBuilder("\n" + Color.GRAY + "> /party " +
+                    cmd.getName() + ": " + Color.BLUE + " " + cmd.getUtility());
+        }
+        commandSource.sendMessage((TextComponent) textComponentBuilder.getFinalTextComponentBuilder().getTextComponent());
+        return 1;
+    }
 
-    public enum listCmd {
-        CREATE("create", "Permet de creer une partie."),
-        INVITE("invite", "Permet d'invité un autre joueur."),
-        JOIN("join", "Permet de rejoindre une partie."),
-        LEAVE("leave", "Permet de leave une partie."),
-        LIST("list", "Permet de voir la liste des joueurs");
+    public int createCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+        PartyManager partyManager = CoreAPI.get().getPartyManager();
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        if (partyManager.createParty(apiPlayer) != null) {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous venez de creer une partie.").setColor(Color.GREEN)).getFinalTextComponent()
+            );
+        } else {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous êtes déjà dans une partie " +
+                            Color.BLUE + "/party leave " +
+                            Color.GREEN + "pour quitter votre partie.")).getFinalTextComponent()
+            );
+        }
+
+        return 1;
+    }
+
+
+    public int leaveCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+        PartyManager partyManager = CoreAPI.get().getPartyManager();
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (!partyManager.hasParty(apiPlayer)) {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous devez être dans une partie.")).getFinalTextComponent()
+            );
+            return 1;
+        }
+
+        partyManager.getParty(apiPlayer).quitParty(apiPlayer);
+
+        player.sendMessage(
+                ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous avez quitté votre partie.")).getFinalTextComponent()
+        );
+        return 1;
+    }
+
+
+    public int listCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+        PartyManager partyManager = CoreAPI.get().getPartyManager();
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        if (!partyManager.hasParty(apiPlayer)) {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être dans une partie pour faire ceci.")).getFinalTextComponent()
+            );
+            return 1;
+        }
+
+        player.sendMessage(
+                ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Liste des membres de la partie:")).getFinalTextComponent()
+        );
+
+        for (Map.Entry<String, PartyRank> members : partyManager.getParty(apiPlayer).getList().entrySet()) {
+            String name = members.getKey();
+            if (members.getValue() == PartyRank.OWNER) {
+                player.sendMessage(
+                        ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + name + Color.YELLOW + " > " + members.getValue().getRankName())).getFinalTextComponent()
+                );
+            }
+
+            if (members.getValue() == PartyRank.PLAYER) {
+                player.sendMessage(
+                        ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + name + Color.BLUE + " > Membre")).getFinalTextComponent()
+                );
+            }
+        }
+        return 1;
+    }
+
+
+    public int joinCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIPlayer owner = CoreAPI.get().getPlayerManager().getPlayer(subArgument);
+        if (owner == null) {
+            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'existe pas")).getFinalTextComponent());
+            return 1;
+        }
+
+        Party party = CoreAPI.get().getPartyManager().getParty(owner);
+        if (party == null) {
+            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'a pas de partie")).getFinalTextComponent());
+            return 1;
+        }
+
+        if (party.joinParty(apiPlayer)) {
+
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous venez de rejoindre la partie.")).getFinalTextComponent()
+            );
+
+        } else {
+
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'avez pas pûes rejoindre la partie.")).getFinalTextComponent()
+            );
+
+        }
+        return 1;
+    }
+
+
+    public int inviteCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+        PartyManager partyManager = CoreAPI.get().getPartyManager();
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+
+        if (!partyManager.hasParty(apiPlayer)) {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'êtes pas dans une partie.")).getFinalTextComponent()
+            );
+            return 1;
+        }
+
+        if (!partyManager.isOwner(apiPlayer)) {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être le chef de la partie.")).getFinalTextComponent()
+            );
+            return 1;
+        }
+
+        APIPlayer targetPlayer = CoreAPI.get().getPlayerManager().getPlayer(subArgument);
+
+        if (partyManager.hasParty(targetPlayer)) {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur est déja dans une partie.")).getFinalTextComponent()
+            );
+            return 1;
+        }
+
+        if (partyManager.getParty(apiPlayer).invitePlayer(targetPlayer)) {
+            TextComponentBuilder.createTextComponent(Color.WHITE + "Vous avez été invité par " + Color.GREEN + apiPlayer.getName(true));
+            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous venez d'inviter " + Color.GREEN + subArgument)).getFinalTextComponent());
+        } else {
+            player.sendMessage(
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous n'avez pas pûes inviter " + Color.RED + subArgument)).getFinalTextComponent()
+            );
+        }
+        return 1;
+    }
+
+
+    public enum ListCmd {
+        CREATE("create", "Permet de creer une partie.", 1),
+        INVITE("invite", "Permet d'invité un autre joueur.", 2),
+        JOIN("join", "Permet de rejoindre une partie.", 2),
+        LEAVE("leave", "Permet de leave une partie.", 1), /// *
+        LIST("list", "Permet de voir la liste des joueurs", 1); /// *
 
         String name;
         String utility;
+        int argument;
 
-        listCmd(String name, String utility) {
+        ListCmd(String name, String utility, int argument) {
             this.name = name;
             this.utility = utility;
+            this.argument = argument;
         }
 
-        public static boolean commandExist(String name) {
+        public static ListCmd getCommand(String name) {
 
-            for (listCmd cmd : listCmd.values()) {
+            for (ListCmd cmd : ListCmd.values()) {
                 if (cmd.getName().equalsIgnoreCase(name)) {
-                    return true;
+                    return cmd;
                 }
             }
-            return false;
+            return null;
+        }
+
+        public static List<ListCmd> getCommand(int argument) {
+
+            List<ListCmd> cmdList = new ArrayList<>();
+
+            for (ListCmd cmd : ListCmd.values()) {
+                if (cmd.getArgument() == argument) {
+                    cmdList.add(cmd);
+                }
+            }
+            return cmdList;
         }
 
         public String getName() {
@@ -235,6 +306,10 @@ public class PartyCmd implements Command {
 
         public String getUtility() {
             return utility;
+        }
+
+        public int getArgument() {
+            return argument;
         }
     }
 }

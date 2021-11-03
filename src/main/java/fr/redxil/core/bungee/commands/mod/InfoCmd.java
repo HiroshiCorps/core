@@ -6,135 +6,70 @@
 
 package fr.redxil.core.bungee.commands.mod;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.APIOfflinePlayer;
-import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.player.data.SanctionInfo;
-import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
-
-import java.util.List;
 
 public class InfoCmd implements Command {
 
-    public void execute(CommandSource sender, String @NonNull [] args) {
-        if (!(sender instanceof Player)) return;
+    public BrigadierCommand getCommand() {
 
-        APIPlayerModerator APIPlayerModerator = CoreAPI.get().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+        LiteralCommandNode<CommandSource> lcnSancName = LiteralArgumentBuilder.<CommandSource>literal("sanc")
+                .executes(commandContext -> {
 
-        if (APIPlayerModerator == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
-                    .sendTo(((Player) sender).getUniqueId());
-            return;
-        }
+                    if (!(commandContext.getSource() instanceof Player))
+                        return 0;
 
-        if (args.length == 0) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Erreur de syntaxe, utilisez : /info (Joueur) (Non obligatoire: ban/mute/kick/warn)").setColor(Color.RED).sendTo(((Player) sender).getUniqueId());
-            return;
-        }
+                    APIPlayerModerator playerModerator = CoreAPI.get().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+                    if (playerModerator == null)
+                        return 0;
 
-        APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(args[0]);
-        if (apiPlayerTarget == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("La target ne s'est jamais connecté.").setColor(Color.RED)
-                    .sendTo(((Player) sender).getUniqueId());
-            return;
-        }
+                    SanctionType sanctionType = SanctionType.getSanctionType(commandContext.getArgument("sanc", String.class));
+                    if (sanctionType == null) {
+                        TextComponentBuilder.createTextComponent("Le type de sanction: " + commandContext.getArgument("sanc", String.class) + "n'a pas était reconnue").setColor(Color.RED);
+                        return 0;
+                    }
 
-        if (args.length == 1) {
+                    APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(commandContext.getArgument("player", String.class));
+                    playerModerator.printSanction(target, sanctionType);
 
-            TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§m                    \n");
-            tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + apiPlayerTarget.getName() + "§r\n");
+                    return 1;
 
-            String connectedMsg = "§c✘", server = null;
-            if (apiPlayerTarget.isConnected()) {
-                connectedMsg = "§a✓";
-                server = CoreAPI.get().getPlayerManager().getPlayer(apiPlayerTarget.getMemberId()).getServer().getServerName();
-            }
+                })
+                .build();
 
-            tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
+        LiteralCommandNode<CommandSource> lcnPlayer = LiteralArgumentBuilder.<CommandSource>literal("player")
+                .executes(commandContext -> {
 
-            if (CoreAPI.get().getNickGestion().hasNick(apiPlayerTarget)) {
-                tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + CoreAPI.get().getNickGestion().getNickData(apiPlayerTarget).getName() + "§r\n");
-            }
+                    if (!(commandContext.getSource() instanceof Player))
+                        return 0;
 
-            tcb.appendNewComponentBuilder("§7→ §rRank§7・" + apiPlayerTarget.getRank().getRankName() + "§r\n");
+                    APIPlayerModerator playerModerator = CoreAPI.get().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+                    if (playerModerator == null)
+                        return 0;
 
-            if (server != null)
-                tcb.appendNewComponentBuilder("§7→ §rServeur§7・§a" + server + "§r\n");
+                    APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(commandContext.getArgument("player", String.class));
+                    playerModerator.printInfo(target);
 
-            String ip = Color.RED + "Déconnecté";
-            if (apiPlayerTarget instanceof APIPlayer)
-                ip = String.valueOf(CoreAPI.get().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiPlayerTarget).getIpInfo().getIp()).size() - 1);
+                    return 1;
 
-            tcb.appendNewComponentBuilder("§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n");
+                })
+                .build();
 
-            String mute = "§c✘";
-            if (apiPlayerTarget.isMute())
-                mute = "§a✓";
+        lcnPlayer.addChild(lcnSancName);
 
-            String ban = "§c✘";
-            if (apiPlayerTarget.isBan())
-                ban = "§a✓";
+        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("info").then(lcnPlayer).build();
 
-            tcb.appendNewComponentBuilder("§7→ §rEtat§7・Banni: " + ban + " §7Mute: " + mute + "§r\n");
-            tcb.appendNewComponentBuilder("§m                    \n");
-
-            tcb.sendTo(((Player) sender).getUniqueId());
-
-            return;
-
-        }
-
-        SanctionType st = SanctionType.getSanctionType(args[1]);
-        if (st != null)
-            printSanction(apiPlayerTarget.getSanction(st), (Player) sender, apiPlayerTarget.getName());
-        else
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION") + "Erreur de syntaxe, utilisez : /info (Joueur) (Non obligatoire: ban/mute/kick/warn)").sendTo(((Player) sender).getUniqueId());
-
-    }
-
-    public void printSanction(List<SanctionInfo> sanctionModels, Player asker, String target) {
-
-        if (!sanctionModels.isEmpty()) {
-
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + target + " Sanctions: " + sanctionModels.size()).sendTo(asker.getUniqueId());
-
-            for (int i = sanctionModels.size() - 1; i >= 0; i--) {
-
-                SanctionInfo sanction = sanctionModels.get(i);
-
-                TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("\nSanction n°§r§6" + (sanctionModels.size() - i) + ":");
-                tcb.appendNewComponentBuilder("\n§r     §7Sanction ID: §d" + sanction.getSanctionID());
-                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + CoreAPI.get().getPlayerManager().getOfflinePlayer(sanction.getAuthorID()).getName());
-                tcb.appendNewComponentBuilder("\n§r     §7Le: §d" + DateUtility.getMessage(sanction.getSanctionDateTS()));
-                tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS()));
-                tcb.appendNewComponentBuilder("\n§r     §7Pour: §d" + sanction.getReason());
-
-                String cancelledString = "§aPas cancel";
-                Long longID = sanction.getCanceller();
-                if (longID != null)
-                    cancelledString = CoreAPI.get().getPlayerManager().getOfflinePlayer(sanction.getCanceller()).getName();
-
-                tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
-
-                tcb.sendTo(asker.getUniqueId());
-
-            }
-
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + target + " Sanctions: " + sanctionModels.size()).sendTo(asker.getUniqueId());
-        } else
-            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(asker.getUniqueId());
+        return new BrigadierCommand(lcn);
 
     }
 

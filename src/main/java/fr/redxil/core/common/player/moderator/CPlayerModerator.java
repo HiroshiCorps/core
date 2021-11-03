@@ -4,11 +4,17 @@
  * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
  */
 
-package fr.redxil.core.common.moderator;
+package fr.redxil.core.common.player.moderator;
 
-import fr.redxil.api.common.moderators.APIPlayerModerator;
+import fr.redxil.api.common.message.Color;
+import fr.redxil.api.common.message.TextComponentBuilder;
+import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.SanctionInfo;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;
+import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
@@ -18,6 +24,7 @@ import fr.redxil.core.common.sql.SQLModels;
 import org.redisson.api.RList;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class CPlayerModerator implements APIPlayerModerator {
@@ -80,6 +87,89 @@ public class CPlayerModerator implements APIPlayerModerator {
             return false;
         else
             return Boolean.parseBoolean(bool);
+    }
+
+    @Override
+    public void printSanction(APIOfflinePlayer apiOfflinePlayer, SanctionType sanctionType) {
+
+        List<SanctionInfo> sanctionInfos = apiOfflinePlayer.getSanction(sanctionType);
+
+        if (!sanctionInfos.isEmpty()) {
+
+            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(this.getUUID());
+
+            for (int i = sanctionInfos.size() - 1; i >= 0; i--) {
+
+                SanctionInfo sanction = sanctionInfos.get(i);
+
+                TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("\nSanction n°§r§6" + (sanctionInfos.size() - i) + ":");
+                tcb.appendNewComponentBuilder("\n§r     §7Sanction ID: §d" + sanction.getSanctionID());
+                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + CoreAPI.get().getPlayerManager().getOfflinePlayer(sanction.getAuthorID()).getName());
+                tcb.appendNewComponentBuilder("\n§r     §7Le: §d" + DateUtility.getMessage(sanction.getSanctionDateTS()));
+                tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS()));
+                tcb.appendNewComponentBuilder("\n§r     §7Pour: §d" + sanction.getReason());
+
+                String cancelledString = "§aPas cancel";
+                Long longID = sanction.getCanceller();
+                if (longID != null)
+                    cancelledString = CoreAPI.get().getPlayerManager().getOfflinePlayer(sanction.getCanceller()).getName();
+
+                tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
+
+                tcb.sendTo(this.getUUID());
+
+            }
+
+            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(this.getUUID());
+        } else
+            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(this.getUUID());
+
+    }
+
+    @Override
+    public void printInfo(APIOfflinePlayer apiOfflinePlayer) {
+
+        TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§m                    \n");
+        tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + apiOfflinePlayer.getName() + "§r\n");
+
+        String connectedMsg = "§c✘", server = null;
+        if (apiOfflinePlayer.isConnected()) {
+            connectedMsg = "§a✓";
+            server = CoreAPI.get().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberId()).getServer().getServerName();
+        }
+
+        tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
+
+        if (CoreAPI.get().getNickGestion().hasNick(apiOfflinePlayer)) {
+            tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + CoreAPI.get().getNickGestion().getNickData(apiOfflinePlayer).getName() + "§r\n");
+        }
+
+        tcb.appendNewComponentBuilder("§7→ §rRank§7・" + apiOfflinePlayer.getRank().getRankName() + "§r\n");
+
+        if (server != null)
+            tcb.appendNewComponentBuilder("§7→ §rServeur§7・§a" + server + "§r\n");
+
+        String ip = Color.RED + "Déconnecté";
+        if (apiOfflinePlayer instanceof APIPlayer)
+            ip = String.valueOf(CoreAPI.get().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiOfflinePlayer).getIpInfo().getIp()).size() - 1);
+
+        tcb.appendNewComponentBuilder("§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n");
+
+        String mute = "§c✘";
+        if (apiOfflinePlayer.isMute())
+            mute = "§a✓";
+
+        String ban = "§c✘";
+        if (apiOfflinePlayer.isBan())
+            ban = "§a✓";
+
+        tcb.appendNewComponentBuilder("§7→ §rEtat§7・Banni: " + ban + " §7Mute: " + mute + "§r\n");
+        tcb.appendNewComponentBuilder("§m                    \n");
+
+        tcb.sendTo(this.getUUID());
+
+        return;
+
     }
 
     @Override

@@ -25,6 +25,8 @@ public enum GameDataValue {
     GAME_SERVER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/server", false, true),
     GAME_MINP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/minp", false, true),
     GAME_MAXP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/maxp", false, true),
+    GAME_SUBGAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/subgame", false, true),
+    GAME_MAP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/map", false, true),
 
     GAME_INCOPLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/incopllist", false, true),
     GAME_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/pllist", false, true),

@@ -16,7 +16,6 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.TextComponent;
 
@@ -25,22 +24,6 @@ import java.util.UUID;
 public class BlackListCmd implements Command {
 
     public BrigadierCommand getCommand() {
-
-        LiteralCommandNode<CommandSource> blackList =
-                LiteralArgumentBuilder.<CommandSource>literal("blacklist")
-                        .executes(commandContext -> {
-                            CommandSource commandSource = commandContext.getSource();
-                            commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Erreur, mauvaise syntaxe: /blacklist (name)").setColor(Color.RED).getTextComponent());
-                            return 1;
-                        }).build();
-
-        LiteralCommandNode<CommandSource> addorrm =
-                LiteralArgumentBuilder.<CommandSource>literal("addorrm")
-                        .executes(commandContext -> {
-                            CommandSource commandSource = commandContext.getSource();
-                            commandSource.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Erreur, mauvaise syntaxe: /blacklist (add ou rm) (name)").setColor(Color.RED).getTextComponent());
-                            return 1;
-                        }).build();
 
         LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("name")
                 .executes(commandContext -> {
@@ -72,6 +55,14 @@ public class BlackListCmd implements Command {
 
                 }).build();
 
+        LiteralCommandNode<CommandSource> addorrm =
+                LiteralArgumentBuilder.<CommandSource>literal("addorrm")
+                        .then(lcn).build();
+
+        LiteralCommandNode<CommandSource> blackList =
+                LiteralArgumentBuilder.<CommandSource>literal("blacklist")
+                        .then(addorrm).build();
+
         blackList.addChild(addorrm);
         addorrm.addChild(lcn);
 
@@ -86,8 +77,7 @@ public class BlackListCmd implements Command {
         UUID playerUUID = ((Player) sender).getUniqueId();
 
         if (args.length != 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("blacklist"))
-                    .appendNewComponentBuilder("Merci de faire /bl (add|remove) (pseudo)").setColor(Color.RED).sendTo(playerUUID);
+            TextComponentBuilder.createTextComponent("Merci de faire /bl (add|remove) (pseudo)").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
@@ -97,8 +87,7 @@ public class BlackListCmd implements Command {
             APIPlayer sp = CoreAPI.get().getPlayerManager().getPlayer(playerUUID);
 
             if (osp == null) {
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("blacklist"))
-                        .appendNewComponentBuilder("Erreur, le joueur: " + args[1] + " est inconnue").setColor(Color.RED).sendTo(playerUUID);
+                TextComponentBuilder.createTextComponent("Erreur, le joueur: " + args[1] + " est inconnue").setColor(Color.RED).sendTo(playerUUID);
                 return;
             }
 
@@ -106,8 +95,7 @@ public class BlackListCmd implements Command {
             if (remove) {
 
                 if (!sp.isBlackList(osp)) {
-                    TextComponentBuilder.createTextComponent(TextUtils.getPrefix("blacklist"))
-                            .appendNewComponentBuilder("Erreur, le joueur: " + args[1] + " n'est pas BlackList").setColor(Color.RED).sendTo(playerUUID);
+                    TextComponentBuilder.createTextComponent("Erreur, le joueur: " + args[1] + " n'est pas BlackList").setColor(Color.RED).sendTo(playerUUID);
                     return;
                 }
 
@@ -116,8 +104,7 @@ public class BlackListCmd implements Command {
             } else {
 
                 if (sp.isBlackList(osp)) {
-                    TextComponentBuilder.createTextComponent(TextUtils.getPrefix("blacklist"))
-                            .appendNewComponentBuilder("Erreur, le joueur: " + args[1] + " est déjà BlackList").setColor(Color.RED).sendTo(playerUUID);
+                    TextComponentBuilder.createTextComponent("Erreur, le joueur: " + args[1] + " est déjà BlackList").setColor(Color.RED).sendTo(playerUUID);
                     return;
                 }
 
@@ -128,8 +115,7 @@ public class BlackListCmd implements Command {
             return;
         }
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("blacklist"))
-                .appendNewComponentBuilder("Merci de faire /bl (add|remove) (pseudo)").setColor(Color.RED).sendTo(playerUUID);
+        TextComponentBuilder.createTextComponent("Merci de faire /bl (add|remove) (pseudo)").setColor(Color.RED).sendTo(playerUUID);
 
     }
 

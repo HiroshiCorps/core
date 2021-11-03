@@ -4,12 +4,12 @@
  * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
  */
 
-package fr.redxil.core.common.moderator;
+package fr.redxil.core.common.player.moderator;
 
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.moderators.APIPlayerModerator;
-import fr.redxil.api.common.moderators.ModeratorManager;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ModeratorDataValue;
 

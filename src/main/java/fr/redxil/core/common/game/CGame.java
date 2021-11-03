@@ -12,10 +12,10 @@ import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.Games;
 import fr.redxil.api.common.game.Hosts;
-import fr.redxil.api.common.moderators.APIPlayerModerator;
+import fr.redxil.api.common.game.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.api.common.team.Team;
 import fr.redxil.api.spigot.minigame.GameBuilder;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.GameDataValue;
@@ -59,7 +59,8 @@ public class CGame implements Games {
         redisManager.setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMinP()).longValue());
         redisManager.setRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMaxP()).longValue());
         redisManager.setRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMaxNPSpec()).longValue());
-
+        redisManager.setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(server, gameID), gameEnum.name());
+        redisManager.setRedisString(GameDataValue.GAME_MAP_REDIS.getString(server, gameID), "None");
         return gameID;
 
     }
@@ -234,6 +235,26 @@ public class CGame implements Games {
     @Override
     public GameEnum getGame() {
         return GameEnum.getStatus(CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_GAME_REDIS.getString(this)));
+    }
+
+    @Override
+    public String getSubGames() {
+        return CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(this));
+    }
+
+    @Override
+    public void setSubGames(String s) {
+        CoreAPI.get().getRedisManager().setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(this), s);
+    }
+
+    @Override
+    public String getMap() {
+        return CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_MAP_REDIS.getString(this));
+    }
+
+    @Override
+    public void setMap(String map) {
+        CoreAPI.get().getRedisManager().setRedisString(GameDataValue.GAME_MAP_REDIS.getString(this), map);
     }
 
     @Override

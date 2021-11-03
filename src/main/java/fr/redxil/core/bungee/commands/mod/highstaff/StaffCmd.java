@@ -6,16 +6,43 @@
 
 package fr.redxil.core.bungee.commands.mod.highstaff;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.moderators.APIPlayerModerator;
+import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class StaffCmd implements Command {
+
+    public BrigadierCommand getCommand() {
+
+        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("staff")
+                .executes(commandContext -> {
+
+                    if (!(commandContext.getSource() instanceof Player))
+                        return 0;
+
+                    APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+                    if (!apiPlayer.getRank().isModeratorRank())
+                        return 0;
+
+                    TextComponentBuilder.createTextComponent(
+                            Color.RED + "Syntax: /staff" + Color.GREEN + " (message)"
+                    ).sendTo(apiPlayer.getUUID());
+                    return 1;
+
+                })
+                .build();
+        return new BrigadierCommand(lcn);
+
+    }
 
     public void execute(CommandSource sender, String @NonNull [] args) {
         if (!(sender instanceof Player)) return;

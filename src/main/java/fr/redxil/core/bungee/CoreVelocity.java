@@ -104,7 +104,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             proxyServer.getEventManager().register(this, this.joinListener);
             proxyServer.getEventManager().register(this, new PlayerListener());
 
-            cm.register("party", new PartyCmd());
+            cm.register(new PartyCmd().getCommand());
 
             cm.register("ban", new BanCmd());
             cm.register("warn", new WarnCmd());
@@ -115,14 +115,14 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             cm.register("unmute", new UnMuteCmd());
 
             cm.register("staff", new StaffCmd(), "s");
-            cm.register("cible", new CibleCmd());
-            cm.register("nickcheck", new NickCheckCmd());
-            cm.register("info", new InfoCmd());
+            cm.register(new CibleCmd().getCommand());
+            cm.register(new NickCheckCmd().getCommand());
+            cm.register(new InfoCmd().getCommand());
             cm.register("setrank", new SetRankCmd());
 
             cm.register("nick", new NickCmd());
             cm.register("proxy", new ProxyCmd());
-            cm.register("friend", new FriendCmd());
+            cm.register(new FriendCmd().getCommand());
             cm.register(new BlackListCmd().getCommand());
 
             cm.register("msg", new MsgCmd());
