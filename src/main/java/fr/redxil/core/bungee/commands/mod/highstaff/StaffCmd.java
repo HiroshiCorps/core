@@ -6,7 +6,10 @@
 
 package fr.redxil.core.bungee.commands.mod.highstaff;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.Command;
@@ -33,13 +36,23 @@ public class StaffCmd implements Command {
                     if (!apiPlayer.getRank().isModeratorRank())
                         return 0;
 
-                    TextComponentBuilder.createTextComponent(
-                            Color.RED + "Syntax: /staff" + Color.GREEN + " (message)"
-                    ).sendTo(apiPlayer.getUUID());
+                    String argument = commandContext.getArgument("message", String.class);
+                    if (argument == null)
+                        TextComponentBuilder.createTextComponent(
+                                Color.RED + "Syntax: /staff" + Color.GREEN + " (message)"
+                        ).sendTo(apiPlayer.getUUID());
+                    else
+                        CoreAPI.get().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("Staff: " + apiPlayer.getName() + ") " + argument));
                     return 1;
 
                 })
                 .build();
+
+        ArgumentCommandNode<CommandSource, String> argumentCommandNode = RequiredArgumentBuilder.<CommandSource, String>argument("message", StringArgumentType.greedyString())
+                .suggests((context, builder) -> builder.buildFuture())
+                .executes(lcn.getCommand()).build();
+
+        lcn.addChild(argumentCommandNode);
         return new BrigadierCommand(lcn);
 
     }

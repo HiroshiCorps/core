@@ -18,6 +18,7 @@ import fr.redxil.api.common.game.team.TeamManager;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
+import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.common.player.nick.NickGestion;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;

@@ -7,6 +7,7 @@
 package fr.redxil.core.bungee.commands.mod;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.Command;
@@ -18,23 +19,45 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.common.CoreAPI;
 
+import java.util.List;
+
 public class CibleCmd implements Command {
 
     public BrigadierCommand getCommand() {
 
-        LiteralCommandNode<CommandSource> lcn2 = LiteralArgumentBuilder.<CommandSource>literal("player")
+        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("nickcheck")
                 .executes(commandContext -> {
-                    if (!(commandContext.getSource() instanceof Player))
-                        return 0;
-                    APIPlayerModerator apiPlayerModerator = CoreAPI.get().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
-                    if (apiPlayerModerator == null)
-                        return 0;
 
-                    if (!apiPlayerModerator.isModeratorMod()) {
+                    CommandSource sender = commandContext.getSource();
+
+                    if (!(sender instanceof Player)) return 0;
+
+                    Player player = (Player) sender;
+                    APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+
+                    if (APIPlayerModAuthor == null) {
+                        TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
+                                .sendTo(((Player) sender).getUniqueId());
+                        return 1;
+                    }
+
+                    if (commandContext.getArgument("player", String.class) == null) {
+                        if (APIPlayerModAuthor.hasCible()) {
+                            APIPlayerModAuthor.setCible(null);
+                            TextComponentBuilder.createTextComponent("Vous n'avez plus de cible.").setColor(Color.RED)
+                                    .sendTo(((Player) sender).getUniqueId());
+
+                        } else
+                            TextComponentBuilder.createTextComponent("Syntax: /cible <pseudo>").setColor(Color.RED)
+                                    .sendTo(player.getUniqueId());
+                        return 1;
+                    }
+
+                    if (!APIPlayerModAuthor.isModeratorMod()) {
 
                         TextComponentBuilder.createTextComponent("Commande accessible uniquement en mod moderation").setColor(Color.RED)
-                                .sendTo(apiPlayerModerator.getUUID());
-                        return 1;
+                                .sendTo(player.getUniqueId());
+                        return 0;
 
                     }
 
@@ -45,43 +68,34 @@ public class CibleCmd implements Command {
                         TextComponentBuilder.createTextComponent(
                                         Color.RED +
                                                 "Cette target ne s'est jamais connecté").setColor(Color.RED)
-                                .sendTo(apiPlayerModerator.getUUID());
+                                .sendTo(player.getUniqueId());
                         return 1;
                     }
 
                     if (playerTarget.getRank().isModeratorRank()) {
                         TextComponentBuilder.createTextComponent(
                                         "Impossible de cibler " + target).setColor(Color.RED)
-                                .sendTo(apiPlayerModerator.getUUID());
-                        return 1;
+                                .sendTo(player.getUniqueId());
+                        return 0;
                     }
 
-                    apiPlayerModerator.setCible(playerTarget.getName());
+                    APIPlayerModAuthor.setCible(playerTarget.getName());
                     TextComponentBuilder.createTextComponent(
                                     "Nouvelle cible: " + playerTarget.getName()).setColor(Color.GREEN)
-                            .sendTo(apiPlayerModerator.getUUID());
-
+                            .sendTo(player.getUniqueId());
                     return 1;
                 })
                 .build();
 
-        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("nickcheck")
-                .executes(commandContext -> {
-                    if (!(commandContext.getSource() instanceof Player))
-                        return 0;
-                    APIPlayerModerator apiPlayerModerator = CoreAPI.get().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
-                    if (apiPlayerModerator == null)
-                        return 0;
-                    if (apiPlayerModerator.hasCible()) {
-                        apiPlayerModerator.setCible(null);
-                        TextComponentBuilder.createTextComponent("Vous n'avez plus de cible.").setColor(Color.RED)
-                                .sendTo(((Player) commandContext.getSource()).getUniqueId());
-
-                    } else
-                        TextComponentBuilder.createTextComponent("Syntax: /cible <pseudo>").setColor(Color.RED)
-                                .sendTo(((Player) commandContext.getSource()).getUniqueId());
-                    return 1;
+        ArgumentCommandNode<CommandSource, String> lcn2 = Argument.<CommandSource>literal("player")
+                .suggests((commandContext, suggestionsBuilder) -> {
+                    List<Long> availablePlayer = CoreAPI.get().getPlayerManager().getLoadedPlayer();
+                    availablePlayer.removeAll(CoreAPI.get().getModeratorManager().getLoadedModerator());
+                    for (Long id : availablePlayer)
+                        suggestionsBuilder.suggest(CoreAPI.get().getPlayerManager().getPlayer(id).getName());
+                    return suggestionsBuilder.buildFuture();
                 })
+                .executes(lcn.getCommand())
                 .build();
 
         lcn.addChild(lcn2);

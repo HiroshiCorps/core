@@ -114,7 +114,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             cm.register("unban", new UnBanCmd());
             cm.register("unmute", new UnMuteCmd());
 
-            cm.register("staff", new StaffCmd(), "s");
+            cm.register(new StaffCmd().getCommand()); /// *
             cm.register(new CibleCmd().getCommand());
             cm.register(new NickCheckCmd().getCommand());
             cm.register(new InfoCmd().getCommand());

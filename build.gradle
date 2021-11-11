@@ -31,7 +31,7 @@ repositories {
 
 dependencies {
     implementation name: 'api-4.0.0'
-    compileOnly name: 'spigot-1.12.2'
+    compileOnly name: 'spigot-1.8.8'
     implementation group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
 }
 

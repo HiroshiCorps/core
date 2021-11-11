@@ -22,16 +22,15 @@ import fr.redxil.api.spigot.utils.NBTEditor;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.spigot.CorePlugin;
 import fr.redxil.core.spigot.hosts.HostScoreboard;
-import net.minecraft.server.v1_12_R1.*;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.*;
 
 import java.util.ArrayList;
@@ -297,11 +296,9 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void playerPickUp(EntityPickupItemEvent event) {
+    public void playerPickUp(PlayerPickupItemEvent event) {
 
-        if (!(event.getEntity() instanceof Player)) return;
-
-        APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(event.getEntity().getUniqueId());
+        APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 

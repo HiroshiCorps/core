@@ -15,6 +15,7 @@ import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.player.PlayerModel;
 
+import java.util.List;
 import java.util.UUID;
 
 public class CPlayerManager implements APIPlayerManager {
@@ -133,6 +134,11 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public boolean isLoadedPlayer(UUID uuid) {
         return CoreAPI.get().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString(null)).containsKey(uuid.toString());
+    }
+
+    @Override
+    public List<Long> getLoadedPlayer() {
+        return CoreAPI.get().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null));
     }
 
 }
