@@ -14,7 +14,6 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.rank.RankList;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -29,15 +28,13 @@ public class NickCmd implements Command {
 
             if (!CoreAPI.get().getNickGestion().hasNick(apiPlayer)) {
 
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                        .appendNewComponentBuilder("Syntax: /nick <nick>").setColor(Color.RED)
+                TextComponentBuilder.createTextComponent("Syntax: /nick <nick>").setColor(Color.RED)
                         .sendTo(((Player) sender).getUniqueId());
 
             } else {
 
                 CoreAPI.get().getNickGestion().removeNick(apiPlayer);
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                        .appendNewComponentBuilder("Vous avez retrouvé votre Pseudo: " + apiPlayer.getName())
+                TextComponentBuilder.createTextComponent("Vous avez retrouvé votre Pseudo: " + apiPlayer.getName())
                         .sendTo(((Player) sender).getUniqueId());
 
             }
@@ -52,23 +49,20 @@ public class NickCmd implements Command {
         if (args.length >= 2) {
 
             if (!isInt(args[1])) {
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                        .appendNewComponentBuilder("Erreur, " + args[1] + " doit être un power de grade" + apiPlayer.getName()).setColor(Color.RED)
+                TextComponentBuilder.createTextComponent("Erreur, " + args[1] + " doit être un power de grade" + apiPlayer.getName()).setColor(Color.RED)
                         .sendTo(((Player) sender).getUniqueId());
                 return;
             }
 
             nickRank = RankList.getRank(Integer.parseInt(args[1]));
             if (nickRank == null) {
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                        .appendNewComponentBuilder("Erreur, " + args[1] + " doit être un power de grade" + apiPlayer.getName()).setColor(Color.RED)
+                TextComponentBuilder.createTextComponent("Erreur, " + args[1] + " doit être un power de grade" + apiPlayer.getName()).setColor(Color.RED)
                         .sendTo(((Player) sender).getUniqueId());
                 return;
             }
 
             if (nickRank.getRankPower() > apiPlayer.getRankPower()) {
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                        .appendNewComponentBuilder("Erreur, " + args[1] + " vous ne pouvez pas vous nick en " + nickRank.getRankName()).setColor(Color.RED)
+                TextComponentBuilder.createTextComponent("Erreur, " + args[1] + " vous ne pouvez pas vous nick en " + nickRank.getRankName()).setColor(Color.RED)
                         .sendTo(((Player) sender).getUniqueId());
                 return;
             }
@@ -76,12 +70,10 @@ public class NickCmd implements Command {
         }
 
         if (CoreAPI.get().getNickGestion().setNick(apiPlayer, new NickData(nick, nickRank))) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                    .appendNewComponentBuilder("Nick changé")
+            TextComponentBuilder.createTextComponent("Nick changé")
                     .sendTo(((Player) sender).getUniqueId());
         } else {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("NICK"))
-                    .appendNewComponentBuilder("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").setColor(Color.RED)
                     .sendTo(((Player) sender).getUniqueId());
         }
 

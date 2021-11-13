@@ -62,8 +62,6 @@ public enum PlayerDataValue {
 
     PLAYER_LASTMSG_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/lastmsg", false, true),
 
-    PLAYER_NUMBER(DataBaseType.REDIS, DataType.GLOBAL, "player/number", false, false),
-
     MAP_PLAYER_NAME(DataBaseType.REDIS, DataType.GLOBAL, "player/name", false, false),
     MAP_PLAYER_UUID(DataBaseType.REDIS, DataType.GLOBAL, "player/uuid", false, false),
     LIST_PLAYER_ID(DataBaseType.REDIS, DataType.GLOBAL, "player/list", false, false);

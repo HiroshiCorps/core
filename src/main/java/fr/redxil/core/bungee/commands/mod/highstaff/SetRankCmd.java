@@ -16,7 +16,6 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.rank.RankList;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -82,8 +81,7 @@ public class SetRankCmd implements Command {
             CoreAPI.get().getModeratorManager().loadModerator((APIPlayer) offlineTarget);
 
         commandSender.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                        TextUtils.getPrefix("moderation")
-                                + "La personne §d" +
+                        "La personne §d" +
                                 offlineTarget.getName() +
                                 " §7à été rank: §a" +
                                 newRank.getRankName()

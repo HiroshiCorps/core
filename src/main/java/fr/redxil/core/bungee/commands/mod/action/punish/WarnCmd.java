@@ -15,7 +15,6 @@ import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -29,15 +28,13 @@ public class WarnCmd implements Command {
         APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModAuthor == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (args.length < 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Syntax: /warn <pseudo> <raison>").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Syntax: /warn <pseudo> <raison>").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
@@ -45,15 +42,13 @@ public class WarnCmd implements Command {
         String targetArgs = args[0];
         APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(targetArgs);
         if (apiPlayerTarget == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("La target ne s'est jamais connecté.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (apiPlayerTarget.getRank().isModeratorRank()) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
@@ -67,19 +62,17 @@ public class WarnCmd implements Command {
         String reason = reasonBuilder.toString();
 
         if (reason.contains("{") || reason.contains("}")) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         SanctionInfo sm = apiPlayerTarget.warnPlayer(reasonBuilder.toString(), APIPlayerModAuthor);
         if (sm != null) {
-            sender.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION") + "Le joueur: " + apiPlayerTarget.getName() + " à été warn.")).getFinalTextComponent());
+            sender.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.getName() + " à été warn.")).getFinalTextComponent());
             Velocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((proxiedPlayer) -> sm.getSancMessage().sendTo(proxiedPlayer.getUniqueId()));
         } else
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Désolé, une erreur est survenue").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
 
     }

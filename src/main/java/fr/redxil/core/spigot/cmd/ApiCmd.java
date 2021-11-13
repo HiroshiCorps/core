@@ -7,33 +7,25 @@
 package fr.redxil.core.spigot.cmd;
 
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.spigot.command.CommandBuilder;
-import fr.redxil.api.spigot.command.CommandInfo;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.ServerDataValue;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.redisson.api.RedissonClient;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-@CommandInfo(
-        name = "api",
-        permission = 500
-)
-public class ApiCmd extends CommandBuilder {
+public class ApiCmd extends Command {
 
-    public ApiCmd(JavaPlugin plugin) {
-        super(plugin);
+    protected ApiCmd() {
+        super("api");
     }
 
     @Override
-    public void execute(CommandSender commandSender, Command command, String s, String[] strings) {
-
-        if (!(commandSender instanceof Player)) return;
+    public boolean execute(CommandSender commandSender, String s, String[] strings) {
+        if (!(commandSender instanceof Player)) return false;
 
         RedissonClient redis = CoreAPI.get().getRedisManager().getRedissonClient();
 
@@ -47,11 +39,10 @@ public class ApiCmd extends CommandBuilder {
         TextComponentBuilder.createTextComponent(
                 "\n§7§m                  §6 [§e SERVER Api §6] §7§m                  \n " +
                         "\n§r§eApi reponse time§7: §b" + response + " ms" +
-                        "\n§r§eUser cache size§7: §b" + CoreAPI.get().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null)) +
+                        "\n§r§eUser cache size§7: §b" + CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString()).size() +
                         "\n§r§eServers cache size§7: §b" + redis.getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).size() +
                         "\n \n§r§7§m                                                              \n"
         ).sendTo(((Player) commandSender).getUniqueId());
-
+        return true;
     }
-
 }

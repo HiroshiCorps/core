@@ -13,7 +13,6 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -26,15 +25,13 @@ public class UnMuteCmd implements Command {
         APIPlayerModerator APIPlayerModerator = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModerator == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (args.length < 1) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Syntax: /unmute <pseudo>").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Syntax: /unmute <pseudo>").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
@@ -43,19 +40,16 @@ public class UnMuteCmd implements Command {
         APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("La target ne s'est jamais connecté").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (apiPlayerTarget.unMute(APIPlayerModerator)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("La personne se nommant: " + apiPlayerTarget.getName() + " est maintenant unMute.")
+            TextComponentBuilder.createTextComponent("La personne se nommant: " + apiPlayerTarget.getName() + " est maintenant unMute.")
                     .sendTo(player.getUniqueId());
         } else {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Impossible de unmute: " + apiPlayerTarget.getName()).setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Impossible de unmute: " + apiPlayerTarget.getName()).setColor(Color.RED)
                     .sendTo(player.getUniqueId());
         }
 

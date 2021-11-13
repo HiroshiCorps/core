@@ -6,9 +6,6 @@
 
 package fr.redxil.core.common.server;
 
-import de.dytanic.cloudnet.driver.CloudNetDriver;
-import de.dytanic.cloudnet.driver.service.ServiceInfoSnapshot;
-import de.dytanic.cloudnet.driver.service.ServiceTask;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.game.Games;
@@ -16,7 +13,6 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.redxil.api.common.server.type.ServerTasks;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
@@ -48,31 +44,18 @@ public class CServer implements Server {
 
         ServerType newServerType;
         int maxPlayer = CoreAPI.get().getPluginEnabler().getMaxPlayer();
-        if (CoreAPI.get().isBungee()) {
-            CoreAPI.get().getRedisManager().setRedisLong("servers/bungee/server_max_players", maxPlayer);
+        if (CoreAPI.get().isBungee())
             newServerType = ServerType.BUNGEE;
-        } else
+        else
             newServerType = ServerType.UNKNOWN;
-
-        ServerTasks serverTasks = ServerTasks.UNKNOWN;
-
-        ServiceInfoSnapshot serviceInfoSnapshot = CloudNetDriver.getInstance().getCloudServiceProvider().getCloudServiceByName(name);
-
-        if (serviceInfoSnapshot != null && ServerTasks.getTasksByService(serviceInfoSnapshot.getName()) != null) {
-            serverTasks = ServerTasks.getTasksByService(serviceInfoSnapshot.getName());
-        }
-
-        ServerTasks finalServerTasks = serverTasks;
 
         ServerModel model = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<String, Object>() {{
             put(ServerDataValue.SERVER_NAME_SQL.getString(null), name);
             put(ServerDataValue.SERVER_MAXP_SQL.getString(null), maxPlayer);
-            put(ServerDataValue.SERVER_ACCES_SQL.getString(null), 0);
-            put(ServerDataValue.SERVER_MAINTENANCE_SQL.getString(null), 0);
-            put(ServerDataValue.SERVER_TYPE_SQL.getString(null), newServerType.toString());
+            put(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
+            put(ServerDataValue.SERVER_TYPE_SQL.getString(null), newServerType.name());
             put(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
             put(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
-            put(ServerDataValue.SERVER_TASKS_SQL.getString(null), finalServerTasks.toString().toUpperCase());
         }}, "WHERE " + ServerDataValue.SERVER_NAME_SQL.getString(null) + " = ?", name);
 
         Long serverId = Integer.valueOf(model.getServerID()).longValue();
@@ -80,22 +63,21 @@ public class CServer implements Server {
         model.set(ServerDataValue.SERVER_MAXP_SQL.getString(null), maxPlayer);
         model.set(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
         model.set(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
+        if (ServerStatus.valueOf(model.getString(ServerDataValue.SERVER_STATUS_SQL.getString(null))) != ServerStatus.MAINTENANCE)
+            model.set(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, serverId);
         RedisManager redisManager = CoreAPI.get().getRedisManager();
 
         redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).put(name, serverId);
-        redisManager.setRedisBoolean(ServerDataValue.SERVER_MAINTENANCE_REDIS.getString(name, serverId), model.getServerAccess() == 1);
         redisManager.setRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(name, serverId), name);
         redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null, null)));
 
         redisManager.setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(name, serverId), maxPlayer);
-        redisManager.setRedisLong(ServerDataValue.SERVER_ACCES_REDIS.getString(name, serverId), model.getLong(ServerDataValue.SERVER_ACCES_SQL.getString(null, null)));
+        redisManager.setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_STATUS_SQL.getString(null, null)));
 
         redisManager.setRedisString(ServerDataValue.SERVER_IP_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_IP_SQL.getString(null, null)));
         redisManager.setRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(name, serverId), Long.parseLong(model.getString(ServerDataValue.SERVER_PORT_SQL.getString(null, null))));
-
-        redisManager.setRedisString(ServerDataValue.SERVER_TASKS_REDIS.getString(name, serverId), finalServerTasks.toString().toUpperCase());
 
         return new CServer(serverId);
 
@@ -109,11 +91,6 @@ public class CServer implements Server {
     @Override
     public void setMaxPlayers(int i) {
         CoreAPI.get().getRedisManager().setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(this), i);
-    }
-
-    @Override
-    public void changeMaintenance(boolean b) {
-        CoreAPI.get().getRedisManager().setRedisBoolean(ServerDataValue.SERVER_MAINTENANCE_REDIS.getString(this), b);
     }
 
     @Override
@@ -158,11 +135,6 @@ public class CServer implements Server {
     }
 
     @Override
-    public boolean isInMaintenance() {
-        return CoreAPI.get().getRedisManager().getRedisBoolean(ServerDataValue.SERVER_MAINTENANCE_REDIS.getString(this));
-    }
-
-    @Override
     public boolean isOnline() {
         return CoreAPI.get().getServerManager().isServerExist(getServerName());
     }
@@ -173,11 +145,6 @@ public class CServer implements Server {
                 CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_IP_REDIS.getString(this)),
                 Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(this))).intValue()
         );
-    }
-
-    @Override
-    public int getPowerAcces() {
-        return Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(ServerDataValue.SERVER_ACCES_REDIS.getString(this))).intValue();
     }
 
     @Override
@@ -194,19 +161,9 @@ public class CServer implements Server {
 
         getTeamLinked().forEach((teamID) -> CoreAPI.get().getTeamManager().getTeam(teamID).deleteTeam());
 
-        ServerTasks serverTasks = getTasks();
-
         ServerDataValue.clearRedisData(DataType.SERVER, name, id);
 
         CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).remove(name);
-
-        if (!(serverTasks != null && serverTasks != ServerTasks.UNKNOWN)) return true;
-
-        if (!(CloudNetDriver.getInstance().getServiceTaskProvider().isServiceTaskPresent(serverTasks.getStaticName())))
-            return true;
-
-        ServiceTask serviceTask = CloudNetDriver.getInstance().getServiceTaskProvider().getServiceTask(serverTasks.getStaticName());
-        if (serviceTask == null || !serviceTask.isAutoDeleteOnStop()) return true;
 
         System.out.println("DELETE SERVER BDD " + name);
         CoreAPI.get().getSQLConnection().execute("DELETE FROM `list_servers` WHERE `" + ServerDataValue.SERVER_NAME_SQL.getString(null) + "`='" + name + "'");
@@ -222,7 +179,12 @@ public class CServer implements Server {
 
     @Override
     public ServerStatus getServerStatus() {
-        return null;
+        return ServerStatus.valueOf(CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this)));
+    }
+
+    @Override
+    public void setServerStatus(ServerStatus serverStatus) {
+        CoreAPI.get().getRedisManager().setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this), serverStatus.name());
     }
 
     @Override
@@ -254,16 +216,6 @@ public class CServer implements Server {
     @Override
     public void removePlayerInServer(UUID uuid) {
         CoreAPI.get().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this)).remove(uuid.toString());
-    }
-
-    @Override
-    public ServerTasks getTasks() {
-        return ServerTasks.valueOf(CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_TASKS_REDIS.getString(this)).toUpperCase());
-    }
-
-    @Override
-    public void changeTask(ServerTasks serverTasks) {
-        CoreAPI.get().getRedisManager().setRedisString(ServerDataValue.SERVER_TASKS_REDIS.getString(this), serverTasks.toString().toUpperCase());
     }
 
     @Override

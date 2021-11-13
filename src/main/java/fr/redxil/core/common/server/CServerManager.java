@@ -6,12 +6,9 @@
 
 package fr.redxil.core.common.server;
 
-import de.dytanic.cloudnet.driver.CloudNetDriver;
-import de.dytanic.cloudnet.driver.service.ServiceInfoSnapshot;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
-import fr.redxil.api.common.server.type.ServerTasks;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ServerDataValue;
@@ -86,20 +83,6 @@ public class CServerManager implements ServerManager {
         if (!isServerExist(name))
             return CServer.initServer(name, ipInfo);
         return getServer(name);
-    }
-
-    @Override
-    public String createServer(ServerTasks serverTasks) {
-        ServiceInfoSnapshot serviceInfoSnapshot = CloudNetDriver.getInstance().getCloudServiceFactory().createCloudService(CloudNetDriver.getInstance().getServiceTaskProvider().getServiceTask(serverTasks.getStaticName()));
-
-        try {
-            assert serviceInfoSnapshot != null;
-            serviceInfoSnapshot.provider().start();
-        } catch (Exception e) {
-            return "error";
-        }
-
-        return serviceInfoSnapshot.getName();
     }
 
 }

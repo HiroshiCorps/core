@@ -23,7 +23,6 @@ import fr.redxil.api.common.player.nick.NickGestion;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
-import fr.redxil.api.common.server.type.ServerTasks;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.data.PlayerDataValue;
@@ -40,7 +39,6 @@ import fr.redxil.core.common.sql.CSQLConnection;
 
 import java.io.File;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class CoreAPI extends API {
 
@@ -96,12 +94,6 @@ public class CoreAPI extends API {
         this.cTeamManager = new CTeamManager();
         new ShutdownOrderListener();
         this.serverManager.initServer(plugin.getServerName(), plugin.getServerIp());
-
-        if (this.getServer().getTasks() != null && this.getServer().getTasks() == ServerTasks.HOST) {
-            if (!this.getGamesManager().isHostExist(plugin.getServerName()))
-                plugin.printLog(Level.WARNING, "the server being a custom game server did not find its" +
-                        "data in the cache please restart the server and load the host");
-        }
 
         CoreAPI.setEnabled(true);
 
@@ -192,7 +184,7 @@ public class CoreAPI extends API {
     public boolean isHostServer() {
         Server server = this.getServer();
         if (server == null) return false;
-        return server.getTasks() == ServerTasks.HOST;
+        return server.getServerType() == ServerType.HOST;
     }
 
     @Override

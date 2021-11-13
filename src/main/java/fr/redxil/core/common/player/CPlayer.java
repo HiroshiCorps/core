@@ -6,7 +6,6 @@
 
 package fr.redxil.core.common.player;
 
-import de.dytanic.cloudnet.driver.CloudNetDriver;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
@@ -157,7 +156,6 @@ public class CPlayer implements APIPlayer {
 
         rm.getRedisList("ip/" + getIpInfo().getIp()).remove(name);
 
-        CloudNetDriver.getInstance().getPermissionManagement().deleteUser(name);
         PlayerDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
     }
@@ -362,8 +360,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public boolean acceptFriendInvite(APIOfflinePlayer s) {
         if (!hasFriendReceived(s)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Impossible d'accepter la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Impossible d'accepter la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
             return false;
         }
 
@@ -371,22 +368,19 @@ public class CPlayer implements APIPlayer {
 
         List<String> sList = getFriendList();
         if (hasFriend(s)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Une erreur est apparue, vous êtes déjà amis avec cette personne").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Une erreur est apparue, vous êtes déjà amis avec cette personne").setColor(Color.RED).sendTo(this);
             return false;
         }
 
         if (s.acceptFriendInviteReceived(this)) {
 
             sList.add(s.getName());
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Demande d'amis de: " + s.getName(false) + " accepté").setColor(Color.GREEN).sendTo(this);
+            TextComponentBuilder.createTextComponent("Demande d'amis de: " + s.getName(false) + " accepté").setColor(Color.GREEN).sendTo(this);
             return true;
 
         }
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Impossible d'accepter la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
+        TextComponentBuilder.createTextComponent("Impossible d'accepter la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
         return false;
     }
 
@@ -394,12 +388,10 @@ public class CPlayer implements APIPlayer {
     public boolean refusedFriendInvite(APIOfflinePlayer s) {
         List<String> sList = getFriendInviteReceived();
         if (!sList.contains(s.getName())) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Impossible de refuser la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Impossible de refuser la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
             return false;
         }
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Demande d'amis refusée").setColor(Color.GREEN).sendTo(this);
+        TextComponentBuilder.createTextComponent("Demande d'amis refusée").setColor(Color.GREEN).sendTo(this);
         sList.remove(s.getName());
         s.refusedFriendInviteReceived(this);
         return true;
@@ -415,12 +407,10 @@ public class CPlayer implements APIPlayer {
     @Override
     public boolean revokeFriendInvite(APIOfflinePlayer s) {
         if (!getFriendInviteSended().contains(s.getName())) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Impossible de révoquer la demande d'amis").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Impossible de révoquer la demande d'amis").setColor(Color.RED).sendTo(this);
             return false;
         }
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Demande d'amis révoquée").setColor(Color.GREEN).sendTo(this);
+        TextComponentBuilder.createTextComponent("Demande d'amis révoquée").setColor(Color.GREEN).sendTo(this);
         getFriendInviteSended().remove(s.getName());
         s.friendInviteRevokeReceived(this);
         return true;
@@ -430,14 +420,12 @@ public class CPlayer implements APIPlayer {
     public boolean sendFriendInvite(APIOfflinePlayer s) {
 
         if (getName().equals(s.getName())) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Hmm très intéressant, quel est ta vie pour interargir avec toi-même ?").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Hmm très intéressant, quel est ta vie pour interargir avec toi-même ?").setColor(Color.RED).sendTo(this);
             return false;
         }
 
         if (hasFriend(s)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Hmm très intéressant, pourquoi demander en amis une personne que tu as déjà en amis?").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Hmm très intéressant, pourquoi demander en amis une personne que tu as déjà en amis?").setColor(Color.RED).sendTo(this);
             return false;
         }
 
@@ -447,20 +435,17 @@ public class CPlayer implements APIPlayer {
         }
 
         if (hasFriendSend(s)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Hmm très intéressant, pourquoi à nouveau le demander en amis? Une fois ne te suffit donc pas").setColor(Color.RED).sendTo(this);
+            TextComponentBuilder.createTextComponent("Hmm très intéressant, pourquoi à nouveau le demander en amis? Une fois ne te suffit donc pas").setColor(Color.RED).sendTo(this);
             return false;
         }
 
         if (s.friendInviteReceived(this)) {
             getFriendInviteSended().add(s.getName());
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Demande d'amis envoyée à: " + s.getName(true)).setColor(Color.GREEN).sendTo(this);
+            TextComponentBuilder.createTextComponent("Demande d'amis envoyée à: " + s.getName(true)).setColor(Color.GREEN).sendTo(this);
             return true;
         }
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Erreur, impossible de demander en amis la personne").setColor(Color.RED).sendTo(this);
+        TextComponentBuilder.createTextComponent("Erreur, impossible de demander en amis la personne").setColor(Color.RED).sendTo(this);
         return false;
 
     }
@@ -476,8 +461,7 @@ public class CPlayer implements APIPlayer {
     public void removeFriend(APIOfflinePlayer s) {
 
         getFriendList().remove(s.getName());
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Tu as retirée: " + s.getName(false) + " de tes amis").setColor(Color.GREEN).sendTo(this);
+        TextComponentBuilder.createTextComponent("Tu as retirée: " + s.getName(false) + " de tes amis").setColor(Color.GREEN).sendTo(this);
         s.removeFriendReceived(this);
 
     }
@@ -485,8 +469,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public void removeFriendReceived(APIOfflinePlayer s) {
         getFriendList().remove(s.getName());
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur: ").setColor(Color.WHITE).appendNewComponentBuilder(s.getName()).setColor(Color.RED).appendNewComponentBuilder(" vous à retirée de ces amis").setColor(Color.WHITE).sendTo(this);
+        TextComponentBuilder.createTextComponent("Le joueur: ").setColor(Color.WHITE).appendNewComponentBuilder(s.getName()).setColor(Color.RED).appendNewComponentBuilder(" vous à retirée de ces amis").setColor(Color.WHITE).sendTo(this);
     }
 
     @Override
@@ -505,8 +488,7 @@ public class CPlayer implements APIPlayer {
     public boolean friendInviteReceived(APIOfflinePlayer s) {
         if (isBlackList(s)) return false;
         getFriendInviteReceived().add(s.getName());
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur: ").setColor(Color.WHITE)
+        TextComponentBuilder.createTextComponent("Le joueur: ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(s.getName()).setColor(Color.RED)
                 .appendNewComponentBuilder(" vous à envoyée une demande d'amis\n").setColor(Color.WHITE)
                 .appendNewComponentBuilder("Vous pouvez la ").setColor(Color.WHITE)
@@ -530,8 +512,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public void friendInviteRevokeReceived(APIOfflinePlayer s) {
         getFriendInviteReceived().remove(s.getName());
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur ").setColor(Color.WHITE)
+        TextComponentBuilder.createTextComponent("Le joueur ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(s.getName()).setColor(Color.RED)
                 .appendNewComponentBuilder(" à annulé sa demande d'amis").setColor(Color.WHITE)
                 .sendTo(this);
@@ -546,8 +527,7 @@ public class CPlayer implements APIPlayer {
         fList.remove(s.getName());
         getFriendList().add(s.getName());
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur ").setColor(Color.WHITE)
+        TextComponentBuilder.createTextComponent("Le joueur ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(s.getName()).setColor(Color.GREEN)
                 .appendNewComponentBuilder(" à accepté votre demande d'amis").setColor(Color.WHITE)
                 .sendTo(this);
@@ -559,8 +539,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public void refusedFriendInviteReceived(APIOfflinePlayer s) {
         getFriendInviteSended().remove(s.getName());
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur ").setColor(Color.WHITE)
+        TextComponentBuilder.createTextComponent("Le joueur ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(s.getName()).setColor(Color.RED)
                 .appendNewComponentBuilder(" à refusé votre demande d'amis").setColor(Color.WHITE)
                 .sendTo(this);
@@ -571,13 +550,11 @@ public class CPlayer implements APIPlayer {
         List<String> fList = getBlackList();
         if (!fList.contains(s.getName())) {
             fList.add(s.getName());
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Le joueur " + s.getName() + " est maintenant dans votre blacklist").setColor(Color.GREEN)
+            TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " est maintenant dans votre blacklist").setColor(Color.GREEN)
                     .sendTo(this);
             return true;
         }
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur " + s.getName() + " est déjà dans votre blacklist").setColor(Color.RED)
+        TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " est déjà dans votre blacklist").setColor(Color.RED)
                 .sendTo(this);
         return false;
     }
@@ -588,14 +565,12 @@ public class CPlayer implements APIPlayer {
     public boolean removeBlackList(APIOfflinePlayer s) {
 
         if (getBlackList().remove(s.getName())) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                    .appendNewComponentBuilder("Le joueur " + s.getName() + " n'est plus dans votre blacklist").setColor(Color.GREEN)
+            TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " n'est plus dans votre blacklist").setColor(Color.GREEN)
                     .sendTo(this);
             return true;
         }
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("amis"))
-                .appendNewComponentBuilder("Le joueur " + s.getName() + " n'est pas dans votre blacklist").setColor(Color.RED)
+        TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " n'est pas dans votre blacklist").setColor(Color.RED)
                 .sendTo(this);
 
         return false;

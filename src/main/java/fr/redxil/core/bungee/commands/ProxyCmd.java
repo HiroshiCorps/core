@@ -11,7 +11,6 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.Component;
@@ -56,7 +55,7 @@ public class ProxyCmd implements Command {
 
             Velocity.getInstance().getProxyServer().registerServer(serverInfo);
 
-            sender.sendMessage((Component) TextComponentBuilder.createTextComponent(TextUtils.getPrefix("SERVER") + "le serveur §a" + args[2] + "§7 a été ajouté au proxy avec succès."));
+            sender.sendMessage((Component) TextComponentBuilder.createTextComponent("le serveur §a" + args[2] + "§7 a été ajouté au proxy avec succès."));
 
         } else if (args[0].equals("remove")) {
 
@@ -76,7 +75,7 @@ public class ProxyCmd implements Command {
             }
 
             Velocity.getInstance().getProxyServer().unregisterServer(Velocity.getInstance().getProxyServer().getServer(args[2]).get().getServerInfo());
-            sender.sendMessage((Component) TextComponentBuilder.createTextComponent(TextUtils.getPrefix("SERVER") + "le serveur §c" + args[2] + "§7 a été supprimé du proxy avec succès."));
+            sender.sendMessage((Component) TextComponentBuilder.createTextComponent("le serveur §c" + args[2] + "§7 a été supprimé du proxy avec succès."));
 
         }
 

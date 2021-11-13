@@ -12,7 +12,6 @@ import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -29,27 +28,23 @@ public class MsgCmd implements Command {
         APIPlayer sp = CoreAPI.get().getPlayerManager().getPlayer(playerUUID);
 
         if (args.length < 2) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("mp"))
-                    .appendNewComponentBuilder("Merci de faire /msg (pseudo) (message)").setColor(Color.RED).sendTo(playerUUID);
+            TextComponentBuilder.createTextComponent("Merci de faire /msg (pseudo) (message)").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
         APIPlayer target = CoreAPI.get().getPlayerManager().getPlayer(args[0]);
         if (target == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("mp"))
-                    .appendNewComponentBuilder("Le joueur: " + args[0] + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
+            TextComponentBuilder.createTextComponent("Le joueur: " + args[0] + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
         if (sp.isBlackList(target)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("mp"))
-                    .appendNewComponentBuilder("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
+            TextComponentBuilder.createTextComponent("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
         if (target.isBlackList(sp)) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("mp"))
-                    .appendNewComponentBuilder("Le joueur: " + args[0] + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
+            TextComponentBuilder.createTextComponent("Le joueur: " + args[0] + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
@@ -60,13 +55,11 @@ public class MsgCmd implements Command {
 
         String message = messageB.toString();
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("mp"))
-                .appendNewComponentBuilder(sp.getName(true)).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
+        TextComponentBuilder.createTextComponent(sp.getName(true)).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(message).sendTo(target.getUUID());
 
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("mp"))
-                .appendNewComponentBuilder(args[0]).setColor(Color.RED)
+        TextComponentBuilder.createTextComponent(args[0]).setColor(Color.RED)
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(message).sendTo(sp.getUUID());
 

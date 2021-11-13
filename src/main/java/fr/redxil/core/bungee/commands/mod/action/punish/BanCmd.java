@@ -16,7 +16,6 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -42,13 +41,12 @@ public class BanCmd implements Command {
             if (sm != null) {
 
                 TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
-                        TextUtils.getPrefix("moderation")
-                                + "Le modérateur §d" +
-                                APIPlayerModAuthor.getName() +
-                                " §7à ban l'utilisateur §a" +
-                                apiPlayerTarget.getName() + " §7jusqu'au " +
-                                format + " pour raison: "
-                                + reason + ".");
+                                "Le modérateur §d" +
+                                        APIPlayerModAuthor.getName() +
+                                        " §7à ban l'utilisateur §a" +
+                                        apiPlayerTarget.getName() + " §7jusqu'au " +
+                                        format + " pour raison: "
+                                        + reason + ".");
 
                 CoreAPI.get().getModeratorManager().sendToModerators(banMessage);
 
@@ -57,13 +55,11 @@ public class BanCmd implements Command {
                 onlinePlayerOptional.ifPresent(player -> player.disconnect(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
 
             } else
-                TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                        .appendNewComponentBuilder("Désolé, une erreur est survenue").setColor(Color.RED)
+                TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                         .sendTo(proxiedPlayer.getUniqueId());
 
         } else {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED)
                     .sendTo(proxiedPlayer.getUniqueId());
         }
 
@@ -76,15 +72,13 @@ public class BanCmd implements Command {
         APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModAuthor == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (args.length < 3) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Syntax: /ban <pseudo> <temps> <raison>").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Syntax: /ban <pseudo> <temps> <raison>").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
@@ -93,22 +87,19 @@ public class BanCmd implements Command {
         APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("La target ne s'est jamais connecté.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (apiPlayerTarget.getRank().isModeratorRank()) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         if (apiPlayerTarget.isBan()) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Erreur, le joueur est déjà ban.").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Erreur, le joueur est déjà ban.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
@@ -123,8 +114,7 @@ public class BanCmd implements Command {
         String reason = reasonBuilder.toString();
 
         if (reason.contains("{") || reason.contains("}")) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("MODERATION"))
-                    .appendNewComponentBuilder("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }

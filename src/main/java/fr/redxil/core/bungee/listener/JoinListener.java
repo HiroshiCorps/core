@@ -13,15 +13,11 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import de.dytanic.cloudnet.driver.CloudNetDriver;
-import de.dytanic.cloudnet.driver.permission.IPermissionManagement;
-import de.dytanic.cloudnet.driver.permission.IPermissionUser;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
-import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.server.type.ServerType;
@@ -130,23 +126,13 @@ public class JoinListener {
 
         APIPlayer apiPlayer = loadPlayer(player);
 
-
-        IPermissionManagement ipm = CloudNetDriver.getInstance().getPermissionManagement();
-
-        ipm.deleteUser(player.getUsername());
-
-        IPermissionUser ipu = ipm.getOrCreateUser(player.getUniqueId(), player.getUsername());
-        ipu.addGroup(apiPlayer.getRank().getRankName());
-
         player.createConnectionRequest(getServer(apiPlayer));
-
-        RedisManager redisManager = CoreAPI.get().getRedisManager();
-        redisManager.setRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null), redisManager.getRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null)) + 1);
 
     }
 
     @Subscribe
     public void onPlayerDisconnect(DisconnectEvent e) {
+
         Player player = e.getPlayer();
         APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(
                 player.getUniqueId()
@@ -161,8 +147,6 @@ public class JoinListener {
         if (moderatorId != null)
             BanCmd.banPlayer(CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", CoreAPI.get().getModeratorManager().getModerator(moderatorId), "{Core} Déconnexion en inspection");
 
-        RedisManager redisManager = CoreAPI.get().getRedisManager();
-        redisManager.setRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null), redisManager.getRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null)) - 1);
     }
 
     @Subscribe

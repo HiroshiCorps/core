@@ -8,7 +8,7 @@
 
 package fr.redxil.core.common.sql.moderator;
 
-import fr.redxil.api.common.moderators.Actions;
+import fr.redxil.api.common.player.moderators.Actions;
 import fr.redxil.core.common.sql.SQLModel;
 
 import java.sql.Timestamp;

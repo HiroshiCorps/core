@@ -14,7 +14,6 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.utils.TextUtils;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -29,18 +28,18 @@ public class ShutdownCmd implements Command {
         }
 
         if (strings.length != 1) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("shutdown")).appendNewComponentBuilder("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(apiPlayer);
             return;
         }
 
         Server server = CoreAPI.get().getServerManager().getServer(strings[0]);
         if (server == null) {
-            TextComponentBuilder.createTextComponent(TextUtils.getPrefix("shutdown")).appendNewComponentBuilder("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer);
             return;
         }
 
         server.sendShutdownOrder();
-        TextComponentBuilder.createTextComponent(TextUtils.getPrefix("shutdown")).appendNewComponentBuilder("L'ordre de shutdown est envoyé").setColor(Color.GREEN).sendTo(apiPlayer);
+        TextComponentBuilder.createTextComponent("L'ordre de shutdown est envoyé").setColor(Color.GREEN).sendTo(apiPlayer);
 
 
     }
