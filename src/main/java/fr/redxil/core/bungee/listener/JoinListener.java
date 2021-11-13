@@ -13,7 +13,6 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import de.dytanic.cloudnet.driver.CloudNetDriver;
 import de.dytanic.cloudnet.driver.permission.IPermissionManagement;
 import de.dytanic.cloudnet.driver.permission.IPermissionUser;
@@ -24,6 +23,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.velocity.Velocity;
@@ -37,26 +37,59 @@ import java.util.Optional;
 
 public class JoinListener {
 
-    public boolean acceptConnection = true;
+    public APIPlayer loadPlayer(Player player) {
+        String[] splittedIP = player.getRemoteAddress().toString().split(":");
+
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().loadPlayer(
+                player.getUsername(),
+                player.getUniqueId(),
+                new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
+        );
+
+        APIOfflinePlayer nicked = CoreAPI.get().getNickGestion().getAPIOfflinePlayer(player.getUsername());
+        if (nicked != null)
+            CoreAPI.get().getNickGestion().removeNick(nicked);
+
+        CoreAPI.get().getModeratorManager().loadModerator(apiPlayer);
+
+        return apiPlayer;
+
+    }
+
+    public RegisteredServer getServer(APIPlayer apiPlayer) {
+        Collection<Server> serverList = CoreAPI.get().getServerManager().getListServer(ServerType.HUB);
+        if (serverList.isEmpty()) return null;
+
+        Server server = null;
+        int totalPlayer = -1;
+
+        for (Server serverCheck : serverList) {
+
+            if (serverCheck.canConnectTo(apiPlayer))
+                continue;
+
+            int playerConnected = serverCheck.getPlayerList().size();
+            if (serverCheck.getMaxPlayers() - playerConnected > 0) {
+                if (totalPlayer == -1 || totalPlayer > playerConnected) {
+                    server = serverCheck;
+                    totalPlayer = playerConnected;
+                }
+            }
+
+        }
+
+        if (server != null) {
+            Optional<RegisteredServer> proxyServer = Velocity.getInstance().getProxyServer().getServer(server.getServerName());
+            if (proxyServer.isPresent()) return proxyServer.get();
+        }
+
+        return null;
+    }
 
     @Subscribe
     public void onPlayerJoin(PostLoginEvent e) {
 
         Player player = e.getPlayer();
-
-        if (!acceptConnection) {
-            player.disconnect((Component) TextComponentBuilder.createTextComponent("Connection refused"));
-            return;
-        }
-
-        if (CoreAPI.get().getNickGestion().isIllegalName(player.getUsername())) {
-            player.disconnect((Component) TextComponentBuilder.createTextComponent(
-                    "§4§lSERVER NETWORK§r\n"
-                            + "§cConnexion non autorisé§r\n\n"
-                            + "§7Raison: Présence d'un caractére interdit dans votre pseudo§e§r\n"
-            ));
-            return;
-        }
 
         if (CoreAPI.get().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
             player.disconnect((Component) TextComponentBuilder.createTextComponent(
@@ -86,8 +119,8 @@ public class JoinListener {
         } else apiOfflinePlayer = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
         if (apiOfflinePlayer != null) {
-            SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
 
+            SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
             if (model != null && model.isEffective()) {
                 player.disconnect((Component) model.getSancMessage());
                 return;
@@ -95,13 +128,8 @@ public class JoinListener {
 
         }
 
-        String[] splittedIP = player.getRemoteAddress().toString().split(":");
+        APIPlayer apiPlayer = loadPlayer(player);
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().loadPlayer(
-                player.getUsername(),
-                player.getUniqueId(),
-                new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
-        );
 
         IPermissionManagement ipm = CloudNetDriver.getInstance().getPermissionManagement();
 
@@ -110,39 +138,11 @@ public class JoinListener {
         IPermissionUser ipu = ipm.getOrCreateUser(player.getUniqueId(), player.getUsername());
         ipu.addGroup(apiPlayer.getRank().getRankName());
 
-        APIPlayer nicked = CoreAPI.get().getNickGestion().getAPIPlayer(player.getUsername());
-        if (nicked != null)
-            CoreAPI.get().getNickGestion().removeNick(nicked);
-
-        CoreAPI.get().getModeratorManager().loadModerator(apiPlayer);
+        player.createConnectionRequest(getServer(apiPlayer));
 
         RedisManager redisManager = CoreAPI.get().getRedisManager();
         redisManager.setRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null), redisManager.getRedisLong(PlayerDataValue.PLAYER_NUMBER.getString(null)) + 1);
 
-    }
-
-    public ServerInfo getServer() {
-        Collection<Server> ServerList = CoreAPI.get().getServerManager().getListServer(ServerType.HUB);
-        if (ServerList.isEmpty()) return null;
-
-        Server server = null;
-        int totalPlayer = -1;
-
-        for (Server serverCheck : ServerList) {
-            int playerConnected = serverCheck.getPlayerList().size();
-            if (serverCheck.getMaxPlayers() - playerConnected > 0) {
-                if (totalPlayer == -1 || totalPlayer > playerConnected) {
-                    server = serverCheck;
-                    totalPlayer = playerConnected;
-                }
-            }
-        }
-
-        if (server != null) {
-            Optional<RegisteredServer> proxyServer = Velocity.getInstance().getProxyServer().getServer(server.getServerName());
-            if (proxyServer.isPresent()) return proxyServer.get().getServerInfo();
-        }
-        return null;
     }
 
     @Subscribe
@@ -167,7 +167,10 @@ public class JoinListener {
 
     @Subscribe
     public void connection(PreLoginEvent event) {
-        if (!acceptConnection) {
+        if (CoreAPI.get().getNickGestion().isIllegalName(event.getUsername())) {
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected")));
+        }
+        if (CoreAPI.get().getServer().getServerStatus() != ServerStatus.ONLINE) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Connection refusée")));
         }
     }
@@ -176,9 +179,17 @@ public class JoinListener {
     public void serverConnect(ServerPreConnectEvent event) {
 
         APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-        if (apiPlayer.getServer() != null)
-            if (apiPlayer.isFreeze() || !apiPlayer.isLogin())
+        Server server = CoreAPI.get().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
+
+        if (apiPlayer.getServer() != null) {
+            if (apiPlayer.isFreeze() || !apiPlayer.isLogin()) {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());
+                return;
+            }
+        }
+
+        if (!server.canConnectTo(apiPlayer))
+            event.setResult(ServerPreConnectEvent.ServerResult.denied());
 
     }
 

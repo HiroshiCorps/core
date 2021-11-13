@@ -216,6 +216,11 @@ public class CServer implements Server {
     }
 
     @Override
+    public boolean canConnectTo(APIPlayer apiPlayer) {
+        return true;
+    }
+
+    @Override
     public ServerStatus getServerStatus() {
         return null;
     }
