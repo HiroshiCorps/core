@@ -61,7 +61,7 @@ public class JoinListener {
 
         for (Server serverCheck : serverList) {
 
-            if (serverCheck.canConnectTo(apiPlayer))
+            if (serverCheck.getServerAccess().canAccess(server, apiPlayer))
                 continue;
 
             int playerConnected = serverCheck.getPlayerList().size();
@@ -172,7 +172,7 @@ public class JoinListener {
             }
         }
 
-        if (!server.canConnectTo(apiPlayer))
+        if (!server.getServerAccess().canAccess(server, apiPlayer))
             event.setResult(ServerPreConnectEvent.ServerResult.denied());
 
     }

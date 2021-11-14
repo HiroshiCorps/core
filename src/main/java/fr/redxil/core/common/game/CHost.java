@@ -56,19 +56,23 @@ public class CHost extends CGame implements Hosts {
     public boolean canAccess(APIPlayer apiPlayer, boolean spec) {
 
         if (spec) {
-            if (!apiPlayer.getRank().isModeratorRank()) {
-                if (!getGame().isAllowPlSpec())
-                    return false;
-                if (getMaxPlayerSpec() <= getOutGameSpectators().size())
-                    return false;
-                return isAllowSpectator(apiPlayer.getName());
-            }
-            return true;
+
+            if (apiPlayer.getRank().isModeratorRank())
+                return true;
+
+            if (!getGame().isAllowPlSpec())
+                return false;
+
+            if (getMaxPlayerSpec() <= getOutGameSpectators().size())
+                return false;
+
+            return isAllowSpectator(apiPlayer.getName());
+
         }
 
-        if (isGameState(GameState.STARTING, GameState.WAITING) && getPlayers().size() < getMaxPlayer()) {
+        if (isGameState(GameState.WAITING) && getPlayers().size() < getMaxPlayer()) {
             HostAccess hostAccess = getHostAccess();
-            if (hostAccess.toString().equals(HostAccess.CLOSE.toString()))
+            if (hostAccess == HostAccess.CLOSE)
                 return false;
             if (hostAccess.toString().equals(HostAccess.FRIEND.toString()))
                 return getAllowPlayer().contains(apiPlayer.getName()) || apiPlayer.hasFriend(CoreAPI.get().getPlayerManager().getPlayer(getAuthor()));
