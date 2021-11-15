@@ -93,7 +93,23 @@ public class CoreAPI extends API {
         this.partyManager = new CPartyManager();
         this.cTeamManager = new CTeamManager();
         new ShutdownOrderListener();
-        this.serverManager.initServer(plugin.getServerName(), plugin.getServerIp());
+
+        ServerType serverType;
+        if (plugin.isBungee())
+            serverType = ServerType.BUNGEE;
+        else {
+
+            Games games = getGame();
+            if (games != null) {
+                if (games instanceof Hosts)
+                    serverType = ServerType.HOST;
+                else serverType = ServerType.GAME;
+            } else serverType = ServerType.HUB;
+
+        }
+
+        if (!getServerManager().isServerExist(plugin.getServerName()))
+            this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp());
 
         CoreAPI.setEnabled(true);
 

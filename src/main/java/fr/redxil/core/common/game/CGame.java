@@ -209,6 +209,11 @@ public class CGame implements Games {
     }
 
     @Override
+    public boolean isAllowConnectServer(APIPlayer apiPlayer) {
+        return isPlayer(apiPlayer.getName()) || isSpectator(apiPlayer.getName());
+    }
+
+    @Override
     public Hosts getHost() {
         return CoreAPI.get().getGamesManager().getHost(getServerName());
     }

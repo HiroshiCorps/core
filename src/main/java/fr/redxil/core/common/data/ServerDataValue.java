@@ -22,6 +22,8 @@ public enum ServerDataValue {
     SERVER_MAXP_SQL(DataBaseType.SQL, DataType.SERVER, "server_max_players", false, false),
     SERVER_TYPE_SQL(DataBaseType.SQL, DataType.SERVER, "server_type", false, false),
     SERVER_STATUS_SQL(DataBaseType.SQL, DataType.SERVER, "server_status", false, false),
+    SERVER_ACCESS_SQL(DataBaseType.SQL, DataType.SERVER, "server_access", false, false),
+    SERVER_NEEDRANK_SQL(DataBaseType.SQL, DataType.SERVER, "server_needrank", false, false),
     SERVER_IP_SQL(DataBaseType.SQL, DataType.SERVER, "server_ip", false, false),
     SERVER_PORT_SQL(DataBaseType.SQL, DataType.SERVER, "server_port", false, false),
 
@@ -30,6 +32,8 @@ public enum ServerDataValue {
     SERVER_TYPE_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_type", false, true),
     SERVER_IP_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_ip", false, true),
     SERVER_STATUS_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_status", false, true),
+    SERVER_ACCESS_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_access", false, false),
+    SERVER_NEEDRANK_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_needrank", false, false),
     SERVER_PORT_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_port", false, true),
     SERVER_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_player", false, true),
     SERVER_HOSTED_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_hosted", false, true),
