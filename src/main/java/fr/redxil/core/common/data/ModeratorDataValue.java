@@ -17,12 +17,11 @@ import org.redisson.api.RedissonClient;
 
 public enum ModeratorDataValue {
 
-    MODERATOR_MEMBERID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_id", false, false),
+    LIST_MODERATOR(DataBaseType.SQL, DataType.GLOBAL, "moderator/list", false, false),
     MODERATOR_MOD_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_mod", false, false),
     MODERATOR_VANISH_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_vanish", false, false),
     MODERATOR_CIBLE_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_cible", false, false),
 
-    LIST_MODERATOR(DataBaseType.REDIS, DataType.GLOBAL, "moderator/list", false, false),
     MODERATOR_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_name", false, true),
     MODERATOR_MOD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_mod", false, true),
     MODERATOR_VANISH_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_vanish", false, true),

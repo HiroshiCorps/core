@@ -1,18 +1,6 @@
-fr/redxil/core/bungee/commands/mod/action/cancel/UnMuteCmd.java
- fr.redxil.core.bungee.commands.mod.action.cancel.UnMuteCmd
-fr/redxil/core/bungee/commands/mod/action/punish/WarnCmd.java
- fr.redxil.core.bungee.commands.mod.action.punish.WarnCmd
-fr/redxil/core/bungee/commands/mod/action/punish/MuteCmd.java
- fr.redxil.core.bungee.commands.mod.action.punish.MuteCmd
-fr/redxil/core/bungee/commands/mod/action/cancel/UnBanCmd.java
- fr.redxil.core.bungee.commands.mod.action.cancel.UnBanCmd
 fr/redxil/core/bungee/commands/friend/BlackListCmd.java
  fr.redxil.core.bungee.commands.friend.BlackListCmd
-fr/redxil/core/bungee/commands/mod/action/punish/KickCmd.java
- fr.redxil.core.bungee.commands.mod.action.punish.KickCmd
 fr/redxil/core/bungee/commands/friend/FriendCmd.java
  fr.redxil.core.bungee.commands.friend.FriendCmd
  fr.redxil.core.bungee.commands.friend.FriendCmd$1
  fr.redxil.core.bungee.commands.friend.FriendCmd$ListCmd
-fr/redxil/core/bungee/commands/mod/action/punish/BanCmd.java
- fr.redxil.core.bungee.commands.mod.action.punish.BanCmd

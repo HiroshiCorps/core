@@ -15,45 +15,26 @@ import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
-public enum PlayerDataValue {
+public enum FriendDataValue {
 
-    PLAYER_RANK_SQL(DataBaseType.SQL, DataType.PLAYER, "member_rank", false, false),
-    PLAYER_MEMBERID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_id", false, false),
+    PLAYER_BLACKLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/blackList", false, true),
+    PLAYER_BLACKLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "blackList", false, false),
 
-    PLAYER_NAME_SQL(DataBaseType.SQL, DataType.PLAYER, "member_name", false, false),
-    PLAYER_UUID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_uuid", false, false),
+    PLAYER_FRIENDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/friendList", false, true),
+    PLAYER_FRIENDLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "friendList", false, false),
 
-    PLAYER_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/name", false, true),
-    PLAYER_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/uuid", false, true),
+    PLAYER_FRIENDRECEIVEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/receivedList", false, true),
+    PLAYER_FRIENDRECEIVEDLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "receivedList", false, false),
 
-    PLAYER_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/rank", false, true),
-
-
-    PLAYER_IPINFO_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ipinfo", false, true),
-    PLAYER_FREEZE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/freeze", false, true),
-
-    PLAYER_HUBLOGGED_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublogged", false, true),
-    PLAYER_HUBPASS_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hubpass", false, true),
-    PLAYER_HUBLEVEL_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublevel", false, true),
-    PLAYER_HUBREWARD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hubreward", false, true),
-
-    PLAYER_INPUT_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/input", false, true),
-
-    CONNECTED_BUNGEESERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/bungee_server", false, true),
-    CONNECTED_SPIGOTSERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/spigot_server", false, true),
-
-    PLAYER_LASTMSG_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/lastmsg", false, true),
-
-    MAP_PLAYER_NAME(DataBaseType.REDIS, DataType.GLOBAL, "player/name", false, false),
-    MAP_PLAYER_UUID(DataBaseType.REDIS, DataType.GLOBAL, "player/uuid", false, false),
-    LIST_PLAYER_ID(DataBaseType.REDIS, DataType.GLOBAL, "player/list", false, false);
+    PLAYER_FRIENDSENDEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/sendList", false, true),
+    PLAYER_FRIENDSENDEDLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "sendList", false, false);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
     final boolean needName, needId;
 
-    PlayerDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
+    FriendDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
@@ -65,7 +46,7 @@ public enum PlayerDataValue {
 
         RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
 
-        for (PlayerDataValue mdv : values())
+        for (FriendDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
                 if (mdv.isArgNeeded() && mdv.hasNeedInfo(playerName, playerID))
                     redissonClient.getBucket(mdv.getString(playerName, playerID)).delete();

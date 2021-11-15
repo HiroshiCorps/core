@@ -15,7 +15,7 @@ import fr.redxil.core.common.sql.SQLModel;
 public class ServerModel extends SQLModel {
 
     public ServerModel() {
-        super("list_servers", "server_id");
+        super("server", "server_id");
     }
 
     public String getServerName() {
