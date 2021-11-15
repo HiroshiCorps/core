@@ -20,11 +20,9 @@ import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.bungee.commands.NickCmd;
-import fr.redxil.core.bungee.commands.ProxyCmd;
 import fr.redxil.core.bungee.commands.ShutdownCmd;
 import fr.redxil.core.bungee.commands.friend.BlackListCmd;
 import fr.redxil.core.bungee.commands.friend.FriendCmd;
@@ -120,15 +118,14 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             cm.register(new InfoCmd().getBrigadierCommand());
             cm.register(new SetRankCmd().getBrigadierCommand());
 
-            cm.register("nick", new NickCmd());
-            cm.register("proxy", new ProxyCmd());
-            cm.register(new FriendCmd().getCommand());
-            cm.register(new BlackListCmd().getCommand());
+            cm.register(new NickCmd().getBrigadierCommand());
+            cm.register(new FriendCmd().getBrigadierCommand());
+            cm.register(new BlackListCmd().getBrigadierCommand());
 
-            cm.register("msg", new MsgCmd());
-            cm.register("r", new RCmd());
+            cm.register(new MsgCmd().getBrigadierCommand());
+            cm.register(new RCmd().getBrigadierCommand());
 
-            cm.register("shutdown", new ShutdownCmd());
+            cm.register(new ShutdownCmd().getBrigadierCommand());
 
             new PlayerSwitchListener();
             new UpdaterReceiver();

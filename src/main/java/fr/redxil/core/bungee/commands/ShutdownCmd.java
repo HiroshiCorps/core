@@ -6,6 +6,9 @@
 
 package fr.redxil.core.bungee.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -14,33 +17,43 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class ShutdownCmd implements Command {
+public class ShutdownCmd extends BrigadierAPI {
 
-    public void execute(CommandSource commandSender, String @NonNull [] strings) {
 
-        if (!(commandSender instanceof Player)) return;
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandSender).getUniqueId());
+    public ShutdownCmd() {
+        super("shutdown");
+    }
+
+    @Override
+    public int execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return 1;
+        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (!apiPlayer.hasPermission(RankList.DEVELOPPEUR.getRankPower())) {
-            return;
+            return 1;
         }
 
-        if (strings.length != 1) {
+        if (commandContext.getArguments().size() != 1) {
             TextComponentBuilder.createTextComponent("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(apiPlayer);
-            return;
+            return 1;
         }
 
-        Server server = CoreAPI.get().getServerManager().getServer(strings[0]);
+        Server server = CoreAPI.get().getServerManager().getServer(commandContext.getArgument("server", String.class));
         if (server == null) {
             TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer);
-            return;
+            return 1;
         }
 
         server.sendShutdownOrder();
         TextComponentBuilder.createTextComponent("L'ordre de shutdown est envoyé").setColor(Color.GREEN).sendTo(apiPlayer);
+        return 1;
+    }
 
-
+    @Override
+    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
+        this.addArgumentCommand(literalCommandNode, "server", StringArgumentType.word());
     }
 }
