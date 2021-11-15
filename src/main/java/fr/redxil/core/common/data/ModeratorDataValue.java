@@ -18,7 +18,6 @@ import org.redisson.api.RedissonClient;
 public enum ModeratorDataValue {
 
     LIST_MODERATOR(DataBaseType.SQL, DataType.GLOBAL, "moderator/list", false, false),
-    MODERATOR_MEMBERID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_id", false, false),
     MODERATOR_MOD_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_mod", false, false),
     MODERATOR_VANISH_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_vanish", false, false),
     MODERATOR_CIBLE_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_cible", false, false),

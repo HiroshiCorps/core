@@ -17,7 +17,7 @@ import java.util.UUID;
 public class PlayerModel extends SQLModel {
 
     public PlayerModel() {
-        super("members", "member_id");
+        super("member", PlayerDataValue.PLAYER_MEMBERID_SQL.getString());
     }
 
     public long getPowerRank() {

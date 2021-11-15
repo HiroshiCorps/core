@@ -8,6 +8,7 @@
 
 package fr.redxil.core.common.sql.player;
 
+import fr.redxil.core.common.data.FriendDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModel;
 
@@ -22,35 +23,35 @@ public class PlayerFriendModel extends SQLModel {
     }
 
     public List<String> getFriendList() {
-        return listFromString(getString(PlayerDataValue.PLAYER_FRIENDLIST_SQL.getString(null)));
+        return listFromString(getString(FriendDataValue.PLAYER_FRIENDLIST_SQL.getString(null)));
     }
 
     public void setFriendList(List<String> friendList) {
-        set(PlayerDataValue.PLAYER_FRIENDLIST_SQL.getString(null), listToString(friendList));
+        set(FriendDataValue.PLAYER_FRIENDLIST_SQL.getString(null), listToString(friendList));
     }
 
     public List<String> getBlackList() {
-        return listFromString(getString(PlayerDataValue.PLAYER_BLACKLIST_SQL.getString(null)));
+        return listFromString(getString(FriendDataValue.PLAYER_BLACKLIST_SQL.getString(null)));
     }
 
     public void setBlackList(List<String> friendList) {
-        set(PlayerDataValue.PLAYER_BLACKLIST_SQL.getString(null), listToString(friendList));
+        set(FriendDataValue.PLAYER_BLACKLIST_SQL.getString(null), listToString(friendList));
     }
 
     public List<String> getSendedList() {
-        return listFromString(getString(PlayerDataValue.PLAYER_FRIENDSENDEDLIST_SQL.getString(null)));
+        return listFromString(getString(FriendDataValue.PLAYER_FRIENDSENDEDLIST_SQL.getString(null)));
     }
 
     public void setSendedList(List<String> friendList) {
-        set(PlayerDataValue.PLAYER_FRIENDSENDEDLIST_SQL.getString(null), listToString(friendList));
+        set(FriendDataValue.PLAYER_FRIENDSENDEDLIST_SQL.getString(null), listToString(friendList));
     }
 
     public List<String> getReceivedList() {
-        return listFromString(getString(PlayerDataValue.PLAYER_FRIENDRECEIVEDLIST_SQL.getString(null)));
+        return listFromString(getString(FriendDataValue.PLAYER_FRIENDRECEIVEDLIST_SQL.getString(null)));
     }
 
     public void setReceivedList(List<String> friendList) {
-        set(PlayerDataValue.PLAYER_FRIENDRECEIVEDLIST_SQL.getString(null), listToString(friendList));
+        set(FriendDataValue.PLAYER_FRIENDRECEIVEDLIST_SQL.getString(null), listToString(friendList));
     }
 
     public String listToString(List<String> list) {

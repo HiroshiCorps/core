@@ -33,7 +33,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     public CPlayerModerator(long memberId) {
         this.memberID = memberId;
-        new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataValue.MODERATOR_MEMBERID_SQL.getString(null) + " = ?", memberId);
+        new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", Long.valueOf(memberId).intValue());
     }
 
     protected static APIPlayerModerator initModerator(APIPlayer apiPlayer) {
@@ -43,11 +43,10 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (!CoreAPI.get().getModeratorManager().isModerator(memberID)) return null;
 
         ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<String, Object>() {{
-            this.put(ModeratorDataValue.MODERATOR_MEMBERID_SQL.getString(null, null), memberID);
+            this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID.intValue());
             this.put(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null), Boolean.valueOf(false).toString());
             this.put(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null), Boolean.valueOf(false).toString());
-            this.put(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(null), null);
-        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID.intValue());
 
         RedisManager rm = CoreAPI.get().getRedisManager();
 
@@ -236,7 +235,7 @@ public class CPlayerModerator implements APIPlayerModerator {
     public static class ModeratorModel extends SQLModel {
 
         public ModeratorModel() {
-            super("moderator", ModeratorDataValue.MODERATOR_MEMBERID_SQL.getString(null));
+            super("moderator", PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null));
         }
 
     }
