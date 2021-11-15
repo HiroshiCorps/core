@@ -6,6 +6,7 @@
 
 package fr.redxil.core.bungee.commands.party;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -19,95 +20,95 @@ import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.velocity.BrigadierAPI;
+import fr.redxil.core.bungee.CoreVelocity;
 import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
-public class PartyCmd {
+public class PartyCmd extends BrigadierAPI {
 
-    public BrigadierCommand getCommand() {
+    public PartyCmd() {
+        super("party");
+    }
 
-        LiteralCommandNode<CommandSource> cmd = LiteralArgumentBuilder.<CommandSource>literal("cmd")
-                .executes(commandContext -> {
+    @Override
+    public int execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) {
+            return 0;
+        }
 
-                    if (!(commandContext.getSource() instanceof Player)) {
-                        return 0;
-                    }
+        Player player = (Player) commandContext.getSource();
 
-                    Player player = (Player) commandContext.getSource();
+        String usedCmd = commandContext.getArgument("cmd", String.class);
+        if (usedCmd == null) {
+            return this.sendCommandList(commandContext);
+        }
 
-                    ListCmd usedCmd = ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
-                    if (usedCmd == null) {
-                        return this.sendCommandList(commandContext);
-                    }
+        int i = 0;
+        boolean cmdAvailable = false;
 
-                    if (!ListCmd.getCommand(1).contains(usedCmd)) {
-                        player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /party " + usedCmd.getName() + " (nom/joueur)").setColor(Color.RED).getTextComponent());
-                        return 1;
-                    }
+        while(!cmdAvailable && i < ListCmd.values().length){
 
-                    switch (usedCmd) {
-                        case LEAVE: {
-                            return leaveCmd(commandContext, player, null);
-                        }
-                        case LIST: {
-                            return listCmd(commandContext, player, null);
-                        }
-                        case CREATE: {
-                            return createCmd(commandContext, player, null);
-                        }
+            if(ListCmd.values()[i].getName().equalsIgnoreCase(usedCmd)){
+                cmdAvailable = true;
+            }
 
-                    }
-                    return 1;
-                })
-                .build();
+            i++;
 
-        LiteralCommandNode<CommandSource> name = LiteralArgumentBuilder.<CommandSource>literal("name")
-                .executes(commandContext -> {
+        }
 
-                    if (!(commandContext.getSource() instanceof Player)) {
-                        return 0;
-                    }
+        String nameArg = commandContext.getArgument("name", String.class);
 
-                    Player player = (Player) commandContext.getSource();
 
-                    ListCmd usedCmd = ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
-                    if (usedCmd == null) {
-                        return this.sendCommandList(commandContext);
-                    }
 
-                    if (!ListCmd.getCommand(2).contains(usedCmd)) {
-                        player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /party " + usedCmd.getName()).setColor(Color.RED).getTextComponent());
-                        return 1;
-                    }
 
-                    String nameArg = commandContext.getArgument("name", String.class);
+        switch (Objects.requireNonNull(ListCmd.getCommand(usedCmd))) {
+            case LEAVE: {
+                return leaveCmd(commandContext, player, null);
+            }
+            case LIST: {
+                return listCmd(commandContext, player, null);
+            }
+            case CREATE: {
+                return createCmd(commandContext, player, null);
+            }
+            case JOIN: {
+                if(nameArg == null){
+                    return this.sendCommandList(commandContext);
+                }
+                return joinCmd(commandContext, player, nameArg);
+            }
+            case INVITE: {
+                if(nameArg == null){
+                    return this.sendCommandList(commandContext);
+                }
+                return inviteCmd(commandContext, player, nameArg);
+            }
 
-                    switch (usedCmd) {
-                        case JOIN: {
-                            return joinCmd(commandContext, player, nameArg);
-                        }
-                        case INVITE: {
-                            return inviteCmd(commandContext, player, nameArg);
-                        }
-                    }
-                    return 1;
-                })
-                .build();
+        }
+        return 1;
+    }
 
-        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("party")
-                .then(cmd)
-                .build();
+    @Override
+    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
 
-        cmd.addChild(name);
+        List<String> playerName = new ArrayList<>();
 
-        return new BrigadierCommand(lcn);
+        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+            playerName.add(player.getUsername());
+        }
+
+        this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(literalCommandNode, "name", StringArgumentType.greedyString());
 
     }
+
 
     public int sendCommandList(CommandContext<CommandSource> commandContext) {
         CommandSource commandSource = commandContext.getSource();
@@ -259,6 +260,10 @@ public class PartyCmd {
         }
         return 1;
     }
+
+
+
+
 
 
     public enum ListCmd {

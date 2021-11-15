@@ -104,21 +104,21 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             proxyServer.getEventManager().register(this, this.joinListener);
             proxyServer.getEventManager().register(this, new PlayerListener());
 
-            cm.register(new PartyCmd().getCommand());
+            cm.register(new PartyCmd().getBrigadierCommand());
 
-            cm.register("ban", new BanCmd());
-            cm.register("warn", new WarnCmd());
-            cm.register("kick", new KickCmd());
-            cm.register("mute", new MuteCmd());
+            cm.register(new BanCmd().getBrigadierCommand());
+            cm.register(new WarnCmd().getBrigadierCommand());
+            cm.register(new KickCmd().getBrigadierCommand());
+            cm.register(new MuteCmd().getBrigadierCommand());
 
-            cm.register("unban", new UnBanCmd());
-            cm.register("unmute", new UnMuteCmd());
+            cm.register(new UnBanCmd().getBrigadierCommand());
+            cm.register(new UnMuteCmd().getBrigadierCommand());
 
-            cm.register(new StaffCmd().getCommand()); /// *
-            cm.register(new CibleCmd().getCommand());
-            cm.register(new NickCheckCmd().getCommand());
-            cm.register(new InfoCmd().getCommand());
-            cm.register("setrank", new SetRankCmd());
+            cm.register(new StaffCmd().getBrigadierCommand());
+            cm.register(new CibleCmd().getBrigadierCommand());
+            cm.register(new NickCheckCmd().getBrigadierCommand());
+            cm.register(new InfoCmd().getBrigadierCommand());
+            cm.register(new SetRankCmd().getBrigadierCommand());
 
             cm.register("nick", new NickCmd());
             cm.register("proxy", new ProxyCmd());
@@ -133,7 +133,6 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
             new PlayerSwitchListener();
             new UpdaterReceiver();
 
-            RankList.enableCloudPerms();
 
             System.out.println("Velocity is started");
         }
@@ -178,6 +177,11 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     @Override
     public ProxyServer getProxyServer() {
         return proxyServer;
+    }
+
+    @Override
+    public void registerCommands() {
+
     }
 
     @Subscribe
@@ -227,7 +231,6 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     public void shutdownServer(String s) {
 
         System.out.println(SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
-        this.joinListener.acceptConnection = false;
         getProxyServer().getAllPlayers().forEach(proxPlayer -> proxPlayer.disconnect((Component) TextComponentBuilder.createTextComponent(s)));
         new Timer().schedule(
 

@@ -6,6 +6,9 @@
 
 package fr.redxil.core.bungee.commands.mod.action.punish;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -16,13 +19,21 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.api.velocity.Velocity;
+import fr.redxil.core.bungee.CoreVelocity;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public class BanCmd implements Command {
+public class BanCmd extends BrigadierAPI {
+
+    public BanCmd() {
+        super("ban");
+    }
 
     public static void banPlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator APIPlayerModAuthor, String reason) {
         long durationTime = DateUtility.toTimeStamp(timeArgs);
@@ -65,62 +76,73 @@ public class BanCmd implements Command {
 
     }
 
-    public void execute(CommandSource sender, String @NonNull [] args) {
-        if (!(sender instanceof Player)) return;
 
-        Player player = (Player) sender;
+    @Override
+    public int execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return 1;
+
+        Player player = (Player) commandContext.getSource();
         APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
+
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        if (args.length < 3) {
+        if (commandContext.getArguments().size() < 3) {
             TextComponentBuilder.createTextComponent("Syntax: /ban <pseudo> <temps> <raison>").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        String targetArgs = args[0];
+        String targetArgs = commandContext.getArgument("target", String.class);
         APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
         if (apiPlayerTarget.getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
         if (apiPlayerTarget.isBan()) {
             TextComponentBuilder.createTextComponent("Erreur, le joueur est déjà ban.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        String timeArgs = args[1];
+        String timeArgs = commandContext.getArgument("time", String.class);
 
-        StringBuilder reasonBuilder = new StringBuilder(args[2]);
-
-        for (int i = 3; i < args.length; i++)
-            reasonBuilder.append(" ").append(args[i]);
-
-        String reason = reasonBuilder.toString();
+        String reason = commandContext.getArgument("reason", String.class);
 
         if (reason.contains("{") || reason.contains("}")) {
             TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
         banPlayer(apiPlayerTarget, timeArgs, APIPlayerModAuthor, reason);
-
+        return 1;
     }
 
+    @Override
+    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
+
+        List<String> playerName = new ArrayList<>();
+
+        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+            playerName.add(player.getUsername());
+        }
+
+        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(literalCommandNode, "time", StringArgumentType.word());
+        this.addArgumentCommand(literalCommandNode, "reason", StringArgumentType.string());
+    }
 }

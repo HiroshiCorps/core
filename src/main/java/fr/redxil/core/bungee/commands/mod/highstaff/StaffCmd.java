@@ -9,6 +9,7 @@ package fr.redxil.core.bungee.commands.mod.highstaff;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
@@ -19,70 +20,47 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.common.CoreAPI;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class StaffCmd implements Command {
+public class StaffCmd extends BrigadierAPI {
 
-    public BrigadierCommand getCommand() {
 
-        LiteralCommandNode<CommandSource> lcn = LiteralArgumentBuilder.<CommandSource>literal("staff")
-                .executes(commandContext -> {
-
-                    if (!(commandContext.getSource() instanceof Player))
-                        return 0;
-
-                    APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
-                    if (!apiPlayer.getRank().isModeratorRank())
-                        return 0;
-
-                    String argument = commandContext.getArgument("message", String.class);
-                    if (argument == null)
-                        TextComponentBuilder.createTextComponent(
-                                Color.RED + "Syntax: /staff" + Color.GREEN + " (message)"
-                        ).sendTo(apiPlayer.getUUID());
-                    else
-                        CoreAPI.get().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("Staff: " + apiPlayer.getName() + ") " + argument));
-                    return 1;
-
-                })
-                .build();
-
-        ArgumentCommandNode<CommandSource, String> argumentCommandNode = RequiredArgumentBuilder.<CommandSource, String>argument("message", StringArgumentType.greedyString())
-                .suggests((context, builder) -> builder.buildFuture())
-                .executes(lcn.getCommand()).build();
-
-        lcn.addChild(argumentCommandNode);
-        return new BrigadierCommand(lcn);
-
+    public StaffCmd() {
+        super("staff");
     }
 
-    public void execute(CommandSource sender, String @NonNull [] args) {
-        if (!(sender instanceof Player)) return;
+    @Override
+    public int execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return 1;
 
-        Player player = (Player) sender;
-        APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+        Player player = (Player) commandContext.getSource();
+        APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent(
                     Color.RED + "Vous n'avez pas la permission d'effectuer cette commande."
             ).sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        if (args.length == 0) {
+        if (commandContext.getArguments().size() == 0) {
             TextComponentBuilder.createTextComponent(
                     Color.RED + "Syntax: /staff" + Color.GREEN + " (message)"
             ).sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        StringBuilder stringBuilder = new StringBuilder(args[0]);
-        if (args.length > 1)
-            for (int i = 1; i < args.length; i++)
-                stringBuilder.append(" ").append(args[i]);
 
-        CoreAPI.get().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("§4{StaffChat} §r" + player.getUsername() + ": " + stringBuilder));
 
+        CoreAPI.get().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("§4{StaffChat} §r" + player.getUsername() + ": " + commandContext.getArgument("message", String.class)));
+
+        return 1;
+    }
+
+    @Override
+    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
+        this.addArgumentCommand(literalCommandNode, "message", StringArgumentType.string());
     }
 }

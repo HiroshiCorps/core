@@ -6,6 +6,9 @@
 
 package fr.redxil.core.bungee.commands.mod.action.punish;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -15,59 +18,61 @@ import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.api.velocity.Velocity;
+import fr.redxil.core.bungee.CoreVelocity;
 import fr.redxil.core.common.CoreAPI;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-public class KickCmd implements Command {
+public class KickCmd extends BrigadierAPI {
 
     public KickCmd() {
+        super("kick");
     }
 
-    public void execute(CommandSource sender, String[] args) {
-        if (!(sender instanceof Player)) return;
 
-        Player player = (Player) sender;
+    @Override
+    public int execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return 1;
+
+        Player player = (Player) commandContext.getSource();
         APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        if (args.length < 2) {
+        if (commandContext.getArguments().size() < 2) {
             TextComponentBuilder.createTextComponent("Syntax: /kick <pseudo> <raison>").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        String targetArgs = args[0];
+        String targetArgs = commandContext.getArgument("target", String.class);
         APIPlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getPlayer(targetArgs);
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("Erreur: Le joueur: " + targetArgs + " n'a pas était trouvé").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
         if (apiPlayerTarget.getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Erreur vous n'avez pas la permission.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
-        StringBuilder reasonBuilder = new StringBuilder();
-
-        for (int i = 1; i < args.length; i++)
-            reasonBuilder.append(args[i]).append(" ");
-
-        String reason = reasonBuilder.toString();
+        String reason = commandContext.getArgument("reason", String.class);
 
         if (reason.contains("{") || reason.contains("}")) {
             TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return;
+            return 1;
         }
 
         SanctionInfo sm = apiPlayerTarget.kickPlayer(reason, APIPlayerModAuthor);
@@ -79,5 +84,20 @@ public class KickCmd implements Command {
         } else
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
+
+        return 1;
+    }
+
+    @Override
+    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
+
+        List<String> playerName = new ArrayList<>();
+
+        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+            playerName.add(player.getUsername());
+        }
+
+        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(literalCommandNode, "reason", StringArgumentType.string());
     }
 }
