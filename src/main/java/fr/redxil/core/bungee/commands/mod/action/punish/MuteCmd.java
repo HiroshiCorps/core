@@ -9,7 +9,6 @@ package fr.redxil.core.bungee.commands.mod.action.punish;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -23,7 +22,6 @@ import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.bungee.CoreVelocity;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,7 +136,7 @@ public class MuteCmd extends BrigadierAPI {
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
         List<String> playerName = new ArrayList<>();
 
-        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
             playerName.add(player.getUsername());
         }
 

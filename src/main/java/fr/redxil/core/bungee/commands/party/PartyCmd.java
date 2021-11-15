@@ -7,10 +7,8 @@
 package fr.redxil.core.bungee.commands.party;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -53,9 +51,9 @@ public class PartyCmd extends BrigadierAPI {
         int i = 0;
         boolean cmdAvailable = false;
 
-        while(!cmdAvailable && i < ListCmd.values().length){
+        while (!cmdAvailable && i < ListCmd.values().length) {
 
-            if(ListCmd.values()[i].getName().equalsIgnoreCase(usedCmd)){
+            if (ListCmd.values()[i].getName().equalsIgnoreCase(usedCmd)) {
                 cmdAvailable = true;
             }
 
@@ -64,8 +62,6 @@ public class PartyCmd extends BrigadierAPI {
         }
 
         String nameArg = commandContext.getArgument("name", String.class);
-
-
 
 
         switch (Objects.requireNonNull(ListCmd.getCommand(usedCmd))) {
@@ -79,13 +75,13 @@ public class PartyCmd extends BrigadierAPI {
                 return createCmd(commandContext, player, null);
             }
             case JOIN: {
-                if(nameArg == null){
+                if (nameArg == null) {
                     return this.sendCommandList(commandContext);
                 }
                 return joinCmd(commandContext, player, nameArg);
             }
             case INVITE: {
-                if(nameArg == null){
+                if (nameArg == null) {
                     return this.sendCommandList(commandContext);
                 }
                 return inviteCmd(commandContext, player, nameArg);
@@ -100,7 +96,7 @@ public class PartyCmd extends BrigadierAPI {
 
         List<String> playerName = new ArrayList<>();
 
-        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
             playerName.add(player.getUsername());
         }
 
@@ -260,10 +256,6 @@ public class PartyCmd extends BrigadierAPI {
         }
         return 1;
     }
-
-
-
-
 
 
     public enum ListCmd {

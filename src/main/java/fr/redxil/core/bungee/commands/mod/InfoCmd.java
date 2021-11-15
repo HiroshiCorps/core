@@ -7,11 +7,8 @@
 package fr.redxil.core.bungee.commands.mod;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -59,13 +56,13 @@ public class InfoCmd extends BrigadierAPI {
 
         List<String> playerName = new ArrayList<>();
 
-        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
             playerName.add(player.getUsername());
         }
 
         List<String> sanctionName = new ArrayList<>();
 
-        for(SanctionType sanctionType : SanctionType.values()){
+        for (SanctionType sanctionType : SanctionType.values()) {
             sanctionName.add(sanctionType.getName());
         }
 

@@ -7,22 +7,15 @@
 package fr.redxil.core.bungee.commands.mod.highstaff;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class StaffCmd extends BrigadierAPI {
 
@@ -51,7 +44,6 @@ public class StaffCmd extends BrigadierAPI {
             ).sendTo(player.getUniqueId());
             return 1;
         }
-
 
 
         CoreAPI.get().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("§4{StaffChat} §r" + player.getUsername() + ": " + commandContext.getArgument("message", String.class)));

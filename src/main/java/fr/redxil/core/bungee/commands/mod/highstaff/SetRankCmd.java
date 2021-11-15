@@ -9,7 +9,6 @@ package fr.redxil.core.bungee.commands.mod.highstaff;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -22,7 +21,6 @@ import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.bungee.CoreVelocity;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,14 +81,14 @@ public class SetRankCmd extends BrigadierAPI {
         RankList newRank = null;
 
 
-        if(!isInt(rankArg)){
-            for(RankList rankList : RankList.values()){
-                if(rankList.getRankName().equalsIgnoreCase(rankArg)){
+        if (!isInt(rankArg)) {
+            for (RankList rankList : RankList.values()) {
+                if (rankList.getRankName().equalsIgnoreCase(rankArg)) {
                     newRank = rankList;
                     break;
                 }
             }
-        }else {
+        } else {
 
             newRank = RankList.getRank(Long.parseLong(rankArg));
 
@@ -127,13 +125,13 @@ public class SetRankCmd extends BrigadierAPI {
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
         List<String> playerName = new ArrayList<>();
 
-        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
             playerName.add(player.getUsername());
         }
 
         List<String> argRank = new ArrayList<>();
 
-        for(RankList rankList : RankList.values()){
+        for (RankList rankList : RankList.values()) {
             argRank.add(rankList.getRankName());
             argRank.add(String.valueOf(rankList.getRankPower()));
         }

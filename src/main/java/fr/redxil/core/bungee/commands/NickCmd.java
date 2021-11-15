@@ -9,7 +9,6 @@ package fr.redxil.core.bungee.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -19,7 +18,6 @@ import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class NickCmd extends BrigadierAPI {
 
@@ -70,13 +68,13 @@ public class NickCmd extends BrigadierAPI {
             String argRank = commandContext.getArgument("rank", String.class);
 
             if (!isInt(argRank)) {
-                for(RankList rankList : RankList.values()){
-                    if(rankList.getRankName().equalsIgnoreCase(argRank)){
+                for (RankList rankList : RankList.values()) {
+                    if (rankList.getRankName().equalsIgnoreCase(argRank)) {
                         nickRank = rankList;
                         break;
                     }
                 }
-            }else {
+            } else {
                 nickRank = RankList.getRank(Integer.parseInt(argRank));
             }
 

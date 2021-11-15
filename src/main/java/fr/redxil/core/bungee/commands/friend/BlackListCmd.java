@@ -7,11 +7,8 @@
 package fr.redxil.core.bungee.commands.friend;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -21,7 +18,6 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.bungee.CoreVelocity;
 import fr.redxil.core.common.CoreAPI;
-import net.kyori.adventure.text.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +87,7 @@ public class BlackListCmd extends BrigadierAPI {
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
         List<String> playerName = new ArrayList<>();
 
-        for(Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()){
+        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
             playerName.add(player.getUsername());
         }
 

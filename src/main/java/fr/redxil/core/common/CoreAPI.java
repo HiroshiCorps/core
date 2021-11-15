@@ -42,6 +42,7 @@ import java.util.UUID;
 
 public class CoreAPI extends API {
 
+    private final ServerAccessEnum sea;
     private CServerManager serverManager;
     private CPlayerManager apiPlayerManager;
     private CModeratorManager moderatorManager;
@@ -51,7 +52,6 @@ public class CoreAPI extends API {
     private SQLConnection sqlConnection;
     private PartyManager partyManager;
     private CTeamManager cTeamManager;
-    private final ServerAccessEnum sea;
 
     public CoreAPI(PluginEnabler plugin, ServerAccessEnum sea) {
         super(plugin);

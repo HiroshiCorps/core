@@ -9,7 +9,6 @@ package fr.redxil.core.bungee.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -19,7 +18,6 @@ import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.common.CoreAPI;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ShutdownCmd extends BrigadierAPI {
 
