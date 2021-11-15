@@ -63,6 +63,8 @@ public class CServer implements Server {
         model.set(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
         model.set(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
         model.set(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
+        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.name());
+        model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().name());
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, serverId);
         RedisManager redisManager = CoreAPI.get().getRedisManager();

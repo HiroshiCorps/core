@@ -18,32 +18,12 @@ public class ServerModel extends SQLModel {
         super("list_servers", "server_id");
     }
 
-    public ServerModel(String name, int players_max, int access, boolean maintenance, ServerType type) {
-        this();
-        this.set(ServerDataValue.SERVER_NAME_SQL.getString(null), name);
-        this.set(ServerDataValue.SERVER_MAXP_SQL.getString(null), players_max);
-        this.set(ServerDataValue.SERVER_ACCES_SQL.getString(null), access);
-        int bool = 0;
-        if (maintenance) bool += 1;
-        this.set(ServerDataValue.SERVER_MAINTENANCE_SQL.getString(null), bool);
-        this.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), type.toString());
-    }
-
     public String getServerName() {
         return this.getString(ServerDataValue.SERVER_NAME_SQL.getString(null));
     }
 
     public int getMaxPlayers() {
         return this.getInt(ServerDataValue.SERVER_MAXP_SQL.getString(null));
-    }
-
-    public int getServerAccess() {
-        return this.getInt(ServerDataValue.SERVER_ACCES_SQL.getString(null));
-    }
-
-    public boolean getMaintenance() {
-        int bool = this.getInt(ServerDataValue.SERVER_MAINTENANCE_SQL.getString(null));
-        return bool == 1;
     }
 
     public ServerType getServerType() {

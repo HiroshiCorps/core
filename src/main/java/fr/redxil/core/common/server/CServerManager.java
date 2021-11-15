@@ -78,10 +78,10 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Server initServer(String name, IpInfo ipInfo) {
+    public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
         if (name == null || ipInfo == null) return null;
         if (!isServerExist(name))
-            return CServer.initServer(name, ipInfo);
+            return CServer.initServer(serverType, name, ipInfo);
         return getServer(name);
     }
 
