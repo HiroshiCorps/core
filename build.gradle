@@ -34,17 +34,13 @@ repositories {
 }
 
 dependencies {
-    implementation name: 'api-4.0.0'
     compileOnly name: 'paper-1.12.2'
-    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
-}
-
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'Gradle Jar File Example',
-                'Main-Class': 'fr.redxil.core.CorePlugin'
+    implementation name: 'api-4.0.0'
+    implementation group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
+    jar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from {
+            configurations.compileClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+        }
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
 }

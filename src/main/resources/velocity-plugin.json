@@ -1,0 +1,12 @@
+{
+  "id": "core",
+  "name": "Core",
+  "version": "1.12",
+  "description": "",
+  "authors": [
+    "RedLine",
+    "XiliTra"
+  ],
+  "dependencies": [],
+  "main": "fr.redxil.core.velocity.CoreVelocity"
+}
