@@ -61,10 +61,12 @@ public class CoreAPI extends API {
         File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlUser.json");
         File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlPass.json");
         File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
+        File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
 
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
+        String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
 
         if (sqlUser == null || sqlPass == null || redisPass == null) {
 
@@ -77,13 +79,16 @@ public class CoreAPI extends API {
             if (redisPass == null)
                 GSONSaver.writeGSON(redisPassFile, "passhere");
 
-            plugin.shutdownServer("Missing database credentials");
+            if (redisUser == null)
+                GSONSaver.writeGSON(redisUserFile, "userhere");
+
+            CoreAPI.setEnabled(false);
             return;
         }
 
         this.sqlConnection = new CSQLConnection();
-        this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "SERVER", sqlUser, sqlPass);
-        this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisPass);
+        this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
+        this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();

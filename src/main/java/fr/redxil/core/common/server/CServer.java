@@ -52,7 +52,7 @@ public class CServer implements Server {
             put(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
             put(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.name());
             put(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().name());
-            put(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null), null);
+            put(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null), RankList.JOUEUR.getRankPower().intValue());
             put(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
             put(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
         }}, "WHERE " + ServerDataValue.SERVER_NAME_SQL.getString(null) + " = ?", name);
@@ -78,7 +78,7 @@ public class CServer implements Server {
 
         redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null)));
         redisManager.setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_ACCESS_SQL.getString(null)));
-        redisManager.setRedisString(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null)));
+        redisManager.setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(name, serverId), model.getInt(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null)));
 
         redisManager.setRedisString(ServerDataValue.SERVER_IP_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_IP_SQL.getString(null, null)));
         redisManager.setRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(name, serverId), Long.parseLong(model.getString(ServerDataValue.SERVER_PORT_SQL.getString(null, null))));
@@ -169,7 +169,7 @@ public class CServer implements Server {
 
         model.set(ServerDataValue.SERVER_STATUS_SQL.getString(name, id), ServerStatus.OFFLINE.name());
         model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(name, id), getServerAccess().name());
-        model.set(ServerDataValue.SERVER_NEEDRANK_SQL.getString(name, id), getReservedRank().getRankPower());
+        model.set(ServerDataValue.SERVER_NEEDRANK_SQL.getString(name, id), getReservedRank().getRankPower().intValue());
         model.set(ServerDataValue.SERVER_TYPE_SQL.getString(name, id), getServerType().name());
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, id);
@@ -267,16 +267,13 @@ public class CServer implements Server {
 
     @Override
     public RankList getReservedRank() {
-        String value = CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this));
-        if (value == null)
-            return null;
-        return RankList.getRank(value);
+        return RankList.getRank(CoreAPI.get().getRedisManager().getRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this)));
     }
 
     @Override
     public void setReservedRank(RankList rankList) {
-        String name = rankList == null ? null : rankList.getRankName();
-        CoreAPI.get().getRedisManager().setRedisString(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this), name);
+        Long power = rankList == null ? RankList.JOUEUR.getRankPower() : rankList.getRankPower();
+        CoreAPI.get().getRedisManager().setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this), power);
     }
 
 }

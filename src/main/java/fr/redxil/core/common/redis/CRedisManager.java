@@ -13,20 +13,22 @@ import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
+import org.redisson.config.SingleServerConfig;
 
 import java.util.List;
 import java.util.Map;
 
 public class CRedisManager implements RedisManager {
 
-    private final String host, port, password;
+    private final String host, port, user, password;
     private final int database;
     private RedissonClient connection;
 
-    public CRedisManager(String host, String port, int database, String password) {
+    public CRedisManager(String host, String port, int database, String user, String password) {
         this.host = host;
         this.port = port;
         this.database = database;
+        this.user = user;
         this.password = password;
         initConnection();
     }
@@ -127,11 +129,15 @@ public class CRedisManager implements RedisManager {
         config.setThreads(8);
         config.setNettyThreads(8);
 
-        config.useSingleServer()
+        SingleServerConfig singleServerConfig = config.useSingleServer()
                 .setAddress("redis://" + host + ":" + port)
-                .setDatabase(database)
-                .setPassword(password);
+                .setDatabase(database);
 
+        if (user != null)
+            singleServerConfig.setUsername(user);
+
+        if (password != null)
+            singleServerConfig.setPassword(password);
 
         connection = Redisson.create(config);
 

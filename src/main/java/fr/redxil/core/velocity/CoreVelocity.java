@@ -6,13 +6,9 @@
 
 package fr.redxil.core.velocity;
 
-import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.utils.IpInfo;
@@ -48,98 +44,39 @@ import fr.redxil.core.velocity.pmsListener.UpdaterReceiver;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-@Plugin(id = "myfirstplugin", name = "My First Plugin", version = "1.0-SNAPSHOT",
-        description = "I did it!", authors = {"Me"})
 public class CoreVelocity extends Velocity implements PluginEnabler {
 
     private static CoreVelocity instance;
-    private final ProxyServer proxyServer;
-    private final Logger logger;
-    private final File pathFile;
-    private final CommandManager cm;
-    private IpInfo ipInfo;
-    private JoinListener joinListener;
+    JoinListener joinListener;
+    IpInfo ipInfo;
 
-    @Inject
-    public CoreVelocity(ProxyServer server, CommandManager commandManager, Logger logger, @DataDirectory Path folder) {
+    public CoreVelocity() {
         super();
         instance = this;
-        this.proxyServer = server;
-        this.logger = logger;
-        this.pathFile = folder.toFile();
-        this.cm = commandManager;
-        if (!pathFile.exists())
-            if (!pathFile.mkdirs()) {
-                server.shutdown();
-                return;
-            }
-        server.getEventManager().register(this, this);
-        logger.info("Hello there, it's a test plugin I made!");
-    }
-
-    public static CoreVelocity getInstance() {
-        return instance;
-    }
-
-    @Subscribe
-    public void onEnable(ProxyInitializeEvent pie) {
-        String[] ipString = proxyServer.getBoundAddress().toString().split(":");
+        String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
         if (CoreAPI.get().isEnabled()) {
+            registerEvents();
+            registerCommands();
             checkCrash();
-
-            this.joinListener = new JoinListener();
-
-            proxyServer.getEventManager().register(this, this.joinListener);
-            proxyServer.getEventManager().register(this, new PlayerListener());
-
-            cm.register(new PartyCmd().getBrigadierCommand());
-
-            cm.register(new BanCmd().getBrigadierCommand());
-            cm.register(new WarnCmd().getBrigadierCommand());
-            cm.register(new KickCmd().getBrigadierCommand());
-            cm.register(new MuteCmd().getBrigadierCommand());
-
-            cm.register(new UnBanCmd().getBrigadierCommand());
-            cm.register(new UnMuteCmd().getBrigadierCommand());
-
-            cm.register(new StaffCmd().getBrigadierCommand());
-            cm.register(new CibleCmd().getBrigadierCommand());
-            cm.register(new NickCheckCmd().getBrigadierCommand());
-            cm.register(new InfoCmd().getBrigadierCommand());
-            cm.register(new SetRankCmd().getBrigadierCommand());
-
-            cm.register(new NickCmd().getBrigadierCommand());
-            cm.register(new FriendCmd().getBrigadierCommand());
-            cm.register(new BlackListCmd().getBrigadierCommand());
-
-            cm.register(new MsgCmd().getBrigadierCommand());
-            cm.register(new RCmd().getBrigadierCommand());
-
-            cm.register(new ShutdownCmd().getBrigadierCommand());
-
-            new PlayerSwitchListener();
-            new UpdaterReceiver();
-
-
-            System.out.println("Velocity is started");
         }
+    }
 
+    static void enableCore() {
+        new CoreVelocity();
     }
 
     public void checkCrash() {
 
         System.out.println("Checking for Crashed APIPlayer");
-        for (Player player : proxyServer.getAllPlayers())
+        for (Player player : getProxyServer().getAllPlayers())
             player.disconnect((Component) TextComponentBuilder.createTextComponent("Error"));
 
         Server server = CoreAPI.get().getServer();
@@ -171,14 +108,56 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     }
 
+    public static CoreVelocity getInstance() {
+        return instance;
+    }
+
     @Override
     public ProxyServer getProxyServer() {
-        return proxyServer;
+        return VelocityEnabler.getInstance().getProxyServer();
+    }
+
+    public void registerEvents() {
+        this.joinListener = new JoinListener();
+
+        getProxyServer().getEventManager().register(this, this.joinListener);
+        getProxyServer().getEventManager().register(this, new PlayerListener());
+        new PlayerSwitchListener();
+        new UpdaterReceiver();
     }
 
     @Override
     public void registerCommands() {
+        if (CoreAPI.get().isEnabled()) {
 
+            CommandManager cm = VelocityEnabler.getInstance().getCommandManager();
+
+            cm.register(new PartyCmd().getBrigadierCommand());
+
+            cm.register(new BanCmd().getBrigadierCommand());
+            cm.register(new WarnCmd().getBrigadierCommand());
+            cm.register(new KickCmd().getBrigadierCommand());
+            cm.register(new MuteCmd().getBrigadierCommand());
+
+            cm.register(new UnBanCmd().getBrigadierCommand());
+            cm.register(new UnMuteCmd().getBrigadierCommand());
+
+            cm.register(new StaffCmd().getBrigadierCommand());
+            cm.register(new CibleCmd().getBrigadierCommand());
+            cm.register(new NickCheckCmd().getBrigadierCommand());
+            cm.register(new InfoCmd().getBrigadierCommand());
+            cm.register(new SetRankCmd().getBrigadierCommand());
+
+            cm.register(new NickCmd().getBrigadierCommand());
+            cm.register(new FriendCmd().getBrigadierCommand());
+            cm.register(new BlackListCmd().getBrigadierCommand());
+
+            cm.register(new MsgCmd().getBrigadierCommand());
+            cm.register(new RCmd().getBrigadierCommand());
+
+            cm.register(new ShutdownCmd().getBrigadierCommand());
+
+        }
     }
 
     @Subscribe
@@ -207,7 +186,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     @Override
     public String getPluginVersion() {
-        return proxyServer.getVersion().getVersion();
+        return getProxyServer().getVersion().getVersion();
     }
 
     @Override
@@ -244,17 +223,17 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     @Override
     public File getPluginDataFolder() {
-        return pathFile;
+        return VelocityEnabler.getInstance().getPathFile();
     }
 
     @Override
     public String getServerVersion() {
-        return proxyServer.getVersion().getVersion();
+        return getProxyServer().getVersion().getVersion();
     }
 
     @Override
     public void printLog(Level level, String msg) {
-        logger.log(level, msg);
+        VelocityEnabler.getInstance().getLogger().log(level, msg);
     }
 
 }

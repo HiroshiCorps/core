@@ -8,5 +8,5 @@
     "XiliTra"
   ],
   "dependencies": [],
-  "main": "fr.redxil.core.velocity.CoreVelocity"
+  "main": "fr.redxil.core.velocity.VelocityEnabler"
 }
