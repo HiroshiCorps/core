@@ -43,7 +43,7 @@ public class VelocityEnabler {
 
     @Subscribe
     public void onEnable(ProxyInitializeEvent pie) {
-        CoreVelocity.enableCore();
+        new CoreVelocity();
     }
 
     public ProxyServer getProxyServer() {

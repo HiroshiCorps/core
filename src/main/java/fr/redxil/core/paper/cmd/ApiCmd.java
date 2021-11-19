@@ -6,8 +6,8 @@
 
 package fr.redxil.core.paper.cmd;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.ServerDataValue;
 import org.bukkit.command.Command;
@@ -27,19 +27,19 @@ public class ApiCmd extends Command {
     public boolean execute(CommandSender commandSender, String s, String[] strings) {
         if (!(commandSender instanceof Player)) return false;
 
-        RedissonClient redis = CoreAPI.get().getRedisManager().getRedissonClient();
+        RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
 
         long time = System.currentTimeMillis();
         AtomicLong newTime = new AtomicLong();
 
-        CoreAPI.get().getSQLConnection().query("SELECT * FROM `members`", resultSet -> newTime.set(System.currentTimeMillis()));
+        API.getInstance().getSQLConnection().query("SELECT * FROM `members`", resultSet -> newTime.set(System.currentTimeMillis()));
 
         long response = newTime.get() - time;
 
         TextComponentBuilder.createTextComponent(
                 "\n§7§m                  §6 [§e SERVER Api §6] §7§m                  \n " +
                         "\n§r§eApi reponse time§7: §b" + response + " ms" +
-                        "\n§r§eUser cache size§7: §b" + CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString()).size() +
+                        "\n§r§eUser cache size§7: §b" + API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString()).size() +
                         "\n§r§eServers cache size§7: §b" + redis.getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).size() +
                         "\n \n§r§7§m                                                              \n"
         ).sendTo(((Player) commandSender).getUniqueId());

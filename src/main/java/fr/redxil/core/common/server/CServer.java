@@ -8,6 +8,7 @@ package fr.redxil.core.common.server;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Games;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.rank.RankList;
@@ -16,7 +17,6 @@ import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
@@ -34,17 +34,17 @@ public class CServer implements Server {
 
     public CServer(long serverID) {
         this.serverId = serverID;
-        this.name = CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(this));
+        this.name = API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(this));
     }
 
     public CServer(String serverName) {
-        this.serverId = Long.parseLong((String) CoreAPI.get().getRedisManager().getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(serverName));
+        this.serverId = Long.parseLong((String) API.getInstance().getRedisManager().getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(serverName));
         this.name = serverName;
     }
 
     public static Server initServer(ServerType serverType, String name, IpInfo serverIp) {
 
-        int maxPlayer = CoreAPI.get().getPluginEnabler().getMaxPlayer();
+        int maxPlayer = API.getInstance().getPluginEnabler().getMaxPlayer();
 
         ServerModel model = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<String, Object>() {{
             put(ServerDataValue.SERVER_NAME_SQL.getString(null), name);
@@ -67,7 +67,7 @@ public class CServer implements Server {
         model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().name());
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, serverId);
-        RedisManager redisManager = CoreAPI.get().getRedisManager();
+        RedisManager redisManager = API.getInstance().getRedisManager();
 
         redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).put(name, serverId);
         redisManager.setRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(name, serverId), name);
@@ -89,12 +89,12 @@ public class CServer implements Server {
 
     @Override
     public int getMaxPlayers() {
-        return Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(this))).intValue();
+        return Long.valueOf(API.getInstance().getRedisManager().getRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(this))).intValue();
     }
 
     @Override
     public void setMaxPlayers(int i) {
-        CoreAPI.get().getRedisManager().setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(this), i);
+        API.getInstance().getRedisManager().setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(this), i);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class CServer implements Server {
         List<APIPlayer> playerList = new ArrayList<>();
 
         getPlayerUUIDList().forEach((uuid) -> {
-            APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(uuid);
+            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
             if (apiPlayer != null)
                 playerList.add(apiPlayer);
         });
@@ -121,7 +121,7 @@ public class CServer implements Server {
     public Collection<UUID> getPlayerUUIDList() {
 
         List<UUID> playerList = new ArrayList<>();
-        List<String> uuidList = CoreAPI.get().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this));
+        List<String> uuidList = API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this));
         uuidList.forEach((uuidString) -> playerList.add(UUID.fromString(uuidString)));
 
         return playerList;
@@ -140,14 +140,14 @@ public class CServer implements Server {
 
     @Override
     public boolean isOnline() {
-        return CoreAPI.get().getServerManager().isServerExist(getServerName());
+        return API.getInstance().getServerManager().isServerExist(getServerName());
     }
 
     @Override
     public IpInfo getServerIP() {
         return new IpInfo(
-                CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_IP_REDIS.getString(this)),
-                Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(this))).intValue()
+                API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_IP_REDIS.getString(this)),
+                Long.valueOf(API.getInstance().getRedisManager().getRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(this))).intValue()
         );
     }
 
@@ -155,7 +155,7 @@ public class CServer implements Server {
     public boolean shutdown() {
 
         String name = getServerName();
-        if (!CoreAPI.get().getPluginEnabler().getServerName().equals(name)) return false;
+        if (!API.getInstance().getPluginEnabler().getServerName().equals(name)) return false;
 
         long id = getServerId();
 
@@ -163,7 +163,7 @@ public class CServer implements Server {
 
         System.out.println("[Core] Clearing redis data");
 
-        getTeamLinked().forEach((teamID) -> CoreAPI.get().getTeamManager().getTeam(teamID).deleteTeam());
+        getTeamLinked().forEach((teamID) -> API.getInstance().getTeamManager().getTeam(teamID).deleteTeam());
 
         ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataValue.SERVER_ID_SQL.getString(null) + " = ?", id);
 
@@ -174,7 +174,7 @@ public class CServer implements Server {
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, id);
 
-        CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).remove(name);
+        API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).remove(name);
 
         return true;
 
@@ -182,27 +182,27 @@ public class CServer implements Server {
 
     @Override
     public ServerStatus getServerStatus() {
-        return ServerStatus.valueOf(CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this)));
+        return ServerStatus.valueOf(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this)));
     }
 
     @Override
     public void setServerStatus(ServerStatus serverStatus) {
-        CoreAPI.get().getRedisManager().setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this), serverStatus.name());
+        API.getInstance().getRedisManager().setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this), serverStatus.name());
     }
 
     @Override
     public ServerAccess getServerAccess() {
-        return ServerAccess.valueOf(CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this)));
+        return ServerAccess.valueOf(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this)));
     }
 
     @Override
     public void setServerAccess(ServerAccess serverAccess) {
-        CoreAPI.get().getRedisManager().setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this), serverAccess.name());
+        API.getInstance().getRedisManager().setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this), serverAccess.name());
     }
 
     @Override
     public ServerType getServerType() {
-        return ServerType.fromString(CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(this)).toUpperCase());
+        return ServerType.fromString(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(this)).toUpperCase());
     }
 
     @Override
@@ -212,68 +212,68 @@ public class CServer implements Server {
 
     @Override
     public void setPlayerInServer(APIPlayer apiPlayer) {
-        RList<String> listPlayer = CoreAPI.get().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this));
+        RList<String> listPlayer = API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this));
         UUID uuid = apiPlayer.getUUID();
         if (!listPlayer.contains(uuid.toString()))
             listPlayer.add(uuid.toString());
 
-        if (CoreAPI.get().isBungee())
-            CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), CoreAPI.get().getPluginEnabler().getServerName());
+        if (API.getInstance().isBungee())
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), API.getInstance().getPluginEnabler().getServerName());
         else {
             Server server = apiPlayer.getServer();
             if (server != null) server.removePlayerInServer(apiPlayer.getUUID());
-            CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), CoreAPI.get().getPluginEnabler().getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), API.getInstance().getPluginEnabler().getServerName());
         }
     }
 
     @Override
     public void removePlayerInServer(UUID uuid) {
-        CoreAPI.get().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this)).remove(uuid.toString());
+        API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this)).remove(uuid.toString());
     }
 
     @Override
     public void sendShutdownOrder() {
-        if (getServerName().equals(CoreAPI.get().getPluginEnabler().getServerName())) {
-            CoreAPI.get().getPluginEnabler().shutdownServer("Shutdown Order from: " + getServerName());
+        if (getServerName().equals(API.getInstance().getPluginEnabler().getServerName())) {
+            API.getInstance().getPluginEnabler().shutdownServer("Shutdown Order from: " + getServerName());
             return;
         }
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "shutdownOrder", CoreAPI.get().getPluginEnabler().getServerName());
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", API.getInstance().getPluginEnabler().getServerName());
     }
 
     @Override
     public boolean isHostDedicated() {
-        return CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_HOSTED_REDIS.getString(this)) != null;
+        return API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_HOSTED_REDIS.getString(this)) != null;
     }
 
     @Override
     public String getHostAuthor() {
-        return CoreAPI.get().getRedisManager().getRedisString(ServerDataValue.SERVER_HOSTED_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_HOSTED_REDIS.getString(this));
     }
 
     @Override
     public boolean isGamesServer() {
-        return CoreAPI.get().getGamesManager().getGame(getServerName()) != null;
+        return API.getInstance().getGamesManager().getGame(getServerName()) != null;
     }
 
     @Override
     public Games getGames() {
-        return CoreAPI.get().getGamesManager().getGame(getServerName());
+        return API.getInstance().getGamesManager().getGame(getServerName());
     }
 
     @Override
     public List<Long> getTeamLinked() {
-        return CoreAPI.get().getRedisManager().getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(this));
     }
 
     @Override
     public RankList getReservedRank() {
-        return RankList.getRank(CoreAPI.get().getRedisManager().getRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this)));
+        return RankList.getRank(API.getInstance().getRedisManager().getRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this)));
     }
 
     @Override
     public void setReservedRank(RankList rankList) {
         Long power = rankList == null ? RankList.JOUEUR.getRankPower() : rankList.getRankPower();
-        CoreAPI.get().getRedisManager().setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this), power);
+        API.getInstance().getRedisManager().setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this), power);
     }
 
 }

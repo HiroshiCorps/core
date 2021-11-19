@@ -11,11 +11,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.velocity.CoreVelocity;
 
@@ -35,14 +35,14 @@ public class MsgCmd extends BrigadierAPI {
         if (!(commandContext.getSource() instanceof Player)) return 1;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        APIPlayer sp = CoreAPI.get().getPlayerManager().getPlayer(playerUUID);
+        APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
 
         if (commandContext.getArguments().size() < 2) {
             TextComponentBuilder.createTextComponent("Merci de faire /msg (pseudo) (message)").setColor(Color.RED).sendTo(playerUUID);
             return 1;
         }
 
-        APIPlayer target = CoreAPI.get().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
+        APIPlayer target = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
         if (target == null) {
             TextComponentBuilder.createTextComponent("Le joueur: " + commandContext.getArgument("target", String.class) + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
             return 1;
@@ -69,8 +69,8 @@ public class MsgCmd extends BrigadierAPI {
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(message).sendTo(sp.getUUID());
 
-        CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp), target.getName(true));
-        CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(target), sp.getName(true));
+        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp), target.getName(true));
+        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(target), sp.getName(true));
         return 1;
     }
 

@@ -11,12 +11,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class CibleCmd extends BrigadierAPI {
         if (!(sender instanceof Player)) return 0;
 
         Player player = (Player) sender;
-        APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
@@ -64,7 +64,7 @@ public class CibleCmd extends BrigadierAPI {
         }
 
         String target = commandContext.getArgument("player", String.class);
-        APIOfflinePlayer playerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(target);
+        APIOfflinePlayer playerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(target);
 
         if (playerTarget == null) {
             TextComponentBuilder.createTextComponent(
@@ -92,10 +92,10 @@ public class CibleCmd extends BrigadierAPI {
     public void registerArgs(LiteralCommandNode<CommandSource> command) {
 
         List<String> playerName = new ArrayList<>();
-        List<Long> availablePlayer = CoreAPI.get().getPlayerManager().getLoadedPlayer();
-        availablePlayer.removeAll(CoreAPI.get().getModeratorManager().getLoadedModerator());
+        List<Long> availablePlayer = API.getInstance().getPlayerManager().getLoadedPlayer();
+        availablePlayer.removeAll(API.getInstance().getModeratorManager().getLoadedModerator());
         for (Long id : availablePlayer)
-            playerName.add(CoreAPI.get().getPlayerManager().getPlayer(id).getName());
+            playerName.add(API.getInstance().getPlayerManager().getPlayer(id).getName());
 
         this.addArgumentCommand(command, "player", StringArgumentType.word(), (String[]) playerName.toArray());
 

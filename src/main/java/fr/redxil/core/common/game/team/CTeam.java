@@ -7,13 +7,13 @@
 package fr.redxil.core.common.game.team;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.team.Team;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.spigot.minigame.GameBuilder;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.core.common.data.TeamDataValue;
@@ -33,16 +33,16 @@ public class CTeam implements Team {
 
     protected CTeam(long longID) {
         this.teamID = longID;
-        this.teamName = CoreAPI.get().getRedisManager().getRedisString(TeamDataValue.TEAM_NAME_REDIS.getString(longID));
+        this.teamName = API.getInstance().getRedisManager().getRedisString(TeamDataValue.TEAM_NAME_REDIS.getString(longID));
     }
 
     public static CTeam initTeam(String name, int maxPlayers) {
 
         long teamID = IDGenerator.generateLONGID(IDDataValue.TEAM);
-        RedisManager rm = CoreAPI.get().getRedisManager();
+        RedisManager rm = API.getInstance().getRedisManager();
 
         rm.setRedisString(TeamDataValue.TEAM_NAME_REDIS.getString(teamID), name);
-        rm.setRedisString(TeamDataValue.TEAM_SERVER_REDIS.getString(teamID), CoreAPI.get().getPluginEnabler().getServerName());
+        rm.setRedisString(TeamDataValue.TEAM_SERVER_REDIS.getString(teamID), API.getInstance().getPluginEnabler().getServerName());
         rm.setRedisString(TeamDataValue.TEAM_DISPLAY_NAME_REDIS.getString(teamID), name);
         rm.setRedisLong(TeamDataValue.TEAM_MAXP_REDIS.getString(teamID), Integer.valueOf(maxPlayers).longValue());
 
@@ -59,7 +59,7 @@ public class CTeam implements Team {
 
         rm.getRedisList(TeamDataValue.TEAM_LIST_REDIS.getString(teamID)).add(teamID);
 
-        rm.getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(CoreAPI.get().getServer())).add(teamID);
+        rm.getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(API.getInstance().getServer())).add(teamID);
 
         return new CTeam(teamID);
 
@@ -78,9 +78,9 @@ public class CTeam implements Team {
         setClientSideAvailable(false);
         for (UUID uuid : getListPlayerUUID())
             removePlayer(uuid);
-        CoreAPI.get().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getString(teamID)).remove(getName());
+        API.getInstance().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getString(teamID)).remove(getName());
         TeamDataValue.clearRedisData(DataType.TEAM, getTeamID());
-        CoreAPI.get().getRedisManager().getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(CoreAPI.get().getServer())).remove(getTeamID());
+        API.getInstance().getRedisManager().getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(API.getInstance().getServer())).remove(getTeamID());
     }
 
     /*
@@ -90,43 +90,43 @@ public class CTeam implements Team {
      */
 
     public boolean hisClientSideAvailable() {
-        return CoreAPI.get().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_CS_AV_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_CS_AV_REDIS.getString(getTeamID()));
     }
 
     public void setClientSideAvailable(boolean value) {
 
         if (hisClientSideAvailable() == value) return;
 
-        CoreAPI.get().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_CS_AV_REDIS.getString(getTeamID()), value);
+        API.getInstance().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_CS_AV_REDIS.getString(getTeamID()), value);
         if (value)
-            PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "teamON", getTeamID());
+            PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "teamON", getTeamID());
         else
-            PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "teamOFF", getTeamID());
+            PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "teamOFF", getTeamID());
 
     }
 
     public boolean getHideToOtherTeams() {
-        return CoreAPI.get().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_HIDE_OTHER_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_HIDE_OTHER_REDIS.getString(getTeamID()));
     }
 
     public void setHideToOtherTeams(boolean value) {
 
         if (getHideToOtherTeams() == value) return;
 
-        CoreAPI.get().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_HIDE_OTHER_REDIS.getString(getTeamID()), value);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", getTeamID());
+        API.getInstance().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_HIDE_OTHER_REDIS.getString(getTeamID()), value);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "opChange", getTeamID());
     }
 
     public boolean getCollide() {
-        return CoreAPI.get().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_COLISION_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_COLISION_REDIS.getString(getTeamID()));
     }
 
     public void setCollide(boolean value) {
 
         if (getCollide() == value) return;
 
-        CoreAPI.get().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_COLISION_REDIS.getString(getTeamID()), value);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", getTeamID());
+        API.getInstance().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_COLISION_REDIS.getString(getTeamID()), value);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "opChange", getTeamID());
     }
 
 
@@ -146,48 +146,48 @@ public class CTeam implements Team {
 
 
     public String getDisplayName() {
-        return CoreAPI.get().getRedisManager().getRedisString(TeamDataValue.TEAM_DISPLAY_NAME_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisString(TeamDataValue.TEAM_DISPLAY_NAME_REDIS.getString(getTeamID()));
     }
 
     public void setDisplayName(String dspName) {
-        CoreAPI.get().getRedisManager().setRedisString(TeamDataValue.TEAM_DISPLAY_NAME_REDIS.getString(getTeamID()), dspName);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", getTeamID());
+        API.getInstance().getRedisManager().setRedisString(TeamDataValue.TEAM_DISPLAY_NAME_REDIS.getString(getTeamID()), dspName);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "opChange", getTeamID());
     }
 
 
     public String getPrefix() {
-        return CoreAPI.get().getRedisManager().getRedisString(TeamDataValue.TEAM_PREFIX_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisString(TeamDataValue.TEAM_PREFIX_REDIS.getString(getTeamID()));
     }
 
     public void setPrefix(String prefix) {
-        CoreAPI.get().getRedisManager().setRedisString(TeamDataValue.TEAM_PREFIX_REDIS.getString(getTeamID()), prefix);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", getTeamID());
+        API.getInstance().getRedisManager().setRedisString(TeamDataValue.TEAM_PREFIX_REDIS.getString(getTeamID()), prefix);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "opChange", getTeamID());
     }
 
     public String getSuffix() {
-        return CoreAPI.get().getRedisManager().getRedisString(TeamDataValue.TEAM_SUFFIX_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisString(TeamDataValue.TEAM_SUFFIX_REDIS.getString(getTeamID()));
     }
 
     public void setSuffix(String suffix) {
-        CoreAPI.get().getRedisManager().setRedisString(TeamDataValue.TEAM_SUFFIX_REDIS.getString(getTeamID()), suffix);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", getTeamID());
+        API.getInstance().getRedisManager().setRedisString(TeamDataValue.TEAM_SUFFIX_REDIS.getString(getTeamID()), suffix);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "opChange", getTeamID());
     }
 
 
     public Color getChatColor() {
-        return Color.getByMOTD(CoreAPI.get().getRedisManager().getRedisString(TeamDataValue.TEAM_CHAT_COLOR_REDIS.getString(getTeamID())));
+        return Color.getByMOTD(API.getInstance().getRedisManager().getRedisString(TeamDataValue.TEAM_CHAT_COLOR_REDIS.getString(getTeamID())));
     }
 
     public void setChatColor(Color chatColor) {
-        CoreAPI.get().getRedisManager().setRedisString(TeamDataValue.TEAM_CHAT_COLOR_REDIS.getString(getTeamID()), chatColor.getMOTD());
+        API.getInstance().getRedisManager().setRedisString(TeamDataValue.TEAM_CHAT_COLOR_REDIS.getString(getTeamID()), chatColor.getMOTD());
     }
 
     public Color getColor() {
-        return Color.getByMOTD(CoreAPI.get().getRedisManager().getRedisString(TeamDataValue.TEAM_COLOR_REDIS.getString(getTeamID())));
+        return Color.getByMOTD(API.getInstance().getRedisManager().getRedisString(TeamDataValue.TEAM_COLOR_REDIS.getString(getTeamID())));
     }
 
     public void setColor(Color color) {
-        CoreAPI.get().getRedisManager().setRedisString(TeamDataValue.TEAM_CHAT_COLOR_REDIS.getString(getTeamID()), color.getMOTD());
+        API.getInstance().getRedisManager().setRedisString(TeamDataValue.TEAM_CHAT_COLOR_REDIS.getString(getTeamID()), color.getMOTD());
     }
 
     public String getColoredName() {
@@ -195,15 +195,15 @@ public class CTeam implements Team {
     }
 
     public boolean getFriendlyFire() {
-        return CoreAPI.get().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_FF_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisBoolean(TeamDataValue.TEAM_FF_REDIS.getString(getTeamID()));
     }
 
     public void setFriendlyFire(boolean value) {
 
         if (getFriendlyFire() == value) return;
 
-        CoreAPI.get().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_FF_REDIS.getString(getTeamID()), value);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", getTeamID());
+        API.getInstance().getRedisManager().setRedisBoolean(TeamDataValue.TEAM_FF_REDIS.getString(getTeamID()), value);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "opChange", getTeamID());
     }
 
     /*
@@ -220,13 +220,13 @@ public class CTeam implements Team {
 
     public List<APIPlayer> getPlayers() {
         return new ArrayList<APIPlayer>() {{
-            APIPlayerManager spm = CoreAPI.get().getPlayerManager();
+            APIPlayerManager spm = API.getInstance().getPlayerManager();
             getListPlayerUUIDS().forEach(uuids -> add(spm.getPlayer(UUID.fromString(uuids))));
         }};
     }
 
     public List<String> getListPlayerUUIDS() {
-        return CoreAPI.get().getRedisManager().getRedisList(TeamDataValue.TEAM_PLAYERS_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisList(TeamDataValue.TEAM_PLAYERS_REDIS.getString(getTeamID()));
     }
 
     public List<UUID> getListPlayerUUID() {
@@ -247,8 +247,8 @@ public class CTeam implements Team {
             return false;
 
         getListPlayerUUIDS().add(player.toString());
-        CoreAPI.get().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(teamID)).put(player.toString(), teamID);
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "addp", getTeamID() + teamBalise + player);
+        API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(teamID)).put(player.toString(), teamID);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "addp", getTeamID() + teamBalise + player);
         return true;
 
     }
@@ -258,9 +258,9 @@ public class CTeam implements Team {
         if (!getListPlayerUUIDS().contains(player.toString())) return false;
 
         getListPlayerUUIDS().remove(player.toString());
-        CoreAPI.get().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(teamID)).remove(player.toString());
+        API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(teamID)).remove(player.toString());
 
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "rmp", getTeamID() + teamBalise + player);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rmp", getTeamID() + teamBalise + player);
         return true;
 
     }
@@ -278,11 +278,11 @@ public class CTeam implements Team {
     }
 
     public int getMaxPlayers() {
-        return Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(TeamDataValue.TEAM_MAXP_REDIS.getString(getTeamID()))).intValue();
+        return Long.valueOf(API.getInstance().getRedisManager().getRedisLong(TeamDataValue.TEAM_MAXP_REDIS.getString(getTeamID()))).intValue();
     }
 
     public void setMaxPlayers(int maxPlayers) {
-        CoreAPI.get().getRedisManager().setRedisLong(TeamDataValue.TEAM_MAXP_REDIS.getString(getTeamID()), Integer.valueOf(maxPlayers).longValue());
+        API.getInstance().getRedisManager().setRedisLong(TeamDataValue.TEAM_MAXP_REDIS.getString(getTeamID()), Integer.valueOf(maxPlayers).longValue());
     }
 
     public int getRemainingPlace() {
@@ -307,7 +307,7 @@ public class CTeam implements Team {
     }
 
     public RMap<String, Object> getAttachedMap() {
-        return CoreAPI.get().getRedisManager().getRedisMap(TeamDataValue.TEAM_ATTACHED_REDIS.getString(getTeamID()));
+        return API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_ATTACHED_REDIS.getString(getTeamID()));
     }
 
 }

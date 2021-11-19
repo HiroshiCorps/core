@@ -11,11 +11,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 
 import java.util.UUID;
@@ -32,21 +32,21 @@ public class RCmd extends BrigadierAPI {
         if (!(commandContext.getSource() instanceof Player)) return 1;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        APIPlayer sp = CoreAPI.get().getPlayerManager().getPlayer(playerUUID);
+        APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
 
         if (commandContext.getArguments().size() < 1) {
             TextComponentBuilder.createTextComponent("Merci de faire /r (message)").setColor(Color.RED).sendTo(playerUUID);
             return 1;
         }
 
-        String targetName = CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp));
+        String targetName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp));
 
         if (targetName == null) {
             TextComponentBuilder.createTextComponent("Erreur, vous avez jusque la pas envoyé de message").setColor(Color.RED).sendTo(playerUUID);
             return 1;
         }
 
-        APIPlayer target = CoreAPI.get().getPlayerManager().getPlayer(targetName);
+        APIPlayer target = API.getInstance().getPlayerManager().getPlayer(targetName);
         if (target == null) {
             TextComponentBuilder.createTextComponent("Le joueur: " + targetName + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
             return 1;

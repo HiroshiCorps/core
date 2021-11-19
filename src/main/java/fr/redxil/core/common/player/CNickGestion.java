@@ -7,12 +7,12 @@
 package fr.redxil.core.common.player;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.nick.NickGestion;
 import fr.redxil.api.common.rank.RankList;
-import fr.redxil.core.common.CoreAPI;
 import org.redisson.api.RedissonClient;
 
 public class CNickGestion implements NickGestion {
@@ -23,7 +23,7 @@ public class CNickGestion implements NickGestion {
         /// Empecher l'utilisation du pseudo d'un joueur
         if (isIllegalName(nickData.getName())) return false;
 
-        if (CoreAPI.get().getPlayerManager().getOfflinePlayer(nickData.getName()) != null)
+        if (API.getInstance().getPlayerManager().getOfflinePlayer(nickData.getName()) != null)
             return false;
 
         if (!apiPlayer.hasPermission(nickData.getRank().getRankPower()))
@@ -40,7 +40,7 @@ public class CNickGestion implements NickGestion {
 
         removeNick(apiPlayer);
 
-        RedissonClient redis = CoreAPI.get().getRedisManager().getRedissonClient();
+        RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
         redis.getMapCache("nick/nickToPlayerList").put(nickData.getName(), apiPlayer.getMemberId());
         redis.getMapCache("nick/playerToNickList").put(apiPlayer.getMemberId(), nickData.getName());
         redis.getMapCache("nick/rankList").put(apiPlayer.getMemberId(), nickData.getRank().getRankPower());
@@ -60,7 +60,7 @@ public class CNickGestion implements NickGestion {
 
         long playerID = apiPlayer.getMemberId();
 
-        RedissonClient redis = CoreAPI.get().getRedisManager().getRedissonClient();
+        RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
         redis.getMapCache("nick/nickToPlayerList").remove(nickData.getName());
         redis.getMapCache("nick/playerToNickList").remove(playerID);
         redis.getMapCache("nick/rankList").remove(playerID);
@@ -74,7 +74,7 @@ public class CNickGestion implements NickGestion {
 
     @Override
     public boolean isNickName(String s) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMapCache("nick/nickToPlayerList").containsKey(s);
+        return API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/nickToPlayerList").containsKey(s);
     }
 
     /// Part: nick -> APIPlayer
@@ -82,7 +82,7 @@ public class CNickGestion implements NickGestion {
     public APIOfflinePlayer getAPIOfflinePlayer(String s) {
         Long realID = getRealID(s);
         if (realID == null) return null;
-        return CoreAPI.get().getPlayerManager().getOfflinePlayer(realID);
+        return API.getInstance().getPlayerManager().getOfflinePlayer(realID);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class CNickGestion implements NickGestion {
     @Override
     public Long getRealID(String s) {
         if (!isNickName(s)) return null;
-        return (long) CoreAPI.get().getRedisManager().getRedissonClient().getMapCache("nick/nickToPlayerList").get(s);
+        return (long) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/nickToPlayerList").get(s);
     }
 
     /// Part: APIPlayer -> nick
@@ -106,17 +106,17 @@ public class CNickGestion implements NickGestion {
     public NickData getNickData(APIOfflinePlayer osp) {
         if (!hasNick(osp))
             return new NickData(osp.getName(), osp.getRank());
-        return new NickData((String) CoreAPI.get().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").get(osp.getMemberId()), RankList.getRank((long) CoreAPI.get().getRedisManager().getRedissonClient().getMapCache("nick/rankList").get(osp.getMemberId())));
+        return new NickData((String) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").get(osp.getMemberId()), RankList.getRank((long) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/rankList").get(osp.getMemberId())));
     }
 
     @Override
     public boolean hasNick(APIOfflinePlayer apiPlayer) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").containsKey(apiPlayer.getMemberId());
+        return API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").containsKey(apiPlayer.getMemberId());
     }
 
     public void nickUpdate(APIPlayer apiPlayer) {
 
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "nickChange", apiPlayer.getUUID().toString());
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", apiPlayer.getUUID().toString());
 
     }
 

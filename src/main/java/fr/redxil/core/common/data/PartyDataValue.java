@@ -38,7 +38,7 @@ public enum PartyDataValue {
 
     public static void clearRedisData(DataType dataType) {
 
-        RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
+        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (PartyDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
@@ -49,7 +49,7 @@ public enum PartyDataValue {
 
     public static void clearRedisData(DataType dataType, Long partyID) {
 
-        RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
+        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (PartyDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))

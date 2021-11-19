@@ -11,6 +11,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
@@ -20,7 +21,6 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.api.velocity.Velocity;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class BanCmd extends BrigadierAPI {
                                 format + " pour raison: "
                                 + reason + ".");
 
-                CoreAPI.get().getModeratorManager().sendToModerators(banMessage);
+                API.getInstance().getModeratorManager().sendToModerators(banMessage);
 
                 Optional<Player> onlinePlayerOptional = Velocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
 
@@ -80,7 +80,7 @@ public class BanCmd extends BrigadierAPI {
         if (!(commandContext.getSource() instanceof Player)) return 1;
 
         Player player = (Player) commandContext.getSource();
-        APIPlayerModerator APIPlayerModAuthor = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
+        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
 
         if (APIPlayerModAuthor == null) {
@@ -96,7 +96,7 @@ public class BanCmd extends BrigadierAPI {
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(targetArgs);
+        APIOfflinePlayer apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)

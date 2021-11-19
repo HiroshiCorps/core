@@ -6,13 +6,13 @@
 
 package fr.redxil.core.paper.event;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.spigot.inventory.InventoryGUI;
 import fr.redxil.api.spigot.itemstack.APIItemStack;
 import fr.redxil.api.spigot.itemstack.GlobalAction;
 import fr.redxil.api.spigot.itemstack.InvItemAction;
 import fr.redxil.api.spigot.itemstack.OFFInvItemAction;
-import fr.redxil.core.common.CoreAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -90,7 +90,7 @@ public class INVEventListener implements Listener {
     @EventHandler
     public void playerInteract(PlayerInteractEvent event) {
 
-        APIPlayer player = CoreAPI.get().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        APIPlayer player = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         if (player == null) return;
         if (player.isFreeze()) {
             event.setCancelled(true);

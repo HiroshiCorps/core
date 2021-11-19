@@ -56,7 +56,7 @@ public enum ServerDataValue {
 
     public static void clearRedisData(DataType dataType, String serverName, Long serverID) {
 
-        RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
+        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (ServerDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))

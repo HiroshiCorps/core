@@ -13,6 +13,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
@@ -53,8 +54,6 @@ import java.util.logging.Level;
 public class CoreVelocity extends Velocity implements PluginEnabler {
 
     private static CoreVelocity instance;
-    JoinListener joinListener;
-    IpInfo ipInfo;
 
     public CoreVelocity() {
         super();
@@ -62,15 +61,17 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
-        if (CoreAPI.get().isEnabled()) {
+        if (API.getInstance().isEnabled()) {
             registerEvents();
             registerCommands();
             checkCrash();
         }
     }
 
-    static void enableCore() {
-        new CoreVelocity();
+    IpInfo ipInfo;
+
+    public static CoreVelocity getInstance() {
+        return instance;
     }
 
     public void checkCrash() {
@@ -79,7 +80,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         for (Player player : getProxyServer().getAllPlayers())
             player.disconnect((Component) TextComponentBuilder.createTextComponent("Error"));
 
-        Server server = CoreAPI.get().getServer();
+        Server server = API.getInstance().getServer();
         String serverName = server.getServerName();
 
         Collection<UUID> playerUUIDList = server.getPlayerUUIDList();
@@ -89,7 +90,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         for (UUID playerUUID : playerUUIDList) {
 
             server.removePlayerInServer(playerUUID);
-            APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(playerUUID);
+            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(playerUUID);
 
             if (apiPlayer != null)
 
@@ -108,19 +109,13 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     }
 
-    public static CoreVelocity getInstance() {
-        return instance;
-    }
-
     @Override
     public ProxyServer getProxyServer() {
         return VelocityEnabler.getInstance().getProxyServer();
     }
 
     public void registerEvents() {
-        this.joinListener = new JoinListener();
-
-        getProxyServer().getEventManager().register(this, this.joinListener);
+        getProxyServer().getEventManager().register(this, new JoinListener());
         getProxyServer().getEventManager().register(this, new PlayerListener());
         new PlayerSwitchListener();
         new UpdaterReceiver();
@@ -128,7 +123,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     @Override
     public void registerCommands() {
-        if (CoreAPI.get().isEnabled()) {
+        if (API.getInstance().isEnabled()) {
 
             CommandManager cm = VelocityEnabler.getInstance().getCommandManager();
 
@@ -166,7 +161,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     }
 
     public void onDisable() {
-        CoreAPI.get().shutdown();
+        API.getInstance().shutdown();
     }
 
     @Override

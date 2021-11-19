@@ -6,8 +6,8 @@
 
 package fr.redxil.core.paper.cmd;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -21,7 +21,7 @@ public class VanishCmd implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (!(commandSender instanceof Player)) return false;
 
-        APIPlayerModerator mod = CoreAPI.get().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
+        APIPlayerModerator mod = API.getInstance().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
         if (mod == null)
             return false;
         String message;

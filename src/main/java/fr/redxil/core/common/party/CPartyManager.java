@@ -6,10 +6,10 @@
 
 package fr.redxil.core.common.party;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PartyDataValue;
 
 public class CPartyManager implements PartyManager {
@@ -23,7 +23,7 @@ public class CPartyManager implements PartyManager {
     @Override
     public Party getParty(APIPlayer apiPlayer) {
         if (!hasParty(apiPlayer)) return null;
-        return getParty((long) CoreAPI.get().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERMAP_REDIS.getString()).get(apiPlayer.getName()));
+        return getParty((long) API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERMAP_REDIS.getString()).get(apiPlayer.getName()));
     }
 
     @Override
@@ -34,12 +34,12 @@ public class CPartyManager implements PartyManager {
 
     @Override
     public boolean hasParty(APIPlayer apiPlayer) {
-        return CoreAPI.get().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERMAP_REDIS.getString()).containsKey(apiPlayer.getName());
+        return API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERMAP_REDIS.getString()).containsKey(apiPlayer.getName());
     }
 
     @Override
     public boolean hasParty(long l) {
-        return CoreAPI.get().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERMAP_REDIS.getString()).containsValue(l);
+        return API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERMAP_REDIS.getString()).containsValue(l);
     }
 
     @Override

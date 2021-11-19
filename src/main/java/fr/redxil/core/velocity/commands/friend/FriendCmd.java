@@ -11,12 +11,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.TextComponent;
 
@@ -103,8 +103,8 @@ public class FriendCmd extends BrigadierAPI {
 
     public void inviteCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
             TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
             return;
@@ -117,8 +117,8 @@ public class FriendCmd extends BrigadierAPI {
 
     public int acceptCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
             TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
             return 1;
@@ -132,8 +132,8 @@ public class FriendCmd extends BrigadierAPI {
 
     public int refuseCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
             TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
             return 1;
@@ -147,8 +147,8 @@ public class FriendCmd extends BrigadierAPI {
 
     public int revokeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
             TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
             return 1;
@@ -162,8 +162,8 @@ public class FriendCmd extends BrigadierAPI {
     }
 
     public int removeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(argument);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target == null) {
             TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
             return 1;
@@ -177,7 +177,7 @@ public class FriendCmd extends BrigadierAPI {
 
     public int listCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         List<String> amisList = apiPlayer.getFriendList();
 
         if (amisList.size() == 0) {
@@ -190,7 +190,7 @@ public class FriendCmd extends BrigadierAPI {
         for (String ami : amisList) {
             String connect = "Déconnecté";
             Color bc = Color.RED;
-            if (CoreAPI.get().getPlayerManager().isLoadedPlayer(ami)) {
+            if (API.getInstance().getPlayerManager().isLoadedPlayer(ami)) {
                 connect = "Connecté";
                 bc = Color.GREEN;
             }

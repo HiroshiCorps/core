@@ -11,6 +11,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
@@ -19,7 +20,6 @@ import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.TextComponent;
 
@@ -118,8 +118,8 @@ public class PartyCmd extends BrigadierAPI {
     }
 
     public int createCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
-        PartyManager partyManager = CoreAPI.get().getPartyManager();
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        PartyManager partyManager = API.getInstance().getPartyManager();
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (partyManager.createParty(apiPlayer) != null) {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous venez de creer une partie.").setColor(Color.GREEN)).getFinalTextComponent()
@@ -137,8 +137,8 @@ public class PartyCmd extends BrigadierAPI {
 
 
     public int leaveCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
-        PartyManager partyManager = CoreAPI.get().getPartyManager();
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        PartyManager partyManager = API.getInstance().getPartyManager();
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
 
         if (!partyManager.hasParty(apiPlayer)) {
             player.sendMessage(
@@ -157,8 +157,8 @@ public class PartyCmd extends BrigadierAPI {
 
 
     public int listCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
-        PartyManager partyManager = CoreAPI.get().getPartyManager();
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        PartyManager partyManager = API.getInstance().getPartyManager();
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (!partyManager.hasParty(apiPlayer)) {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être dans une partie pour faire ceci.")).getFinalTextComponent()
@@ -189,14 +189,14 @@ public class PartyCmd extends BrigadierAPI {
 
 
     public int joinCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
-        APIPlayer owner = CoreAPI.get().getPlayerManager().getPlayer(subArgument);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        APIPlayer owner = API.getInstance().getPlayerManager().getPlayer(subArgument);
         if (owner == null) {
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'existe pas")).getFinalTextComponent());
             return 1;
         }
 
-        Party party = CoreAPI.get().getPartyManager().getParty(owner);
+        Party party = API.getInstance().getPartyManager().getParty(owner);
         if (party == null) {
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'a pas de partie")).getFinalTextComponent());
             return 1;
@@ -220,8 +220,8 @@ public class PartyCmd extends BrigadierAPI {
 
 
     public int inviteCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
-        PartyManager partyManager = CoreAPI.get().getPartyManager();
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        PartyManager partyManager = API.getInstance().getPartyManager();
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
 
         if (!partyManager.hasParty(apiPlayer)) {
             player.sendMessage(
@@ -237,7 +237,7 @@ public class PartyCmd extends BrigadierAPI {
             return 1;
         }
 
-        APIPlayer targetPlayer = CoreAPI.get().getPlayerManager().getPlayer(subArgument);
+        APIPlayer targetPlayer = API.getInstance().getPlayerManager().getPlayer(subArgument);
 
         if (partyManager.hasParty(targetPlayer)) {
             player.sendMessage(

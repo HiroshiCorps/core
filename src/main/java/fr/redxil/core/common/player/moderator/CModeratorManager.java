@@ -6,11 +6,11 @@
 
 package fr.redxil.core.common.player.moderator;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ModeratorDataValue;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public APIPlayerModerator getModerator(String s) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(s);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(s);
         if (apiPlayer == null) return null;
         return getModerator(apiPlayer);
     }
@@ -74,7 +74,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public APIPlayerModerator getModerator(UUID uuid) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(uuid);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
         if (apiPlayer == null) return null;
         return getModerator(apiPlayer.getMemberId());
     }
@@ -87,7 +87,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Collection<Long> getLoadedModerator() {
-        List<Long> moderatorString = CoreAPI.get().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString(null));
+        List<Long> moderatorString = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString(null));
         return new ArrayList<Long>() {{
             for (long longS : moderatorString)
                 add(longS);
@@ -122,7 +122,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(UUID uuid) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(uuid);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
         if (apiPlayer == null) return false;
         return isModerator(apiPlayer);
     }
@@ -136,7 +136,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(long memberId) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(memberId);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberId);
         if (apiPlayer == null) return false;
         return isModerator(apiPlayer);
     }
@@ -150,14 +150,14 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(String name) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(name);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(name);
         if (apiPlayer == null) return false;
         return isModerator(apiPlayer);
     }
 
     @Override
     public boolean isLoaded(long memberId) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString(null)).contains(memberId);
+        return API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString(null)).contains(memberId);
     }
 
 }

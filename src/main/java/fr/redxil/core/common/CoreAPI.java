@@ -121,7 +121,7 @@ public class CoreAPI extends API {
     }
 
     public static CoreAPI getInstance() {
-        return (CoreAPI) API.get();
+        return (CoreAPI) API.getInstance();
     }
 
     @Override

@@ -37,7 +37,7 @@ public class SQLModels<T extends SQLModel> {
 
     public void get(T model, int primaryKey) {
         assert model != null;
-        API.get().getSQLConnection().query("SELECT * FROM " + model.getTable()
+        API.getInstance().getSQLConnection().query("SELECT * FROM " + model.getTable()
                 + " WHERE " + model.getPrimaryKey() + " = " + primaryKey, resultSet -> {
             try {
                 if (resultSet.first()) {
@@ -60,7 +60,7 @@ public class SQLModels<T extends SQLModel> {
         try {
             T model = this.method.newInstance();
 
-            API.get().getSQLConnection().query("SELECT * FROM " + model.getTable() + (query != null ? " " + query : ""),
+            API.getInstance().getSQLConnection().query("SELECT * FROM " + model.getTable() + (query != null ? " " + query : ""),
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
@@ -150,7 +150,7 @@ public class SQLModels<T extends SQLModel> {
 
             String queryString = "DELETE FROM " + model.getTable() + " " + query;
             this.logs.info(queryString);
-            API.get().getSQLConnection().execute(queryString, vars);
+            API.getInstance().getSQLConnection().execute(queryString, vars);
         } catch (Exception ignored) {
         }
     }
@@ -197,7 +197,7 @@ public class SQLModels<T extends SQLModel> {
 
         this.logs.info(query);
 
-        API.get().getSQLConnection().execute(query);
+        API.getInstance().getSQLConnection().execute(query);
 
     }
 

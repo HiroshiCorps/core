@@ -6,6 +6,7 @@
 
 package fr.redxil.core.common.player.moderator;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
@@ -15,7 +16,6 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
@@ -40,7 +40,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         Long memberID = apiPlayer.getMemberId();
 
-        if (!CoreAPI.get().getModeratorManager().isModerator(memberID)) return null;
+        if (!API.getInstance().getModeratorManager().isModerator(memberID)) return null;
 
         ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID.intValue());
@@ -48,7 +48,7 @@ public class CPlayerModerator implements APIPlayerModerator {
             this.put(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null), Boolean.valueOf(false).toString());
         }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID.intValue());
 
-        RedisManager rm = CoreAPI.get().getRedisManager();
+        RedisManager rm = API.getInstance().getRedisManager();
 
         rm.setRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(null, memberID), apiPlayer.getName());
         rm.setRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(null, memberID), model.getString(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null)));
@@ -71,17 +71,17 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public String getCible() {
-        return CoreAPI.get().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this));
     }
 
     @Override
     public void setCible(String s) {
-        CoreAPI.get().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this), s);
+        API.getInstance().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this), s);
     }
 
     @Override
     public boolean isVanish() {
-        String bool = CoreAPI.get().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_VANISH_REDIS.getString(this));
+        String bool = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_VANISH_REDIS.getString(this));
         if (bool == null)
             return false;
         else
@@ -103,7 +103,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
                 TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("\nSanction n°§r§6" + (sanctionInfos.size() - i) + ":");
                 tcb.appendNewComponentBuilder("\n§r     §7Sanction ID: §d" + sanction.getSanctionID());
-                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + CoreAPI.get().getPlayerManager().getOfflinePlayer(sanction.getAuthorID()).getName());
+                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + API.getInstance().getPlayerManager().getOfflinePlayer(sanction.getAuthorID()).getName());
                 tcb.appendNewComponentBuilder("\n§r     §7Le: §d" + DateUtility.getMessage(sanction.getSanctionDateTS()));
                 tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS()));
                 tcb.appendNewComponentBuilder("\n§r     §7Pour: §d" + sanction.getReason());
@@ -111,7 +111,7 @@ public class CPlayerModerator implements APIPlayerModerator {
                 String cancelledString = "§aPas cancel";
                 Long longID = sanction.getCanceller();
                 if (longID != null)
-                    cancelledString = CoreAPI.get().getPlayerManager().getOfflinePlayer(sanction.getCanceller()).getName();
+                    cancelledString = API.getInstance().getPlayerManager().getOfflinePlayer(sanction.getCanceller()).getName();
 
                 tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
 
@@ -134,13 +134,13 @@ public class CPlayerModerator implements APIPlayerModerator {
         String connectedMsg = "§c✘", server = null;
         if (apiOfflinePlayer.isConnected()) {
             connectedMsg = "§a✓";
-            server = CoreAPI.get().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberId()).getServer().getServerName();
+            server = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberId()).getServer().getServerName();
         }
 
         tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
 
-        if (CoreAPI.get().getNickGestion().hasNick(apiOfflinePlayer)) {
-            tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + CoreAPI.get().getNickGestion().getNickData(apiOfflinePlayer).getName() + "§r\n");
+        if (API.getInstance().getNickGestion().hasNick(apiOfflinePlayer)) {
+            tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + API.getInstance().getNickGestion().getNickData(apiOfflinePlayer).getName() + "§r\n");
         }
 
         tcb.appendNewComponentBuilder("§7→ §rRank§7・" + apiOfflinePlayer.getRank().getRankName() + "§r\n");
@@ -150,7 +150,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         String ip = Color.RED + "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer)
-            ip = String.valueOf(CoreAPI.get().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiOfflinePlayer).getIpInfo().getIp()).size() - 1);
+            ip = String.valueOf(API.getInstance().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiOfflinePlayer).getIpInfo().getIp()).size() - 1);
 
         tcb.appendNewComponentBuilder("§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n");
 
@@ -173,12 +173,12 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public String getName() {
-        return CoreAPI.get().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(this));
     }
 
     @Override
     public boolean isModeratorMod() {
-        String bool = CoreAPI.get().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(this));
+        String bool = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(this));
         if (bool == null)
             return false;
         else
@@ -187,7 +187,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public APIPlayer getAPIPlayer() {
-        return CoreAPI.get().getPlayerManager().getPlayer(getMemberId());
+        return API.getInstance().getPlayerManager().getPlayer(getMemberId());
     }
 
     /**
@@ -201,7 +201,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public void disconnectModerator() {
-        if (!CoreAPI.get().isBungee()) return;
+        if (!API.getInstance().isBungee()) return;
 
         long memberID = this.memberID;
 
@@ -213,7 +213,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         ModeratorDataValue.clearRedisData(DataType.PLAYER, this);
 
-        CoreAPI.get().getRedisManager().getRedisList(ModeratorDataValue.LIST_MODERATOR.getString(null)).remove(memberID);
+        API.getInstance().getRedisManager().getRedisList(ModeratorDataValue.LIST_MODERATOR.getString(null)).remove(memberID);
     }
 
     @Override
@@ -227,7 +227,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public UUID getUUID() {
-        String uuid = CoreAPI.get().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_UUID_REDIS.getString(this));
+        String uuid = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_UUID_REDIS.getString(this));
         if (uuid == null) return null;
         return UUID.fromString(uuid);
     }

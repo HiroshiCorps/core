@@ -8,18 +8,18 @@ package fr.redxil.core.common.pmsListener;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
-import fr.redxil.core.common.CoreAPI;
+import fr.redxil.api.common.API;
 
 public class ShutdownOrderListener implements PMReceiver {
 
     public ShutdownOrderListener() {
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "shutdownOrder", String.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", String.class, this);
     }
 
     @Override
     public void pluginMessageReceived(String title, Object message) {
 
-        CoreAPI.get().getPluginEnabler().shutdownServer("Shutdown Order from server: " + message.toString());
+        API.getInstance().getPluginEnabler().shutdownServer("Shutdown Order from server: " + message.toString());
 
     }
 

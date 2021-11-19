@@ -14,6 +14,7 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
@@ -36,24 +37,24 @@ public class JoinListener {
     public APIPlayer loadPlayer(Player player) {
         String[] splittedIP = player.getRemoteAddress().toString().split(":");
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().loadPlayer(
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().loadPlayer(
                 player.getUsername(),
                 player.getUniqueId(),
                 new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
         );
 
-        APIOfflinePlayer nicked = CoreAPI.get().getNickGestion().getAPIOfflinePlayer(player.getUsername());
+        APIOfflinePlayer nicked = API.getInstance().getNickGestion().getAPIOfflinePlayer(player.getUsername());
         if (nicked != null)
-            CoreAPI.get().getNickGestion().removeNick(nicked);
+            API.getInstance().getNickGestion().removeNick(nicked);
 
-        CoreAPI.get().getModeratorManager().loadModerator(apiPlayer);
+        API.getInstance().getModeratorManager().loadModerator(apiPlayer);
 
         return apiPlayer;
 
     }
 
     public RegisteredServer getServer(APIPlayer apiPlayer) {
-        Collection<Server> serverList = CoreAPI.get().getServerManager().getListServer(ServerType.HUB);
+        Collection<Server> serverList = API.getInstance().getServerManager().getListServer(ServerType.HUB);
         if (serverList.isEmpty()) return null;
 
         Server server = null;
@@ -87,7 +88,7 @@ public class JoinListener {
 
         Player player = e.getPlayer();
 
-        if (CoreAPI.get().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
+        if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
             player.disconnect((Component) TextComponentBuilder.createTextComponent(
                     "§4§lSERVER NETWORK§r\n"
                             + "§cConnexion non autorisé§r\n\n"
@@ -97,7 +98,7 @@ public class JoinListener {
         }
 
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
-            if (CoreAPI.get().getPlayerManager().isLoadedPlayer(player.getUsername())) {
+            if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUsername())) {
                 player.disconnect((Component) TextComponentBuilder.createTextComponent(
                         "§4§lSERVER NETWORK§r\n"
                                 + "§cConnexion non autorisé§r\n\n"
@@ -108,11 +109,11 @@ public class JoinListener {
 
         APIOfflinePlayer apiOfflinePlayer;
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK) {
-            apiOfflinePlayer = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUsername());
-            APIOfflinePlayer previousWithUUID = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUniqueId());
+            apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername());
+            APIOfflinePlayer previousWithUUID = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
             if (previousWithUUID != null)
                 previousWithUUID.setUUID(null);
-        } else apiOfflinePlayer = CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUniqueId());
+        } else apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
         if (apiOfflinePlayer != null) {
 
@@ -134,27 +135,27 @@ public class JoinListener {
     public void onPlayerDisconnect(DisconnectEvent e) {
 
         Player player = e.getPlayer();
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(
                 player.getUniqueId()
         );
 
         if (apiPlayer == null) return;
 
-        Long moderatorId = (Long) CoreAPI.get().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
-        CoreAPI.get().getServer().removePlayerInServer(player.getUniqueId());
+        Long moderatorId = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
+        API.getInstance().getServer().removePlayerInServer(player.getUniqueId());
         apiPlayer.unloadPlayer();
 
         if (moderatorId != null)
-            BanCmd.banPlayer(CoreAPI.get().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", CoreAPI.get().getModeratorManager().getModerator(moderatorId), "{Core} Déconnexion en inspection");
+            BanCmd.banPlayer(API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", API.getInstance().getModeratorManager().getModerator(moderatorId), "{Core} Déconnexion en inspection");
 
     }
 
     @Subscribe
     public void connection(PreLoginEvent event) {
-        if (CoreAPI.get().getNickGestion().isIllegalName(event.getUsername())) {
+        if (API.getInstance().getNickGestion().isIllegalName(event.getUsername())) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected")));
         }
-        if (CoreAPI.get().getServer().getServerStatus() != ServerStatus.ONLINE) {
+        if (API.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Connection refusée")));
         }
     }
@@ -162,8 +163,8 @@ public class JoinListener {
     @Subscribe
     public void serverConnect(ServerPreConnectEvent event) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-        Server server = CoreAPI.get().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        Server server = API.getInstance().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
 
         if (apiPlayer.getServer() != null) {
             if (apiPlayer.isFreeze() || !apiPlayer.isLogin()) {

@@ -11,13 +11,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 
 public class ShutdownCmd extends BrigadierAPI {
 
@@ -29,7 +29,7 @@ public class ShutdownCmd extends BrigadierAPI {
     @Override
     public int execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (!apiPlayer.hasPermission(RankList.DEVELOPPEUR.getRankPower())) {
             return 1;
         }
@@ -39,7 +39,7 @@ public class ShutdownCmd extends BrigadierAPI {
             return 1;
         }
 
-        Server server = CoreAPI.get().getServerManager().getServer(commandContext.getArgument("server", String.class));
+        Server server = API.getInstance().getServerManager().getServer(commandContext.getArgument("server", String.class));
         if (server == null) {
             TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer);
             return 1;

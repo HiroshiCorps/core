@@ -6,12 +6,12 @@
 
 package fr.redxil.core.paper.moderatormode;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.spigot.event.PlayerJoinModerationEvent;
 import fr.redxil.api.spigot.event.PlayerQuitModerationEvent;
 import fr.redxil.api.spigot.utils.ModeratorTools;
 import fr.redxil.api.spigot.utils.Title;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ModeratorDataValue;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,7 +20,7 @@ public class ModeratorMain {
 
     public void setModerator(APIPlayerModerator APIPlayerModerator, boolean b, boolean onConnection) {
 
-        CoreAPI.get().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(APIPlayerModerator), Boolean.valueOf(b).toString());
+        API.getInstance().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(APIPlayerModerator), Boolean.valueOf(b).toString());
 
         Player player = Bukkit.getPlayer(APIPlayerModerator.getUUID());
         player.getInventory().clear();

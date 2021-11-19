@@ -6,9 +6,9 @@
 
 package fr.redxil.core.paper.cmd;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -22,7 +22,7 @@ public class FreezeCmd implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (!(commandSender instanceof Player)) return false;
 
-        APIPlayerModerator mod = CoreAPI.get().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
+        APIPlayerModerator mod = API.getInstance().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
         if (mod == null)
             return false;
 
@@ -31,13 +31,13 @@ public class FreezeCmd implements CommandExecutor {
             return true;
         }
 
-        APIPlayer target = CoreAPI.get().getPlayerManager().getPlayer(args[0]);
+        APIPlayer target = API.getInstance().getPlayerManager().getPlayer(args[0]);
         if (target == null) {
             commandSender.sendMessage(ChatColor.RED + "Joueur: " + args[0] + " introuvable");
             return true;
         }
 
-        if (!target.getServer().getServerName().equals(CoreAPI.get().getPluginEnabler().getServerName())) {
+        if (!target.getServer().getServerName().equals(API.getInstance().getPluginEnabler().getServerName())) {
 
             commandSender.sendMessage(ChatColor.RED + "Impossible d'interargir avec la cible, server different: " + target.getServer().getServerName());
             return true;

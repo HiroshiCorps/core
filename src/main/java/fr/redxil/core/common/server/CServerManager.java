@@ -7,10 +7,10 @@
 package fr.redxil.core.common.server;
 
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.ServerDataValue;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class CServerManager implements ServerManager {
     @Override
     public List<String> getListServerName() {
         return new ArrayList<String>() {{
-            for (Object serverName : CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).keySet())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).keySet())
                 add((String) serverName);
         }};
     }
@@ -29,7 +29,7 @@ public class CServerManager implements ServerManager {
     @Override
     public List<Long> getListServerID() {
         return new ArrayList<Long>() {{
-            for (Object serverName : CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).values())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).values())
                 add((long) serverName);
         }};
     }
@@ -57,17 +57,17 @@ public class CServerManager implements ServerManager {
     @Override
     public boolean isServerExist(String s) {
         if (s == null) return false;
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsKey(s);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsKey(s);
     }
 
     @Override
     public boolean isServerExist(long l) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsValue(l);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsValue(l);
     }
 
     @Override
     public Server getServer(String s) {
-        return getServer((long) CoreAPI.get().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(s));
+        return getServer((long) API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(s));
     }
 
     @Override

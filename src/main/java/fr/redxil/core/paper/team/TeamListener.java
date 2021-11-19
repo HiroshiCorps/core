@@ -8,11 +8,11 @@ package fr.redxil.core.paper.team;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.team.Team;
 import fr.redxil.api.spigot.minigame.GameBuilder;
 import fr.redxil.api.spigot.utils.Reflection;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.game.team.CTeam;
 import net.minecraft.server.v1_12_R1.ChatComponentText;
 import net.minecraft.server.v1_12_R1.PacketPlayOutScoreboardTeam;
@@ -32,12 +32,12 @@ import java.util.UUID;
 public class TeamListener implements PMReceiver, Listener {
 
     public TeamListener() {
-        Bukkit.getPluginManager().registerEvents(this, (JavaPlugin) CoreAPI.get().getPluginEnabler());
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "teamON", Long.class, this);
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "teamOFF", Long.class, this);
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "opChange", Long.class, this);
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "addp", String.class, this);
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "rmp", String.class, this);
+        Bukkit.getPluginManager().registerEvents(this, (JavaPlugin) API.getInstance().getPluginEnabler());
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "teamON", Long.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "teamOFF", Long.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "opChange", Long.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "addp", String.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "rmp", String.class, this);
     }
 
     public static void sendPacketToAll(PacketPlayOutScoreboardTeam ppost) {
@@ -53,33 +53,33 @@ public class TeamListener implements PMReceiver, Listener {
         switch (s) {
 
             case "teamON": {
-                Team team = CoreAPI.get().getTeamManager().getTeam((Long) o);
+                Team team = API.getInstance().getTeamManager().getTeam((Long) o);
                 sendPacketToAll(makePacket(team, team.getListPlayerName(true), 0));
                 break;
             }
 
             case "teamOFF": {
-                Team team = CoreAPI.get().getTeamManager().getTeam((Long) o);
+                Team team = API.getInstance().getTeamManager().getTeam((Long) o);
                 sendPacketToAll(makePacket(team, null, 1));
                 break;
             }
 
             case "opChange": {
-                Team team = CoreAPI.get().getTeamManager().getTeam((Long) o);
+                Team team = API.getInstance().getTeamManager().getTeam((Long) o);
                 sendPacketToAll(makePacket(team, null, 2));
                 break;
             }
 
             case "addp": {
                 String[] split = ((String) o).split(CTeam.teamBalise);
-                Team team = CoreAPI.get().getTeamManager().getTeam(Long.parseLong(split[0]));
+                Team team = API.getInstance().getTeamManager().getTeam(Long.parseLong(split[0]));
                 sendPacketToAll(makePacket(team, Collections.singletonList(Bukkit.getPlayer(UUID.fromString(split[1])).getName()), 3));
                 break;
             }
 
             case "rmp": {
                 String[] split = ((String) o).split(CTeam.teamBalise);
-                Team team = CoreAPI.get().getTeamManager().getTeam(Long.parseLong(split[0]));
+                Team team = API.getInstance().getTeamManager().getTeam(Long.parseLong(split[0]));
                 sendPacketToAll(makePacket(team, Collections.singletonList(Bukkit.getPlayer(UUID.fromString(split[1])).getName()), 4));
                 break;
             }
@@ -125,8 +125,8 @@ public class TeamListener implements PMReceiver, Listener {
     public void playerJoin(PlayerJoinEvent joinEvent) {
 
         Player player = joinEvent.getPlayer();
-        for (Long teamID : CoreAPI.get().getServer().getTeamLinked()) {
-            Team team = CoreAPI.get().getTeamManager().getTeam(teamID);
+        for (Long teamID : API.getInstance().getServer().getTeamLinked()) {
+            Team team = API.getInstance().getTeamManager().getTeam(teamID);
             PacketPlayOutScoreboardTeam packet = makePacket(team, team.getListPlayerName(true), 0);
             if (packet == null) continue;
             Reflection.sendPacket(player, packet);

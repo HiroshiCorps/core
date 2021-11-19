@@ -7,10 +7,10 @@
 package fr.redxil.core.common.player;
 
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.player.PlayerModel;
@@ -29,9 +29,9 @@ public class CPlayerManager implements APIPlayerManager {
 
     public APIPlayer getPlayer(String name) {
         if (!isLoadedPlayer(name)) {
-            return CoreAPI.get().getNickGestion().getAPIPlayer(name);
+            return API.getInstance().getNickGestion().getAPIPlayer(name);
         }
-        return getPlayer((long) CoreAPI.get().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString(null)).get(name));
+        return getPlayer((long) API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString(null)).get(name));
     }
 
     /**
@@ -46,7 +46,7 @@ public class CPlayerManager implements APIPlayerManager {
         if (!isLoadedPlayer(uuid)) {
             return null;
         }
-        return getPlayer((long) CoreAPI.get().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString(null)).get(uuid.toString()));
+        return getPlayer((long) API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString(null)).get(uuid.toString()));
     }
 
     /**
@@ -77,7 +77,7 @@ public class CPlayerManager implements APIPlayerManager {
         if (apiPlayer != null) return apiPlayer;
 
         if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid) == null)
-            return CoreAPI.get().getNickGestion().getAPIOfflinePlayer(uuid.toString());
+            return API.getInstance().getNickGestion().getAPIOfflinePlayer(uuid.toString());
         return new CPlayerOffline(uuid);
     }
 
@@ -94,7 +94,7 @@ public class CPlayerManager implements APIPlayerManager {
         if (apiPlayer != null) return apiPlayer;
 
         if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name) == null)
-            return CoreAPI.get().getNickGestion().getAPIOfflinePlayer(name);
+            return API.getInstance().getNickGestion().getAPIOfflinePlayer(name);
         return new CPlayerOffline(name);
     }
 
@@ -123,22 +123,22 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public boolean isLoadedPlayer(String p) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString(null)).containsKey(p);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString(null)).containsKey(p);
     }
 
     @Override
     public boolean isLoadedPlayer(long l) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null)).contains(l);
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null)).contains(l);
     }
 
     @Override
     public boolean isLoadedPlayer(UUID uuid) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString(null)).containsKey(uuid.toString());
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString(null)).containsKey(uuid.toString());
     }
 
     @Override
     public List<Long> getLoadedPlayer() {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null));
     }
 
 }

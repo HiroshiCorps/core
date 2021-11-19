@@ -87,10 +87,10 @@ public abstract class SQLModel {
             return;
         }
         if (value == null) {
-            API.get().getSQLConnection().asyncExecute("UPDATE " + this.table
+            API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
                     + " SET " + columnName + " = NULL WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
         } else {
-            API.get().getSQLConnection().asyncExecute("UPDATE " + this.table
+            API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
                     + " SET " + columnName + " = ? WHERE " + this.primaryKey + " = ?", value, this.getInt(this.primaryKey));
         }
     }
@@ -101,12 +101,12 @@ public abstract class SQLModel {
         }
         this.columns.put(columnName, value);
         if (value == null) {
-            API.get().getSQLConnection().execute("UPDATE " + this.table
+            API.getInstance().getSQLConnection().execute("UPDATE " + this.table
                     + " SET " + columnName + " = NULL WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
         } else {
             System.out.println("UPDATE " + this.table
                     + " SET " + columnName + " = " + value + " WHERE " + this.primaryKey + " = " + this.getInt(this.primaryKey));
-            API.get().getSQLConnection().execute("UPDATE " + this.table
+            API.getInstance().getSQLConnection().execute("UPDATE " + this.table
                     + " SET " + columnName + " = ? WHERE " + this.primaryKey + " = ?", value, this.getInt(this.primaryKey));
         }
     }
@@ -119,7 +119,7 @@ public abstract class SQLModel {
             return;
         }
         this.columns.put(columnName, this.getInt(columnName) + add);
-        API.get().getSQLConnection().asyncExecute("UPDATE " + this.table
+        API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
                 + " SET " + columnName + " = " + columnName + " + " + add
                 + " WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
     }
@@ -132,7 +132,7 @@ public abstract class SQLModel {
             return;
         }
         this.columns.put(columnName, this.getInt(columnName) - sub);
-        API.get().getSQLConnection().asyncExecute("UPDATE " + this.table
+        API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
                 + " SET " + columnName + " = " + columnName + " - " + sub
                 + " WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
     }

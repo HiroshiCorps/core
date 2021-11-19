@@ -12,6 +12,7 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
@@ -23,7 +24,6 @@ import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.velocity.Velocity;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class PlayerListener {
     @Subscribe
     public void playerMessage(PlayerChatEvent chatEvent) {
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(chatEvent.getPlayer().getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(chatEvent.getPlayer().getUniqueId());
         if (apiPlayer == null) return;
 
         String[] message = chatEvent.getMessage().split(" ");
@@ -60,7 +60,7 @@ public class PlayerListener {
             return;
         }
 
-        APIPlayerModerator APIPlayerModerator = CoreAPI.get().getModeratorManager().getModerator(apiPlayer.getMemberId());
+        APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberId());
 
         if (APIPlayerModerator != null && message[0].startsWith("!s")) {
             String newMessage = chatEvent.getMessage().replace("!s", "");
@@ -92,7 +92,7 @@ public class PlayerListener {
     }
 
     public RegisteredServer getServer() {
-        Collection<Server> ServerList = CoreAPI.get().getServerManager().getListServer(ServerType.HUB);
+        Collection<Server> ServerList = API.getInstance().getServerManager().getListServer(ServerType.HUB);
         if (ServerList.isEmpty()) return null;
 
         Server server = null;

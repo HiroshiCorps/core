@@ -15,15 +15,15 @@ import fr.redxil.core.common.data.IDDataValue;
 public class IDGenerator {
 
     public static int generateINTID(IDDataValue idv) {
-        return (int) API.get().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
+        return (int) API.getInstance().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
     }
 
     public static long generateLONGID(IDDataValue idv) {
-        return API.get().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
+        return API.getInstance().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
     }
 
     public static void resetID(IDDataValue idv) {
-        API.get().getRedisManager().getRedissonClient().getBucket(idv.getLocation()).delete();
+        API.getInstance().getRedisManager().getRedissonClient().getBucket(idv.getLocation()).delete();
     }
 
 }

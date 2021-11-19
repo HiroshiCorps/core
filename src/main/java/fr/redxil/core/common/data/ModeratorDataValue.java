@@ -43,7 +43,7 @@ public enum ModeratorDataValue {
 
     public static void clearRedisData(DataType dataType, String moderatorName, Long moderatorID) {
 
-        RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
+        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (ModeratorDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))

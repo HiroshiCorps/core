@@ -11,13 +11,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class InfoCmd extends BrigadierAPI {
         if (!(commandContext.getSource() instanceof Player))
             return 1;
 
-        APIPlayerModerator playerModerator = CoreAPI.get().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
         if (playerModerator == null)
             return 1;
 
@@ -45,7 +45,7 @@ public class InfoCmd extends BrigadierAPI {
             return 1;
         }
 
-        APIOfflinePlayer target = CoreAPI.get().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
+        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
         playerModerator.printSanction(target, sanctionType);
 
         return 1;

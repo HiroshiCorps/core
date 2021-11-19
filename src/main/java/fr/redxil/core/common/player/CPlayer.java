@@ -56,7 +56,7 @@ public class CPlayer implements APIPlayer {
 
     protected static APIPlayer loadPlayer(String name, UUID uuid, IpInfo ipInfo) {
 
-        RedisManager redisManager = CoreAPI.get().getRedisManager();
+        RedisManager redisManager = API.getInstance().getRedisManager();
 
         PlayerModel PlayerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
@@ -82,7 +82,7 @@ public class CPlayer implements APIPlayer {
         redisManager.setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(name, memberID), moneyModel.getSolde());
         redisManager.setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(name, memberID), name);
         redisManager.setRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(name, memberID), uuid.toString());
-        redisManager.setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(name, memberID), CoreAPI.get().getServer().getServerName());
+        redisManager.setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(name, memberID), API.getInstance().getServer().getServerName());
         redisManager.setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(name, memberID), PlayerModel.getPowerRank());
         redisManager.setRedisString(PlayerDataValue.PLAYER_INPUT_REDIS.getString(name, memberID), null);
         redisManager.setRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(name, memberID), ipInfo.toString());
@@ -105,11 +105,11 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public void unloadPlayer() {
-        if (!CoreAPI.get().isBungee()) return;
+        if (!API.getInstance().isBungee()) return;
 
         String name = getName();
 
-        APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(getMemberId());
+        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(getMemberId());
         if (spm != null)
             spm.disconnectModerator();
 
@@ -120,11 +120,11 @@ public class CPlayer implements APIPlayer {
 
 
         UUID uuid = getUUID();
-        Team team = CoreAPI.get().getTeamManager().getPlayerTeam(uuid);
+        Team team = API.getInstance().getTeamManager().getPlayerTeam(uuid);
         if (team != null)
             team.removePlayer(uuid);
 
-        RedisManager rm = CoreAPI.get().getRedisManager();
+        RedisManager rm = API.getInstance().getRedisManager();
 
         rm.getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).remove(uuid.toString());
         rm.getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(name);
@@ -168,9 +168,9 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public Server getServer() {
-        String serverName = CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(this));
+        String serverName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(this));
         if (serverName == null) return null;
-        return CoreAPI.get().getServerManager().getServer(serverName);
+        return API.getInstance().getServerManager().getServer(serverName);
     }
 
 
@@ -178,19 +178,19 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public Server getBungeeServer() {
-        String serverName = CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(this));
+        String serverName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(this));
         if (serverName == null) return null;
-        return CoreAPI.get().getServerManager().getServer(serverName);
+        return API.getInstance().getServerManager().getServer(serverName);
     }
 
     @Override
     public void switchServer(String server) {
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + server);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + server);
     }
 
     @Override
     public void addSolde(long value) {
-        CoreAPI.get().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), getSolde() + value);
+        API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), getSolde() + value);
     }
 
     @Override
@@ -199,19 +199,19 @@ public class CPlayer implements APIPlayer {
         if (value <= 0)
             return false;
 
-        CoreAPI.get().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), value);
+        API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), value);
 
         return true;
     }
 
     @Override
     public long getSolde() {
-        return CoreAPI.get().getRedisManager().getRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this));
     }
 
     @Override
     public void addCoins(long value) {
-        CoreAPI.get().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), getCoins() + value);
+        API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), getCoins() + value);
     }
 
 
@@ -222,13 +222,13 @@ public class CPlayer implements APIPlayer {
         if (value <= 0)
             return false;
 
-        CoreAPI.get().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), value);
+        API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), value);
         return true;
     }
 
     @Override
     public long getCoins() {
-        return CoreAPI.get().getRedisManager().getRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this));
     }
 
     @Override
@@ -238,8 +238,8 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public void setRank(RankList rankList) {
-        CoreAPI.get().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), rankList.getRankPower());
-        PMManager.sendRedissonPluginMessage(CoreAPI.get().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
+        API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), rankList.getRankPower());
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
     }
 
     @Override
@@ -249,7 +249,7 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public Long getRankPower() {
-        return CoreAPI.get().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this));
     }
 
 
@@ -258,7 +258,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public Long getRankPower(boolean nickCare) {
         if (nickCare) {
-            NickData nick = API.get().getNickGestion().getNickData(this);
+            NickData nick = API.getInstance().getNickGestion().getNickData(this);
             if (nick != null)
                 return nick.getRank().getRankPower();
         }
@@ -286,27 +286,27 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public boolean isConnected() {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(this)).contains(Long.valueOf(memberID).toString());
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(this)).contains(Long.valueOf(memberID).toString());
     }
 
     @Override
     public String getName() {
-        return CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this));
     }
 
     @Override
     public void setName(String s) {
         if (s != null) {
-            CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(getName());
-            CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this), s);
-            CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).put(getName(), memberID);
+            API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(getName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this), s);
+            API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).put(getName(), memberID);
         }
     }
 
     @Override
     public String getName(boolean nickCare) {
         if (nickCare) {
-            NickData nickData = API.get().getNickGestion().getNickData(this);
+            NickData nickData = API.getInstance().getNickGestion().getNickData(this);
             if (nickData != null) return nickData.getName();
         }
         return getName();
@@ -319,36 +319,36 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public UUID getUUID() {
-        return UUID.fromString(CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(this)));
+        return UUID.fromString(API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(this)));
     }
 
     @Override
     public void setUUID(UUID uuid) {
         if (uuid != null) {
-            CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).remove(getUUID().toString());
-            CoreAPI.get().getRedisManager().setRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(this), uuid.toString());
-            CoreAPI.get().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).put(uuid.toString(), memberID);
+            API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).remove(getUUID().toString());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(this), uuid.toString());
+            API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_UUID.getString(this)).put(uuid.toString(), memberID);
         }
     }
 
     @Override
     public IpInfo getIpInfo() {
-        return IpInfo.fromString(CoreAPI.get().getRedisManager().getRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(this)));
+        return IpInfo.fromString(API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(this)));
     }
 
     @Override
     public boolean isNick() {
-        return CoreAPI.get().getNickGestion().hasNick(this);
+        return API.getInstance().getNickGestion().hasNick(this);
     }
 
     @Override
     public boolean isLogin() {
-        return CoreAPI.get().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(this)) == 1L;
+        return API.getInstance().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(this)) == 1L;
     }
 
     @Override
     public boolean isFreeze() {
-        return CoreAPI.get().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(this)) != 0L;
+        return API.getInstance().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(this)) != 0L;
     }
 
     @Override
@@ -359,7 +359,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getFriendInviteReceived() {
 
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDRECEIVEDLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDRECEIVEDLIST_REDIS.getString(this));
 
     }
 
@@ -406,7 +406,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getFriendInviteSended() {
 
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDSENDEDLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDSENDEDLIST_REDIS.getString(this));
 
     }
 
@@ -459,7 +459,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getFriendList() {
 
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDLIST_REDIS.getString(this));
 
     }
 
@@ -481,7 +481,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getBlackList() {
 
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_BLACKLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_BLACKLIST_REDIS.getString(this));
 
     }
 
@@ -585,7 +585,7 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public Party getParty() {
-        return CoreAPI.get().getPartyManager().getParty(this);
+        return API.getInstance().getPartyManager().getParty(this);
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
@@ -19,7 +20,6 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class SetRankCmd extends BrigadierAPI {
     public int execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer == null) return 1;
 
         if (!apiPlayer.hasPermission(RankList.ADMINISTRATEUR.getRankPower())) {
@@ -62,7 +62,7 @@ public class SetRankCmd extends BrigadierAPI {
             return 1;
         }
 
-        APIOfflinePlayer offlineTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
+        APIOfflinePlayer offlineTarget = API.getInstance().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
         if (offlineTarget == null) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Le joueur: " + commandContext.getArgument("target", String.class) + " ne s'est jamais connecté").setColor(Color.RED)
@@ -102,13 +102,13 @@ public class SetRankCmd extends BrigadierAPI {
             return 1;
         }
 
-        APIPlayerModerator playerModerator = CoreAPI.get().getModeratorManager().getModerator(offlineTarget.getMemberId());
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(offlineTarget.getMemberId());
         if (playerModerator != null)
             playerModerator.disconnectModerator();
 
         offlineTarget.setRank(newRank);
         if (offlineTarget instanceof APIPlayer)
-            CoreAPI.get().getModeratorManager().loadModerator((APIPlayer) offlineTarget);
+            API.getInstance().getModeratorManager().loadModerator((APIPlayer) offlineTarget);
 
         commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                         "La personne §d" +

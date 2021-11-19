@@ -119,7 +119,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public Long getRankPower(boolean nickCare) {
         if (nickCare) {
-            NickData nick = API.get().getNickGestion().getNickData(this);
+            NickData nick = API.getInstance().getNickGestion().getNickData(this);
             if (nick != null)
                 return nick.getRank().getRankPower();
         }
@@ -155,7 +155,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public String getName(boolean nickCare) {
         if (nickCare) {
-            NickData nickData = API.get().getNickGestion().getNickData(this);
+            NickData nickData = API.getInstance().getNickGestion().getNickData(this);
             if (nickData != null) return nickData.getName();
         }
         return getName();
@@ -181,12 +181,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public boolean isConnected() {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null)).contains(getMemberId());
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null)).contains(getMemberId());
     }
 
     @Override
     public boolean isNick() {
-        return CoreAPI.get().getNickGestion().hasNick(this);
+        return API.getInstance().getNickGestion().hasNick(this);
     }
 
     @Override

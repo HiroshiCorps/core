@@ -38,7 +38,7 @@ public enum MoneyDataValue {
 
     public static void clearRedisData(DataType dataType, String playerName, Long playerID) {
 
-        RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
+        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (MoneyDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))

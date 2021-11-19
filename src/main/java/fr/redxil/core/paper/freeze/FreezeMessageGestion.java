@@ -6,10 +6,10 @@
 
 package fr.redxil.core.paper.freeze;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.spigot.utils.Title;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
@@ -33,10 +33,10 @@ public class FreezeMessageGestion {
         if (b) {
             Player player = Bukkit.getPlayer(apiPlayer.getUUID());
             if (player == null) return;
-            CoreAPI.get().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer), moderator.getMemberId());
+            API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer), moderator.getMemberId());
             sendMessage(player, moderator);
         } else {
-            CoreAPI.get().getRedisManager().getRedissonClient().getBucket(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer)).delete();
+            API.getInstance().getRedisManager().getRedissonClient().getBucket(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer)).delete();
             stopFreezeMessage(apiPlayer.getUUID());
         }
     }
@@ -54,7 +54,7 @@ public class FreezeMessageGestion {
     }
 
     public void sendMessage(Player player, APIPlayerModerator APIPlayerModerator) {
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
             @Override

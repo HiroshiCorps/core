@@ -6,11 +6,11 @@
 
 package fr.redxil.core.common.game.team;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.team.Team;
 import fr.redxil.api.common.game.team.TeamManager;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.TeamDataValue;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class CTeamManager implements TeamManager {
     @Override
     public List<Long> getTeamIDList() {
         return new ArrayList<Long>() {{
-            for (Object l : CoreAPI.get().getRedisManager().getRedisMap(TeamDataValue.TEAM_LIST_REDIS.getLocation()).entrySet())
+            for (Object l : API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LIST_REDIS.getLocation()).entrySet())
                 if (l instanceof Long)
                     add((Long) l);
         }};
@@ -136,12 +136,12 @@ public class CTeamManager implements TeamManager {
 
     @Override
     public boolean hasTeam(UUID playerUUID) {
-        return CoreAPI.get().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getLocation()).containsKey(playerUUID.toString());
+        return API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getLocation()).containsKey(playerUUID.toString());
     }
 
     @Override
     public boolean isTeamExist(long teamID) {
-        return CoreAPI.get().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getLocation()).contains(teamID);
+        return API.getInstance().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getLocation()).contains(teamID);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class CTeamManager implements TeamManager {
     @Override
     public CTeam getPlayerTeam(UUID uuid) {
         if (!hasTeam(uuid)) return null;
-        return getTeam((long) CoreAPI.get().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getLocation()).get(uuid.toString()));
+        return getTeam((long) API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getLocation()).get(uuid.toString()));
     }
 
     @Override

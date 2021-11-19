@@ -8,7 +8,7 @@ package fr.redxil.core.paper.receiver;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
-import fr.redxil.core.common.CoreAPI;
+import fr.redxil.api.common.API;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,9 +16,9 @@ import org.bukkit.entity.Player;
 public class UpdaterReceiver implements PMReceiver {
 
     public UpdaterReceiver() {
-        ///CoreAPI.get().getPMSReceiverManager().setSocketReceiver("update", this);
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "restart", String.class, this);
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "stop", String.class, this);
+        /// API.getInstance().getPMSReceiverManager().setSocketReceiver("update", this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "restart", String.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "stop", String.class, this);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class UpdaterReceiver implements PMReceiver {
             }
 
             case "stop": {
-                CoreAPI.get().getPluginEnabler().shutdownServer("Updater shutdown");
+                API.getInstance().getPluginEnabler().shutdownServer("Updater shutdown");
                 break;
             }
 

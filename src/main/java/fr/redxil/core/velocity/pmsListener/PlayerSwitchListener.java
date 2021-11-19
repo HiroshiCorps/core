@@ -10,10 +10,10 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.velocity.Velocity;
-import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class PlayerSwitchListener implements PMReceiver {
 
     public PlayerSwitchListener() {
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "switchServer", String.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", String.class, this);
     }
 
     @Override

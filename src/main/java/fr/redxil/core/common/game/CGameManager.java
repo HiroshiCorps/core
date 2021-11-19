@@ -6,12 +6,12 @@
 
 package fr.redxil.core.common.game;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.Games;
 import fr.redxil.api.common.game.GamesManager;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.GameDataValue;
 
 import java.util.ArrayList;
@@ -22,19 +22,19 @@ public class CGameManager implements GamesManager {
     @Override
     public List<Games> getListGames() {
         return new ArrayList<Games>() {{
-            for (Object serverName : CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).values())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).values())
                 add(getGame(Long.parseLong((String) serverName)));
         }};
     }
 
     @Override
     public boolean isGameExist(String s) {
-        return CoreAPI.get().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).containsKey(s);
+        return API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).containsKey(s);
     }
 
     @Override
     public boolean isGameExist(long l) {
-        return CoreAPI.get().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).containsValue(l);
+        return API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).containsValue(l);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class CGameManager implements GamesManager {
     @Override
     public List<Hosts> getListHosts() {
         return new ArrayList<Hosts>() {{
-            for (Object serverName : CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).values())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).values())
                 add(getHost(Long.parseLong((String) serverName)));
         }};
     }
@@ -69,18 +69,18 @@ public class CGameManager implements GamesManager {
     @Override
     public boolean isHostExist(String s) {
         if (s == null) return false;
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).containsKey(s);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).containsKey(s);
     }
 
     @Override
     public boolean isHostExist(long s) {
-        return CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).containsValue(s);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).containsValue(s);
     }
 
     @Override
     public Hosts getHost(String s) {
         if (!isHostExist(s)) return null;
-        return new CHost((long) CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).get(s));
+        return new CHost((long) API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).get(s));
     }
 
     @Override

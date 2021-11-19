@@ -55,7 +55,7 @@ public enum TeamDataValue {
 
     public static void clearRedisData(DataType dataType, Long hostID) {
 
-        RedissonClient redissonClient = API.get().getRedisManager().getRedissonClient();
+        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (TeamDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))

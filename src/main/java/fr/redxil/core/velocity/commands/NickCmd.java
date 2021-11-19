@@ -11,13 +11,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 
 public class NickCmd extends BrigadierAPI {
 
@@ -39,18 +39,18 @@ public class NickCmd extends BrigadierAPI {
     public int execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
 
         if (commandContext.getArguments().size() == 0) {
 
-            if (!CoreAPI.get().getNickGestion().hasNick(apiPlayer)) {
+            if (!API.getInstance().getNickGestion().hasNick(apiPlayer)) {
 
                 TextComponentBuilder.createTextComponent("Syntax: /nick <nick>").setColor(Color.RED)
                         .sendTo(((Player) commandContext.getSource()).getUniqueId());
 
             } else {
 
-                CoreAPI.get().getNickGestion().removeNick(apiPlayer);
+                API.getInstance().getNickGestion().removeNick(apiPlayer);
                 TextComponentBuilder.createTextComponent("Vous avez retrouvé votre Pseudo: " + apiPlayer.getName())
                         .sendTo(((Player) commandContext.getSource()).getUniqueId());
 
@@ -92,7 +92,7 @@ public class NickCmd extends BrigadierAPI {
 
         }
 
-        if (CoreAPI.get().getNickGestion().setNick(apiPlayer, new NickData(nick, nickRank))) {
+        if (API.getInstance().getNickGestion().setNick(apiPlayer, new NickData(nick, nickRank))) {
             TextComponentBuilder.createTextComponent("Nick changé")
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
         } else {

@@ -8,12 +8,12 @@ package fr.redxil.core.velocity.pmsListener;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
-import fr.redxil.core.common.CoreAPI;
+import fr.redxil.api.common.API;
 
 public class UpdaterReceiver implements PMReceiver {
 
     public UpdaterReceiver() {
-        PMManager.addRedissonPMListener(CoreAPI.get().getRedisManager().getRedissonClient(), "stop", String.class, this);
+        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "stop", String.class, this);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class UpdaterReceiver implements PMReceiver {
         switch (s) {
 
             case "stop": {
-                CoreAPI.get().getPluginEnabler().shutdownServer((String) s1);
+                API.getInstance().getPluginEnabler().shutdownServer((String) s1);
                 break;
             }
 

@@ -11,12 +11,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.velocity.BrigadierAPI;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class UnBanCmd extends BrigadierAPI {
         if (!(commandContext.getSource() instanceof Player)) return 1;
 
         Player player = (Player) commandContext.getSource();
-        APIPlayerModerator APIPlayerModerator = CoreAPI.get().getModeratorManager().getModerator(player.getUniqueId());
+        APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModerator == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
@@ -49,7 +49,7 @@ public class UnBanCmd extends BrigadierAPI {
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIOfflinePlayer apiPlayerTarget = CoreAPI.get().getPlayerManager().getOfflinePlayer(targetArgs);
+        APIOfflinePlayer apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)

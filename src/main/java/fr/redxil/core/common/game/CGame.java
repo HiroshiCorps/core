@@ -17,7 +17,6 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.spigot.minigame.GameBuilder;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.GameDataValue;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.utils.DataType;
@@ -33,20 +32,20 @@ public class CGame implements Games {
     final long gameID;
 
     public CGame(long gameID) {
-        this.server = CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_SERVER_REDIS.getString(null, gameID));
+        this.server = API.getInstance().getRedisManager().getRedisString(GameDataValue.GAME_SERVER_REDIS.getString(null, gameID));
         this.gameID = gameID;
     }
 
     public CGame(String serverName) {
         this.server = serverName;
-        this.gameID = (long) CoreAPI.get().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).get(serverName);
+        this.gameID = (long) API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).get(serverName);
     }
 
     public static long initGame(String server, GameEnum gameEnum) {
 
         long gameID = IDGenerator.generateLONGID(IDDataValue.GAME);
 
-        RedisManager redisManager = CoreAPI.get().getRedisManager();
+        RedisManager redisManager = API.getInstance().getRedisManager();
 
         GameDataValue.clearRedisData(DataType.SERVER, server, gameID);
 
@@ -76,9 +75,9 @@ public class CGame implements Games {
 
         GameDataValue.clearRedisData(DataType.SERVER, name, id);
 
-        CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).remove(name);
+        API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).remove(name);
         if (host)
-            CoreAPI.get().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).remove(name);
+            API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).remove(name);
     }
 
     @Override
@@ -125,52 +124,52 @@ public class CGame implements Games {
 
     @Override
     public int getMinPlayer() {
-        return Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(GameDataValue.GAME_MINP_REDIS.getString(this))).intValue();
+        return Long.valueOf(API.getInstance().getRedisManager().getRedisLong(GameDataValue.GAME_MINP_REDIS.getString(this))).intValue();
     }
 
     @Override
     public void setMinPlayer(int i) {
-        CoreAPI.get().getRedisManager().setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(this), Integer.valueOf(i).longValue());
+        API.getInstance().getRedisManager().setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(this), Integer.valueOf(i).longValue());
     }
 
     @Override
     public int getMaxPlayer() {
-        return Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(this))).intValue();
+        return Long.valueOf(API.getInstance().getRedisManager().getRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(this))).intValue();
     }
 
     @Override
     public void setMaxPlayer(int i) {
-        CoreAPI.get().getRedisManager().setRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(this), Integer.valueOf(i).longValue());
+        API.getInstance().getRedisManager().setRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(this), Integer.valueOf(i).longValue());
     }
 
     @Override
     public int getMaxPlayerSpec() {
-        return Long.valueOf(CoreAPI.get().getRedisManager().getRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(this))).intValue();
+        return Long.valueOf(API.getInstance().getRedisManager().getRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(this))).intValue();
     }
 
     @Override
     public void setMaxPlayerSpec(int i) {
-        CoreAPI.get().getRedisManager().setRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(this), Integer.valueOf(i).longValue());
+        API.getInstance().getRedisManager().setRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(this), Integer.valueOf(i).longValue());
     }
 
     @Override
     public List<String> getPlayers() {
-        return CoreAPI.get().getRedisManager().getRedisList(GameDataValue.GAME_PLAYER_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_PLAYER_REDIS.getString(this));
     }
 
     @Override
     public List<String> getInGameSpectators() {
-        return CoreAPI.get().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_INGAME_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_INGAME_REDIS.getString(this));
     }
 
     @Override
     public List<String> getOutGameSpectators() {
-        return CoreAPI.get().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_OUTGAME_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_OUTGAME_REDIS.getString(this));
     }
 
     @Override
     public List<String> getInConnectPlayer() {
-        return CoreAPI.get().getRedisManager().getRedisList(GameDataValue.GAME_INCOPLAYER_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_INCOPLAYER_REDIS.getString(this));
     }
 
     @Override
@@ -200,12 +199,12 @@ public class CGame implements Games {
 
     @Override
     public Map<String, Object> getSettingsMap() {
-        return CoreAPI.get().getRedisManager().getRedisMap(GameDataValue.GAME_SETTINGS_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAME_SETTINGS_REDIS.getString(this));
     }
 
     @Override
     public boolean isHostLinked() {
-        return CoreAPI.get().getGamesManager().isHostExist(getServerName());
+        return API.getInstance().getGamesManager().isHostExist(getServerName());
     }
 
     @Override
@@ -215,17 +214,17 @@ public class CGame implements Games {
 
     @Override
     public Hosts getHost() {
-        return CoreAPI.get().getGamesManager().getHost(getServerName());
+        return API.getInstance().getGamesManager().getHost(getServerName());
     }
 
     @Override
     public GameState getGameState() {
-        return GameState.getState(CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(this)));
+        return GameState.getState(API.getInstance().getRedisManager().getRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(this)));
     }
 
     @Override
     public void setGameState(GameState gameState) {
-        CoreAPI.get().getRedisManager().setRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(this), gameState.getName());
+        API.getInstance().getRedisManager().setRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(this), gameState.getName());
     }
 
     @Override
@@ -239,37 +238,37 @@ public class CGame implements Games {
 
     @Override
     public GameEnum getGame() {
-        return GameEnum.getStatus(CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_GAME_REDIS.getString(this)));
+        return GameEnum.getStatus(API.getInstance().getRedisManager().getRedisString(GameDataValue.GAME_GAME_REDIS.getString(this)));
     }
 
     @Override
     public String getSubGames() {
-        return CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(this));
     }
 
     @Override
     public void setSubGames(String s) {
-        CoreAPI.get().getRedisManager().setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(this), s);
+        API.getInstance().getRedisManager().setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(this), s);
     }
 
     @Override
     public String getMap() {
-        return CoreAPI.get().getRedisManager().getRedisString(GameDataValue.GAME_MAP_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(GameDataValue.GAME_MAP_REDIS.getString(this));
     }
 
     @Override
     public void setMap(String map) {
-        CoreAPI.get().getRedisManager().setRedisString(GameDataValue.GAME_MAP_REDIS.getString(this), map);
+        API.getInstance().getRedisManager().setRedisString(GameDataValue.GAME_MAP_REDIS.getString(this), map);
     }
 
     @Override
     public boolean hasTeam() {
-        return CoreAPI.get().getRedisManager().getRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(this));
     }
 
     @Override
     public void setHasTeam(boolean b) {
-        CoreAPI.get().getRedisManager().setRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(this), b);
+        API.getInstance().getRedisManager().setRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(this), b);
     }
 
     @Override
@@ -286,25 +285,25 @@ public class CGame implements Games {
 
     @Override
     public void forceStart(APIPlayerModerator APIPlayer) {
-        PMManager.sendRedissonPluginMessage(API.get().getRedisManager().getRedissonClient(), "forceSTART", APIPlayer.getName());
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTART", APIPlayer.getName());
     }
 
     @Override
     public void forceStopStart(APIPlayerModerator APIPlayer) {
-        PMManager.sendRedissonPluginMessage(API.get().getRedisManager().getRedissonClient(), "forceSTOPSTART", APIPlayer.getName());
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTOPSTART", APIPlayer.getName());
     }
 
     @Override
     public boolean forceEnd(APIPlayerModerator APIPlayer, String reason) {
         if (reason.contains("<split>")) return false;
-        PMManager.sendRedissonPluginMessage(API.get().getRedisManager().getRedissonClient(), "forceEND", APIPlayer.getName() + "<split>" + reason);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceEND", APIPlayer.getName() + "<split>" + reason);
         return true;
     }
 
     @Override
     public boolean forceWin(APIPlayerModerator APIPlayer, Team team, String reason) {
         if (reason.contains("<split>")) return false;
-        PMManager.sendRedissonPluginMessage(API.get().getRedisManager().getRedissonClient(), "forceWIN", APIPlayer.getName() + "<split>" + team.getName() + "<split>" + reason);
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceWIN", APIPlayer.getName() + "<split>" + team.getName() + "<split>" + reason);
         return true;
     }
 

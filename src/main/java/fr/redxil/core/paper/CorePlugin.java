@@ -8,6 +8,7 @@ package fr.redxil.core.paper;
 
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
@@ -89,7 +90,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         log(SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
 
-        if (!CoreAPI.get().isEnabled()) {
+        if (!API.getInstance().isEnabled()) {
             log(SystemColor.RED + "Error while loading API, please check error code below" + SystemColor.RESET);
             return;
         }
@@ -135,7 +136,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         for (Player player : Bukkit.getOnlinePlayers())
             player.kickPlayer("Error");
 
-        Server server = CoreAPI.get().getServer();
+        Server server = API.getInstance().getServer();
         String serverName = server.getServerName();
 
         Collection<UUID> playerUUIDList = new ArrayList<>(server.getPlayerUUIDList());
@@ -144,7 +145,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         log(Level.SEVERE, SystemColor.RED + "Founded " + playerUUIDList.size() + " crashed player data" + SystemColor.RESET);
         for (UUID playerUUID : playerUUIDList) {
             server.removePlayerInServer(playerUUID);
-            APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(playerUUID);
+            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(playerUUID);
             if (apiPlayer != null)
                 if (apiPlayer.getServer().getServerName().equals(serverName)) {
                     log(Level.SEVERE, SystemColor.GREEN + "Saving player: " + apiPlayer.getName() + SystemColor.RESET);
@@ -156,12 +157,12 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
     @Override
     public void onDisable() {
-        if (CoreAPI.get().isHostServer()) {
-            CoreAPI.get().getHost().stop();
-            CoreAPI.get().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", getServerName());
+        if (API.getInstance().isHostServer()) {
+            API.getInstance().getHost().stop();
+            API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", getServerName());
         }
 
-        CoreAPI.get().shutdown();
+        API.getInstance().shutdown();
         this.setEnabled(false);
     }
 

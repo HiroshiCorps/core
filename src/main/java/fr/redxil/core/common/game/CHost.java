@@ -6,13 +6,13 @@
 
 package fr.redxil.core.common.game;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.HostAccess;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.GameDataValue;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class CHost extends CGame implements Hosts {
 
         long gameID = CGame.initGame(server, gameEnum);
 
-        RedisManager redisManager = CoreAPI.get().getRedisManager();
+        RedisManager redisManager = API.getInstance().getRedisManager();
 
         redisManager.getRedisMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).put(server, gameID);
         redisManager.setRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(server, gameID), author);
@@ -39,17 +39,17 @@ public class CHost extends CGame implements Hosts {
 
     @Override
     public String getAuthor() {
-        return CoreAPI.get().getRedisManager().getRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(this));
     }
 
     @Override
     public HostAccess getHostAccess() {
-        return HostAccess.getStatus(CoreAPI.get().getRedisManager().getRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(this)));
+        return HostAccess.getStatus(API.getInstance().getRedisManager().getRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(this)));
     }
 
     @Override
     public void setHostAccess(HostAccess hostAccess) {
-        CoreAPI.get().getRedisManager().setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(this), hostAccess.toString());
+        API.getInstance().getRedisManager().setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(this), hostAccess.toString());
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CHost extends CGame implements Hosts {
             if (hostAccess == HostAccess.CLOSE)
                 return false;
             if (hostAccess.toString().equals(HostAccess.FRIEND.toString()))
-                return getAllowPlayer().contains(apiPlayer.getName()) || apiPlayer.hasFriend(CoreAPI.get().getPlayerManager().getPlayer(getAuthor()));
+                return getAllowPlayer().contains(apiPlayer.getName()) || apiPlayer.hasFriend(API.getInstance().getPlayerManager().getPlayer(getAuthor()));
             return true;
         }
 
@@ -85,12 +85,12 @@ public class CHost extends CGame implements Hosts {
 
     @Override
     public List<String> getAllowPlayer() {
-        return CoreAPI.get().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWPLAYER_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWPLAYER_REDIS.getString(this));
     }
 
     @Override
     public List<String> getAllowSpectator() {
-        return CoreAPI.get().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWSPECTATOR_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWSPECTATOR_REDIS.getString(this));
     }
 
     @Override

@@ -6,6 +6,7 @@
 
 package fr.redxil.core.paper.event;
 
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.Games;
 import fr.redxil.api.common.game.Hosts;
@@ -19,7 +20,6 @@ import fr.redxil.api.spigot.itemstack.APIItemStack;
 import fr.redxil.api.spigot.minigame.GameBuilder;
 import fr.redxil.api.spigot.minigame.teams.TeamsGUI;
 import fr.redxil.api.spigot.utils.NBTEditor;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.hosts.HostScoreboard;
 import net.minecraft.server.v1_12_R1.*;
@@ -46,8 +46,8 @@ public class EventListener implements Listener {
     public EventListener(CorePlugin corePlugin) {
         this.corePlugin = corePlugin;
 
-        if (CoreAPI.get().isHostServer())
-            this.hostScoreboard = new HostScoreboard(CoreAPI.get().getHost());
+        if (API.getInstance().isHostServer())
+            this.hostScoreboard = new HostScoreboard(API.getInstance().getHost());
         else
             this.hostScoreboard = null;
     }
@@ -104,14 +104,14 @@ public class EventListener implements Listener {
             return;
         }
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(p.getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
         if (apiPlayer == null) {
             p.kickPlayer("An error appears with you're data");
             return;
         }
 
-        CoreAPI.get().getServer().setPlayerInServer(apiPlayer);
-        APIPlayerModerator playerModerator = CoreAPI.get().getModeratorManager().getModerator(apiPlayer);
+        API.getInstance().getServer().setPlayerInServer(apiPlayer);
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer);
 
         if (playerModerator != null) {
             if (apiPlayer.isLogin()) {
@@ -135,7 +135,7 @@ public class EventListener implements Listener {
             return;
 
         GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Games games = CoreAPI.get().getGame();
+        Games games = API.getInstance().getGame();
 
         boolean spectate = games.isSpectator(apiPlayer.getName());
 
@@ -185,9 +185,9 @@ public class EventListener implements Listener {
     public void playerQuitEvent(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
-        APIOfflinePlayer osp = CoreAPI.get().getPlayerManager().getOfflinePlayer(event.getPlayer().getName());
+        APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(event.getPlayer().getName());
 
-        CoreAPI.get().getServer().removePlayerInServer(event.getPlayer().getUniqueId());
+        API.getInstance().getServer().removePlayerInServer(event.getPlayer().getUniqueId());
 
         corePlugin.getVanish().playerDisconnect(event.getPlayer());
         corePlugin.getFreezeGestion().stopFreezeMessage(event.getPlayer().getUniqueId());
@@ -199,7 +199,7 @@ public class EventListener implements Listener {
             return;
 
         GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Games games = CoreAPI.get().getGame();
+        Games games = API.getInstance().getGame();
 
         boolean spectator = games.isSpectator(osp.getName());
 
@@ -215,7 +215,7 @@ public class EventListener implements Listener {
             gameBuilder.onSpectatorLeave(player);
         }
 
-        if (!CoreAPI.get().isHostServer()) return;
+        if (!API.getInstance().isHostServer()) return;
 
         if (hostScoreboard != null)
             hostScoreboard.removeScoreboard(event.getPlayer());
@@ -224,7 +224,7 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void playerLogin(PlayerLoggedEvent event) {
-        APIPlayerModerator playerModerator = CoreAPI.get().getModeratorManager().getModerator(event.getAPIPlayer());
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(event.getAPIPlayer());
 
         if (playerModerator != null) {
             corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
@@ -235,7 +235,7 @@ public class EventListener implements Listener {
     public void sendJoinMessage(APIPlayer apiPlayer) {
 
 
-        NickData nickData = CoreAPI.get().getNickGestion().getNickData(apiPlayer);
+        NickData nickData = API.getInstance().getNickGestion().getNickData(apiPlayer);
 
         String message = "§fLe joueur " + nickData.getRank().getChatRankString() + " " + nickData.getName() + " §fà rejoint le serveur";
 
@@ -245,7 +245,7 @@ public class EventListener implements Listener {
 
     public void sendQuitMessage(APIOfflinePlayer apiPlayer) {
 
-        NickData nickData = CoreAPI.get().getNickGestion().getNickData(apiPlayer);
+        NickData nickData = API.getInstance().getNickGestion().getNickData(apiPlayer);
 
         String message = "§fLe joueur " + nickData.getRank().getChatRankString() + " " + nickData.getName() + " §fà quitté le serveur";
         Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
@@ -255,13 +255,13 @@ public class EventListener implements Listener {
     @EventHandler
     public void playerChat(AsyncPlayerChatEvent asyncPlayerChatEvent) {
 
-        asyncPlayerChatEvent.setFormat(CoreAPI.get().getPlayerManager().getPlayer(asyncPlayerChatEvent.getPlayer().getUniqueId()).getChatString() + asyncPlayerChatEvent.getMessage());
+        asyncPlayerChatEvent.setFormat(API.getInstance().getPlayerManager().getPlayer(asyncPlayerChatEvent.getPlayer().getUniqueId()).getChatString() + asyncPlayerChatEvent.getMessage());
 
     }
 
     @EventHandler
     public void playerMove(PlayerMoveEvent event) {
-        APIPlayer player = CoreAPI.get().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        APIPlayer player = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         if (player == null) return;
         if (player.isFreeze())
             event.setCancelled(true);
@@ -273,11 +273,11 @@ public class EventListener implements Listener {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
 
-        APIPlayer apiPlayer = CoreAPI.get().getPlayerManager().getPlayer(player.getUniqueId());
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (apiPlayer.isFreeze())
             event.setCancelled(true);
 
-        APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(apiPlayer.getMemberId());
+        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
@@ -286,7 +286,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void playerDrop(PlayerDropItemEvent event) {
 
-        APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
+        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
@@ -298,7 +298,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void playerPickUp(PlayerPickupItemEvent event) {
 
-        APIPlayerModerator spm = CoreAPI.get().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
+        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
