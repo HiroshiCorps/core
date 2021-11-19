@@ -15,9 +15,9 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.velocity.CoreVelocity;
+import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;

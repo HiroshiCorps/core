@@ -20,6 +20,28 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.velocity.commands.NickCmd;
+import fr.redxil.core.velocity.commands.ShutdownCmd;
+import fr.redxil.core.velocity.commands.friend.BlackListCmd;
+import fr.redxil.core.velocity.commands.friend.FriendCmd;
+import fr.redxil.core.velocity.commands.mod.CibleCmd;
+import fr.redxil.core.velocity.commands.mod.InfoCmd;
+import fr.redxil.core.velocity.commands.mod.NickCheckCmd;
+import fr.redxil.core.velocity.commands.mod.action.cancel.UnBanCmd;
+import fr.redxil.core.velocity.commands.mod.action.cancel.UnMuteCmd;
+import fr.redxil.core.velocity.commands.mod.action.punish.BanCmd;
+import fr.redxil.core.velocity.commands.mod.action.punish.KickCmd;
+import fr.redxil.core.velocity.commands.mod.action.punish.MuteCmd;
+import fr.redxil.core.velocity.commands.mod.action.punish.WarnCmd;
+import fr.redxil.core.velocity.commands.mod.highstaff.SetRankCmd;
+import fr.redxil.core.velocity.commands.mod.highstaff.StaffCmd;
+import fr.redxil.core.velocity.commands.msg.MsgCmd;
+import fr.redxil.core.velocity.commands.msg.RCmd;
+import fr.redxil.core.velocity.commands.party.PartyCmd;
+import fr.redxil.core.velocity.listener.JoinListener;
+import fr.redxil.core.velocity.listener.PlayerListener;
+import fr.redxil.core.velocity.pmsListener.PlayerSwitchListener;
+import fr.redxil.core.velocity.pmsListener.UpdaterReceiver;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
@@ -46,12 +68,57 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         this.logger = logger;
         this.folder = folder;
 
+        if (proxyServer == null)
+            logger.log(Level.SEVERE, "ProxyServer null");
+        else
+            logger.log(Level.FINE, "ProxyServer not null");
+
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
         if (API.getInstance().isEnabled()) {
             checkCrash();
+            registerCommands();
+            registerEvents();
         }
+    }
+
+    public void registerEvents() {
+        proxyServer.getEventManager().register(this, new JoinListener());
+        proxyServer.getEventManager().register(this, new PlayerListener());
+        new PlayerSwitchListener();
+        new UpdaterReceiver();
+    }
+
+    public void registerCommands() {
+
+        CommandManager cm = commandManager;
+
+        cm.register(new PartyCmd().getBrigadierCommand());
+
+        cm.register(new BanCmd().getBrigadierCommand());
+        cm.register(new WarnCmd().getBrigadierCommand());
+        cm.register(new KickCmd().getBrigadierCommand());
+        cm.register(new MuteCmd().getBrigadierCommand());
+
+        cm.register(new UnBanCmd().getBrigadierCommand());
+        cm.register(new UnMuteCmd().getBrigadierCommand());
+
+        cm.register(new StaffCmd().getBrigadierCommand());
+        cm.register(new CibleCmd().getBrigadierCommand());
+        cm.register(new NickCheckCmd().getBrigadierCommand());
+        cm.register(new InfoCmd().getBrigadierCommand());
+        cm.register(new SetRankCmd().getBrigadierCommand());
+
+        cm.register(new NickCmd().getBrigadierCommand());
+        cm.register(new FriendCmd().getBrigadierCommand());
+        cm.register(new BlackListCmd().getBrigadierCommand());
+
+        cm.register(new MsgCmd().getBrigadierCommand());
+        cm.register(new RCmd().getBrigadierCommand());
+
+        cm.register(new ShutdownCmd().getBrigadierCommand());
+
     }
 
     public void checkCrash() {

@@ -19,8 +19,8 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.rank.RankList;
-import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.velocity.CoreVelocity;
+import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;

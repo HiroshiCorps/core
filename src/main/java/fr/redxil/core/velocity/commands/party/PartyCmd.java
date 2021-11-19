@@ -19,8 +19,8 @@ import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.velocity.BrigadierAPI;
 import fr.redxil.core.velocity.CoreVelocity;
+import fr.redxil.core.velocity.commands.BrigadierAPI;
 import net.kyori.adventure.text.TextComponent;
 
 import java.util.ArrayList;

@@ -16,7 +16,7 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.velocity.BrigadierAPI;
+import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,7 @@ public class CibleCmd extends BrigadierAPI {
         for (Long id : availablePlayer)
             playerName.add(API.getInstance().getPlayerManager().getPlayer(id).getName());
 
-        this.addArgumentCommand(command, "player", StringArgumentType.word(), (String[]) playerName.toArray());
+        this.addArgumentCommand(command, "player", StringArgumentType.word(), playerName.toArray(new String[0]));
 
     }
 }

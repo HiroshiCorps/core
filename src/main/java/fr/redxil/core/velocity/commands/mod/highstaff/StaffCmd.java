@@ -15,7 +15,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.velocity.BrigadierAPI;
+import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 public class StaffCmd extends BrigadierAPI {
 
