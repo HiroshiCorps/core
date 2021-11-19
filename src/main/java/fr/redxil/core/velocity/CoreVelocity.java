@@ -84,8 +84,8 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     }
 
     public void registerEvents() {
-        proxyServer.getEventManager().register(this, new JoinListener());
-        proxyServer.getEventManager().register(this, new PlayerListener());
+        proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new JoinListener());
+        proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new PlayerListener());
         new PlayerSwitchListener();
         new UpdaterReceiver();
     }

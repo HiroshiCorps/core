@@ -17,8 +17,8 @@ import org.redisson.api.RedissonClient;
 
 public enum MoneyDataValue {
 
-    PLAYER_COINS_SQL(DataBaseType.SQL, DataType.PLAYER, "member_coins", false, true),
-    PLAYER_SOLDE_SQL(DataBaseType.SQL, DataType.PLAYER, "member_solde", false, true),
+    PLAYER_COINS_SQL(DataBaseType.SQL, DataType.PLAYER, "member_coins", false, false),
+    PLAYER_SOLDE_SQL(DataBaseType.SQL, DataType.PLAYER, "member_solde", false, false),
 
     PLAYER_COINS_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/coins", false, true),
     PLAYER_SOLDE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/solde", false, true);

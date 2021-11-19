@@ -15,13 +15,11 @@ import java.util.logging.Logger;
 @Plugin(id = "core", name = "Core", version = "1.12", description = "", authors = {"RedLine", "XiliTra"})
 public class VelocityEnabler {
 
-    private final ProxyServer proxyServer;
-    private final Logger logger;
-    private final File pathFile;
-    private final CommandManager cm;
+    private static VelocityEnabler instance;
 
     @Inject
     public VelocityEnabler(ProxyServer server, CommandManager commandManager, Logger logger, @DataDirectory Path folder) {
+        instance = this;
         this.proxyServer = server;
         this.logger = logger;
         this.pathFile = folder.toFile();
@@ -33,6 +31,15 @@ public class VelocityEnabler {
             }
         }
         logger.info("Hello there, it's a test plugin I made!");
+    }
+
+    private final ProxyServer proxyServer;
+    private final Logger logger;
+    private final File pathFile;
+    private final CommandManager cm;
+
+    public static VelocityEnabler getInstance() {
+        return instance;
     }
 
     @Subscribe
