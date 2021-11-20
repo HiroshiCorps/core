@@ -91,6 +91,8 @@ public class CoreAPI extends API {
 
         }
 
+        this.serverName = serverName;
+
         this.sqlConnection = new CSQLConnection();
         this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
         this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
