@@ -41,6 +41,7 @@ import java.io.File;
 public class CoreAPI extends API {
 
     private final ServerAccessEnum sea;
+    private String serverName;
     private CServerManager serverManager;
     private CPlayerManager apiPlayerManager;
     private CModeratorManager moderatorManager;
@@ -56,17 +57,22 @@ public class CoreAPI extends API {
 
         this.sea = sea;
 
+        File serverNameFile = new File(plugin.getPluginDataFolder() + File.separator + "servername.json");
         File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlUser.json");
         File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlPass.json");
         File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
 
+        String serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
         String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
 
-        if (sqlUser == null || sqlPass == null || redisPass == null) {
+        if (serverName == null || sqlUser == null || sqlPass == null || redisPass == null) {
+
+            if (serverName == null)
+                GSONSaver.writeGSON(serverNameFile, "servername");
 
             if (sqlUser == null)
                 GSONSaver.writeGSON(sqlUserFile, "userhere");
@@ -99,8 +105,8 @@ public class CoreAPI extends API {
         new ShutdownOrderListener();
 
         ServerType serverType;
-        if (plugin.isBungee())
-            serverType = ServerType.BUNGEE;
+        if (plugin.isVelocity())
+            serverType = ServerType.VELOCITY;
         else {
 
             Games games = getGame();
@@ -112,8 +118,8 @@ public class CoreAPI extends API {
 
         }
 
-        if (!getServerManager().isServerExist(plugin.getServerName()))
-            this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp());
+        if (!getServerManager().isServerExist(getServerName()))
+            this.serverManager.initServer(serverType, getServerName(), plugin.getServerIp());
 
         CoreAPI.setEnabled(true);
 
@@ -151,7 +157,7 @@ public class CoreAPI extends API {
     @Override
     public Server getServer() {
         if (this.serverManager == null) return null;
-        return this.serverManager.getServer(getPluginEnabler().getServerName());
+        return this.serverManager.getServer(getServerName());
     }
 
     @Override
@@ -178,6 +184,11 @@ public class CoreAPI extends API {
     }
 
     @Override
+    public String getServerName() {
+        return serverName;
+    }
+
+    @Override
     public ServerType getServerType() {
         return this.getServer().getServerType();
     }
@@ -190,7 +201,7 @@ public class CoreAPI extends API {
     @Override
     public Hosts getHost() {
         if (isHostServer() && isSpigot())
-            return getGamesManager().getHost(this.getPluginEnabler().getServerName());
+            return getGamesManager().getHost(getServerName());
 
         return null;
     }
@@ -209,12 +220,12 @@ public class CoreAPI extends API {
 
     @Override
     public Games getGame() {
-        return getGamesManager().getGame(getPluginEnabler().getServerName());
+        return getGamesManager().getGame(getServerName());
     }
 
     @Override
     public boolean isGameServer() {
-        return getGamesManager().isGameExist(getPluginEnabler().getServerName());
+        return getGamesManager().isGameExist(getServerName());
     }
 
     public ServerAccessEnum getServerAccessEnum() {
