@@ -11,6 +11,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.player.PlayerModel;
@@ -26,7 +27,6 @@ public class CPlayerManager implements APIPlayerManager {
      * @param name This need to be the name of the player / nick
      * @return APIPlayer or null if the player is not loaded
      */
-
     public APIPlayer getPlayer(String name) {
         if (!isLoadedPlayer(name)) {
             return API.getInstance().getNickGestion().getAPIPlayer(name);
@@ -139,6 +139,21 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public List<Long> getLoadedPlayer() {
         return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null));
+    }
+
+    @Override
+    public String getIdentifierString(APIOfflinePlayer aop) {
+        return CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK ? aop.getName() : aop.getUUID().toString();
+    }
+
+    @Override
+    public String getIdentifierString(String name, UUID uuid) {
+        return CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK ? name : uuid.toString();
+    }
+
+    @Override
+    public String getPlayerIdentifierColumn() {
+        return CoreAPI.getInstance().getServerAccessEnum().getPDV().getString();
     }
 
 }

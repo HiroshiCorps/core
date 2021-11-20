@@ -7,31 +7,19 @@
 package fr.redxil.core.velocity.listener;
 
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
-import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
-import fr.redxil.api.common.rank.RankList;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.common.data.PlayerDataValue;
-import fr.redxil.core.velocity.commands.mod.action.punish.BanCmd;
 import net.kyori.adventure.text.Component;
-
-import java.util.Collection;
-import java.util.Optional;
 
 public class JoinListener {
 
@@ -54,38 +42,14 @@ public class JoinListener {
 
     }
 
-    public RegisteredServer getServer(APIPlayer apiPlayer) {
-        return getServer(apiPlayer.getName(), apiPlayer.getRank());
-    }
-
-    public RegisteredServer getServer(String playerName, RankList rankList) {
-        Collection<Server> serverList = API.getInstance().getServerManager().getListServer(ServerType.HUB);
-        if (serverList.isEmpty()) return null;
-
-        Server server = null;
-        int totalPlayer = -1;
-
-        for (Server serverCheck : serverList) {
-
-            if (serverCheck.getServerAccess().canAccess(server, playerName, rankList))
-                continue;
-
-            int playerConnected = serverCheck.getPlayerList().size();
-            if (serverCheck.getMaxPlayers() - playerConnected > 0) {
-                if (totalPlayer == -1 || totalPlayer > playerConnected) {
-                    server = serverCheck;
-                    totalPlayer = playerConnected;
-                }
-            }
-
+    @Subscribe
+    public void connection(PreLoginEvent event) {
+        if (API.getInstance().getNickGestion().isIllegalName(event.getUsername())) {
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected").getFinalTextComponent()));
         }
-
-        if (server != null) {
-            Optional<RegisteredServer> proxyServer = Velocity.getInstance().getProxyServer().getServer(server.getServerName());
-            if (proxyServer.isPresent()) return proxyServer.get();
+        if (API.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Connection refusée").getFinalTextComponent()));
         }
-
-        return null;
     }
 
     @Subscribe
@@ -98,7 +62,7 @@ public class JoinListener {
                     "§4§lSERVER NETWORK§r\n"
                             + "§cConnexion non autorisé§r\n\n"
                             + "§7Raison: Une personne est déjà connecté avec votre UUID§e§r\n"
-            ));
+            ).getFinalTextComponent());
             return;
         }
 
@@ -108,94 +72,24 @@ public class JoinListener {
                         "§4§lSERVER NETWORK§r\n"
                                 + "§cConnexion non autorisé§r\n\n"
                                 + "§7Raison: Une personne est déjà connecté avec votre username§e§r\n"
-                ));
+                ).getFinalTextComponent());
                 return;
             }
 
         APIOfflinePlayer apiOfflinePlayer;
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK) {
             apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername());
-            APIOfflinePlayer previousWithUUID = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
-            if (previousWithUUID != null)
-                previousWithUUID.setUUID(null);
         } else apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
         if (apiOfflinePlayer != null) {
 
             SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
-            if (model != null && model.isEffective()) {
-                player.disconnect((Component) model.getSancMessage());
-                return;
-            }
+            if (model != null && model.isEffective())
+                player.disconnect((Component) model.getSancMessage().getFinalTextComponent());
 
         }
 
-        RegisteredServer registeredServer = null;
-        APIPlayer apiPlayer = null;
-
-        if (apiOfflinePlayer != null)
-            registeredServer = getServer(apiOfflinePlayer.getName(), apiOfflinePlayer.getRank());
-        else {
-            apiPlayer = loadPlayer(player);
-            registeredServer = getServer(apiPlayer);
-        }
-
-        if (registeredServer == null) {
-            player.disconnect((Component) TextComponentBuilder.createTextComponent("Une Erreur est apparue: Aucun serveur accessible (Maintenance)"));
-            return;
-        }
-
-        if (apiPlayer == null)
-            loadPlayer(player);
-
-        player.createConnectionRequest(registeredServer);
-
-    }
-
-    @Subscribe
-    public void onPlayerDisconnect(DisconnectEvent e) {
-
-        Player player = e.getPlayer();
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(
-                player.getUniqueId()
-        );
-
-        if (apiPlayer == null) return;
-
-        Long moderatorId = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
-        API.getInstance().getServer().removePlayerInServer(player.getUniqueId());
-        apiPlayer.unloadPlayer();
-
-        if (moderatorId != null)
-            BanCmd.banPlayer(API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", API.getInstance().getModeratorManager().getModerator(moderatorId), "{Core} Déconnexion en inspection");
-
-    }
-
-    @Subscribe
-    public void connection(PreLoginEvent event) {
-        if (API.getInstance().getNickGestion().isIllegalName(event.getUsername())) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected")));
-        }
-        if (API.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Connection refusée")));
-        }
-    }
-
-    @Subscribe
-    public void serverConnect(ServerPreConnectEvent event) {
-
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-        Server server = API.getInstance().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
-
-        if (apiPlayer.getServer() != null) {
-            if (apiPlayer.isFreeze() || !apiPlayer.isLogin()) {
-                event.setResult(ServerPreConnectEvent.ServerResult.denied());
-                return;
-            }
-        }
-
-        if (!server.getServerAccess().canAccess(server, apiPlayer))
-            event.setResult(ServerPreConnectEvent.ServerResult.denied());
+        loadPlayer(player);
 
     }
 

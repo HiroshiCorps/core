@@ -62,7 +62,7 @@ public class CPlayer implements APIPlayer {
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(null), uuid.toString());
             this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), RankList.JOUEUR.getRankPower().intValue());
-        }}, "WHERE " + CoreAPI.getInstance().getServerAccessEnum().getPdv().getString() + " = ?", CoreAPI.getInstance().getDataForGetAndSet(name, uuid));
+        }}, "WHERE " + CoreAPI.getInstance().getPlayerManager().getPlayerIdentifierColumn() + " = ?", CoreAPI.getInstance().getPlayerManager().getIdentifierString(name, uuid));
 
         long memberID = playerModel.getMemberId();
 

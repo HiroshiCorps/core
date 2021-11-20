@@ -8,6 +8,7 @@ package fr.redxil.core.common.server;
 
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerType;
@@ -83,6 +84,24 @@ public class CServerManager implements ServerManager {
         if (!isServerExist(name))
             return CServer.initServer(serverType, name, ipInfo);
         return getServer(name);
+    }
+
+    @Override
+    public Server getConnectableServer(APIPlayer apiPlayer, ServerType serverType) {
+
+        List<Server> availableServer = getListServer(serverType);
+        final Server[] server = {null};
+
+        availableServer.forEach((testServer) -> {
+
+            if (testServer.getConnectedPlayer() < testServer.getMaxPlayers() && testServer.getServerAccess().canAccess(testServer, apiPlayer))
+                if (server[0] == null || server[0].getConnectedPlayer() > testServer.getConnectedPlayer())
+                    server[0] = testServer;
+
+        });
+
+        return server[0];
+
     }
 
 }

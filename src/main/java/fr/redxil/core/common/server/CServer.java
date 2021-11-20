@@ -121,11 +121,17 @@ public class CServer implements Server {
     public Collection<UUID> getPlayerUUIDList() {
 
         List<UUID> playerList = new ArrayList<>();
-        List<String> uuidList = API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this));
-        uuidList.forEach((uuidString) -> playerList.add(UUID.fromString(uuidString)));
+
+        API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this))
+                .forEach((uuidString) -> playerList.add(UUID.fromString((String) uuidString)));
 
         return playerList;
 
+    }
+
+    @Override
+    public int getConnectedPlayer() {
+        return API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this)).size();
     }
 
     @Override

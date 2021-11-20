@@ -16,7 +16,6 @@ import fr.redxil.api.common.game.GamesManager;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.game.team.TeamManager;
 import fr.redxil.api.common.party.PartyManager;
-import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.common.player.nick.NickGestion;
@@ -38,7 +37,6 @@ import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.CSQLConnection;
 
 import java.io.File;
-import java.util.UUID;
 
 public class CoreAPI extends API {
 
@@ -84,6 +82,7 @@ public class CoreAPI extends API {
 
             CoreAPI.setEnabled(false);
             return;
+
         }
 
         this.sqlConnection = new CSQLConnection();
@@ -222,14 +221,6 @@ public class CoreAPI extends API {
         return this.sea;
     }
 
-    public String getDataForGetAndSet(APIOfflinePlayer aop) {
-        return getServerAccessEnum() == ServerAccessEnum.CRACK ? aop.getName() : aop.getUUID().toString();
-    }
-
-    public String getDataForGetAndSet(String name, UUID uuid) {
-        return getServerAccessEnum() == ServerAccessEnum.CRACK ? name : uuid.toString();
-    }
-
     public enum ServerAccessEnum {
 
         PRENIUM(PlayerDataValue.PLAYER_UUID_SQL),
@@ -237,13 +228,27 @@ public class CoreAPI extends API {
 
         final PlayerDataValue pdv;
 
+        public static ServerAccessEnum getInstance(String name) {
+
+            for (ServerAccessEnum sea : ServerAccessEnum.values())
+                if (sea.getName().equals(name))
+                    return sea;
+
+            return null;
+        }
+
         ServerAccessEnum(PlayerDataValue playerDataValue) {
             this.pdv = playerDataValue;
         }
 
-        public PlayerDataValue getPdv() {
+        public PlayerDataValue getPDV() {
             return pdv;
         }
+
+        public String getName() {
+            return getPDV().getString();
+        }
+
     }
 
 }

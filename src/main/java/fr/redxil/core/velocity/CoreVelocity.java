@@ -39,7 +39,9 @@ import fr.redxil.core.velocity.commands.msg.MsgCmd;
 import fr.redxil.core.velocity.commands.msg.RCmd;
 import fr.redxil.core.velocity.commands.party.PartyCmd;
 import fr.redxil.core.velocity.listener.JoinListener;
+import fr.redxil.core.velocity.listener.LeaveListener;
 import fr.redxil.core.velocity.listener.PlayerListener;
+import fr.redxil.core.velocity.listener.ServerListener;
 import fr.redxil.core.velocity.pmsListener.PlayerSwitchListener;
 import fr.redxil.core.velocity.pmsListener.UpdaterReceiver;
 import net.kyori.adventure.text.Component;
@@ -61,7 +63,6 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     final IpInfo ipInfo;
 
     public CoreVelocity(ProxyServer server, CommandManager commandManager, Logger logger, File folder) {
-        super();
 
         this.proxyServer = server;
         this.commandManager = commandManager;
@@ -76,16 +77,20 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
+
         if (API.getInstance().isEnabled()) {
             checkCrash();
             registerCommands();
             registerEvents();
         }
+
     }
 
     public void registerEvents() {
         proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new JoinListener());
+        proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new LeaveListener());
         proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new PlayerListener());
+        proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new ServerListener());
         new PlayerSwitchListener();
         new UpdaterReceiver();
     }
