@@ -99,6 +99,9 @@ public class CPlayer implements APIPlayer {
 
         redisManager.getRedisList(PlayerDataValue.LIST_PLAYER_ID.getString(name, memberID)).add(memberID);
 
+        if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
+            redisManager.setRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(), 1L);
+
         return new CPlayer(memberID);
 
     }
