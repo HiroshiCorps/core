@@ -58,13 +58,13 @@ public class CPlayer implements APIPlayer {
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        PlayerModel PlayerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<String, Object>() {{
+        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(null), uuid.toString());
-            this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), RankList.JOUEUR.getRankPower().toString());
+            this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), RankList.JOUEUR.getRankPower().intValue());
         }}, "WHERE " + CoreAPI.getInstance().getServerAccessEnum().getPdv().getString() + " = ?", CoreAPI.getInstance().getDataForGetAndSet(name, uuid));
 
-        long memberID = PlayerModel.getMemberId();
+        long memberID = playerModel.getMemberId();
 
         PlayerFriendModel PlayerFriendModel = new SQLModels<>(PlayerFriendModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
@@ -83,7 +83,7 @@ public class CPlayer implements APIPlayer {
         redisManager.setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(name, memberID), name);
         redisManager.setRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(name, memberID), uuid.toString());
         redisManager.setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(name, memberID), API.getInstance().getServer().getServerName());
-        redisManager.setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(name, memberID), PlayerModel.getPowerRank());
+        redisManager.setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(name, memberID), playerModel.getPowerRank());
         redisManager.setRedisString(PlayerDataValue.PLAYER_INPUT_REDIS.getString(name, memberID), null);
         redisManager.setRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(name, memberID), ipInfo.toString());
 
@@ -155,12 +155,6 @@ public class CPlayer implements APIPlayer {
         FriendDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
         rm.getRedisList("ip/" + getIpInfo().getIp()).remove(name);
-
-        /// APIPlayer Part
-
-        PlayerModel PlayerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-        if (PlayerModel != null)
-            PlayerModel.set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().toString());
 
         PlayerDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
@@ -238,6 +232,9 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public void setRank(RankList rankList) {
+        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+        if (playerModel != null)
+            playerModel.set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
         API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), rankList.getRankPower());
         PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
     }

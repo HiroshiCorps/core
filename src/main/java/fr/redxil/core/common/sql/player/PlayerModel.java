@@ -21,7 +21,7 @@ public class PlayerModel extends SQLModel {
     }
 
     public long getPowerRank() {
-        return Long.parseLong(this.getString(PlayerDataValue.PLAYER_RANK_SQL.getString(null)));
+        return Integer.valueOf(this.getInt(PlayerDataValue.PLAYER_RANK_SQL.getString(null))).longValue();
     }
 
     public RankList getRank() {

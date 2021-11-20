@@ -104,11 +104,10 @@ public class CGame implements Games {
                 getOutGameSpectators().add(apiPlayer.getName());
             else
                 getInGameSpectators().add(apiPlayer.getName());
-            apiPlayer.switchServer(getServerName());
         } else {
             getPlayers().add(apiPlayer.getName());
-            apiPlayer.switchServer(getServerName());
         }
+        apiPlayer.switchServer(getServerName());
 
         return true;
     }
@@ -208,8 +207,8 @@ public class CGame implements Games {
     }
 
     @Override
-    public boolean isAllowConnectServer(APIPlayer apiPlayer) {
-        return isPlayer(apiPlayer.getName()) || isSpectator(apiPlayer.getName());
+    public boolean isAllowConnectServer(String name) {
+        return isPlayer(name) || isSpectator(name);
     }
 
     @Override

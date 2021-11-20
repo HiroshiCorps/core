@@ -67,14 +67,14 @@ public class CServerManager implements ServerManager {
 
     @Override
     public Server getServer(String s) {
+        if (!isServerExist(s)) return null;
         return getServer((long) API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(s));
     }
 
     @Override
     public Server getServer(long l) {
-        if (isServerExist(l))
-            return new CServer(l);
-        return null;
+        if (!isServerExist(l)) return null;
+        return new CServer(l);
     }
 
     @Override

@@ -15,6 +15,7 @@ import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.MoneyDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.money.MoneyModel;
@@ -68,7 +69,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void addSolde(long i) {
-        moneyModel.set("member_solde", moneyModel.getSolde() + i);
+        moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), moneyModel.getSolde() + i);
     }
 
     @Override
@@ -77,14 +78,14 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
-        moneyModel.set("member_solde", i);
+        moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), i);
 
         return true;
     }
 
     @Override
     public void addCoins(long i) {
-        moneyModel.set("member_coins", moneyModel.getCoins() + i);
+        moneyModel.set(MoneyDataValue.PLAYER_COINS_SQL.getString(), moneyModel.getCoins() + i);
     }
 
     @Override
@@ -92,7 +93,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
-        moneyModel.set("member_coins", moneyModel.getCoins() + i);
+        moneyModel.set(MoneyDataValue.PLAYER_COINS_SQL.getString(), moneyModel.getCoins() + i);
         return true;
     }
 
@@ -103,7 +104,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void setRank(RankList rankList) {
-        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), rankList.getRankPower().toString());
+        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), rankList.getRankPower().intValue());
     }
 
     @Override

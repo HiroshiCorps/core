@@ -19,6 +19,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
+import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.server.type.ServerType;
@@ -54,6 +55,10 @@ public class JoinListener {
     }
 
     public RegisteredServer getServer(APIPlayer apiPlayer) {
+        return getServer(apiPlayer.getName(), apiPlayer.getRank());
+    }
+
+    public RegisteredServer getServer(String playerName, RankList rankList) {
         Collection<Server> serverList = API.getInstance().getServerManager().getListServer(ServerType.HUB);
         if (serverList.isEmpty()) return null;
 
@@ -62,7 +67,7 @@ public class JoinListener {
 
         for (Server serverCheck : serverList) {
 
-            if (serverCheck.getServerAccess().canAccess(server, apiPlayer))
+            if (serverCheck.getServerAccess().canAccess(server, playerName, rankList))
                 continue;
 
             int playerConnected = serverCheck.getPlayerList().size();
@@ -125,9 +130,25 @@ public class JoinListener {
 
         }
 
-        APIPlayer apiPlayer = loadPlayer(player);
+        RegisteredServer registeredServer = null;
+        APIPlayer apiPlayer = null;
 
-        player.createConnectionRequest(getServer(apiPlayer));
+        if (apiOfflinePlayer != null)
+            registeredServer = getServer(apiOfflinePlayer.getName(), apiOfflinePlayer.getRank());
+        else {
+            apiPlayer = loadPlayer(player);
+            registeredServer = getServer(apiPlayer);
+        }
+
+        if (registeredServer == null) {
+            player.disconnect((Component) TextComponentBuilder.createTextComponent("Une Erreur est apparue: Aucun serveur accessible (Maintenance)"));
+            return;
+        }
+
+        if (apiPlayer == null)
+            loadPlayer(player);
+
+        player.createConnectionRequest(registeredServer);
 
     }
 

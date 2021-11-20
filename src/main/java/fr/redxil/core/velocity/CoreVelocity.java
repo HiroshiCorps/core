@@ -182,7 +182,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     @Override
     public String getServerName() {
-        return getProxyServer().getVersion().getName();
+        return getProxyServer().getConfiguration().getQueryMap();
     }
 
     @Override
