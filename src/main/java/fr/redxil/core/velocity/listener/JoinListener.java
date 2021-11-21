@@ -6,8 +6,9 @@
 
 package fr.redxil.core.velocity.listener;
 
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import fr.redline.pms.utils.IpInfo;
@@ -16,6 +17,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
+import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.utils.SanctionType;
@@ -56,26 +58,26 @@ public class JoinListener {
     }
 
     @Subscribe
-    public void onPlayerJoin(PostLoginEvent e) {
+    public void onPlayerJoin(LoginEvent e) {
 
         Player player = e.getPlayer();
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "First Connection");
         if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
-            player.disconnect((Component) TextComponentBuilder.createTextComponent(
+            e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
                     "§4§lSERVER NETWORK§r\n"
                             + "§cConnexion non autorisé§r\n\n"
                             + "§7Raison: Une personne est déjà connecté avec votre UUID§e§r\n"
-            ).getFinalTextComponent());
+            ).getFinalTextComponent()));
             return;
         }
 
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
             if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUsername())) {
-                player.disconnect((Component) TextComponentBuilder.createTextComponent(
+                e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
                         "§4§lSERVER NETWORK§r\n"
                                 + "§cConnexion non autorisé§r\n\n"
                                 + "§7Raison: Une personne est déjà connecté avec votre username§e§r\n"
-                ).getFinalTextComponent());
+                ).getFinalTextComponent()));
                 return;
             }
 
@@ -89,19 +91,22 @@ public class JoinListener {
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 2");
         if (apiOfflinePlayer != null) {
 
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "APIOfflinePlayer not null");
             SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
             if (model != null && model.isEffective()) {
-                player.disconnect((Component) model.getSancMessage().getFinalTextComponent());
+                e.setResult(ResultedEvent.ComponentResult.denied((Component) model.getSancMessage().getFinalTextComponent()));
                 return;
             }
 
-            Server velocityServer = API.getInstance().getServer();
+        } else API.getInstance().getPluginEnabler().printLog(Level.FINE, "APIOfflinePlayer null");
 
-            if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUsername(), apiOfflinePlayer.getRank())) {
-                player.disconnect((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server"));
-                return;
-            }
+        RankList playerRank = apiOfflinePlayer == null ? RankList.JOUEUR : apiOfflinePlayer.getRank();
 
+        Server velocityServer = API.getInstance().getServer();
+        if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUsername(), playerRank)) {
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 6");
+            e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server").getFinalTextComponent()));
+            return;
         }
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 3");

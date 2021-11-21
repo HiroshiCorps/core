@@ -50,8 +50,8 @@ public class CServer implements Server {
             put(ServerDataValue.SERVER_NAME_SQL.getString(null), name);
             put(ServerDataValue.SERVER_MAXP_SQL.getString(null), maxPlayer);
             put(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
-            put(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.name());
-            put(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().name());
+            put(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.toString());
+            put(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().toString());
             put(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null), RankList.JOUEUR.getRankPower().intValue());
             put(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
             put(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
@@ -63,8 +63,7 @@ public class CServer implements Server {
         model.set(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
         model.set(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
         model.set(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
-        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.name());
-        model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().name());
+        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.toString());
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, serverId);
         RedisManager redisManager = API.getInstance().getRedisManager();
@@ -173,10 +172,10 @@ public class CServer implements Server {
 
         ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataValue.SERVER_ID_SQL.getString(null) + " = ?", id);
 
-        model.set(ServerDataValue.SERVER_STATUS_SQL.getString(name, id), ServerStatus.OFFLINE.name());
-        model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(name, id), getServerAccess().name());
+        model.set(ServerDataValue.SERVER_STATUS_SQL.getString(name, id), ServerStatus.OFFLINE.toString());
+        model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(name, id), getServerAccess().toString());
         model.set(ServerDataValue.SERVER_NEEDRANK_SQL.getString(name, id), getReservedRank().getRankPower().intValue());
-        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(name, id), getServerType().name());
+        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(name, id), getServerType().toString());
 
         ServerDataValue.clearRedisData(DataType.SERVER, name, id);
 
@@ -188,27 +187,27 @@ public class CServer implements Server {
 
     @Override
     public ServerStatus getServerStatus() {
-        return ServerStatus.valueOf(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this)));
+        return ServerStatus.getServerStatus(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this)));
     }
 
     @Override
     public void setServerStatus(ServerStatus serverStatus) {
-        API.getInstance().getRedisManager().setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this), serverStatus.name());
+        API.getInstance().getRedisManager().setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(this), serverStatus.toString());
     }
 
     @Override
     public ServerAccess getServerAccess() {
-        return ServerAccess.valueOf(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this)));
+        return ServerAccess.getServerAccess(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this)));
     }
 
     @Override
     public void setServerAccess(ServerAccess serverAccess) {
-        API.getInstance().getRedisManager().setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this), serverAccess.name());
+        API.getInstance().getRedisManager().setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(this), serverAccess.toString());
     }
 
     @Override
     public ServerType getServerType() {
-        return ServerType.fromString(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(this)).toUpperCase());
+        return ServerType.getServerType(API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(this)));
     }
 
     @Override

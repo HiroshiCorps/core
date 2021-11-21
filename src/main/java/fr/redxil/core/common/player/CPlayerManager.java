@@ -18,6 +18,7 @@ import fr.redxil.core.common.sql.player.PlayerModel;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class CPlayerManager implements APIPlayerManager {
 
@@ -73,12 +74,21 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIOfflinePlayer getOfflinePlayer(UUID uuid) {
+
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 1");
+
         APIPlayer apiPlayer = getPlayer(uuid);
         if (apiPlayer != null) return apiPlayer;
 
-        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid) == null)
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 2");
+
+        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString()) == null) {
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 3");
             return API.getInstance().getNickGestion().getAPIOfflinePlayer(uuid.toString());
-        return new CPlayerOffline(uuid);
+        } else {
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 4");
+            return new CPlayerOffline(uuid);
+        }
     }
 
     /**
@@ -90,12 +100,21 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIOfflinePlayer getOfflinePlayer(String name) {
+
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 1");
+
         APIPlayer apiPlayer = getPlayer(name);
         if (apiPlayer != null) return apiPlayer;
 
-        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name) == null)
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 2");
+
+        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name) == null) {
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 3");
             return API.getInstance().getNickGestion().getAPIOfflinePlayer(name);
-        return new CPlayerOffline(name);
+        } else {
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 4");
+            return new CPlayerOffline(name);
+        }
     }
 
     /**
