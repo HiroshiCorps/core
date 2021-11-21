@@ -16,6 +16,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
+import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
@@ -89,8 +90,17 @@ public class JoinListener {
         if (apiOfflinePlayer != null) {
 
             SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
-            if (model != null && model.isEffective())
+            if (model != null && model.isEffective()) {
                 player.disconnect((Component) model.getSancMessage().getFinalTextComponent());
+                return;
+            }
+
+            Server velocityServer = API.getInstance().getServer();
+
+            if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUsername(), apiOfflinePlayer.getRank())) {
+                player.disconnect((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server"));
+                return;
+            }
 
         }
 
