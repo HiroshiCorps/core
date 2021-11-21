@@ -39,7 +39,6 @@ public class EventListener implements Listener {
 
     final CorePlugin corePlugin;
     final HostScoreboard hostScoreboard;
-    public boolean acceptConnection = true;
 
     public EventListener(CorePlugin corePlugin) {
         this.corePlugin = corePlugin;
@@ -87,7 +86,6 @@ public class EventListener implements Listener {
     @EventHandler
     public void asyncJoin(AsyncPlayerPreLoginEvent event) {
 
-        if (acceptConnection) return;
         event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Connection refused");
 
     }
@@ -96,11 +94,6 @@ public class EventListener implements Listener {
     public void playerJoinEvent(PlayerJoinEvent event) {
 
         Player p = event.getPlayer();
-
-        if (!acceptConnection) {
-            p.kickPlayer("Connection refused");
-            return;
-        }
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
         if (apiPlayer == null) {
