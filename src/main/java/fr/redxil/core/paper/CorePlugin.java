@@ -24,7 +24,6 @@ import fr.redxil.core.paper.minigame.PlayerListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.receiver.UpdaterReceiver;
-import fr.redxil.core.paper.team.TeamListener;
 import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -87,7 +86,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
         new Receiver();
         new UpdaterReceiver();
-        new TeamListener();
 
         PluginManager p = this.getServer().getPluginManager();
         p.registerEvents(new INVEventListener(), this);
@@ -185,7 +183,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     public void shutdownServer(String s) {
 
         System.out.println(SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
-        this.getEventListener().acceptConnection = false;
         Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(s));
         Bukkit.getServer().shutdown();
         new Timer().schedule(
