@@ -22,7 +22,6 @@ import fr.redxil.core.paper.event.INVEventListener;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
 import fr.redxil.core.paper.minigame.PlayerListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
-import fr.redxil.core.paper.moderatormode.UUIDCheckCmd;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.receiver.UpdaterReceiver;
 import fr.redxil.core.paper.team.TeamListener;
@@ -40,7 +39,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
     private static CorePlugin instance;
 
-    private String serverName;
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
@@ -68,24 +66,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
                         + "# carefully all outputs coming from it.        #\n"
                         + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
         );
-
-
-        log(SystemColor.YELLOW + "Initialize plugin config" + SystemColor.RESET);
-        this.saveDefaultConfig();
-        this.getConfig();
-        log(SystemColor.GREEN + "Plugin config initialized" + SystemColor.RESET);
-
-        log(SystemColor.YELLOW + "Searching servername" + SystemColor.RESET);
-        this.serverName = Bukkit.getServer().getServerName();
-        if (this.serverName == null || this.serverName.isEmpty()) {
-            log(SystemColor.RED + "Cannot get ServerName, Shuttingdown" + SystemColor.RESET);
-            log(Level.SEVERE, "Plugin cannot load : ServerName is empty.");
-            this.setEnabled(false);
-            this.shutdownServer("Plugin cannot load : ServerName is empty.");
-            return;
-        }
-
-        log(SystemColor.GREEN + "Servername found: " + serverName + SystemColor.RESET);
 
         log(SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
@@ -122,7 +102,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         this.getCommand("freeze").setExecutor(new FreezeCmd());
         this.getCommand("vanish").setExecutor(new VanishCmd());
         this.getCommand("fly").setExecutor(new FlyCmd());
-        this.getCommand("uuid").setExecutor(new UUIDCheckCmd());
 
         log(SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
@@ -159,7 +138,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     public void onDisable() {
         if (API.getInstance().isHostServer()) {
             API.getInstance().getHost().stop();
-            API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", getServerName());
+            API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", API.getInstance().getServerName());
         }
 
         API.getInstance().shutdown();
@@ -179,11 +158,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     }
 
     @Override
-    public String getServerName() {
-        return serverName;
-    }
-
-    @Override
     public String getPluginVersion() {
         return getDescription().getVersion();
     }
@@ -194,7 +168,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     }
 
     @Override
-    public boolean isBungee() {
+    public boolean isVelocity() {
         return false;
     }
 

@@ -201,7 +201,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public void disconnectModerator() {
-        if (!API.getInstance().isBungee()) return;
+        if (!API.getInstance().isVelocity()) return;
 
         long memberID = this.memberID;
 

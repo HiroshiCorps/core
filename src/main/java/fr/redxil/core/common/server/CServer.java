@@ -161,7 +161,7 @@ public class CServer implements Server {
     public boolean shutdown() {
 
         String name = getServerName();
-        if (!API.getInstance().getPluginEnabler().getServerName().equals(name)) return false;
+        if (!API.getInstance().getServerName().equals(name)) return false;
 
         long id = getServerId();
 
@@ -223,12 +223,12 @@ public class CServer implements Server {
         if (!listPlayer.contains(uuid.toString()))
             listPlayer.add(uuid.toString());
 
-        if (API.getInstance().isBungee())
-            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), API.getInstance().getPluginEnabler().getServerName());
+        if (API.getInstance().isVelocity())
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), API.getInstance().getServerName());
         else {
             Server server = apiPlayer.getServer();
             if (server != null) server.removePlayerInServer(apiPlayer.getUUID());
-            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), API.getInstance().getPluginEnabler().getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), API.getInstance().getServerName());
         }
     }
 
@@ -239,11 +239,11 @@ public class CServer implements Server {
 
     @Override
     public void sendShutdownOrder() {
-        if (getServerName().equals(API.getInstance().getPluginEnabler().getServerName())) {
+        if (getServerName().equals(API.getInstance().getServerName())) {
             API.getInstance().getPluginEnabler().shutdownServer("Shutdown Order from: " + getServerName());
             return;
         }
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", API.getInstance().getPluginEnabler().getServerName());
+        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", API.getInstance().getServerName());
     }
 
     @Override

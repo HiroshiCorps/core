@@ -136,6 +136,8 @@ public class TeamListener implements PMReceiver, Listener {
 
     @EventHandler
     public void entityDamage(EntityDamageEvent event) {
+        if (GameBuilder.getGameBuilder() == null)
+            return;
         if (!GameBuilder.getGameBuilder().getGame().isGameState(GameState.OCCUPIED))
             event.setCancelled(true);
     }

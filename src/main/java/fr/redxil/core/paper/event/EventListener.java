@@ -19,7 +19,6 @@ import fr.redxil.api.spigot.event.PlayerLoggedEvent;
 import fr.redxil.api.spigot.itemstack.APIItemStack;
 import fr.redxil.api.spigot.minigame.GameBuilder;
 import fr.redxil.api.spigot.minigame.teams.TeamsGUI;
-import fr.redxil.api.spigot.utils.NBTEditor;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.hosts.HostScoreboard;
 import net.minecraft.server.v1_12_R1.*;
@@ -35,7 +34,6 @@ import org.bukkit.event.player.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class EventListener implements Listener {
 
@@ -234,10 +232,9 @@ public class EventListener implements Listener {
 
     public void sendJoinMessage(APIPlayer apiPlayer) {
 
-
         NickData nickData = API.getInstance().getNickGestion().getNickData(apiPlayer);
 
-        String message = "§fLe joueur " + nickData.getRank().getChatRankString() + " " + nickData.getName() + " §fà rejoint le serveur";
+        String message = "§fLe joueur " + nickData.getRank().getChatRankString() + nickData.getName() + " §fà rejoint le serveur";
 
         Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
 
@@ -290,9 +287,6 @@ public class EventListener implements Listener {
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
-        if (!NBTEditor.contains(event.getItemDrop(), "uuid"))
-            NBTEditor.set(event.getItemDrop(), UUID.randomUUID(), "uuid");
-
     }
 
     @EventHandler
@@ -301,10 +295,6 @@ public class EventListener implements Listener {
         APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
-
-
-        if (!NBTEditor.contains(event.getItem(), "uuid"))
-            NBTEditor.set(event.getItem(), UUID.randomUUID(), "uuid");
 
     }
 

@@ -42,20 +42,29 @@ public class CoreAPI extends API {
 
     private final ServerAccessEnum sea;
     private String serverName;
-    private CServerManager serverManager;
-    private CPlayerManager apiPlayerManager;
-    private CModeratorManager moderatorManager;
-    private CNickGestion nickGestion;
+    private final CServerManager serverManager;
+    private final CPlayerManager apiPlayerManager;
+    private final CModeratorManager moderatorManager;
+    private final CNickGestion nickGestion;
     private CRedisManager manager;
-    private CGameManager cGameManager;
-    private SQLConnection sqlConnection;
-    private PartyManager partyManager;
-    private CTeamManager cTeamManager;
+    private final CGameManager cGameManager;
+    private final SQLConnection sqlConnection;
+    private final PartyManager partyManager;
+    private final CTeamManager cTeamManager;
 
     public CoreAPI(PluginEnabler plugin, ServerAccessEnum sea) {
         super(plugin);
 
         this.sea = sea;
+
+        this.serverManager = new CServerManager();
+        this.apiPlayerManager = new CPlayerManager();
+        this.moderatorManager = new CModeratorManager();
+        this.nickGestion = new CNickGestion();
+        this.cGameManager = new CGameManager();
+        this.partyManager = new CPartyManager();
+        this.cTeamManager = new CTeamManager();
+        this.sqlConnection = new CSQLConnection();
 
         File serverNameFile = new File(plugin.getPluginDataFolder() + File.separator + "servername.json");
         File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlUser.json");
@@ -92,18 +101,9 @@ public class CoreAPI extends API {
         }
 
         this.serverName = serverName;
-
-        this.sqlConnection = new CSQLConnection();
         this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
         this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
-        this.serverManager = new CServerManager();
-        this.apiPlayerManager = new CPlayerManager();
-        this.moderatorManager = new CModeratorManager();
-        this.nickGestion = new CNickGestion();
-        this.cGameManager = new CGameManager();
-        this.partyManager = new CPartyManager();
-        this.cTeamManager = new CTeamManager();
         new ShutdownOrderListener();
 
         ServerType serverType;

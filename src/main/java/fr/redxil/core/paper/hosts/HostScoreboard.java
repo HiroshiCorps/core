@@ -32,7 +32,7 @@ public class HostScoreboard extends Scoreboard {
         lines.put(2, "§7╸ §fJoueurs: §b" + Bukkit.getOnlinePlayers().size() + "/" + hosts.getSettings("host_slots"));
         ///lines.put(3, "§7╸ §fÉquipes: §b" + hosts.getHostData().getHostTeamsType().getDisplayName());
         lines.put(3, "§7");
-        lines.put(4, "§7╸ §fServeur: §7" + API.getInstance().getPluginEnabler().getServerName().toUpperCase());
+        lines.put(4, "§7╸ §fServeur: §7" + API.getInstance().getServerName().toUpperCase());
         lines.put(5, "");
         lines.put(6, "§6play.swampmc.net");
     }

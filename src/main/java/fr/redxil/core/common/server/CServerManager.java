@@ -16,42 +16,55 @@ import fr.redxil.core.common.data.ServerDataValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 public class CServerManager implements ServerManager {
 
     @Override
     public List<String> getListServerName() {
         return new ArrayList<String>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).keySet())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).keySet()) {
                 add((String) serverName);
+                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 1");
+            }
         }};
     }
 
     @Override
     public List<Long> getListServerID() {
         return new ArrayList<Long>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).values())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).values()) {
                 add((long) serverName);
+                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 2");
+            }
         }};
     }
 
     @Override
     public List<Server> getListServer() {
         return new ArrayList<Server>() {{
-            for (long serverID : getListServerID())
+            for (long serverID : getListServerID()) {
                 add(getServer(serverID));
+                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 3");
+            }
         }};
     }
 
     @Override
-    public List<Server> getListServer(ServerType ServerType) {
+    public List<Server> getListServer(ServerType serverType) {
 
-        if (ServerType == null) return getListServer();
+        if (serverType == null) return getListServer();
 
         return new ArrayList<Server>() {{
-            for (Server server : getListServer())
-                if (server.getServerType().toString().equals(ServerType.toString()))
+            for (Server server : getListServer()) {
+                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 4");
+                if (server.getServerType() == serverType) {
+                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 6");
                     add(server);
+                } else {
+                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 7");
+                }
+            }
         }};
     }
 
@@ -90,17 +103,16 @@ public class CServerManager implements ServerManager {
     public Server getConnectableServer(APIPlayer apiPlayer, ServerType serverType) {
 
         List<Server> availableServer = getListServer(serverType);
-        final Server[] server = {null};
+        Server server = null;
 
-        availableServer.forEach((testServer) -> {
-
+        for (Server testServer : availableServer) {
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 5");
             if (testServer.getConnectedPlayer() < testServer.getMaxPlayers() && testServer.getServerAccess().canAccess(testServer, apiPlayer))
-                if (server[0] == null || server[0].getConnectedPlayer() > testServer.getConnectedPlayer())
-                    server[0] = testServer;
+                if (server == null || server.getConnectedPlayer() > testServer.getConnectedPlayer())
+                    server = testServer;
+        }
 
-        });
-
-        return server[0];
+        return server;
 
     }
 

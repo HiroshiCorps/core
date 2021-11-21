@@ -56,6 +56,8 @@ public class CPlayer implements APIPlayer {
 
     protected static APIPlayer loadPlayer(String name, UUID uuid, IpInfo ipInfo) {
 
+        System.out.println("Creating player Data");
+
         RedisManager redisManager = API.getInstance().getRedisManager();
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<String, Object>() {{
@@ -100,7 +102,9 @@ public class CPlayer implements APIPlayer {
         redisManager.getRedisList(PlayerDataValue.LIST_PLAYER_ID.getString(name, memberID)).add(memberID);
 
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
-            redisManager.setRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(), 1L);
+            redisManager.setRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(name, memberID), 1L);
+
+        System.out.println("Player Data creation finished");
 
         return new CPlayer(memberID);
 
@@ -108,7 +112,7 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public void unloadPlayer() {
-        if (!API.getInstance().isBungee()) return;
+        if (!API.getInstance().isVelocity()) return;
 
         String name = getName();
 

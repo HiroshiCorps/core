@@ -48,9 +48,9 @@ import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,7 +70,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         this.folder = folder;
 
         if (proxyServer == null)
-            logger.log(Level.SEVERE, "ProxyServer null");
+            this.logger.log(Level.SEVERE, "ProxyServer null");
         else
             logger.log(Level.FINE, "ProxyServer not null");
 
@@ -181,13 +181,8 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     }
 
     @Override
-    public boolean isBungee() {
+    public boolean isVelocity() {
         return true;
-    }
-
-    @Override
-    public String getServerName() {
-        return getProxyServer().getConfiguration().getQueryMap();
     }
 
     @Override
@@ -214,16 +209,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
         System.out.println(SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
         getProxyServer().getAllPlayers().forEach(proxPlayer -> proxPlayer.disconnect((Component) TextComponentBuilder.createTextComponent(s)));
-        new Timer().schedule(
-
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        getProxyServer().shutdown();
-                    }
-                }
-
-                , 5);
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> getProxyServer().shutdown(), 5, TimeUnit.SECONDS);
 
     }
 
@@ -239,7 +225,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     @Override
     public void printLog(Level level, String msg) {
-        logger.log(level, msg);
+        System.out.println(msg);
     }
 
 }

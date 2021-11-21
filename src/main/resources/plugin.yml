@@ -1,3 +1,12 @@
 main: "fr.redxil.core.paper.CorePlugin"
 version: "1.0"
 name: "Core"
+commands:
+  mod:
+    description: "Mode moderateur"
+  freeze:
+    description: "Freeze un joueur"
+  vanish:
+    description: "Se mettre en Invisible"
+  fly:
+    description: "Voler"

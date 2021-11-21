@@ -97,9 +97,9 @@ public class INVEventListener implements Listener {
             return;
         }
 
-        System.out.println("test");
         ItemStack item = event.getItem();
-        System.out.println(item.getType());
+        if (item == null)
+            return;
 
         if (item instanceof APIItemStack) {
 

@@ -42,7 +42,7 @@ public class CTeam implements Team {
         RedisManager rm = API.getInstance().getRedisManager();
 
         rm.setRedisString(TeamDataValue.TEAM_NAME_REDIS.getString(teamID), name);
-        rm.setRedisString(TeamDataValue.TEAM_SERVER_REDIS.getString(teamID), API.getInstance().getPluginEnabler().getServerName());
+        rm.setRedisString(TeamDataValue.TEAM_SERVER_REDIS.getString(teamID), API.getInstance().getServerName());
         rm.setRedisString(TeamDataValue.TEAM_DISPLAY_NAME_REDIS.getString(teamID), name);
         rm.setRedisLong(TeamDataValue.TEAM_MAXP_REDIS.getString(teamID), Integer.valueOf(maxPlayers).longValue());
 

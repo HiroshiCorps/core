@@ -21,6 +21,8 @@ import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.Component;
 
+import java.util.logging.Level;
+
 public class JoinListener {
 
     public APIPlayer loadPlayer(Player player) {
@@ -56,7 +58,7 @@ public class JoinListener {
     public void onPlayerJoin(PostLoginEvent e) {
 
         Player player = e.getPlayer();
-
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "First Connection");
         if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
             player.disconnect((Component) TextComponentBuilder.createTextComponent(
                     "§4§lSERVER NETWORK§r\n"
@@ -76,11 +78,14 @@ public class JoinListener {
                 return;
             }
 
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline PLayer");
         APIOfflinePlayer apiOfflinePlayer;
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK) {
             apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername());
         } else apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
+
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 2");
         if (apiOfflinePlayer != null) {
 
             SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
@@ -89,7 +94,9 @@ public class JoinListener {
 
         }
 
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 3");
         loadPlayer(player);
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 4");
 
     }
 
