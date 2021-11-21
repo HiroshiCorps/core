@@ -7,21 +7,22 @@
 package fr.redxil.core.common.game;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameEnum;
-import fr.redxil.api.common.game.Games;
-import fr.redxil.api.common.game.GamesManager;
-import fr.redxil.api.common.game.Hosts;
+import fr.redxil.api.common.game.GameManager;
+import fr.redxil.api.common.game.Host;
+import fr.redxil.api.common.game.error.GameCreateError;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.data.GameDataValue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CGameManager implements GamesManager {
+public class CGameManager implements GameManager {
 
     @Override
-    public List<Games> getListGames() {
-        return new ArrayList<Games>() {{
+    public List<Game> getListGames() {
+        return new ArrayList<Game>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).values())
                 add(getGame(Long.parseLong((String) serverName)));
         }};
@@ -38,29 +39,29 @@ public class CGameManager implements GamesManager {
     }
 
     @Override
-    public Games getGame(String s) {
+    public Game getGame(String s) {
         if (!isGameExist(s)) return null;
         if (isHostExist(s)) getHost(s);
         return new CGame(s);
     }
 
     @Override
-    public Games getGame(long s) {
+    public Game getGame(long s) {
         if (!isGameExist(s)) return null;
         if (isHostExist(s)) return getHost(s);
         return new CGame(s);
     }
 
     @Override
-    public Games initGameServer(String s, GameEnum gameEnum) {
-        Games games = getGame(s);
+    public Game initGameServer(String s, GameEnum gameEnum) {
+        Game games = getGame(s);
         if (games != null) return games;
-        return getGame(CGame.initGame(s, gameEnum));
+        return CGame.initGame(s, gameEnum);
     }
 
     @Override
-    public List<Hosts> getListHosts() {
-        return new ArrayList<Hosts>() {{
+    public List<Host> getListHost() {
+        return new ArrayList<Host>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).values())
                 add(getHost(Long.parseLong((String) serverName)));
         }};
@@ -78,23 +79,22 @@ public class CGameManager implements GamesManager {
     }
 
     @Override
-    public Hosts getHost(String s) {
+    public Host getHost(String s) {
         if (!isHostExist(s)) return null;
         return new CHost((long) API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).get(s));
     }
 
     @Override
-    public Hosts getHost(long s) {
+    public Host getHost(long s) {
         if (!isHostExist(s)) return null;
         return new CHost(s);
     }
 
     @Override
-    public Hosts initHostServer(String s, APIPlayer s1, GameEnum hostGame) {
-        if (s == null || s1 == null || hostGame == null) return null;
+    public Host initHostServer(String s, APIPlayer s1, GameEnum hostGame) throws GameCreateError {
         if (isHostExist(s))
-            return getHost(s);
-        return getHost(CHost.initHost(s, s1.getName(), hostGame));
+            throw new GameCreateError("Host name already used");
+        return CHost.initHost(s, s1.getName(), hostGame);
     }
 
 }

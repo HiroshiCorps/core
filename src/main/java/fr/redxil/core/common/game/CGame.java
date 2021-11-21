@@ -8,10 +8,10 @@ package fr.redxil.core.common.game;
 
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
-import fr.redxil.api.common.game.Games;
-import fr.redxil.api.common.game.Hosts;
+import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.game.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
@@ -25,8 +25,9 @@ import fr.redxil.core.common.redis.IDGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-public class CGame implements Games {
+public class CGame implements Game {
 
     final String server;
     final long gameID;
@@ -41,7 +42,7 @@ public class CGame implements Games {
         this.gameID = (long) API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).get(serverName);
     }
 
-    public static long initGame(String server, GameEnum gameEnum) {
+    public static Game initGame(String server, GameEnum gameEnum) {
 
         long gameID = IDGenerator.generateLONGID(IDDataValue.GAME);
 
@@ -60,7 +61,7 @@ public class CGame implements Games {
         redisManager.setRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMaxNPSpec()).longValue());
         redisManager.setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(server, gameID), gameEnum.name());
         redisManager.setRedisString(GameDataValue.GAME_MAP_REDIS.getString(server, gameID), "None");
-        return gameID;
+        return new CGame(gameID);
 
     }
 
@@ -101,11 +102,11 @@ public class CGame implements Games {
 
         if (b) {
             if (!apiPlayer.getRank().isModeratorRank())
-                getOutGameSpectators().add(apiPlayer.getName());
+                getOutGameSpectators().add(apiPlayer.getUUID());
             else
-                getInGameSpectators().add(apiPlayer.getName());
+                getInGameSpectators().add(apiPlayer.getUUID());
         } else {
-            getPlayers().add(apiPlayer.getName());
+            getPlayers().add(apiPlayer.getUUID());
         }
         apiPlayer.switchServer(getServerName());
 
@@ -152,27 +153,27 @@ public class CGame implements Games {
     }
 
     @Override
-    public List<String> getPlayers() {
+    public List<UUID> getPlayers() {
         return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_PLAYER_REDIS.getString(this));
     }
 
     @Override
-    public List<String> getInGameSpectators() {
+    public List<UUID> getInGameSpectators() {
         return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_INGAME_REDIS.getString(this));
     }
 
     @Override
-    public List<String> getOutGameSpectators() {
+    public List<UUID> getOutGameSpectators() {
         return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_OUTGAME_REDIS.getString(this));
     }
 
     @Override
-    public List<String> getInConnectPlayer() {
+    public List<UUID> getInConnectPlayer() {
         return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_INCOPLAYER_REDIS.getString(this));
     }
 
     @Override
-    public boolean setSpectator(String s, boolean b) {
+    public boolean setSpectator(UUID s, boolean b) {
         if (b == isSpectator(s)) return false;
         if (b) {
             getPlayers().remove(s);
@@ -203,17 +204,17 @@ public class CGame implements Games {
 
     @Override
     public boolean isHostLinked() {
-        return API.getInstance().getGamesManager().isHostExist(getServerName());
+        return API.getInstance().getGameManager().isHostExist(getServerName());
     }
 
     @Override
-    public boolean isAllowConnectServer(String name) {
+    public boolean isAllowConnectServer(UUID name) {
         return isPlayer(name) || isSpectator(name);
     }
 
     @Override
-    public Hosts getHost() {
-        return API.getInstance().getGamesManager().getHost(getServerName());
+    public Host getHost() {
+        return API.getInstance().getGameManager().getHost(getServerName());
     }
 
     @Override
@@ -276,8 +277,8 @@ public class CGame implements Games {
     }
 
     @Override
-    public List<String> getSpectators() {
-        List<String> specList = new ArrayList<>(getInGameSpectators());
+    public List<UUID> getSpectators() {
+        List<UUID> specList = new ArrayList<>(getInGameSpectators());
         specList.addAll(getOutGameSpectators());
         return specList;
     }
@@ -307,7 +308,7 @@ public class CGame implements Games {
     }
 
     @Override
-    public boolean isInConnectPlayer(String playerName) {
+    public boolean isInConnectPlayer(UUID playerName) {
         return getInConnectPlayer().contains(playerName);
     }
 
@@ -322,12 +323,12 @@ public class CGame implements Games {
     }
 
     @Override
-    public boolean isPlayer(String playerName) {
+    public boolean isPlayer(UUID playerName) {
         return getPlayers().contains(playerName);
     }
 
     @Override
-    public boolean isSpectator(String playerName) {
+    public boolean isSpectator(UUID playerName) {
         return getSpectators().contains(playerName);
     }
 

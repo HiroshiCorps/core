@@ -9,7 +9,8 @@ package fr.redxil.core.common.server;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.Games;
+import fr.redxil.api.common.game.Game;
+import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.rank.RankList;
 import fr.redxil.api.common.redis.RedisManager;
@@ -246,23 +247,23 @@ public class CServer implements Server {
     }
 
     @Override
-    public boolean isHostDedicated() {
-        return API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_HOSTED_REDIS.getString(this)) != null;
+    public boolean isHostServer() {
+        return API.getInstance().getGameManager().getHost(getServerName()) != null;
     }
 
     @Override
-    public String getHostAuthor() {
-        return API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_HOSTED_REDIS.getString(this));
+    public boolean isGameServer() {
+        return API.getInstance().getGame() != null;
     }
 
     @Override
-    public boolean isGamesServer() {
-        return API.getInstance().getGamesManager().getGame(getServerName()) != null;
+    public Game getGame() {
+        return API.getInstance().getGameManager().getGame(getServerName());
     }
 
     @Override
-    public Games getGames() {
-        return API.getInstance().getGamesManager().getGame(getServerName());
+    public Host getHost() {
+        return API.getInstance().getGameManager().getHost(getServerName());
     }
 
     @Override

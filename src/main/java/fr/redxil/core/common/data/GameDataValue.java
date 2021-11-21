@@ -10,7 +10,7 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.Games;
+import fr.redxil.api.common.game.Game;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -70,7 +70,7 @@ public enum GameDataValue {
 
     }
 
-    public static void clearRedisData(DataType dataType, Games host) {
+    public static void clearRedisData(DataType dataType, Game host) {
 
         if (host != null)
             clearRedisData(dataType, host.getServerName(), host.getGameID());
@@ -79,7 +79,7 @@ public enum GameDataValue {
 
     }
 
-    public String getString(Games hosts) {
+    public String getString(Game hosts) {
         String location = this.location;
         if (needName) {
             String pseudo = hosts.getServerName();

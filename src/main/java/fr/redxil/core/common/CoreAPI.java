@@ -11,9 +11,9 @@ import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
-import fr.redxil.api.common.game.Games;
-import fr.redxil.api.common.game.GamesManager;
-import fr.redxil.api.common.game.Hosts;
+import fr.redxil.api.common.game.Game;
+import fr.redxil.api.common.game.GameManager;
+import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.game.team.TeamManager;
 import fr.redxil.api.common.party.PartyManager;
 import fr.redxil.api.common.player.APIPlayerManager;
@@ -111,9 +111,9 @@ public class CoreAPI extends API {
             serverType = ServerType.VELOCITY;
         else {
 
-            Games games = getGame();
+            Game games = getGame();
             if (games != null) {
-                if (games instanceof Hosts)
+                if (games instanceof Host)
                     serverType = ServerType.HOST;
                 else serverType = ServerType.GAME;
             } else serverType = ServerType.HUB;
@@ -201,15 +201,15 @@ public class CoreAPI extends API {
     }
 
     @Override
-    public Hosts getHost() {
+    public Host getHost() {
         if (isHostServer() && isSpigot())
-            return getGamesManager().getHost(getServerName());
+            return getGameManager().getHost(getServerName());
 
         return null;
     }
 
     @Override
-    public GamesManager getGamesManager() {
+    public GameManager getGameManager() {
         return this.cGameManager;
     }
 
@@ -221,13 +221,13 @@ public class CoreAPI extends API {
     }
 
     @Override
-    public Games getGame() {
-        return getGamesManager().getGame(getServerName());
+    public Game getGame() {
+        return getGameManager().getGame(getServerName());
     }
 
     @Override
     public boolean isGameServer() {
-        return getGamesManager().isGameExist(getServerName());
+        return getGameManager().isGameExist(getServerName());
     }
 
     public ServerAccessEnum getServerAccessEnum() {

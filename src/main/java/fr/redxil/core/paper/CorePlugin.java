@@ -21,7 +21,6 @@ import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.INVEventListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
-import fr.redxil.core.paper.minigame.PlayerListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.receiver.UpdaterReceiver;
@@ -91,7 +90,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         p.registerEvents(new INVEventListener(), this);
 
         p.registerEvents(new ConnectionListener(this), this);
-        p.registerEvents(new PlayerListener(), this);
         p.registerEvents(new PlayerInteractEvent(), this);
 
         log(SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);

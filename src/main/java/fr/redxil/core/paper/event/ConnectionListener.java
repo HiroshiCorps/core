@@ -7,29 +7,25 @@
 package fr.redxil.core.paper.event;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameState;
-import fr.redxil.api.common.game.Games;
-import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.utils.JavaUtils;
 import fr.redxil.api.paper.event.PlayerLoggedEvent;
-import fr.redxil.api.paper.itemstack.APIItemStack;
 import fr.redxil.api.paper.minigame.GameBuilder;
-import fr.redxil.api.paper.minigame.teams.TeamsGUI;
 import fr.redxil.core.paper.CorePlugin;
-import fr.redxil.core.paper.hosts.HostScoreboard;
 import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.ArrayList;
@@ -38,15 +34,9 @@ import java.util.List;
 public class ConnectionListener implements Listener {
 
     final CorePlugin corePlugin;
-    final HostScoreboard hostScoreboard;
 
     public ConnectionListener(CorePlugin corePlugin) {
         this.corePlugin = corePlugin;
-
-        if (API.getInstance().isHostServer())
-            this.hostScoreboard = new HostScoreboard(API.getInstance().getHost());
-        else
-            this.hostScoreboard = null;
     }
 
     public static void applyNick(Player p, APIPlayer apiPlayer, boolean connection) {
@@ -84,15 +74,34 @@ public class ConnectionListener implements Listener {
     }
 
     @EventHandler
-    public void playerJoinEvent(PlayerJoinEvent event) {
+    public void playerJoinEvent(PlayerLoginEvent event) {
 
         Player p = event.getPlayer();
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
         if (apiPlayer == null) {
-            p.kickPlayer("An error appears with you're data");
+            event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
             return;
         }
+
+        GameBuilder gameBuilder = GameBuilder.getGameBuilder();
+        Game games = API.getInstance().getGame();
+        if (gameBuilder != null) {
+            boolean spectate = games.isSpectator(apiPlayer.getUUID());
+
+            if (games.getPlayers().size() >= games.getMaxPlayer() && !spectate) {
+                event.setResult(PlayerLoginEvent.Result.KICK_FULL);
+                return;
+            }
+
+            if (!spectate && !games.isGameState(GameState.WAITING, GameState.STARTING)) {
+                event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+                return;
+            }
+        }
+
+        corePlugin.getVanish().applyVanish(p);
+        applyNick(p, apiPlayer, true);
 
         API.getInstance().getServer().setPlayerInServer(apiPlayer);
         APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer);
@@ -101,13 +110,34 @@ public class ConnectionListener implements Listener {
             if (apiPlayer.isLogin()) {
                 corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
                 corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
-                if (playerModerator.isModeratorMod())
-                    event.setJoinMessage(null);
             }
         }
 
-        corePlugin.getVanish().applyVanish(p);
-        applyNick(p, apiPlayer, true);
+    }
+
+    public void playerJoinGameServer(Player p, APIPlayer apiPlayer) {
+
+        GameBuilder gameBuilder = GameBuilder.getGameBuilder();
+        Game games = API.getInstance().getGame();
+
+        if (gameBuilder == null)
+            return;
+
+        boolean spectate = games.isSpectator(p.getUniqueId());
+
+        if (!spectate) {
+            games.getInConnectPlayer().remove(apiPlayer.getUUID());
+            gameBuilder.onPlayerJoin(p);
+            gameBuilder.broadcastActionBar("§a" + p.getName() + "§7 à rejoins la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
+        } else
+            gameBuilder.onSpectatorJoin(p);
+
+    }
+
+    @EventHandler
+    public void playerJoin(PlayerJoinEvent event) {
+
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 
         if (event.getJoinMessage() != null && GameBuilder.getGameBuilder() == null) {
             event.setJoinMessage(null);
@@ -115,53 +145,8 @@ public class ConnectionListener implements Listener {
                 sendJoinMessage(apiPlayer);
         }
 
-        if (GameBuilder.getGameBuilder() == null)
-            return;
-
-        GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Games games = API.getInstance().getGame();
-
-        boolean spectate = games.isSpectator(apiPlayer.getName());
-
-        if (games.getPlayers().size() >= games.getMaxPlayer() && !spectate) {
-            p.kickPlayer("§cErreur vous ne pouvez pas rejoindre ce serveur");
-            return;
-        }
-
-        if (!spectate && !games.isGameState(GameState.WAITING, GameState.STARTING)) {
-            p.kickPlayer("§cErreur vous ne pouvez pas rejoindre ce serveur");
-            return;
-        }
-
-        if (!spectate) {
-            games.getInConnectPlayer().remove(apiPlayer.getName());
-            gameBuilder.onPlayerJoin(p);
-            gameBuilder.broadcastActionBar("§a" + p.getName() + "§7 à rejoins la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
-
-            if (gameBuilder.hasTeams())
-                p.getInventory().setItem(0, new APIItemStack(Material.BANNER, 1, (byte) 15).setName("§e§lÉquipes §7(Clique droit)").setOFFInvAction((player, event2) -> {
-                    event2.setCancelled(true);
-                    new TeamsGUI(player, 0).openGUI(player);
-                }));
-
-        } else
-            gameBuilder.onSpectatorJoin(p);
-
-        p.getInventory().setItem(8, new APIItemStack(Material.BARRIER).setName("§c§lQuitter §7(Clique droit)"));
-
-        if (!games.isHostLinked()) return;
-
-        Hosts hosts = games.getHost();
-
-        p.sendMessage("Serveur host");
-        p.sendMessage("§aBienvenue dans l'host de : " + hosts.getAuthor() + " dans le mode de jeu " + hosts.getGame());
-
-        p.getInventory().setItem(8, new APIItemStack(Material.BED).setName("§c§lQuitter §7(Clique droit)"));
-        if (games.isGameState(GameState.WAITING, GameState.STARTING) && apiPlayer.getName().equals(hosts.getAuthor()))
-            p.getInventory().setItem(0, new APIItemStack(Material.REDSTONE_COMPARATOR).setName("§e§lConfigurer §7(Clique droit)"));
-
-        if (hostScoreboard != null)
-            hostScoreboard.addScoreboard(event.getPlayer());
+        if (GameBuilder.getGameBuilder() != null)
+            playerJoinGameServer(event.getPlayer(), apiPlayer);
 
     }
 
@@ -183,26 +168,21 @@ public class ConnectionListener implements Listener {
             return;
 
         GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Games games = API.getInstance().getGame();
+        Game games = API.getInstance().getGame();
 
-        boolean spectator = games.isSpectator(osp.getName());
+        boolean spectator = games.isSpectator(osp.getUUID());
 
         if (!spectator) {
-            games.getPlayers().remove(osp.getName());
+            games.getPlayers().remove(osp.getUUID());
             gameBuilder.broadcastActionBar("§a" + osp.getName(true) + "§7 à quitté la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
             gameBuilder.onPlayerLeave(player);
         } else {
-            if (games.getInGameSpectators().contains(osp.getName()))
-                games.getInGameSpectators().remove(osp.getName());
+            if (games.getInGameSpectators().contains(osp.getUUID()))
+                games.getInGameSpectators().remove(osp.getUUID());
             else
-                games.getOutGameSpectators().remove(osp.getName());
+                games.getOutGameSpectators().remove(osp.getUUID());
             gameBuilder.onSpectatorLeave(player);
         }
-
-        if (!API.getInstance().isHostServer()) return;
-
-        if (hostScoreboard != null)
-            hostScoreboard.removeScoreboard(event.getPlayer());
 
     }
 

@@ -7,25 +7,25 @@
 package fr.redxil.core.common.game;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.GameEnum;
-import fr.redxil.api.common.game.GameState;
-import fr.redxil.api.common.game.HostAccess;
-import fr.redxil.api.common.game.Hosts;
+import fr.redxil.api.common.game.*;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.data.GameDataValue;
 
 import java.util.List;
+import java.util.UUID;
 
-public class CHost extends CGame implements Hosts {
+public class CHost extends CGame implements Host {
 
     public CHost(long gameID) {
         super(gameID);
     }
 
-    public static long initHost(String server, String author, GameEnum gameEnum) {
+    public static Host initHost(String server, String author, GameEnum gameEnum) {
 
-        long gameID = CGame.initGame(server, gameEnum);
+        Game game = CGame.initGame(server, gameEnum);
+
+        long gameID = game.getGameID();
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
@@ -33,13 +33,13 @@ public class CHost extends CGame implements Hosts {
         redisManager.setRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(server, gameID), author);
         redisManager.setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(server, gameID), HostAccess.CLOSE.toString());
 
-        return gameID;
+        return new CHost(gameID);
 
     }
 
     @Override
-    public String getAuthor() {
-        return API.getInstance().getRedisManager().getRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(this));
+    public UUID getAuthor() {
+        return UUID.fromString(API.getInstance().getRedisManager().getRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(this)));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CHost extends CGame implements Hosts {
             if (getMaxPlayerSpec() <= getOutGameSpectators().size())
                 return false;
 
-            return isAllowSpectator(apiPlayer.getName());
+            return isAllowSpectator(apiPlayer.getUUID());
 
         }
 
@@ -75,7 +75,7 @@ public class CHost extends CGame implements Hosts {
             if (hostAccess == HostAccess.CLOSE)
                 return false;
             if (hostAccess.toString().equals(HostAccess.FRIEND.toString()))
-                return getAllowPlayer().contains(apiPlayer.getName()) || apiPlayer.hasFriend(API.getInstance().getPlayerManager().getPlayer(getAuthor()));
+                return getAllowPlayer().contains(apiPlayer.getUUID()) || apiPlayer.hasFriend(API.getInstance().getPlayerManager().getPlayer(getAuthor()));
             return true;
         }
 
@@ -84,27 +84,27 @@ public class CHost extends CGame implements Hosts {
     }
 
     @Override
-    public List<String> getAllowPlayer() {
+    public List<UUID> getAllowPlayer() {
         return API.getInstance().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWPLAYER_REDIS.getString(this));
     }
 
     @Override
-    public List<String> getAllowSpectator() {
+    public List<UUID> getAllowSpectator() {
         return API.getInstance().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWSPECTATOR_REDIS.getString(this));
     }
 
     @Override
-    public boolean isAllowPlayer(String s) {
+    public boolean isAllowPlayer(UUID s) {
         return getAllowPlayer().contains(s);
     }
 
     @Override
-    public boolean isAllowSpectator(String s) {
+    public boolean isAllowSpectator(UUID s) {
         return getAllowSpectator().contains(s);
     }
 
     @Override
-    public Hosts getHost() {
+    public Host getHost() {
         return this;
     }
 

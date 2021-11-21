@@ -103,7 +103,7 @@ public class JoinListener {
         RankList playerRank = apiOfflinePlayer == null ? RankList.JOUEUR : apiOfflinePlayer.getRank();
 
         Server velocityServer = API.getInstance().getServer();
-        if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUsername(), playerRank)) {
+        if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUniqueId(), playerRank)) {
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 6");
             e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server").getFinalTextComponent()));
             return;
