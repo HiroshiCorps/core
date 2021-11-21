@@ -158,7 +158,6 @@ public class CoreAPI extends API {
 
     @Override
     public Server getServer() {
-        if (this.serverManager == null) return null;
         return this.serverManager.getServer(getServerName());
     }
 
@@ -202,10 +201,7 @@ public class CoreAPI extends API {
 
     @Override
     public Host getHost() {
-        if (isHostServer() && isSpigot())
-            return getGameManager().getHost(getServerName());
-
-        return null;
+        return getGameManager().getHost(getServerName());
     }
 
     @Override
@@ -215,9 +211,7 @@ public class CoreAPI extends API {
 
     @Override
     public boolean isHostServer() {
-        Server server = this.getServer();
-        if (server == null) return false;
-        return server.getServerType() == ServerType.HOST;
+        return getHost() != null;
     }
 
     @Override

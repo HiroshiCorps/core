@@ -29,6 +29,7 @@ import java.util.logging.Level;
 public class JoinListener {
 
     public APIPlayer loadPlayer(Player player) {
+
         String[] splittedIP = player.getRemoteAddress().toString().split(":");
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().loadPlayer(
