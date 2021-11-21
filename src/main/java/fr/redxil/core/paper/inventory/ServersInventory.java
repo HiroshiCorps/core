@@ -7,8 +7,8 @@
 package fr.redxil.core.paper.inventory;
 
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.api.spigot.inventory.InventoryGUI;
-import fr.redxil.api.spigot.itemstack.APIItemStack;
+import fr.redxil.api.paper.inventory.InventoryGUI;
+import fr.redxil.api.paper.itemstack.APIItemStack;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;

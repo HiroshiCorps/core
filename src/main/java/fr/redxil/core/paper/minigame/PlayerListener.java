@@ -7,8 +7,8 @@
 package fr.redxil.core.paper.minigame;
 
 import fr.redxil.api.common.game.GameState;
-import fr.redxil.api.spigot.minigame.GameBuilder;
-import fr.redxil.api.spigot.minigame.teams.TeamsGUI;
+import fr.redxil.api.paper.minigame.GameBuilder;
+import fr.redxil.api.paper.minigame.teams.TeamsGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

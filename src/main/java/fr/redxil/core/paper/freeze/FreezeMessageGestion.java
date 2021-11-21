@@ -9,7 +9,7 @@ package fr.redxil.core.paper.freeze;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.spigot.utils.Title;
+import fr.redxil.api.paper.utils.Title;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;

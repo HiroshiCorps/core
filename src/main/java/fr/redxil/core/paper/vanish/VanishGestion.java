@@ -11,7 +11,7 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
-import fr.redxil.api.spigot.utils.ActionBar;
+import fr.redxil.api.paper.utils.ActionBar;
 import fr.redxil.core.common.data.ModeratorDataValue;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;

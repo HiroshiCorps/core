@@ -8,11 +8,11 @@ package fr.redxil.core.paper.event;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.spigot.inventory.InventoryGUI;
-import fr.redxil.api.spigot.itemstack.APIItemStack;
-import fr.redxil.api.spigot.itemstack.GlobalAction;
-import fr.redxil.api.spigot.itemstack.InvItemAction;
-import fr.redxil.api.spigot.itemstack.OFFInvItemAction;
+import fr.redxil.api.paper.inventory.InventoryGUI;
+import fr.redxil.api.paper.itemstack.APIItemStack;
+import fr.redxil.api.paper.itemstack.GlobalAction;
+import fr.redxil.api.paper.itemstack.InvItemAction;
+import fr.redxil.api.paper.itemstack.OFFInvItemAction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

@@ -12,7 +12,7 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.api.spigot.minigame.GameBuilder;
+import fr.redxil.api.paper.minigame.GameBuilder;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.core.common.data.TeamDataValue;

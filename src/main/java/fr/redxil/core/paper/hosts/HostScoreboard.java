@@ -9,8 +9,8 @@ package fr.redxil.core.paper.hosts;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Hosts;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.spigot.scoreboard.Scoreboard;
-import fr.redxil.api.spigot.scoreboard.ScoreboardBuilder;
+import fr.redxil.api.paper.scoreboard.Scoreboard;
+import fr.redxil.api.paper.scoreboard.ScoreboardBuilder;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
