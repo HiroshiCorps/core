@@ -29,18 +29,18 @@ import org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventListener implements Listener {
+public class ConnectionListener implements Listener {
 
     final CorePlugin corePlugin;
     final HostScoreboard hostScoreboard;
 
-    public EventListener(CorePlugin corePlugin) {
+    public ConnectionListener(CorePlugin corePlugin) {
         this.corePlugin = corePlugin;
 
         if (API.getInstance().isHostServer())
@@ -80,13 +80,6 @@ public class EventListener implements Listener {
 
             }
         });
-
-    }
-
-    @EventHandler
-    public void asyncJoin(AsyncPlayerPreLoginEvent event) {
-
-        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Connection refused");
 
     }
 
@@ -239,55 +232,6 @@ public class EventListener implements Listener {
 
         String message = "§fLe joueur " + nickData.getRank().getChatRankString() + " " + nickData.getName() + " §fà quitté le serveur";
         Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
-
-    }
-
-    @EventHandler
-    public void playerChat(AsyncPlayerChatEvent asyncPlayerChatEvent) {
-
-        asyncPlayerChatEvent.setFormat(API.getInstance().getPlayerManager().getPlayer(asyncPlayerChatEvent.getPlayer().getUniqueId()).getChatString() + asyncPlayerChatEvent.getMessage());
-
-    }
-
-    @EventHandler
-    public void playerMove(PlayerMoveEvent event) {
-        APIPlayer player = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
-        if (player == null) return;
-        if (player.isFreeze())
-            event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void playerDamage(EntityDamageEvent event) {
-
-        if (!(event.getEntity() instanceof Player)) return;
-        Player player = (Player) event.getEntity();
-
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        if (apiPlayer.isFreeze())
-            event.setCancelled(true);
-
-        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberId());
-        if (spm != null)
-            if (spm.isModeratorMod()) event.setCancelled(true);
-
-    }
-
-    @EventHandler
-    public void playerDrop(PlayerDropItemEvent event) {
-
-        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
-        if (spm != null)
-            if (spm.isModeratorMod()) event.setCancelled(true);
-
-    }
-
-    @EventHandler
-    public void playerPickUp(PlayerPickupItemEvent event) {
-
-        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
-        if (spm != null)
-            if (spm.isModeratorMod()) event.setCancelled(true);
 
     }
 

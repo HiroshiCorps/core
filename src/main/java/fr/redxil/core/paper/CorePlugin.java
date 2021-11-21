@@ -17,8 +17,9 @@ import fr.redxil.core.paper.cmd.FlyCmd;
 import fr.redxil.core.paper.cmd.FreezeCmd;
 import fr.redxil.core.paper.cmd.ModCmd;
 import fr.redxil.core.paper.cmd.VanishCmd;
-import fr.redxil.core.paper.event.EventListener;
+import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.INVEventListener;
+import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
 import fr.redxil.core.paper.minigame.PlayerListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
@@ -41,7 +42,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
-    private fr.redxil.core.paper.event.EventListener eventListener;
 
     public static void log(String message) {
         instance.getLogger().info(message);
@@ -90,9 +90,9 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         PluginManager p = this.getServer().getPluginManager();
         p.registerEvents(new INVEventListener(), this);
 
-        this.eventListener = new fr.redxil.core.paper.event.EventListener(this);
-        p.registerEvents(eventListener, this);
+        p.registerEvents(new ConnectionListener(this), this);
         p.registerEvents(new PlayerListener(), this);
+        p.registerEvents(new PlayerInteractEvent(), this);
 
         log(SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
 
@@ -219,10 +219,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     @Override
     public void printLog(Level level, String msg) {
         log(level, msg);
-    }
-
-    public EventListener getEventListener() {
-        return this.eventListener;
     }
 
 }
