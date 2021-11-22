@@ -28,6 +28,7 @@ public enum PlayerDataValue {
 
     PLAYER_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/rank", false, true),
 
+    PLAYER_MAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/map", false, true),
 
     PLAYER_IPINFO_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ipinfo", false, true),
     PLAYER_FREEZE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/freeze", false, true),

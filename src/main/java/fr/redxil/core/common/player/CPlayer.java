@@ -427,6 +427,11 @@ public class CPlayer implements APIPlayer {
     }
 
     @Override
+    public boolean hasParty() {
+        return API.getInstance().getPartyManager().hasParty(this);
+    }
+
+    @Override
     public boolean sendFriendInvite(APIOfflinePlayer s) {
 
         if (getName().equals(s.getName())) {
@@ -590,6 +595,31 @@ public class CPlayer implements APIPlayer {
     @Override
     public Party getParty() {
         return API.getInstance().getPartyManager().getParty(this);
+    }
+
+    @Override
+    public boolean hasTeam() {
+        return API.getInstance().getTeamManager().hasTeam(this);
+    }
+
+    @Override
+    public Team getTeam() {
+        return API.getInstance().getTeamManager().getPlayerTeam(this);
+    }
+
+    @Override
+    public void addTempData(String s, Object o) {
+        API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.PLAYER_MAP_REDIS.getString(this)).put(s, o);
+    }
+
+    @Override
+    public Object removeTempData(String s) {
+        return API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.PLAYER_MAP_REDIS.getString(this)).remove(s);
+    }
+
+    @Override
+    public Object getTempData(String s) {
+        return API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.PLAYER_MAP_REDIS.getString(this)).get(s);
     }
 
     @Override
