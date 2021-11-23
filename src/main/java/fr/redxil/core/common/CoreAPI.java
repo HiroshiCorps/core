@@ -14,8 +14,8 @@ import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameManager;
 import fr.redxil.api.common.game.Host;
-import fr.redxil.api.common.game.team.TeamManager;
-import fr.redxil.api.common.party.PartyManager;
+import fr.redxil.api.common.group.party.PartyManager;
+import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.common.player.nick.NickGestion;
@@ -26,8 +26,8 @@ import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.game.CGameManager;
-import fr.redxil.core.common.game.team.CTeamManager;
-import fr.redxil.core.common.party.CPartyManager;
+import fr.redxil.core.common.group.party.CPartyManager;
+import fr.redxil.core.common.group.team.CTeamManager;
 import fr.redxil.core.common.player.CNickGestion;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
@@ -41,7 +41,7 @@ import java.io.File;
 public class CoreAPI extends API {
 
     private final ServerAccessEnum sea;
-    private String serverName;
+    private final String serverName;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
@@ -72,7 +72,7 @@ public class CoreAPI extends API {
         File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
 
-        String serverName = GSONSaver.loadGSON(serverNameFile, String.class);
+        this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
@@ -100,7 +100,6 @@ public class CoreAPI extends API {
 
         }
 
-        this.serverName = serverName;
         this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
         this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 

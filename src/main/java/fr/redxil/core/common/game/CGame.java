@@ -12,7 +12,7 @@ import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameState;
 import fr.redxil.api.common.game.Host;
-import fr.redxil.api.common.game.team.Team;
+import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;

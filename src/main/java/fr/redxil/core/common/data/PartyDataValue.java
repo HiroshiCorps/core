@@ -10,7 +10,7 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.party.Party;
+import fr.redxil.api.common.group.party.Party;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -22,7 +22,7 @@ public enum PartyDataValue {
     PARTY_INVITE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "party/<gameID>/invite", true),
     PARTY_OWNER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "party/<gameID>/owner", true),
 
-    PARTY_PLAYERMAP_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "party/linkmap", false);
+    MAP_PLAYERPARTY_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "party/linkmap", false);
 
     final DataType dataType;
     final DataBaseType dataBaseType;

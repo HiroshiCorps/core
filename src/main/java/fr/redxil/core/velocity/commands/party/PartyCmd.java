@@ -12,12 +12,12 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.group.party.Party;
+import fr.redxil.api.common.group.party.PartyManager;
+import fr.redxil.api.common.group.party.PartyRank;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
-import fr.redxil.api.common.party.Party;
-import fr.redxil.api.common.party.PartyManager;
-import fr.redxil.api.common.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
@@ -147,7 +147,7 @@ public class PartyCmd extends BrigadierAPI {
             return 1;
         }
 
-        partyManager.getParty(apiPlayer).quitParty(apiPlayer);
+        partyManager.getPlayerParty(apiPlayer).quitParty(apiPlayer);
 
         player.sendMessage(
                 ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous avez quitté votre partie.")).getFinalTextComponent()
@@ -170,7 +170,7 @@ public class PartyCmd extends BrigadierAPI {
                 ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Liste des membres de la partie:")).getFinalTextComponent()
         );
 
-        for (Map.Entry<String, PartyRank> members : partyManager.getParty(apiPlayer).getList().entrySet()) {
+        for (Map.Entry<String, PartyRank> members : partyManager.getPlayerParty(apiPlayer).getRankList().entrySet()) {
             String name = members.getKey();
             if (members.getValue() == PartyRank.OWNER) {
                 player.sendMessage(
@@ -196,7 +196,7 @@ public class PartyCmd extends BrigadierAPI {
             return 1;
         }
 
-        Party party = API.getInstance().getPartyManager().getParty(owner);
+        Party party = API.getInstance().getPartyManager().getPlayerParty(owner);
         if (party == null) {
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'a pas de partie")).getFinalTextComponent());
             return 1;
@@ -230,7 +230,7 @@ public class PartyCmd extends BrigadierAPI {
             return 1;
         }
 
-        if (!partyManager.isOwner(apiPlayer)) {
+        if (!partyManager.getPlayerParty(apiPlayer).isPartyOwner(apiPlayer)) {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être le chef de la partie.")).getFinalTextComponent()
             );
@@ -246,7 +246,7 @@ public class PartyCmd extends BrigadierAPI {
             return 1;
         }
 
-        if (partyManager.getParty(apiPlayer).invitePlayer(targetPlayer)) {
+        if (partyManager.getPlayerParty(apiPlayer).invitePlayer(targetPlayer)) {
             TextComponentBuilder.createTextComponent(Color.WHITE + "Vous avez été invité par " + Color.GREEN + apiPlayer.getName(true));
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous venez d'inviter " + Color.GREEN + subArgument)).getFinalTextComponent());
         } else {

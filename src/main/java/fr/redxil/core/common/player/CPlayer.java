@@ -9,10 +9,10 @@ package fr.redxil.core.common.player;
 import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.team.Team;
+import fr.redxil.api.common.group.party.Party;
+import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.party.Party;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
@@ -594,7 +594,7 @@ public class CPlayer implements APIPlayer {
 
     @Override
     public Party getParty() {
-        return API.getInstance().getPartyManager().getParty(this);
+        return API.getInstance().getPartyManager().getPlayerParty(this);
     }
 
     @Override
@@ -620,6 +620,13 @@ public class CPlayer implements APIPlayer {
     @Override
     public Object getTempData(String s) {
         return API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.PLAYER_MAP_REDIS.getString(this)).get(s);
+    }
+
+    @Override
+    public List<String> getTempDataKeyList() {
+        return new ArrayList<String>() {{
+            API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.PLAYER_MAP_REDIS.getString(getName(), getMemberId())).keySet().forEach((object) -> add((String) object));
+        }};
     }
 
     @Override

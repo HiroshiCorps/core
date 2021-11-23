@@ -4,11 +4,11 @@
  * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
  */
 
-package fr.redxil.core.common.game.team;
+package fr.redxil.core.common.group.team;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.team.Team;
-import fr.redxil.api.common.game.team.TeamManager;
+import fr.redxil.api.common.group.team.Team;
+import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.data.TeamDataValue;
