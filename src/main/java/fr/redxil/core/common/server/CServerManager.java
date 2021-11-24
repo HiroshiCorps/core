@@ -94,8 +94,10 @@ public class CServerManager implements ServerManager {
     @Override
     public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
         if (name == null || ipInfo == null) return null;
-        if (!isServerExist(name))
+        if (!isServerExist(name)) {
+            System.out.println("Server init with: " + name);
             return CServer.initServer(serverType, name, ipInfo);
+        }
         return getServer(name);
     }
 

@@ -157,6 +157,7 @@ public class CoreAPI extends API {
 
     @Override
     public Server getServer() {
+        System.out.println("Server Name: " + getServerName());
         return this.serverManager.getServer(getServerName());
     }
 

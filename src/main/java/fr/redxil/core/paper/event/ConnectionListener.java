@@ -14,7 +14,6 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.utils.JavaUtils;
-import fr.redxil.api.paper.event.PlayerLoggedEvent;
 import fr.redxil.api.paper.minigame.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import net.minecraft.server.v1_12_R1.*;
@@ -100,19 +99,6 @@ public class ConnectionListener implements Listener {
             }
         }
 
-        corePlugin.getVanish().applyVanish(p);
-        applyNick(p, apiPlayer, true);
-
-        API.getInstance().getServer().setPlayerInServer(apiPlayer);
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer);
-
-        if (playerModerator != null) {
-            if (apiPlayer.isLogin()) {
-                corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
-                corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
-            }
-        }
-
     }
 
     public void playerJoinGameServer(Player p, APIPlayer apiPlayer) {
@@ -145,6 +131,19 @@ public class ConnectionListener implements Listener {
                 sendJoinMessage(apiPlayer);
         }
 
+        applyNick(event.getPlayer(), apiPlayer, true);
+        corePlugin.getVanish().applyVanish(event.getPlayer());
+
+        API.getInstance().getServer().setPlayerInServer(apiPlayer);
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer);
+
+        if (playerModerator != null) {
+            if (apiPlayer.isLogin()) {
+                corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
+                corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
+            }
+        }
+
         if (GameBuilder.getGameBuilder() != null)
             playerJoinGameServer(event.getPlayer(), apiPlayer);
 
@@ -154,7 +153,7 @@ public class ConnectionListener implements Listener {
     public void playerQuitEvent(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
-        APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(event.getPlayer().getName());
+        APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(event.getPlayer().getUniqueId());
 
         API.getInstance().getServer().removePlayerInServer(event.getPlayer().getUniqueId());
 
@@ -184,16 +183,6 @@ public class ConnectionListener implements Listener {
             gameBuilder.onSpectatorLeave(player);
         }
 
-    }
-
-    @EventHandler
-    public void playerLogin(PlayerLoggedEvent event) {
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(event.getAPIPlayer());
-
-        if (playerModerator != null) {
-            corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
-            corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
-        }
     }
 
     public void sendJoinMessage(APIPlayer apiPlayer) {
