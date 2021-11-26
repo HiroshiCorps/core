@@ -95,7 +95,7 @@ public class CServerManager implements ServerManager {
     public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
         if (name == null || ipInfo == null) return null;
         if (!isServerExist(name)) {
-            System.out.println("Server init with: " + name);
+            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with: " + name);
             return CServer.initServer(serverType, name, ipInfo);
         }
         return getServer(name);

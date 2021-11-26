@@ -31,7 +31,11 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class CorePlugin extends JavaPlugin implements PluginEnabler {
@@ -42,14 +46,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
 
-    public static void log(String message) {
-        instance.getLogger().info(message);
-    }
-
-    public static void log(Level level, String message) {
-        instance.getLogger().log(level, message);
-    }
-
     public static CorePlugin getInstance() {
         return instance;
     }
@@ -58,30 +54,28 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     public void onEnable() {
         instance = this;
 
-        log(
+        printLog(Level.FINE,
                 SystemColor.WHITE + "#==========[WELCOME TO SERVER API]===========#\n"
                         + SystemColor.YELLOW + "# SERVERAPI is now loading. Please read      #\n"
                         + "# carefully all outputs coming from it.        #\n"
                         + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
         );
 
-        log(SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
+        printLog(Level.FINE, SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
         new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
 
         if (!API.getInstance().isEnabled()) {
-            log(SystemColor.RED + "Error while loading API, please check error code below" + SystemColor.RESET);
+            printLog(Level.SEVERE, SystemColor.RED + "Error while loading API, please check error code below" + SystemColor.RESET);
             return;
         }
 
-        log(SystemColor.GREEN + "API Started" + SystemColor.RESET);
+        printLog(Level.FINE, SystemColor.GREEN + "API Started" + SystemColor.RESET);
         checkCrash();
 
         this.vanish = new VanishGestion(this);
         this.freezeGestion = new FreezeMessageGestion(this);
 
         this.moderatorMain = new ModeratorMain();
-
-        log(SystemColor.GREEN + "Mod started" + SystemColor.RESET);
 
         new Receiver();
         new UpdaterReceiver();
@@ -92,14 +86,14 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         p.registerEvents(new ConnectionListener(this), this);
         p.registerEvents(new PlayerInteractEvent(), this);
 
-        log(SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
+        printLog(Level.INFO, SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
 
         this.getCommand("mod").setExecutor(new ModCmd());
         this.getCommand("freeze").setExecutor(new FreezeCmd());
         this.getCommand("vanish").setExecutor(new VanishCmd());
         this.getCommand("fly").setExecutor(new FlyCmd());
 
-        log(SystemColor.GREEN + "Command registered" + SystemColor.RESET);
+        printLog(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
         this.setEnabled(true);
 
@@ -107,7 +101,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
     public void checkCrash() {
 
-        log(Level.FINE, SystemColor.YELLOW + "Checking for Crashed APIPlayer" + SystemColor.RESET);
+        printLog(Level.FINE, SystemColor.YELLOW + "Checking for Crashed APIPlayer" + SystemColor.RESET);
         for (Player player : Bukkit.getOnlinePlayers())
             player.kickPlayer("Error");
 
@@ -117,13 +111,13 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         Collection<UUID> playerUUIDList = new ArrayList<>(server.getPlayerUUIDList());
         if (playerUUIDList.isEmpty()) return;
 
-        log(Level.SEVERE, SystemColor.RED + "Founded " + playerUUIDList.size() + " crashed player data" + SystemColor.RESET);
+        printLog(Level.SEVERE, SystemColor.RED + "Founded " + playerUUIDList.size() + " crashed player data" + SystemColor.RESET);
         for (UUID playerUUID : playerUUIDList) {
             server.removePlayerInServer(playerUUID);
             APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(playerUUID);
             if (apiPlayer != null)
                 if (apiPlayer.getServer().getServerName().equals(serverName)) {
-                    log(Level.SEVERE, SystemColor.GREEN + "Saving player: " + apiPlayer.getName() + SystemColor.RESET);
+                    printLog(Level.SEVERE, SystemColor.GREEN + "Saving player: " + apiPlayer.getName() + SystemColor.RESET);
                     apiPlayer.unloadPlayer();
                 }
         }
@@ -180,26 +174,16 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     @Override
     public void shutdownServer(String s) {
 
-        System.out.println(SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
+        API.getInstance().getPluginEnabler().printLog(Level.SEVERE, SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
         Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(s));
-        Bukkit.getServer().shutdown();
-        new Timer().schedule(
-
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        Bukkit.getServer().shutdown();
-                    }
-                }
-
-                , 5);
+        Executors.newSingleThreadScheduledExecutor().schedule(() -> Bukkit.getServer().shutdown(), 5, TimeUnit.SECONDS);
 
     }
 
     @Override
     public void shutdownPlugin(String s) {
 
-        System.out.println(SystemColor.RED + "Shutting down plugin: " + s + SystemColor.RESET);
+        printLog(Level.SEVERE, SystemColor.RED + "Shutting down plugin: " + s + SystemColor.RESET);
         Bukkit.getPluginManager().disablePlugin(this);
 
     }
@@ -216,7 +200,7 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
     @Override
     public void printLog(Level level, String msg) {
-        log(level, msg);
+        System.out.println("[" + level.getName() + "] " + msg);
     }
 
 }

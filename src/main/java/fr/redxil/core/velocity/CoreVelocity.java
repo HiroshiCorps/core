@@ -129,7 +129,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     public void checkCrash() {
 
-        System.out.println("Checking for Crashed APIPlayer");
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Checking for Crashed APIPlayer");
         for (Player player : getProxyServer().getAllPlayers())
             player.disconnect((Component) TextComponentBuilder.createTextComponent("Error"));
 
@@ -139,7 +139,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
         Collection<UUID> playerUUIDList = server.getPlayerUUIDList();
         if (playerUUIDList.isEmpty()) return;
 
-        System.out.println("Founded " + playerUUIDList.size() + " crashed player data");
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Founded " + playerUUIDList.size() + " crashed player data");
         for (UUID playerUUID : playerUUIDList) {
 
             server.removePlayerInServer(playerUUID);
@@ -149,7 +149,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
                 if (apiPlayer.getBungeeServer().getServerName().equals(serverName)) {
 
-                    System.out.println("Saving player: " + playerUUID.toString());
+                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Saving player: " + playerUUID.toString());
                     Server lastSpigotServer = apiPlayer.getServer();
                     if (lastSpigotServer != null)
                         lastSpigotServer.removePlayerInServer(playerUUID);
@@ -199,7 +199,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     @Override
     public void shutdownPlugin(String s) {
 
-        System.out.println(SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
+        API.getInstance().getPluginEnabler().printLog(Level.SEVERE, SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
         getProxyServer().getEventManager().unregisterListeners(this);
         onDisable();
 
@@ -208,7 +208,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
     @Override
     public void shutdownServer(String s) {
 
-        System.out.println(SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
+        API.getInstance().getPluginEnabler().printLog(Level.SEVERE, SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
         getProxyServer().getAllPlayers().forEach(proxPlayer -> proxPlayer.disconnect((Component) TextComponentBuilder.createTextComponent(s)));
         Executors.newSingleThreadScheduledExecutor().schedule(() -> getProxyServer().shutdown(), 5, TimeUnit.SECONDS);
 
@@ -226,7 +226,7 @@ public class CoreVelocity extends Velocity implements PluginEnabler {
 
     @Override
     public void printLog(Level level, String msg) {
-        System.out.println(msg);
+        System.out.println("[" + level.getName() + "] " + msg);
     }
 
 }

@@ -103,7 +103,6 @@ public class INVEventListener implements Listener {
 
         if (item instanceof APIItemStack) {
 
-            System.out.println("test1");
             APIItemStack apiItemStack = (APIItemStack) item;
             OFFInvItemAction action = apiItemStack.getOFFInvAction();
             if (action != null)

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class CGame implements Game {
 
@@ -70,7 +71,7 @@ public class CGame implements Game {
         String name = getServerName();
         long id = getGameID();
 
-        System.out.println("[Host] Clearing redis data");
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "[Host] Clearing redis data");
 
         boolean host = isHostLinked();
 

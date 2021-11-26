@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 public abstract class SQLModel {
 
@@ -100,12 +101,12 @@ public abstract class SQLModel {
             return;
         }
         this.columns.put(columnName, value);
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "UPDATE " + this.table
+                + " SET " + columnName + " = " + value + " WHERE " + this.primaryKey + " = " + this.getInt(this.primaryKey));
         if (value == null) {
             API.getInstance().getSQLConnection().execute("UPDATE " + this.table
                     + " SET " + columnName + " = NULL WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
         } else {
-            System.out.println("UPDATE " + this.table
-                    + " SET " + columnName + " = " + value + " WHERE " + this.primaryKey + " = " + this.getInt(this.primaryKey));
             API.getInstance().getSQLConnection().execute("UPDATE " + this.table
                     + " SET " + columnName + " = ? WHERE " + this.primaryKey + " = ?", value, this.getInt(this.primaryKey));
         }

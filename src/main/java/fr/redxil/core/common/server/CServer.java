@@ -26,6 +26,7 @@ import fr.redxil.core.common.sql.server.ServerModel;
 import org.redisson.api.RList;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class CServer implements Server {
 
@@ -167,7 +168,7 @@ public class CServer implements Server {
 
         //model.set(ServerDataValue.SERVER_TASKS_SQL.getString(null), getTasks().toString().toUpperCase());
 
-        System.out.println("[Core] Clearing redis data");
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
 
         getTeamLinked().forEach((teamID) -> API.getInstance().getTeamManager().getTeam(teamID).deleteTeam());
 

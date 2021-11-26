@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class CPlayer implements APIPlayer {
 
@@ -56,7 +57,7 @@ public class CPlayer implements APIPlayer {
 
     protected static APIPlayer loadPlayer(String name, UUID uuid, IpInfo ipInfo) {
 
-        System.out.println("Creating player Data");
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Creating player Data");
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
@@ -104,7 +105,7 @@ public class CPlayer implements APIPlayer {
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
             redisManager.setRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(name, memberID), 1L);
 
-        System.out.println("Player Data creation finished");
+        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Player Data creation finished");
 
         return new CPlayer(memberID);
 
