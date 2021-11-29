@@ -33,7 +33,7 @@ dependencies {
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from {
-            configurations.compileClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+            configurations.implementation.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
         }
     }
 }
