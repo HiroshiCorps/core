@@ -3,9 +3,6 @@ version '1.0.0'
 
 apply plugin: 'java-library'
 
-sourceCompatibility = 1.8
-
-
 compileJava.options.encoding = 'UTF-8'
 
 configurations.implementation.setCanBeResolved(true)
@@ -20,11 +17,7 @@ repositories {
     }
 
     maven {
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
-    }
-
-    maven {
-        url = "https://mvnrepository.com/artifact/org.redisson/redisson"
+        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
     }
 
     maven {
