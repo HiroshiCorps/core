@@ -6,12 +6,14 @@
 
 package fr.redxil.core.paper;
 
+import fr.hiroshi.paper.HiroshiPaper;
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.paper.Paper;
+import fr.redxil.api.paper.tags.TagsManager;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.FlyCmd;
 import fr.redxil.core.paper.cmd.FreezeCmd;
@@ -24,6 +26,8 @@ import fr.redxil.core.paper.freeze.FreezeMessageGestion;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.receiver.UpdaterReceiver;
+import fr.redxil.core.paper.tags.CoreTagsManager;
+import fr.redxil.core.paper.tags.OutboundHandler;
 import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -44,9 +48,15 @@ public class CorePlugin extends Paper {
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
+    private CoreTagsManager coreTagsManager;
 
     public static CorePlugin getInstance() {
         return instance;
+    }
+
+    @Override
+    public TagsManager getTagsManager() {
+        return coreTagsManager;
     }
 
     @Override
@@ -73,6 +83,9 @@ public class CorePlugin extends Paper {
 
         this.vanish = new VanishGestion(this);
         this.freezeGestion = new FreezeMessageGestion(this);
+
+        this.coreTagsManager = new CoreTagsManager();
+        HiroshiPaper.INSTANCE.registerPacketHandler(new OutboundHandler());
 
         this.moderatorMain = new ModeratorMain();
 

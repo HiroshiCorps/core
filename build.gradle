@@ -13,7 +13,7 @@ repositories {
     flatDir {
         dirs "../api/build/libs/"
         dirs "../api/libs/"
-        dirs "../paperspigot-1.12.2/Paper-Server/target"
+        dirs "../paper/Paper-Server/target"
     }
 
     maven {
