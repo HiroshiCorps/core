@@ -133,10 +133,10 @@ public class ConnectionListener implements Listener {
             gameBuilder.broadcastActionBar("§a" + osp.getName(true) + "§7 à quitté la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
             gameBuilder.onPlayerLeave(player);
         } else {
-            if (games.getInGameSpectators().contains(osp.getUUID()))
-                games.getInGameSpectators().remove(osp.getUUID());
+            if (games.getPlayerSpectators().contains(osp.getUUID()))
+                games.getPlayerSpectators().remove(osp.getUUID());
             else
-                games.getOutGameSpectators().remove(osp.getUUID());
+                games.getModeratorSpectators().remove(osp.getUUID());
             gameBuilder.onSpectatorLeave(player);
         }
 

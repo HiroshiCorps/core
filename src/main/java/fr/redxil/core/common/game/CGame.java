@@ -22,7 +22,6 @@ import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.redis.IDGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -86,12 +85,15 @@ public class CGame implements Game {
     public boolean canAccess(APIPlayer apiPlayer, boolean b) {
 
         if (b) {
-            if (!apiPlayer.getRank().isModeratorRank()) {
-                if (!getGame().isAllowPlSpec())
-                    return false;
-                return getMaxPlayerSpec() > getOutGameSpectators().size();
-            }
-            return true;
+
+            if (apiPlayer.getRank().isModeratorRank())
+                return true;
+
+            if (!getGame().isAllowPlSpec())
+                return false;
+
+            return getMaxPlayerSpec() > getPlayerSpectators().size();
+
         }
 
         return isGameState(GameState.WAITING) && getPlayers().size() < getMaxPlayer();
@@ -102,10 +104,10 @@ public class CGame implements Game {
         if (!canAccess(apiPlayer, b)) return false;
 
         if (b) {
-            if (!apiPlayer.getRank().isModeratorRank())
-                getOutGameSpectators().add(apiPlayer.getUUID());
+            if (apiPlayer.getRank().isModeratorRank())
+                getModeratorSpectators().add(apiPlayer.getUUID());
             else
-                getInGameSpectators().add(apiPlayer.getUUID());
+                getPlayerSpectators().add(apiPlayer.getUUID());
         } else {
             getPlayers().add(apiPlayer.getUUID());
         }
@@ -159,13 +161,13 @@ public class CGame implements Game {
     }
 
     @Override
-    public List<UUID> getInGameSpectators() {
-        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_INGAME_REDIS.getString(this));
+    public List<UUID> getPlayerSpectators() {
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_PLAYER_REDIS.getString(this));
     }
 
     @Override
-    public List<UUID> getOutGameSpectators() {
-        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_OUTGAME_REDIS.getString(this));
+    public List<UUID> getModeratorSpectators() {
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.GAME_SPEC_MODERATOR_REDIS.getString(this));
     }
 
     @Override
@@ -178,11 +180,11 @@ public class CGame implements Game {
         if (b == isSpectator(s)) return false;
         if (b) {
             getPlayers().remove(s);
-            getInGameSpectators().add(s);
+            getPlayerSpectators().add(s);
         } else {
-            if (getOutGameSpectators().contains(s)) return false;
+            if (getModeratorSpectators().contains(s)) return false;
             getPlayers().add(s);
-            getInGameSpectators().remove(s);
+            getPlayerSpectators().remove(s);
         }
         return true;
     }
@@ -210,7 +212,18 @@ public class CGame implements Game {
 
     @Override
     public boolean isAllowConnectServer(UUID name) {
-        return isPlayer(name) || isSpectator(name);
+        boolean authorized = isPlayer(name) || isSpectator(name);
+        if (!authorized) {
+            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(name);
+            if (apiPlayer == null)
+                return false;
+            if (apiPlayer.getRank().isModeratorRank()) {
+                joinGame(apiPlayer, true);
+                return true;
+            }
+        }
+
+        return authorized;
     }
 
     @Override
@@ -278,13 +291,6 @@ public class CGame implements Game {
     }
 
     @Override
-    public List<UUID> getSpectators() {
-        List<UUID> specList = new ArrayList<>(getInGameSpectators());
-        specList.addAll(getOutGameSpectators());
-        return specList;
-    }
-
-    @Override
     public void forceStart(APIPlayerModerator APIPlayer) {
         PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTART", APIPlayer.getName());
     }
@@ -330,7 +336,7 @@ public class CGame implements Game {
 
     @Override
     public boolean isSpectator(UUID playerName) {
-        return getSpectators().contains(playerName);
+        return getModeratorSpectators().contains(playerName) || getPlayerSpectators().contains(playerName);
     }
 
 }

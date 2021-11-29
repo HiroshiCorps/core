@@ -32,8 +32,8 @@ public enum GameDataValue {
     GAME_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/pllist", false, true),
 
     GAME_MAXPLSPEC_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specmax", false, true),
-    GAME_SPEC_INGAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specingame", false, true),
-    GAME_SPEC_OUTGAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specoutgame", false, true),
+    GAME_SPEC_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specingame", false, true),
+    GAME_SPEC_MODERATOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specoutgame", false, true),
 
     HOST_AUTHOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/author", false, true),
     HOST_ACCESS_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/access", false, true),
