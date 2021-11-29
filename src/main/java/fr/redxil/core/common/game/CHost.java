@@ -63,7 +63,7 @@ public class CHost extends CGame implements Host {
             if (!getGame().isAllowPlSpec())
                 return false;
 
-            if (getMaxPlayerSpec() <= getOutGameSpectators().size())
+            if (getMaxPlayerSpec() <= getPlayerSpectators().size())
                 return false;
 
             return isAllowSpectator(apiPlayer.getUUID());
