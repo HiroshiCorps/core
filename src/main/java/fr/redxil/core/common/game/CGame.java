@@ -94,7 +94,7 @@ public class CGame implements Game {
             return true;
         }
 
-        return isGameState(GameState.STARTING, GameState.WAITING) && getPlayers().size() < getMaxPlayer();
+        return isGameState(GameState.WAITING) && getPlayers().size() < getMaxPlayer();
     }
 
     @Override

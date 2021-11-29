@@ -13,13 +13,11 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
-import fr.redxil.api.common.utils.JavaUtils;
 import fr.redxil.api.paper.minigame.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
-import net.minecraft.server.v1_12_R1.*;
+import fr.redxil.core.paper.utils.Nick;
+import fr.redxil.core.paper.utils.PlayerInjector;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,49 +25,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ConnectionListener implements Listener {
 
     final CorePlugin corePlugin;
 
     public ConnectionListener(CorePlugin corePlugin) {
         this.corePlugin = corePlugin;
-    }
-
-    public static void applyNick(Player p, APIPlayer apiPlayer, boolean connection) {
-
-        EntityPlayer craftPlayerP = ((CraftPlayer) p).getHandle();
-        JavaUtils.setDeclaredField(craftPlayerP, "listName", CraftChatMessage.fromString(apiPlayer.getTabString())[0]);
-        JavaUtils.setDeclaredField(craftPlayerP.getProfile(), "name", apiPlayer.getName(true));
-
-        craftPlayerP.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, craftPlayerP));
-
-        if (connection) return;
-
-        PacketPlayOutPlayerInfo removePacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, craftPlayerP);
-        PacketPlayOutEntityDestroy entityDestroy = new PacketPlayOutEntityDestroy(craftPlayerP.getId());
-        PacketPlayOutPlayerInfo joinPacket = new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, craftPlayerP);
-        PacketPlayOutNamedEntitySpawn entitySpawn = new PacketPlayOutNamedEntitySpawn(craftPlayerP);
-
-        List<Player> playerList = new ArrayList<>(Bukkit.getOnlinePlayers());
-        playerList.remove(p);
-
-        playerList.forEach((player) -> {
-            EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
-            if (player.canSee(p)) {
-
-                PlayerConnection playerConnection = entityPlayer.playerConnection;
-
-                playerConnection.sendPacket(entityDestroy);
-                playerConnection.sendPacket(removePacket);
-                playerConnection.sendPacket(joinPacket);
-                playerConnection.sendPacket(entitySpawn);
-
-            }
-        });
-
     }
 
     @EventHandler
@@ -86,18 +47,12 @@ public class ConnectionListener implements Listener {
         GameBuilder gameBuilder = GameBuilder.getGameBuilder();
         Game games = API.getInstance().getGame();
         if (gameBuilder != null) {
-            boolean spectate = games.isSpectator(apiPlayer.getUUID());
-
-            if (games.getPlayers().size() >= games.getMaxPlayer() && !spectate) {
-                event.setResult(PlayerLoginEvent.Result.KICK_FULL);
-                return;
-            }
-
-            if (!spectate && !games.isGameState(GameState.WAITING, GameState.STARTING)) {
-                event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-                return;
+            if (!games.isSpectator(apiPlayer.getUUID()) && !games.isGameState(GameState.WAITING)) {
+                games.setSpectator(apiPlayer.getUUID(), true);
             }
         }
+
+        PlayerInjector.injectPlayer(p);
 
     }
 
@@ -131,7 +86,7 @@ public class ConnectionListener implements Listener {
                 sendJoinMessage(apiPlayer);
         }
 
-        applyNick(event.getPlayer(), apiPlayer, true);
+        Nick.applyNick(event.getPlayer(), apiPlayer, true);
         corePlugin.getVanish().applyVanish(event.getPlayer());
 
         API.getInstance().getServer().setPlayerInServer(apiPlayer);
@@ -153,6 +108,8 @@ public class ConnectionListener implements Listener {
     public void playerQuitEvent(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
+        PlayerInjector.removeInject(player);
+
         APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(event.getPlayer().getUniqueId());
 
         API.getInstance().getServer().removePlayerInServer(event.getPlayer().getUniqueId());

@@ -10,7 +10,7 @@ import fr.redline.pms.connect.linker.pm.PMManager;
 import fr.redline.pms.connect.linker.pm.PMReceiver;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.core.paper.event.ConnectionListener;
+import fr.redxil.core.paper.utils.Nick;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -32,6 +32,6 @@ public class Receiver implements PMReceiver {
         Player player = Bukkit.getPlayer(apiPlayer.getUUID());
         if (player == null) return;
 
-        ConnectionListener.applyNick(player, apiPlayer, false);
+        Nick.applyNick(player, apiPlayer, false);
     }
 }
