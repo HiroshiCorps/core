@@ -14,7 +14,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
@@ -54,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CoreVelocity extends Velocity implements PluginEnabler {
+public class CoreVelocity extends Velocity {
 
     final ProxyServer proxyServer;
     final Logger logger;

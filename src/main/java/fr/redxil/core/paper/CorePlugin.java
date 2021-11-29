@@ -9,9 +9,9 @@ package fr.redxil.core.paper;
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.paper.Paper;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.FlyCmd;
 import fr.redxil.core.paper.cmd.FreezeCmd;
@@ -28,7 +28,6 @@ import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-public class CorePlugin extends JavaPlugin implements PluginEnabler {
+public class CorePlugin extends Paper {
 
     private static CorePlugin instance;
 
