@@ -24,16 +24,16 @@ import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.common.data.FriendDataValue;
+import fr.redxil.core.common.data.LinkDataValue;
 import fr.redxil.core.common.data.MoneyDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
+import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
+import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
+import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
+import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
-import fr.redxil.core.common.sql.money.MoneyModel;
-import fr.redxil.core.common.sql.player.PlayerFriendModel;
-import fr.redxil.core.common.sql.player.PlayerModel;
-import fr.redxil.core.common.sql.player.SettingsModel;
-import fr.redxil.core.common.sql.sanction.SanctionModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,10 +69,6 @@ public class CPlayer implements APIPlayer {
 
         long memberID = playerModel.getMemberId();
 
-        PlayerFriendModel PlayerFriendModel = new SQLModels<>(PlayerFriendModel.class).getOrInsert(new HashMap<String, Object>() {{
-            this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
-        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-
         MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
             this.put(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), 0);
@@ -90,11 +86,6 @@ public class CPlayer implements APIPlayer {
         redisManager.setRedisString(PlayerDataValue.PLAYER_INPUT_REDIS.getString(name, memberID), null);
         redisManager.setRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(name, memberID), ipInfo.toString());
 
-        redisManager.setRedisList(FriendDataValue.PLAYER_FRIENDLIST_REDIS.getString(name, memberID), PlayerFriendModel.getFriendList());
-        redisManager.setRedisList(FriendDataValue.PLAYER_BLACKLIST_REDIS.getString(name, memberID), PlayerFriendModel.getBlackList());
-        redisManager.setRedisList(FriendDataValue.PLAYER_FRIENDSENDEDLIST_REDIS.getString(name, memberID), PlayerFriendModel.getSendedList());
-        redisManager.setRedisList(FriendDataValue.PLAYER_FRIENDRECEIVEDLIST_REDIS.getString(name, memberID), PlayerFriendModel.getReceivedList());
-
         redisManager.getRedisList("ip/" + ipInfo.getIp()).add(name);
 
         redisManager.getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(name, memberID)).put(name, memberID);
@@ -105,11 +96,18 @@ public class CPlayer implements APIPlayer {
         if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
             redisManager.setRedisLong(PlayerDataValue.PLAYER_HUBLOGGED_REDIS.getString(name, memberID), 1L);
 
+        loadLink(memberID);
+
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "Player Data creation finished");
 
         return new CPlayer(memberID);
 
     }
+
+    static void loadLink(long memberID) {
+        List<PlayerLinkModel> playerLinkModel = new SQLModels<>(PlayerLinkModel.class).get("SELECT * FROM link WHERE " + LinkDataValue.FROM_ID_SQL.getString() + " = ? OR " + LinkDataValue.TO_ID_SQL.getString() + " = ?", memberID, memberID);
+    }
+
 
     @Override
     public void unloadPlayer() {
@@ -149,18 +147,7 @@ public class CPlayer implements APIPlayer {
 
         MoneyDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
-        /// Friend Part
-
-        PlayerFriendModel PlayerFriendModel = new SQLModels<>(PlayerFriendModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-
-        if (PlayerFriendModel != null) {
-            PlayerFriendModel.setBlackList(getBlackList());
-            PlayerFriendModel.setFriendList(getFriendList());
-            PlayerFriendModel.setReceivedList(getFriendInviteReceived());
-            PlayerFriendModel.setSendedList(getFriendInviteSended());
-        }
-
-        FriendDataValue.clearRedisData(DataType.PLAYER, name, memberID);
+        LinkDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
         rm.getRedisList("ip/" + getIpInfo().getIp()).remove(name);
 
@@ -364,7 +351,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getFriendInviteReceived() {
 
-        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDRECEIVEDLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_FRIENDRECEIVEDLIST_REDIS.getString(this));
 
     }
 
@@ -411,7 +398,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getFriendInviteSended() {
 
-        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDSENDEDLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_FRIENDSENDEDLIST_REDIS.getString(this));
 
     }
 
@@ -469,7 +456,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getFriendList() {
 
-        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_FRIENDLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_FRIENDLIST_REDIS.getString(this));
 
     }
 
@@ -491,7 +478,7 @@ public class CPlayer implements APIPlayer {
     @Override
     public List<String> getBlackList() {
 
-        return API.getInstance().getRedisManager().getRedissonClient().getList(FriendDataValue.PLAYER_BLACKLIST_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_BLACKLIST_REDIS.getString(this));
 
     }
 

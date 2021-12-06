@@ -6,7 +6,7 @@
  *
  */
 
-package fr.redxil.core.common.sql.party;
+package fr.redxil.core.common.group.party;
 
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.sql.SQLModel;

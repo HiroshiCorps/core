@@ -15,26 +15,27 @@ import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
-public enum FriendDataValue {
+public enum LinkDataValue {
+
+    LINK_ID_SQL(DataBaseType.SQL, DataType.PLAYER, "link_id", false, false),
+    FROM_ID_SQL(DataBaseType.SQL, DataType.PLAYER, "from_id", false, false),
+    TO_ID_SQL(DataBaseType.SQL, DataType.PLAYER, "to_id", false, false),
+    LINK_TYPE_SQL(DataBaseType.SQL, DataType.PLAYER, "link_state", false, false),
 
     PLAYER_BLACKLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/blackList", false, true),
-    PLAYER_BLACKLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "blackList", false, false),
 
     PLAYER_FRIENDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/friendList", false, true),
-    PLAYER_FRIENDLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "friendList", false, false),
 
     PLAYER_FRIENDRECEIVEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/receivedList", false, true),
-    PLAYER_FRIENDRECEIVEDLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "receivedList", false, false),
 
-    PLAYER_FRIENDSENDEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/sendList", false, true),
-    PLAYER_FRIENDSENDEDLIST_SQL(DataBaseType.SQL, DataType.PLAYER, "sendList", false, false);
+    PLAYER_FRIENDSENDEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/sendList", false, true);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
     final boolean needName, needId;
 
-    FriendDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
+    LinkDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
@@ -46,7 +47,7 @@ public enum FriendDataValue {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
-        for (FriendDataValue mdv : values())
+        for (LinkDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
                 if (mdv.isArgNeeded() && mdv.hasNeedInfo(playerName, playerID))
                     redissonClient.getBucket(mdv.getString(playerName, playerID)).delete();

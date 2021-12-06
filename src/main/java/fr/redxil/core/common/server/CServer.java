@@ -22,7 +22,6 @@ import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.ServerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModels;
-import fr.redxil.core.common.sql.server.ServerModel;
 import org.redisson.api.RList;
 
 import java.util.*;

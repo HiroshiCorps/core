@@ -6,7 +6,7 @@
  *
  */
 
-package fr.redxil.core.common.sql.moderator;
+package fr.redxil.core.common.player.sqlmodel.moderator;
 
 import fr.redxil.api.common.player.moderators.Actions;
 import fr.redxil.core.common.sql.SQLModel;

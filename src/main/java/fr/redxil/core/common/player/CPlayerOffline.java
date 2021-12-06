@@ -17,12 +17,12 @@ import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.MoneyDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
+import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
+import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
+import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
+import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
-import fr.redxil.core.common.sql.money.MoneyModel;
-import fr.redxil.core.common.sql.player.PlayerFriendModel;
-import fr.redxil.core.common.sql.player.PlayerModel;
-import fr.redxil.core.common.sql.player.SettingsModel;
-import fr.redxil.core.common.sql.sanction.SanctionModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     private long memberID;
     private PlayerModel model = null;
     private MoneyModel moneyModel;
-    private PlayerFriendModel friendModel = null;
+    private PlayerLinkModel friendModel = null;
 
     public CPlayerOffline(String name) {
 
@@ -63,7 +63,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
             this.model = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
 
         this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-        this.friendModel = new SQLModels<>(PlayerFriendModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+        this.friendModel = new SQLModels<>(PlayerLinkModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
 
     }
 

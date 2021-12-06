@@ -6,7 +6,7 @@
  *
  */
 
-package fr.redxil.core.common.sql.server;
+package fr.redxil.core.common.server;
 
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.core.common.data.ServerDataValue;

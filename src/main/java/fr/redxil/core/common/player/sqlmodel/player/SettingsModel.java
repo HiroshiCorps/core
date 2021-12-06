@@ -6,7 +6,7 @@
  *
  */
 
-package fr.redxil.core.common.sql.player;
+package fr.redxil.core.common.player.sqlmodel.player;
 
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.core.common.data.PlayerDataValue;
