@@ -11,13 +11,17 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
+import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 public class CPlayerManager implements APIPlayerManager {
@@ -173,6 +177,35 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public String getPlayerIdentifierColumn() {
         return CoreAPI.getInstance().getServerAccessEnum().getPDV().getString();
+    }
+
+    HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();
+
+    @Override
+    public void addLinkOnConnectAction(String s, BiConsumer<APIPlayer, LinkData> biConsumer) {
+        if (hasLinkType(s))
+            return;
+        linkMap.put(s, biConsumer);
+    }
+
+    @Override
+    public void removeLinkOnConnectAction(String s) {
+        linkMap.remove(s);
+    }
+
+    @Override
+    public BiConsumer<APIPlayer, LinkData> getLinkOnConnectAction(String s) {
+        return linkMap.get(s);
+    }
+
+    @Override
+    public List<String> getLinkTypeList() {
+        return new ArrayList<>(linkMap.keySet());
+    }
+
+    @Override
+    public boolean hasLinkType(String s) {
+        return linkMap.containsKey(s);
     }
 
 }

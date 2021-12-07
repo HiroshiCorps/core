@@ -8,40 +8,43 @@
 
 package fr.redxil.core.common.player.sqlmodel.player;
 
+import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.LinkDataValue;
-import fr.redxil.core.common.player.link.LinkState;
 import fr.redxil.core.common.sql.SQLModel;
 
-public class PlayerLinkModel extends SQLModel {
+public class PlayerLinkModel extends SQLModel implements LinkData {
 
     public PlayerLinkModel() {
         super("link", LinkDataValue.LINK_ID_SQL.getString());
     }
 
+    @Override
     public int getLinkID() {
         return getInt(LinkDataValue.LINK_ID_SQL.getString());
     }
 
-
-    public Long getFromPlayer() {
+    @Override
+    public long getFromPlayer() {
         return Integer.valueOf(getInt(LinkDataValue.FROM_ID_SQL.getString())).longValue();
     }
 
-    public Long getToPlayer() {
+    @Override
+    public long getToPlayer() {
         return Integer.valueOf(getInt(LinkDataValue.TO_ID_SQL.getString())).longValue();
     }
 
-
-    public LinkState getLinkState() {
-        return LinkState.valueOf(getString(LinkDataValue.LINK_TYPE_SQL.getString()));
+    @Override
+    public String getLinkType() {
+        return getString(LinkDataValue.LINK_TYPE_SQL.getString());
     }
 
-    public void setLinkState(LinkState linkState) {
-        set(LinkDataValue.LINK_TYPE_SQL.getString(), linkState.name());
+    @Override
+    public void setLinkType(String linkType) {
+        set(LinkDataValue.LINK_TYPE_SQL.getString(), linkType);
     }
 
-
+    @Override
     public void deleteLink() {
         CoreAPI.getInstance().getSQLConnection().asyncExecute("DELETE * FROM link WHERE " + LinkDataValue.LINK_ID_SQL.getString() + " = ?", getLinkID());
     }

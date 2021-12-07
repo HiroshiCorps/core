@@ -19,7 +19,6 @@ import fr.redxil.core.common.data.MoneyDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
-import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -35,7 +34,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
     private long memberID;
     private PlayerModel model = null;
     private MoneyModel moneyModel;
-    private PlayerLinkModel friendModel = null;
 
     public CPlayerOffline(String name) {
 
@@ -59,16 +57,23 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public void initPlayer(long memberID) {
 
         this.memberID = memberID;
+        initPlayerModel();
+
+    }
+
+    private void initPlayerModel() {
         if (this.model == null)
             this.model = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+    }
 
-        this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-        this.friendModel = new SQLModels<>(PlayerLinkModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-
+    private void initMoneyModel() {
+        if (this.moneyModel == null)
+            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
     }
 
     @Override
     public void addSolde(long i) {
+        initMoneyModel();
         moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), moneyModel.getSolde() + i);
     }
 
@@ -78,9 +83,11 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
+        initMoneyModel();
         moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), i);
 
         return true;
+
     }
 
     @Override
@@ -134,11 +141,13 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public long getSolde() {
+        initMoneyModel();
         return moneyModel.getSolde();
     }
 
     @Override
     public long getCoins() {
+        initMoneyModel();
         return moneyModel.getCoins();
     }
 
@@ -188,97 +197,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean isNick() {
         return API.getInstance().getNickGestion().hasNick(this);
-    }
-
-    @Override
-    public List<String> getFriendInviteReceived() {
-        return friendModel.getReceivedList();
-    }
-
-    @Override
-    public boolean friendInviteReceived(APIOfflinePlayer s) {
-
-        if (isBlackList(s)) return false;
-        List<String> fList = friendModel.getReceivedList();
-        if (fList.contains(s.getName())) return false;
-
-        fList.add(s.getName());
-        friendModel.setReceivedList(fList);
-        return true;
-
-    }
-
-    @Override
-    public List<String> getFriendInviteSended() {
-        return friendModel.getSendedList();
-    }
-
-    @Override
-    public List<String> getFriendList() {
-        return friendModel.getFriendList();
-    }
-
-    @Override
-    public void removeFriendReceived(APIOfflinePlayer s) {
-
-        List<String> fList = friendModel.getFriendList();
-        if (fList.remove(s.getName()))
-            friendModel.setFriendList(fList);
-
-    }
-
-    @Override
-    public boolean acceptFriendInviteReceived(APIOfflinePlayer s) {
-        if (!hasFriendSend(s)) return false;
-
-        List<String> fList = getFriendInviteSended();
-        fList.remove(s.getName());
-        friendModel.setSendedList(fList);
-
-        List<String> sList = getFriendList();
-        sList.add(s.getName());
-        friendModel.setFriendList(fList);
-
-        return true;
-    }
-
-    @Override
-    public List<String> getBlackList() {
-        return friendModel.getBlackList();
-    }
-
-    @Override
-    public boolean isBlackList(APIOfflinePlayer playerName) {
-        return getBlackList().contains(playerName.getName());
-    }
-
-    @Override
-    public boolean hasFriend(APIOfflinePlayer playerName) {
-        return getFriendList().contains(playerName.getName());
-    }
-
-    @Override
-    public boolean hasFriendSend(APIOfflinePlayer playerName) {
-        return getFriendInviteSended().contains(playerName.getName());
-    }
-
-    @Override
-    public void friendInviteRevokeReceived(APIOfflinePlayer s) {
-        List<String> fList = getFriendInviteReceived();
-        if (fList.remove(s.getName()))
-            friendModel.setReceivedList(fList);
-    }
-
-    @Override
-    public boolean hasFriendReceived(APIOfflinePlayer playerName) {
-        return getFriendInviteReceived().contains(playerName.getName());
-    }
-
-    @Override
-    public void refusedFriendInviteReceived(APIOfflinePlayer s) {
-        List<String> fList = getFriendInviteSended();
-        if (fList.remove(s.getName()))
-            friendModel.setSendedList(fList);
     }
 
     @Override
