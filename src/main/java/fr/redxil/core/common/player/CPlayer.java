@@ -11,12 +11,8 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.party.Party;
 import fr.redxil.api.common.group.team.Team;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
-import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.rank.RankList;
@@ -32,7 +28,6 @@ import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
-import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
 
 import java.util.ArrayList;
@@ -41,14 +36,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class CPlayer implements APIPlayer {
+public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     //model variable
     private final long memberID;
-    List<SanctionInfo> sanctionModelList = null;
-    List<Setting> settingsModelList = null;
 
     public CPlayer(long memberID) {
+        super(memberID);
         this.memberID = memberID;
     }
 
@@ -344,243 +338,6 @@ public class CPlayer implements APIPlayer {
     }
 
     @Override
-    public boolean hasFriend(APIOfflinePlayer playerName) {
-        return getFriendList().contains(playerName.getName());
-    }
-
-    @Override
-    public List<String> getFriendInviteReceived() {
-
-        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_FRIENDRECEIVEDLIST_REDIS.getString(this));
-
-    }
-
-    @Override
-    public boolean acceptFriendInvite(APIOfflinePlayer s) {
-        if (!hasFriendReceived(s)) {
-            TextComponentBuilder.createTextComponent("Impossible d'accepter la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-
-        getFriendInviteReceived().remove(s.getName());
-
-        List<String> sList = getFriendList();
-        if (hasFriend(s)) {
-            TextComponentBuilder.createTextComponent("Une erreur est apparue, vous êtes déjà amis avec cette personne").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-
-        if (s.acceptFriendInviteReceived(this)) {
-
-            sList.add(s.getName());
-            TextComponentBuilder.createTextComponent("Demande d'amis de: " + s.getName(false) + " accepté").setColor(Color.GREEN).sendTo(this);
-            return true;
-
-        }
-
-        TextComponentBuilder.createTextComponent("Impossible d'accepter la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
-        return false;
-    }
-
-    @Override
-    public boolean refusedFriendInvite(APIOfflinePlayer s) {
-        List<String> sList = getFriendInviteReceived();
-        if (!sList.contains(s.getName())) {
-            TextComponentBuilder.createTextComponent("Impossible de refuser la demande d'amis, elle à dûes être annulée").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-        TextComponentBuilder.createTextComponent("Demande d'amis refusée").setColor(Color.GREEN).sendTo(this);
-        sList.remove(s.getName());
-        s.refusedFriendInviteReceived(this);
-        return true;
-    }
-
-    @Override
-    public List<String> getFriendInviteSended() {
-
-        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_FRIENDSENDEDLIST_REDIS.getString(this));
-
-    }
-
-    @Override
-    public boolean revokeFriendInvite(APIOfflinePlayer s) {
-        if (!getFriendInviteSended().contains(s.getName())) {
-            TextComponentBuilder.createTextComponent("Impossible de révoquer la demande d'amis").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-        TextComponentBuilder.createTextComponent("Demande d'amis révoquée").setColor(Color.GREEN).sendTo(this);
-        getFriendInviteSended().remove(s.getName());
-        s.friendInviteRevokeReceived(this);
-        return true;
-    }
-
-    @Override
-    public boolean hasParty() {
-        return API.getInstance().getPartyManager().hasParty(this);
-    }
-
-    @Override
-    public boolean sendFriendInvite(APIOfflinePlayer s) {
-
-        if (getName().equals(s.getName())) {
-            TextComponentBuilder.createTextComponent("Hmm très intéressant, quel est ta vie pour interargir avec toi-même ?").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-
-        if (hasFriend(s)) {
-            TextComponentBuilder.createTextComponent("Hmm très intéressant, pourquoi demander en amis une personne que tu as déjà en amis?").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-
-        if (hasFriendReceived(s)) {
-            if (acceptFriendInvite(s))
-                return true;
-        }
-
-        if (hasFriendSend(s)) {
-            TextComponentBuilder.createTextComponent("Hmm très intéressant, pourquoi à nouveau le demander en amis? Une fois ne te suffit donc pas").setColor(Color.RED).sendTo(this);
-            return false;
-        }
-
-        if (s.friendInviteReceived(this)) {
-            getFriendInviteSended().add(s.getName());
-            TextComponentBuilder.createTextComponent("Demande d'amis envoyée à: " + s.getName(true)).setColor(Color.GREEN).sendTo(this);
-            return true;
-        }
-
-        TextComponentBuilder.createTextComponent("Erreur, impossible de demander en amis la personne").setColor(Color.RED).sendTo(this);
-        return false;
-
-    }
-
-    @Override
-    public List<String> getFriendList() {
-
-        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_FRIENDLIST_REDIS.getString(this));
-
-    }
-
-    @Override
-    public void removeFriend(APIOfflinePlayer s) {
-
-        getFriendList().remove(s.getName());
-        TextComponentBuilder.createTextComponent("Tu as retirée: " + s.getName(false) + " de tes amis").setColor(Color.GREEN).sendTo(this);
-        s.removeFriendReceived(this);
-
-    }
-
-    @Override
-    public void removeFriendReceived(APIOfflinePlayer s) {
-        getFriendList().remove(s.getName());
-        TextComponentBuilder.createTextComponent("Le joueur: ").setColor(Color.WHITE).appendNewComponentBuilder(s.getName()).setColor(Color.RED).appendNewComponentBuilder(" vous à retirée de ces amis").setColor(Color.WHITE).sendTo(this);
-    }
-
-    @Override
-    public List<String> getBlackList() {
-
-        return API.getInstance().getRedisManager().getRedissonClient().getList(LinkDataValue.PLAYER_BLACKLIST_REDIS.getString(this));
-
-    }
-
-    @Override
-    public boolean isBlackList(APIOfflinePlayer playerName) {
-        return getBlackList().contains(playerName.getName());
-    }
-
-    @Override
-    public boolean friendInviteReceived(APIOfflinePlayer s) {
-        if (isBlackList(s)) return false;
-        getFriendInviteReceived().add(s.getName());
-        TextComponentBuilder.createTextComponent("Le joueur: ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(s.getName()).setColor(Color.RED)
-                .appendNewComponentBuilder(" vous à envoyée une demande d'amis\n").setColor(Color.WHITE)
-                .appendNewComponentBuilder("Vous pouvez la ").setColor(Color.WHITE)
-                .appendNewComponentBuilder("refuser").setColor(Color.RED).setOnClickExecCommand("/friend refuse " + s.getName()).setHover("friend refuse " + s.getName())
-                .appendNewComponentBuilder(" ou alors l'").setColor(Color.WHITE).setOnClickExecCommand("/friend accept " + s.getName()).setHover("friend accept " + s.getName())
-                .appendNewComponentBuilder("accepter").setColor(Color.GREEN)
-                .sendTo(this);
-        return true;
-    }
-
-    @Override
-    public boolean hasFriendReceived(APIOfflinePlayer playerName) {
-        return getFriendInviteReceived().contains(playerName.getName());
-    }
-
-    @Override
-    public boolean hasFriendSend(APIOfflinePlayer playerName) {
-        return getFriendInviteSended().contains(playerName.getName());
-    }
-
-    @Override
-    public void friendInviteRevokeReceived(APIOfflinePlayer s) {
-        getFriendInviteReceived().remove(s.getName());
-        TextComponentBuilder.createTextComponent("Le joueur ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(s.getName()).setColor(Color.RED)
-                .appendNewComponentBuilder(" à annulé sa demande d'amis").setColor(Color.WHITE)
-                .sendTo(this);
-    }
-
-    @Override
-    public boolean acceptFriendInviteReceived(APIOfflinePlayer s) {
-
-        List<String> fList = getFriendInviteSended();
-        if (!fList.contains(s.getName())) return false;
-
-        fList.remove(s.getName());
-        getFriendList().add(s.getName());
-
-        TextComponentBuilder.createTextComponent("Le joueur ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(s.getName()).setColor(Color.GREEN)
-                .appendNewComponentBuilder(" à accepté votre demande d'amis").setColor(Color.WHITE)
-                .sendTo(this);
-
-        return true;
-
-    }
-
-    @Override
-    public void refusedFriendInviteReceived(APIOfflinePlayer s) {
-        getFriendInviteSended().remove(s.getName());
-        TextComponentBuilder.createTextComponent("Le joueur ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(s.getName()).setColor(Color.RED)
-                .appendNewComponentBuilder(" à refusé votre demande d'amis").setColor(Color.WHITE)
-                .sendTo(this);
-    }
-
-    @Override
-    public boolean addBlackList(APIOfflinePlayer s) {
-        List<String> fList = getBlackList();
-        if (!fList.contains(s.getName())) {
-            fList.add(s.getName());
-            TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " est maintenant dans votre blacklist").setColor(Color.GREEN)
-                    .sendTo(this);
-            return true;
-        }
-        TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " est déjà dans votre blacklist").setColor(Color.RED)
-                .sendTo(this);
-        return false;
-    }
-
-    /* Settings */
-
-    @Override
-    public boolean removeBlackList(APIOfflinePlayer s) {
-
-        if (getBlackList().remove(s.getName())) {
-            TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " n'est plus dans votre blacklist").setColor(Color.GREEN)
-                    .sendTo(this);
-            return true;
-        }
-
-        TextComponentBuilder.createTextComponent("Le joueur " + s.getName() + " n'est pas dans votre blacklist").setColor(Color.RED)
-                .sendTo(this);
-
-        return false;
-
-    }
-
-    @Override
     public Party getParty() {
         return API.getInstance().getPartyManager().getPlayerParty(this);
     }
@@ -618,185 +375,6 @@ public class CPlayer implements APIPlayer {
     }
 
     @Override
-    public void loadSettings() {
-        this.settingsModelList = new ArrayList<>();
-        this.settingsModelList.addAll(new SQLModels<>(SettingsModel.class).get("WHERE member_id = ? ORDER BY settings_name ASC", getMemberId()));
-    }
-
-    @Override
-    public List<Setting> getSettings() {
-        if (settingsModelList == null) loadSettings();
-        return this.settingsModelList;
-    }
-
-    @Override
-    public void removeSetting(String settingName) {
-        new SQLModels<>(SettingsModel.class).delete("WHERE settings_name = ? AND player_id = ?", settingName, getMemberId());
-        loadSettings();
-    }
-
-    @Override
-    public Setting createSetting(String settingName, String settingValue) {
-
-        Setting base = getSetting(settingName);
-        if (base != null) {
-            base.setValue(settingValue);
-            return base;
-        }
-
-        SettingsModel sm = new SettingsModel(
-                getMemberId(),
-                settingName,
-                settingValue
-        );
-
-        new SQLModels<>(SettingsModel.class).insert(sm);
-
-        loadSettings();
-
-        return getSetting(settingName);
-
-    }
-
-    @Override
-    public Setting getSetting(String settingsName) {
-        for (Setting sm : getSettings())
-            if (settingsName.equals(sm.getName()))
-                return sm;
-        return null;
-    }
-
-    @Override
-    public void loadSanction() {
-        this.sanctionModelList = new ArrayList<>();
-        this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberId()));
-    }
-
-    @Override
-    public SanctionInfo banPlayer(String reason, long time, APIPlayerModerator author) {
-
-        if (isBan()) return null;
-
-        SanctionModel sm = new SanctionModel(
-                getMemberId(),
-                author.getMemberId(),
-                SanctionType.BAN,
-                reason,
-                time
-        );
-
-        new SQLModels<>(SanctionModel.class).insert(sm);
-
-        loadSanction();
-
-        return getLastSanction(SanctionType.BAN);
-
-    }
-
-    @Override
-    public SanctionInfo mutePlayer(String reason, long time, APIPlayerModerator author) {
-
-        if (isMute()) return null;
-
-        SanctionModel sm = new SanctionModel(
-                getMemberId(),
-                author.getMemberId(),
-                SanctionType.MUTE,
-                reason,
-                time
-        );
-
-        new SQLModels<>(SanctionModel.class).insert(sm);
-
-        loadSanction();
-
-        return getLastSanction(SanctionType.MUTE);
-
-    }
-
-    @Override
-    public SanctionInfo warnPlayer(String reason, APIPlayerModerator author) {
-
-        SanctionModel sm = new SanctionModel(
-                getMemberId(),
-                author.getMemberId(),
-                SanctionType.WARN,
-                reason
-        );
-
-        new SQLModels<>(SanctionModel.class).insert(sm);
-
-        loadSanction();
-
-        return getLastSanction(SanctionType.WARN);
-
-    }
-
-    @Override
-    public List<SanctionInfo> getSanction() {
-        if (sanctionModelList == null) loadSanction();
-        return sanctionModelList;
-    }
-
-    @Override
-    public List<SanctionInfo> getSanction(SanctionType sanctionType) {
-        List<SanctionInfo> corrList = new ArrayList<>();
-        for (SanctionInfo sm : getSanction()) {
-            if (sm.getSanctionType().getID() == sanctionType.getID())
-                corrList.add(sm);
-        }
-        return corrList;
-    }
-
-    @Override
-    public boolean isMute() {
-        SanctionInfo sm = getLastSanction(SanctionType.MUTE);
-        if (sm == null) return false;
-        return sm.isEffective();
-    }
-
-    @Override
-    public boolean isBan() {
-        SanctionInfo sm = getLastSanction(SanctionType.BAN);
-        if (sm == null) return false;
-        return sm.isEffective();
-    }
-
-    @Override
-    public SanctionInfo getLastSanction(SanctionType sanctionType) {
-        List<SanctionInfo> sanctionList = getSanction(sanctionType);
-        if (sanctionList.isEmpty()) return null;
-
-        return sanctionList.get(0);
-    }
-
-    @Override
-    public boolean unBan(APIPlayerModerator mod) {
-
-        SanctionInfo sm = getLastSanction(SanctionType.BAN);
-        if (sm != null && sm.isEffective()) {
-            sm.setCanceller(mod.getMemberId());
-            return true;
-        }
-
-        return false;
-
-    }
-
-    @Override
-    public boolean unMute(APIPlayerModerator mod) {
-
-        SanctionInfo sm = getLastSanction(SanctionType.MUTE);
-        if (sm != null && sm.isEffective()) {
-            sm.setCanceller(mod.getMemberId());
-            return true;
-        }
-
-        return false;
-
-    }
-
-    @Override
     public SanctionInfo kickPlayer(String reason, APIPlayerModerator author) {
 
         SanctionModel sm = new SanctionModel(
@@ -812,6 +390,11 @@ public class CPlayer implements APIPlayer {
 
         return getLastSanction(SanctionType.KICK);
 
+    }
+
+    @Override
+    public boolean hasParty() {
+        return CoreAPI.getInstance().getPartyManager().getParty(getMemberId()) != null;
     }
 
 }
