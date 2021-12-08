@@ -6,6 +6,7 @@
 
 package fr.redxil.core.paper.scoreboard;
 
+import fr.redxil.api.paper.Paper;
 import fr.redxil.api.paper.scoreboard.BoardManager;
 import fr.redxil.api.paper.scoreboard.BoardProvider;
 import org.bukkit.entity.Player;
@@ -16,13 +17,9 @@ import java.util.Map;
 
 public class CoreBoardManager implements BoardManager {
 
-    private final Plugin plugin;
+    private final Plugin plugin = Paper.getInstance();
     private final Map<Player, BoardObjective> boardMap = new HashMap<>();
     private final Map<BoardProvider, BoardObjective> objectiveMap = new HashMap<>();
-
-    public CoreBoardManager(Plugin plugin) {
-        this.plugin = plugin;
-    }
 
     @Override
     public void setProvider(Player player, BoardProvider provider) {

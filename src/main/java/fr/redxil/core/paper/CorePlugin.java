@@ -13,6 +13,8 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.paper.Paper;
+import fr.redxil.api.paper.holograms.HologramsManager;
+import fr.redxil.api.paper.scoreboard.BoardManager;
 import fr.redxil.api.paper.tags.TagsManager;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.FlyCmd;
@@ -23,9 +25,12 @@ import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.INVEventListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
+import fr.redxil.core.paper.holograms.CoreHologramsManager;
+import fr.redxil.core.paper.holograms.HologramListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.receiver.UpdaterReceiver;
+import fr.redxil.core.paper.scoreboard.CoreBoardManager;
 import fr.redxil.core.paper.tags.CoreTagsManager;
 import fr.redxil.core.paper.tags.OutboundHandler;
 import fr.redxil.core.paper.vanish.VanishGestion;
@@ -49,6 +54,8 @@ public class CorePlugin extends Paper {
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
     private CoreTagsManager coreTagsManager;
+    private CoreHologramsManager coreHologramsManager;
+    private CoreBoardManager coreBoardManager;
 
     public static CorePlugin getInstance() {
         return instance;
@@ -57,6 +64,16 @@ public class CorePlugin extends Paper {
     @Override
     public TagsManager getTagsManager() {
         return coreTagsManager;
+    }
+
+    @Override
+    public BoardManager getBoardManager() {
+        return coreBoardManager;
+    }
+
+    @Override
+    public HologramsManager getHologramManager() {
+        return coreHologramsManager;
     }
 
     @Override
@@ -88,6 +105,8 @@ public class CorePlugin extends Paper {
         HiroshiPaper.INSTANCE.registerPacketHandler(new OutboundHandler());
 
         this.moderatorMain = new ModeratorMain();
+        this.coreHologramsManager = new CoreHologramsManager();
+        this.coreBoardManager = new CoreBoardManager();
 
         new Receiver();
         new UpdaterReceiver();
@@ -97,6 +116,7 @@ public class CorePlugin extends Paper {
 
         p.registerEvents(new ConnectionListener(this), this);
         p.registerEvents(new PlayerInteractEvent(), this);
+        p.registerEvents(new HologramListener(), this);
 
         printLog(Level.INFO, SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
 
