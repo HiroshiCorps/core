@@ -18,7 +18,7 @@ import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -48,7 +48,7 @@ public class SetRankCmd extends BrigadierAPI {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer == null) return 1;
 
-        if (!apiPlayer.hasPermission(RankList.ADMINISTRATEUR.getRankPower())) {
+        if (!apiPlayer.hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Seulement un adminnistrateur peut executer cette commande"
             ).setColor(Color.RED)).getFinalTextComponent());
@@ -70,7 +70,7 @@ public class SetRankCmd extends BrigadierAPI {
             return 1;
         }
 
-        if (offlineTarget.hasPermission(RankList.ADMINISTRATEUR.getRankPower())) {
+        if (offlineTarget.hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Impossible d'affecter un nouveau rank à ce joueur"
             ).setColor(Color.RED)).getFinalTextComponent());
@@ -78,19 +78,19 @@ public class SetRankCmd extends BrigadierAPI {
         }
 
         String rankArg = commandContext.getArgument("rank", String.class);
-        RankList newRank = null;
+        Rank newRank = null;
 
 
         if (!isInt(rankArg)) {
-            for (RankList rankList : RankList.values()) {
-                if (rankList.getRankName().equalsIgnoreCase(rankArg)) {
-                    newRank = rankList;
+            for (Rank Rank : Rank.values()) {
+                if (Rank.getRankName().equalsIgnoreCase(rankArg)) {
+                    newRank = Rank;
                     break;
                 }
             }
         } else {
 
-            newRank = RankList.getRank(Long.parseLong(rankArg));
+            newRank = Rank.getRank(Long.parseLong(rankArg));
 
         }
 
@@ -131,9 +131,9 @@ public class SetRankCmd extends BrigadierAPI {
 
         List<String> argRank = new ArrayList<>();
 
-        for (RankList rankList : RankList.values()) {
-            argRank.add(rankList.getRankName());
-            argRank.add(String.valueOf(rankList.getRankPower()));
+        for (Rank Rank : Rank.values()) {
+            argRank.add(Rank.getRankName());
+            argRank.add(String.valueOf(Rank.getRankPower()));
         }
 
         this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));

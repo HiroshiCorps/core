@@ -170,7 +170,7 @@ public class PartyCmd extends BrigadierAPI {
                 ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Liste des membres de la partie:")).getFinalTextComponent()
         );
 
-        for (Map.Entry<String, PartyRank> members : partyManager.getPlayerParty(apiPlayer).getRankList().entrySet()) {
+        for (Map.Entry<String, PartyRank> members : partyManager.getPlayerParty(apiPlayer).getRank().entrySet()) {
             String name = members.getKey();
             if (members.getValue() == PartyRank.OWNER) {
                 player.sendMessage(

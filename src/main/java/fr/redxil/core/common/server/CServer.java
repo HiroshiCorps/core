@@ -12,7 +12,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerAccess;
@@ -53,7 +53,7 @@ public class CServer implements Server {
             put(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
             put(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.toString());
             put(ServerDataValue.SERVER_ACCESS_SQL.getString(null), serverType.getRelatedServerAccess().toString());
-            put(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null), RankList.JOUEUR.getRankPower().intValue());
+            put(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null), Rank.JOUEUR.getRankPower().intValue());
             put(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
             put(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
         }}, "WHERE " + ServerDataValue.SERVER_NAME_SQL.getString(null) + " = ?", name);
@@ -272,13 +272,13 @@ public class CServer implements Server {
     }
 
     @Override
-    public RankList getReservedRank() {
-        return RankList.getRank(API.getInstance().getRedisManager().getRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this)));
+    public Rank getReservedRank() {
+        return Rank.getRank(API.getInstance().getRedisManager().getRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this)));
     }
 
     @Override
-    public void setReservedRank(RankList rankList) {
-        Long power = rankList == null ? RankList.JOUEUR.getRankPower() : rankList.getRankPower();
+    public void setReservedRank(Rank Rank) {
+        Long power = Rank == null ? fr.redxil.api.common.player.rank.Rank.JOUEUR.getRankPower() : Rank.getRankPower();
         API.getInstance().getRedisManager().setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(this), power);
     }
 

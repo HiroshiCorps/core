@@ -16,7 +16,7 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 
 public class NickCmd extends BrigadierAPI {
 
@@ -60,21 +60,21 @@ public class NickCmd extends BrigadierAPI {
         }
 
         String nick = commandContext.getArgument("nick", String.class);
-        RankList nickRank = RankList.JOUEUR;
+        Rank nickRank = Rank.JOUEUR;
 
         if (commandContext.getArguments().size() >= 2) {
 
             String argRank = commandContext.getArgument("rank", String.class);
 
             if (!isInt(argRank)) {
-                for (RankList rankList : RankList.values()) {
-                    if (rankList.getRankName().equalsIgnoreCase(argRank)) {
-                        nickRank = rankList;
+                for (Rank Rank : Rank.values()) {
+                    if (Rank.getRankName().equalsIgnoreCase(argRank)) {
+                        nickRank = Rank;
                         break;
                     }
                 }
             } else {
-                nickRank = RankList.getRank(Integer.parseInt(argRank));
+                nickRank = Rank.getRank(Integer.parseInt(argRank));
             }
 
             if (nickRank == null) {

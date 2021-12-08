@@ -1,29 +1,29 @@
 package fr.redxil.core.paper.holograms;
 
 import fr.redxil.api.paper.Paper;
-import fr.redxil.api.paper.holograms.HologramLine;
-import fr.redxil.core.paper.holograms.task.HologramLineTask;
+import fr.redxil.api.paper.holograms.HologramText;
+import fr.redxil.core.paper.holograms.task.HologramTextTask;
 import net.minecraft.server.v1_12_R1.*;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class EntityHologram {
 
-    private final HologramLine line;
+    private HologramText line;
     private final EntityArmorStand entity;
     private final PacketPlayOutSpawnEntityLiving spawnPacket;
     private final PacketPlayOutEntityDestroy destroyPacket;
 
     private boolean removed = false;
 
-    public EntityHologram(HologramLine line, EntityArmorStand entity) {
+    public EntityHologram(HologramText line, EntityArmorStand entity) {
         this.line = line;
         this.entity = entity;
         this.spawnPacket = new PacketPlayOutSpawnEntityLiving(entity);
         this.destroyPacket = new PacketPlayOutEntityDestroy(entity.getId());
         long interval = line.getInterval();
         if (interval > 0) {
-            new HologramLineTask(Paper.getInstance(), this, interval);
+            new HologramTextTask(Paper.getInstance(), this, interval);
         }
     }
 
@@ -35,8 +35,12 @@ public class EntityHologram {
         return destroyPacket;
     }
 
-    public HologramLine getLine() {
+    public HologramText getLine() {
         return line;
+    }
+
+    public void setLine(HologramText HologramText) {
+        this.line = HologramText;
     }
 
     public EntityArmorStand getEntity() {
@@ -57,7 +61,7 @@ public class EntityHologram {
     }
 
     public void update() {
-        String line = this.line.getLine();
+        String line = this.line.getText();
         if (this.line.getBeforeUpdate() != null) {
             this.line.getBeforeUpdate().accept(line);
         }

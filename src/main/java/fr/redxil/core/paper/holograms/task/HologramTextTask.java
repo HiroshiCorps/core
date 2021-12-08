@@ -4,11 +4,11 @@ import fr.redxil.core.paper.holograms.EntityHologram;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class HologramLineTask extends BukkitRunnable {
+public class HologramTextTask extends BukkitRunnable {
 
     private final EntityHologram entity;
 
-    public HologramLineTask(JavaPlugin plugin, EntityHologram entity, long interval) {
+    public HologramTextTask(JavaPlugin plugin, EntityHologram entity, long interval) {
         this.entity = entity;
         this.runTaskTimerAsynchronously(plugin, interval, interval);
     }

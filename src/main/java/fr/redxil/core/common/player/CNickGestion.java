@@ -12,7 +12,7 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.nick.NickGestion;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import org.redisson.api.RedissonClient;
 
 public class CNickGestion implements NickGestion {
@@ -43,7 +43,7 @@ public class CNickGestion implements NickGestion {
         RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
         redis.getMapCache("nick/nickToPlayerList").put(nickData.getName(), apiPlayer.getMemberId());
         redis.getMapCache("nick/playerToNickList").put(apiPlayer.getMemberId(), nickData.getName());
-        redis.getMapCache("nick/rankList").put(apiPlayer.getMemberId(), nickData.getRank().getRankPower());
+        redis.getMapCache("nick/Rank").put(apiPlayer.getMemberId(), nickData.getRank().getRankPower());
 
         if (apiPlayer instanceof APIPlayer)
             nickUpdate((APIPlayer) apiPlayer);
@@ -63,7 +63,7 @@ public class CNickGestion implements NickGestion {
         RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
         redis.getMapCache("nick/nickToPlayerList").remove(nickData.getName());
         redis.getMapCache("nick/playerToNickList").remove(playerID);
-        redis.getMapCache("nick/rankList").remove(playerID);
+        redis.getMapCache("nick/Rank").remove(playerID);
 
         if (apiPlayer instanceof APIPlayer)
             nickUpdate((APIPlayer) apiPlayer);
@@ -106,7 +106,7 @@ public class CNickGestion implements NickGestion {
     public NickData getNickData(APIOfflinePlayer osp) {
         if (!hasNick(osp))
             return new NickData(osp.getName(), osp.getRank());
-        return new NickData((String) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").get(osp.getMemberId()), RankList.getRank((long) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/rankList").get(osp.getMemberId())));
+        return new NickData((String) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").get(osp.getMemberId()), Rank.getRank((long) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/Rank").get(osp.getMemberId())));
     }
 
     @Override

@@ -8,7 +8,7 @@
 
 package fr.redxil.core.common.player.sqlmodel.player;
 
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.sql.SQLModel;
 
@@ -24,8 +24,8 @@ public class PlayerModel extends SQLModel {
         return Integer.valueOf(this.getInt(PlayerDataValue.PLAYER_RANK_SQL.getString(null))).longValue();
     }
 
-    public RankList getRank() {
-        return RankList.getRank(getPowerRank());
+    public Rank getRank() {
+        return Rank.getRank(getPowerRank());
     }
 
     public int getMemberId() {

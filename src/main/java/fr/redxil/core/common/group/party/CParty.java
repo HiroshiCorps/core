@@ -189,7 +189,7 @@ public class CParty implements Party {
     }
 
     @Override
-    public Map<String, PartyRank> getRankList() {
+    public Map<String, PartyRank> getRank() {
         return new HashMap<String, PartyRank>() {{
             for (Entry<Object, Object> entry : API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(getPartyID())).entrySet()) {
                 put((String) entry.getKey(), PartyRank.valueOf((String) entry.getValue()));

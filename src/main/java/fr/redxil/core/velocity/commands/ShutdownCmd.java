@@ -15,7 +15,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 
 public class ShutdownCmd extends BrigadierAPI {
@@ -29,7 +29,7 @@ public class ShutdownCmd extends BrigadierAPI {
     public int execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
-        if (!apiPlayer.hasPermission(RankList.DEVELOPPEUR.getRankPower())) {
+        if (!apiPlayer.hasPermission(Rank.DEVELOPPEUR.getRankPower())) {
             return 1;
         }
 

@@ -16,7 +16,7 @@ import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.utils.SanctionType;
@@ -59,7 +59,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(null), uuid.toString());
-            this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), RankList.JOUEUR.getRankPower().intValue());
+            this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.JOUEUR.getRankPower().intValue());
         }}, "WHERE " + CoreAPI.getInstance().getPlayerManager().getPlayerIdentifierColumn() + " = ?", CoreAPI.getInstance().getPlayerManager().getIdentifierString(name, uuid));
 
         long memberID = playerModel.getMemberId();
@@ -232,22 +232,22 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public RankList getRank() {
-        return RankList.getRank(getRankPower());
+    public Rank getRank() {
+        return Rank.getRank(getRankPower());
     }
 
     @Override
-    public void setRank(RankList rankList) {
+    public void setRank(Rank Rank) {
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
         if (playerModel != null)
             playerModel.set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
-        API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), rankList.getRankPower());
+        API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), Rank.getRankPower());
         PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
     }
 
     @Override
-    public RankList getRank(boolean nickCare) {
-        return RankList.getRank(getRankPower(nickCare));
+    public Rank getRank(boolean nickCare) {
+        return Rank.getRank(getRankPower(nickCare));
     }
 
     @Override
@@ -283,8 +283,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public String getChatString() {
-        RankList rankList = getRank(true);
-        return rankList.getChatRankString() + getName(true) + rankList.getChatSeparator() + "";
+        Rank Rank = getRank(true);
+        return Rank.getChatRankString() + getName(true) + Rank.getChatSeparator() + "";
     }
 
     @Override

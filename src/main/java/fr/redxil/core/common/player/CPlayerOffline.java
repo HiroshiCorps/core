@@ -12,7 +12,7 @@ import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.MoneyDataValue;
@@ -105,18 +105,18 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public RankList getRank() {
+    public Rank getRank() {
         return model.getRank();
     }
 
     @Override
-    public void setRank(RankList rankList) {
-        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), rankList.getRankPower().intValue());
+    public void setRank(Rank Rank) {
+        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.getRankPower().intValue());
     }
 
     @Override
-    public RankList getRank(boolean nickCare) {
-        return RankList.getRank(getRankPower(nickCare));
+    public Rank getRank(boolean nickCare) {
+        return Rank.getRank(getRankPower(nickCare));
     }
 
     @Override

@@ -17,7 +17,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
-import fr.redxil.api.common.rank.RankList;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.utils.SanctionType;
@@ -101,7 +101,7 @@ public class JoinListener {
 
         } else API.getInstance().getPluginEnabler().printLog(Level.FINE, "APIOfflinePlayer null");
 
-        RankList playerRank = apiOfflinePlayer == null ? RankList.JOUEUR : apiOfflinePlayer.getRank();
+        Rank playerRank = apiOfflinePlayer == null ? Rank.JOUEUR : apiOfflinePlayer.getRank();
 
         Server velocityServer = API.getInstance().getServer();
         if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUniqueId(), playerRank)) {
