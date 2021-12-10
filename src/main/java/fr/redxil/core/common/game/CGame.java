@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.game;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameEnum;
@@ -292,25 +292,25 @@ public class CGame implements Game {
 
     @Override
     public void forceStart(APIPlayerModerator APIPlayer) {
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTART", APIPlayer.getName());
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTART", APIPlayer.getName());
     }
 
     @Override
     public void forceStopStart(APIPlayerModerator APIPlayer) {
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTOPSTART", APIPlayer.getName());
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTOPSTART", APIPlayer.getName());
     }
 
     @Override
     public boolean forceEnd(APIPlayerModerator APIPlayer, String reason) {
         if (reason.contains("<split>")) return false;
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceEND", APIPlayer.getName() + "<split>" + reason);
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceEND", APIPlayer.getName() + "<split>" + reason);
         return true;
     }
 
     @Override
     public boolean forceWin(APIPlayerModerator APIPlayer, Team team, String reason) {
         if (reason.contains("<split>")) return false;
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceWIN", APIPlayer.getName() + "<split>" + team.getName() + "<split>" + reason);
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceWIN", APIPlayer.getName() + "<split>" + team.getName() + "<split>" + reason);
         return true;
     }
 

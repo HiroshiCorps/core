@@ -6,8 +6,8 @@
 
 package fr.redxil.core.paper.receiver;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
-import fr.redline.pms.connect.linker.pm.PMReceiver;
+import fr.redline.pms.pm.PMReceiver;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.paper.utils.Nick;
@@ -20,13 +20,13 @@ public class Receiver implements PMReceiver {
 
     public Receiver() {
 
-        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", String.class, this);
-        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", String.class, this);
+        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", String.class, this);
+        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", String.class, this);
 
     }
 
     @Override
-    public void pluginMessageReceived(String s, Object s1) {
+    public void redisPluginMessageReceived(String s, Object s1) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(UUID.fromString((String) s1));
 
         Player player = Bukkit.getPlayer(apiPlayer.getUUID());

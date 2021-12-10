@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.player;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
@@ -116,7 +116,7 @@ public class CNickGestion implements NickGestion {
 
     public void nickUpdate(APIPlayer apiPlayer) {
 
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", apiPlayer.getUUID().toString());
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", apiPlayer.getUUID().toString());
 
     }
 

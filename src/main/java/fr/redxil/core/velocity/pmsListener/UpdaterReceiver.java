@@ -6,18 +6,18 @@
 
 package fr.redxil.core.velocity.pmsListener;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
-import fr.redline.pms.connect.linker.pm.PMReceiver;
+import fr.redline.pms.pm.PMReceiver;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 
 public class UpdaterReceiver implements PMReceiver {
 
     public UpdaterReceiver() {
-        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "stop", String.class, this);
+        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "stop", String.class, this);
     }
 
     @Override
-    public void pluginMessageReceived(String s, Object s1) {
+    public void redisPluginMessageReceived(String s, Object s1) {
 
         switch (s) {
 

@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.player;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.party.Party;
@@ -185,7 +185,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void switchServer(String server) {
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + server);
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + server);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         if (playerModel != null)
             playerModel.set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
         API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), Rank.getRankPower());
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
     }
 
     @Override

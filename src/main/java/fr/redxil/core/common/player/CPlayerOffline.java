@@ -8,6 +8,7 @@ package fr.redxil.core.common.player;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
+import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
@@ -15,10 +16,12 @@ import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.LinkDataValue;
 import fr.redxil.core.common.data.MoneyDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
+import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -246,6 +249,43 @@ public class CPlayerOffline implements APIOfflinePlayer {
             if (settingsName.equals(sm.getName()))
                 return sm;
         return null;
+    }
+
+
+    @Override
+    public boolean hasLinkWith(APIOfflinePlayer apiOfflinePlayer, String... strings) {
+        return false;
+    }
+
+    @Override
+    public List<? extends LinkData> getLinksWith(APIOfflinePlayer apiOfflinePlayer, String... strings) {
+        int fromID = Long.valueOf(getMemberId()).intValue();
+        int toID = Long.valueOf(getMemberId()).intValue();
+        return new SQLModels<>(PlayerLinkModel.class).get(
+                "WHERE ((" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) OR (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?)) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
+                fromID, toID, toID, fromID, strings
+        );
+    }
+
+    @Override
+    public LinkData getLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings) {
+        int fromID = Long.valueOf(getMemberId()).intValue();
+        int toID = Long.valueOf(getMemberId()).intValue();
+        return new SQLModels<>(PlayerLinkModel.class).getFirst(
+                "WHERE ((" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) OR (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?)) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
+                fromID, toID, toID, fromID, strings
+        );
+    }
+
+    @Override
+    public LinkData createLinkWith(APIOfflinePlayer apiOfflinePlayer, String s) {
+
+        PlayerLinkModel linkData = new PlayerLinkModel(this, apiOfflinePlayer, s);
+
+        new SQLModels<>(PlayerLinkModel.class).insert(linkData);
+
+        return getLinkWith(apiOfflinePlayer, s);
+
     }
 
     @Override

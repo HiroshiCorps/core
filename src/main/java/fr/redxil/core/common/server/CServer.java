@@ -6,7 +6,7 @@
 
 package fr.redxil.core.common.server;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
@@ -243,7 +243,7 @@ public class CServer implements Server {
             API.getInstance().getPluginEnabler().shutdownServer("Shutdown Order from: " + getServerName());
             return;
         }
-        PMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", API.getInstance().getServerName());
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", API.getInstance().getServerName());
     }
 
     @Override

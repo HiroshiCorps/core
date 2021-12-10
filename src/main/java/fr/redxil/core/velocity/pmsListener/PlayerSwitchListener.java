@@ -8,8 +8,8 @@ package fr.redxil.core.velocity.pmsListener;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import fr.redline.pms.connect.linker.pm.PMManager;
-import fr.redline.pms.connect.linker.pm.PMReceiver;
+import fr.redline.pms.pm.PMReceiver;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
@@ -21,23 +21,23 @@ import java.util.Optional;
 public class PlayerSwitchListener implements PMReceiver {
 
     public PlayerSwitchListener() {
-        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", String.class, this);
+        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", String.class, this);
     }
 
     @Override
-    public void pluginMessageReceived(String title, Object message) {
+    public void redisPluginMessageReceived(String title, Object message) {
 
         if (!(message instanceof String)) return;
 
         String[] dataList = ((String) message).split("<switchSplit>");
         Optional<Player> playerO = Velocity.getInstance().getProxyServer().getPlayer(dataList[0]);
 
-        if (!playerO.isPresent()) return;
+        if (playerO.isEmpty()) return;
 
         Player player = playerO.get();
 
         Optional<RegisteredServer> serverInfo = Velocity.getInstance().getProxyServer().getServer(dataList[1]);
-        if (!serverInfo.isPresent()) {
+        if (serverInfo.isEmpty()) {
             player.sendMessage((Component) TextComponentBuilder.createTextComponent(Color.RED + "Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
             return;
         }

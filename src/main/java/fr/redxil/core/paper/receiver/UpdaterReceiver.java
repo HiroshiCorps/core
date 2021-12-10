@@ -6,8 +6,8 @@
 
 package fr.redxil.core.paper.receiver;
 
-import fr.redline.pms.connect.linker.pm.PMManager;
-import fr.redline.pms.connect.linker.pm.PMReceiver;
+import fr.redline.pms.pm.PMReceiver;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,12 +16,12 @@ public class UpdaterReceiver implements PMReceiver {
 
     public UpdaterReceiver() {
         /// API.getInstance().getPMSReceiverManager().setSocketReceiver("update", this);
-        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "restart", String.class, this);
-        PMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "stop", String.class, this);
+        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "restart", String.class, this);
+        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "stop", String.class, this);
     }
 
     @Override
-    public void pluginMessageReceived(String s, Object s1) {
+    public void redisPluginMessageReceived(String s, Object s1) {
 
         switch (s) {
 
