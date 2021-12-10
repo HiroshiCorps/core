@@ -36,7 +36,7 @@ public class BoardEntry extends ScoreboardTeam {
         this.nameSet = Collections.singleton(this.position.getPlayerName());
         long interval = line.getUpdateInterval();
         if (interval > 0) {
-            Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> objective.addPendingUpdate(index), interval, interval);
+            Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> objective.updateLine(index), interval, interval);
         }
     }
 

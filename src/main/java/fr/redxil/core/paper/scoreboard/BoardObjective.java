@@ -16,8 +16,10 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 public class BoardObjective extends ScoreboardObjective {
@@ -29,9 +31,8 @@ public class BoardObjective extends ScoreboardObjective {
     private final BoardProvider provider;
     private final List<BoardEntry> entries;
     private final List<Player> viewers = new ArrayList<>();
-    private final LinkedBlockingQueue<Integer> pendingUpdates = new LinkedBlockingQueue<>();
+    private final ExecutorService service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-    @SuppressWarnings("deprecation")
     public BoardObjective(Plugin plugin, BoardProvider provider) {
         super(scoreboard, "dummy", IScoreboardCriteria.b);
         this.provider = provider;
@@ -43,21 +44,6 @@ public class BoardObjective extends ScoreboardObjective {
             entries.add(new BoardEntry(plugin, this, line, index));
             index++;
         }
-
-        Executors.newCachedThreadPool().execute(() -> {
-            while (MinecraftServer.getServer().isRunning()) {
-                try {
-                    int line = this.pendingUpdates.take();
-                    if (line == -1) {
-                        this.updateTitle();
-                    } else {
-                        this.updateViewers(line);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         long interval = provider.titleRefreshInterval();
         if (interval > 0) {
@@ -101,8 +87,14 @@ public class BoardObjective extends ScoreboardObjective {
         return provider;
     }
 
-    public void addPendingUpdate(int line) {
-        this.pendingUpdates.offer(line);
+    public void updateLine(int line) {
+        this.service.execute(() -> {
+            if (line == -1) {
+                this.updateTitle();
+            } else {
+                this.updateViewers(line);
+            }
+        });
     }
 
     protected int lineSize() {

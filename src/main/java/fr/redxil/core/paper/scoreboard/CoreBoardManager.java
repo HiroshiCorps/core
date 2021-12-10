@@ -45,12 +45,12 @@ public class CoreBoardManager implements BoardManager {
 
     @Override
     public void updateLine(BoardProvider provider, int line) {
-        this.getOrCreateObjective(provider).addPendingUpdate(line);
+        this.getOrCreateObjective(provider).updateLine(line);
     }
 
     @Override
     public void updateTitle(BoardProvider provider) {
-        this.getOrCreateObjective(provider).addPendingUpdate(-1);
+        this.getOrCreateObjective(provider).updateLine(-1);
     }
 
     private BoardObjective getOrCreateObjective(BoardProvider provider) {
