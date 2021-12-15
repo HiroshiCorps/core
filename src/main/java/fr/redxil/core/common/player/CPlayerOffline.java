@@ -253,12 +253,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     @Override
-    public boolean hasLinkWith(APIOfflinePlayer apiOfflinePlayer, String... strings) {
-        return false;
+    public boolean hasLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings) {
+        return getLinkWith(apiOfflinePlayer, strings) != null;
     }
 
     @Override
-    public List<? extends LinkData> getLinksWith(APIOfflinePlayer apiOfflinePlayer, String... strings) {
+    public List<? extends LinkData> getLinksWith(APIOfflinePlayer apiOfflinePlayer, String strings) {
         int fromID = Long.valueOf(getMemberId()).intValue();
         int toID = Long.valueOf(getMemberId()).intValue();
         return new SQLModels<>(PlayerLinkModel.class).get(
