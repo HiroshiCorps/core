@@ -8,7 +8,7 @@ package fr.redxil.core.paper.event;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
-import fr.redxil.api.common.game.GameState;
+import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
@@ -86,7 +86,7 @@ public class ConnectionListener implements Listener {
                 sendJoinMessage(apiPlayer);
         }
 
-        Nick.applyNick(event.getPlayer(), apiPlayer, true);
+        Nick.applyNick(event.getPlayer(), apiPlayer);
         corePlugin.getVanish().applyVanish(event.getPlayer());
 
         API.getInstance().getServer().setPlayerInServer(apiPlayer);

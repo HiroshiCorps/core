@@ -32,6 +32,6 @@ public class Receiver implements PMReceiver {
         Player player = Bukkit.getPlayer(apiPlayer.getUUID());
         if (player == null) return;
 
-        Nick.applyNick(player, apiPlayer, false);
+        Nick.applyNick(player, apiPlayer);
     }
 }
