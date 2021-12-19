@@ -17,6 +17,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.velocity.CoreEnabledEvent;
 import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
@@ -81,6 +82,8 @@ public class CoreVelocity extends Velocity {
             checkCrash();
             registerCommands();
             registerEvents();
+            assert server != null;
+            server.getEventManager().fire(new CoreEnabledEvent(this));
         }
 
     }
