@@ -140,7 +140,7 @@ public class BanCmd extends BrigadierAPI {
         }
 
         this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "time", StringArgumentType.word());
+        this.addArgumentCommand(literalCommandNode, "time", StringArgumentType.word(), "perm", "0s", "0h", "0j", "0m");
         this.addArgumentCommand(literalCommandNode, "reason", StringArgumentType.string());
     }
 }
