@@ -1,22 +1,18 @@
 package fr.redxil.core.velocity.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class BrigadierAPI {
 
     private final String name;
-    private final List<ArgumentCommandNode<CommandSource, String>> args = new ArrayList<>();
-    private BrigadierCommand brigadierCommand;
 
     public BrigadierAPI(String name) {
         this.name = name;
@@ -31,40 +27,26 @@ public abstract class BrigadierAPI {
 
         LiteralCommandNode<CommandSource> commands = LiteralArgumentBuilder.<CommandSource>literal(this.name)
                 .executes(context -> {
-
                     execute(context);
                     return 1;
                 }).build();
 
-        for (int i = 0; i < args.size(); i++) {
-
-            if (i == 0) {
-
-                commands.addChild(args.get(i));
-
-            } else {
-
-                args.get(i - 1).addChild(args.get(i));
-
-            }
-        }
+        registerArgs(commands);
 
         return commands;
 
     }
 
-    public void addArgumentCommand(LiteralCommandNode<CommandSource> literalCommandNode, String name, StringArgumentType type) {
-        ArgumentCommandNode<CommandSource, String> node = RequiredArgumentBuilder.<CommandSource, String>argument(name, type)
-                .suggests(((context, builder) -> {
-                    return builder.buildFuture();
-                })).executes(literalCommandNode.getCommand()).build();
+    public <T> CommandNode<CommandSource> addArgumentCommand(CommandNode<CommandSource> literalCommandNode, String name, ArgumentType<T> type) {
+        ArgumentCommandNode<CommandSource, T> node = RequiredArgumentBuilder.<CommandSource, T>argument(name, type)
+                .suggests(((context, builder) -> builder.buildFuture())).executes(literalCommandNode.getCommand()).build();
 
-
-        this.args.add(node);
+        literalCommandNode.addChild(node);
+        return node;
     }
 
-    public void addArgumentCommand(LiteralCommandNode<CommandSource> literalCommandNode, String name, StringArgumentType type, String... argsTab) {
-        ArgumentCommandNode<CommandSource, String> node = RequiredArgumentBuilder.<CommandSource, String>argument(name, type)
+    public <T> CommandNode<CommandSource> addArgumentCommand(CommandNode<CommandSource> literalCommandNode, String name, ArgumentType<T> type, String... argsTab) {
+        ArgumentCommandNode<CommandSource, T> node = RequiredArgumentBuilder.<CommandSource, T>argument(name, type)
                 .suggests(((context, builder) -> {
 
                     for (String args : argsTab) {
@@ -74,8 +56,8 @@ public abstract class BrigadierAPI {
                     return builder.buildFuture();
                 })).executes(literalCommandNode.getCommand()).build();
 
-
-        this.args.add(node);
+        literalCommandNode.addChild(node);
+        return node;
     }
 
 
@@ -84,11 +66,6 @@ public abstract class BrigadierAPI {
     }
 
     public BrigadierCommand getBrigadierCommand() {
-
-        LiteralCommandNode<CommandSource> literalCommandNode = this.buildCommands();
-
-        registerArgs(literalCommandNode);
-        this.brigadierCommand = new BrigadierCommand(literalCommandNode);
-        return this.brigadierCommand;
+        return new BrigadierCommand(this.buildCommands());
     }
 }
