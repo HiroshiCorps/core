@@ -253,28 +253,28 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     @Override
-    public boolean hasLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings) {
-        return getLinkWith(apiOfflinePlayer, strings) != null;
+    public boolean hasLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings, boolean received) {
+        return getLinkWith(apiOfflinePlayer, strings, received) != null;
     }
 
     @Override
-    public List<? extends LinkData> getLinksWith(APIOfflinePlayer apiOfflinePlayer, String strings) {
+    public List<? extends LinkData> getLinksWith(APIOfflinePlayer apiOfflinePlayer, String strings, boolean received) {
         int fromID = Long.valueOf(getMemberId()).intValue();
         int toID = Long.valueOf(getMemberId()).intValue();
+        if (received)
+            return new SQLModels<>(PlayerLinkModel.class).get(
+                    "WHERE ((" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) OR (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?)) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
+                    fromID, toID, toID, fromID, strings
+            );
         return new SQLModels<>(PlayerLinkModel.class).get(
-                "WHERE ((" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) OR (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?)) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
-                fromID, toID, toID, fromID, strings
+                "WHERE (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
+                fromID, toID, strings
         );
     }
 
     @Override
-    public LinkData getLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings) {
-        int fromID = Long.valueOf(getMemberId()).intValue();
-        int toID = Long.valueOf(getMemberId()).intValue();
-        return new SQLModels<>(PlayerLinkModel.class).getFirst(
-                "WHERE ((" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) OR (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?)) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
-                fromID, toID, toID, fromID, strings
-        );
+    public LinkData getLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings, boolean received) {
+        return getLinksWith(apiOfflinePlayer, strings, received).get(0);
     }
 
     @Override
@@ -284,7 +284,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
         new SQLModels<>(PlayerLinkModel.class).insert(linkData);
 
-        return getLinkWith(apiOfflinePlayer, s);
+        return getLinkWith(apiOfflinePlayer, s, false);
 
     }
 
