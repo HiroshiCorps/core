@@ -22,7 +22,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnMuteCmd extends BrigadierAPI {
+public class UnMuteCmd extends BrigadierAPI<CommandSource> {
 
 
     public UnMuteCmd() {

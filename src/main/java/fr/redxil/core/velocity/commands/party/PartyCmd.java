@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.party;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 
 
-public class PartyCmd extends BrigadierAPI {
+public class PartyCmd extends BrigadierAPI<CommandSource> {
 
     public PartyCmd() {
         super("party");
@@ -100,8 +101,8 @@ public class PartyCmd extends BrigadierAPI {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "name", StringArgumentType.greedyString());
+        CommandNode<CommandSource> cmd = this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(cmd, "name", StringArgumentType.greedyString());
 
     }
 

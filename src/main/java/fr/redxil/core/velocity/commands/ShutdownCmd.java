@@ -18,7 +18,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 
-public class ShutdownCmd extends BrigadierAPI {
+public class ShutdownCmd extends BrigadierAPI<CommandSource> {
 
 
     public ShutdownCmd() {

@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.mod.action.punish;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -25,7 +26,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarnCmd extends BrigadierAPI {
+public class WarnCmd extends BrigadierAPI<CommandSource> {
 
 
     public WarnCmd() {
@@ -93,8 +94,8 @@ public class WarnCmd extends BrigadierAPI {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "reason", StringArgumentType.string());
+        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(target, "reason", StringArgumentType.string());
 
     }
 }

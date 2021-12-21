@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -18,7 +19,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.rank.Rank;
 
-public class NickCmd extends BrigadierAPI {
+public class NickCmd extends BrigadierAPI<CommandSource> {
 
 
     public NickCmd() {
@@ -103,7 +104,7 @@ public class NickCmd extends BrigadierAPI {
 
     @Override
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        this.addArgumentCommand(literalCommandNode, "nick", StringArgumentType.word());
-        this.addArgumentCommand(literalCommandNode, "rank", StringArgumentType.word());
+        CommandNode<CommandSource> nick = this.addArgumentCommand(literalCommandNode, "nick", StringArgumentType.word());
+        this.addArgumentCommand(nick, "rank", StringArgumentType.word());
     }
 }

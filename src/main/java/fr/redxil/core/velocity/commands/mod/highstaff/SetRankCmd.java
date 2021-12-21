@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.mod.highstaff;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -25,7 +26,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetRankCmd extends BrigadierAPI {
+public class SetRankCmd extends BrigadierAPI<CommandSource> {
 
 
     public SetRankCmd() {
@@ -136,7 +137,7 @@ public class SetRankCmd extends BrigadierAPI {
             argRank.add(String.valueOf(Rank.getRankPower()));
         }
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "rank", StringArgumentType.word(), argRank.toArray(new String[0]));
+        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(target, "rank", StringArgumentType.word(), argRank.toArray(new String[0]));
     }
 }

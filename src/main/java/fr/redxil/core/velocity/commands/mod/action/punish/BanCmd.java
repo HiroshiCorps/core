@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.mod.action.punish;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BanCmd extends BrigadierAPI {
+public class BanCmd extends BrigadierAPI<CommandSource> {
 
     public BanCmd() {
         super("ban");
@@ -37,7 +38,7 @@ public class BanCmd extends BrigadierAPI {
         long durationTime = DateUtility.toTimeStamp(timeArgs);
 
         Optional<Player> playerOptional = Velocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getUUID());
-        if (!playerOptional.isPresent()) return;
+        if (playerOptional.isEmpty()) return;
         Player proxiedPlayer = playerOptional.get();
 
         long end = DateUtility.addToCurrentTimeStamp(durationTime);
@@ -139,8 +140,8 @@ public class BanCmd extends BrigadierAPI {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "time", StringArgumentType.word(), "perm", "0s", "0h", "0j", "0m");
-        this.addArgumentCommand(literalCommandNode, "reason", StringArgumentType.string());
+        CommandNode<CommandSource> targetNode = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        CommandNode<CommandSource> timeNode = this.addArgumentCommand(targetNode, "time", StringArgumentType.word(), "perm", "0s", "0h", "0j", "0m");
+        this.addArgumentCommand(timeNode, "reason", StringArgumentType.string());
     }
 }

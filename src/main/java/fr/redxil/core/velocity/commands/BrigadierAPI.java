@@ -7,10 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.velocitypowered.api.command.BrigadierCommand;
-import com.velocitypowered.api.command.CommandSource;
 
-public abstract class BrigadierAPI {
+public abstract class BrigadierAPI<C> {
 
     private final String name;
 
@@ -19,13 +17,13 @@ public abstract class BrigadierAPI {
     }
 
 
-    public abstract int execute(CommandContext<CommandSource> context);
+    public abstract int execute(CommandContext<C> context);
 
-    public abstract void registerArgs(LiteralCommandNode<CommandSource> commandNode);
+    public abstract void registerArgs(LiteralCommandNode<C> commandNode);
 
-    public LiteralCommandNode<CommandSource> buildCommands() {
+    public LiteralCommandNode<C> buildCommands() {
 
-        LiteralCommandNode<CommandSource> commands = LiteralArgumentBuilder.<CommandSource>literal(this.name)
+        LiteralCommandNode<C> commands = LiteralArgumentBuilder.<C>literal(this.name)
                 .executes(context -> {
                     execute(context);
                     return 1;
@@ -37,16 +35,16 @@ public abstract class BrigadierAPI {
 
     }
 
-    public <T> CommandNode<CommandSource> addArgumentCommand(CommandNode<CommandSource> literalCommandNode, String name, ArgumentType<T> type) {
-        ArgumentCommandNode<CommandSource, T> node = RequiredArgumentBuilder.<CommandSource, T>argument(name, type)
+    public <T> CommandNode<C> addArgumentCommand(CommandNode<C> literalCommandNode, String name, ArgumentType<T> type) {
+        ArgumentCommandNode<C, T> node = RequiredArgumentBuilder.<C, T>argument(name, type)
                 .suggests(((context, builder) -> builder.buildFuture())).executes(literalCommandNode.getCommand()).build();
 
         literalCommandNode.addChild(node);
         return node;
     }
 
-    public <T> CommandNode<CommandSource> addArgumentCommand(CommandNode<CommandSource> literalCommandNode, String name, ArgumentType<T> type, String... argsTab) {
-        ArgumentCommandNode<CommandSource, T> node = RequiredArgumentBuilder.<CommandSource, T>argument(name, type)
+    public <T> CommandNode<C> addArgumentCommand(CommandNode<C> literalCommandNode, String name, ArgumentType<T> type, String... argsTab) {
+        ArgumentCommandNode<C, T> node = RequiredArgumentBuilder.<C, T>argument(name, type)
                 .suggests(((context, builder) -> {
 
                     for (String args : argsTab) {
@@ -65,7 +63,4 @@ public abstract class BrigadierAPI {
         return name;
     }
 
-    public BrigadierCommand getBrigadierCommand() {
-        return new BrigadierCommand(this.buildCommands());
-    }
 }

@@ -6,6 +6,7 @@
 
 package fr.redxil.core.velocity;
 
+import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -102,30 +103,29 @@ public class CoreVelocity extends Velocity {
 
         CommandManager cm = commandManager;
 
-        cm.register(new PartyCmd().getBrigadierCommand());
+        cm.register(new BrigadierCommand(new PartyCmd().buildCommands()));
 
-        cm.register(new BanCmd().getBrigadierCommand());
-        cm.register(new WarnCmd().getBrigadierCommand());
-        cm.register(new KickCmd().getBrigadierCommand());
-        cm.register(new MuteCmd().getBrigadierCommand());
+        cm.register(new BrigadierCommand(new BanCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new WarnCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new KickCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new MuteCmd().buildCommands()));
 
-        cm.register(new UnBanCmd().getBrigadierCommand());
-        cm.register(new UnMuteCmd().getBrigadierCommand());
+        cm.register(new BrigadierCommand(new UnBanCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new UnMuteCmd().buildCommands()));
 
-        cm.register(new StaffCmd().getBrigadierCommand());
-        cm.register(new CibleCmd().getBrigadierCommand());
-        cm.register(new NickCheckCmd().getBrigadierCommand());
-        cm.register(new InfoCmd().getBrigadierCommand());
-        cm.register(new SetRankCmd().getBrigadierCommand());
+        cm.register(new BrigadierCommand(new StaffCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new CibleCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new NickCheckCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new SetRankCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new InfoCmd().buildCommands()));
 
-        cm.register(new NickCmd().getBrigadierCommand());
-        cm.register(new FriendCmd().getBrigadierCommand());
-        cm.register(new BlackListCmd().getBrigadierCommand());
+        cm.register(new BrigadierCommand(new BlackListCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new FriendCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new NickCmd().buildCommands()));
 
-        cm.register(new MsgCmd().getBrigadierCommand());
-        cm.register(new RCmd().getBrigadierCommand());
-
-        cm.register(new ShutdownCmd().getBrigadierCommand());
+        cm.register(new BrigadierCommand(new ShutdownCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new RCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new MsgCmd().buildCommands()));
 
     }
 

@@ -20,7 +20,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.UUID;
 
-public class RCmd extends BrigadierAPI {
+public class RCmd extends BrigadierAPI<CommandSource> {
 
 
     public RCmd() {

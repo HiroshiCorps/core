@@ -22,7 +22,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UnBanCmd extends BrigadierAPI {
+public class UnBanCmd extends BrigadierAPI<CommandSource> {
 
 
     public UnBanCmd() {

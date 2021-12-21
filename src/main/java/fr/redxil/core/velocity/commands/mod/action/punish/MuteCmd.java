@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.mod.action.punish;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class MuteCmd extends BrigadierAPI {
+public class MuteCmd extends BrigadierAPI<CommandSource> {
 
     public MuteCmd() {
         super("mute");
@@ -134,14 +135,15 @@ public class MuteCmd extends BrigadierAPI {
 
     @Override
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
+
         List<String> playerName = new ArrayList<>();
 
         for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "time", StringArgumentType.word());
-        this.addArgumentCommand(literalCommandNode, "reason", StringArgumentType.string());
+        CommandNode<CommandSource> targetNode = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        CommandNode<CommandSource> timeNode = this.addArgumentCommand(targetNode, "time", StringArgumentType.word(), "perm", "0s", "0h", "0j", "0m");
+        this.addArgumentCommand(timeNode, "reason", StringArgumentType.string());
     }
 }

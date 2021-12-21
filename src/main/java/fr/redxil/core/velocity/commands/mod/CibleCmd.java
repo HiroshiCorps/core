@@ -21,7 +21,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CibleCmd extends BrigadierAPI {
+public class CibleCmd extends BrigadierAPI<CommandSource> {
 
 
     public CibleCmd() {

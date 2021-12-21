@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.mod;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -23,7 +24,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InfoCmd extends BrigadierAPI {
+public class InfoCmd extends BrigadierAPI<CommandSource> {
 
 
     public InfoCmd() {
@@ -66,9 +67,9 @@ public class InfoCmd extends BrigadierAPI {
             sanctionName.add(sanctionType.getName());
         }
 
-        this.addArgumentCommand(literalCommandNode, "sanc", StringArgumentType.word(), sanctionName.toArray(new String[0]));
+        CommandNode<CommandSource> sanc = this.addArgumentCommand(literalCommandNode, "sanc", StringArgumentType.word(), sanctionName.toArray(new String[0]));
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(sanc, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
 
     }
 }

@@ -8,6 +8,7 @@ package fr.redxil.core.velocity.commands.friend;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
@@ -23,7 +24,7 @@ import net.kyori.adventure.text.TextComponent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FriendCmd extends BrigadierAPI {
+public class FriendCmd extends BrigadierAPI<CommandSource> {
 
     public FriendCmd() {
         super("friend");
@@ -85,8 +86,8 @@ public class FriendCmd extends BrigadierAPI {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), cmdName.toArray(new String[0]));
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.greedyString(), playerName.toArray(new String[0]));
+        CommandNode<CommandSource> cmd = this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), cmdName.toArray(new String[0]));
+        this.addArgumentCommand(cmd, "target", StringArgumentType.greedyString(), playerName.toArray(new String[0]));
     }
 
 
