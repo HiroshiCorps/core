@@ -15,6 +15,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -46,32 +47,7 @@ public class RCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        APIPlayer target = API.getInstance().getPlayerManager().getPlayer(targetName);
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + targetName + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
-        }
-
-        if (sp.isBlackList(target)) {
-            TextComponentBuilder.createTextComponent("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
-        }
-
-        if (target.isBlackList(sp)) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + targetName + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
-        }
-
-
-        String message = commandContext.getArgument("message", String.class);
-
-        TextComponentBuilder.createTextComponent(sp.getName(true)).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
-                .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(message).sendTo(target.getUUID());
-
-        TextComponentBuilder.createTextComponent(targetName).setColor(Color.RED)
-                .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(message).sendTo(sp.getUUID());
+        Velocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName + " " + commandContext.getArgument("message", String.class));
 
         return 1;
     }

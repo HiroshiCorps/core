@@ -9,11 +9,13 @@ package fr.redxil.core.common.player;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.LinkData;
+import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.api.common.utils.Pair;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.LinkDataValue;
@@ -26,6 +28,7 @@ import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -253,38 +256,32 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     @Override
-    public boolean hasLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings, boolean received) {
-        return getLinkWith(apiOfflinePlayer, strings, received) != null;
+    public boolean hasLinkWith(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... strings) {
+        return getLink(linkUsage, apiOfflinePlayer, strings) != null;
     }
 
     @Override
-    public List<? extends LinkData> getLinksWith(APIOfflinePlayer apiOfflinePlayer, String strings, boolean received) {
-        int fromID = Long.valueOf(getMemberId()).intValue();
-        int toID = Long.valueOf(getMemberId()).intValue();
-        if (received)
-            return new SQLModels<>(PlayerLinkModel.class).get(
-                    "WHERE ((" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) OR (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?)) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
-                    fromID, toID, toID, fromID, strings
-            );
-        return new SQLModels<>(PlayerLinkModel.class).get(
-                "WHERE (" + LinkDataValue.FROM_ID_SQL.getString() + " = ? AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?) AND " + LinkDataValue.LINK_TYPE_SQL.getString() + " = ?, ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC",
-                fromID, toID, strings
-        );
+    public List<LinkData> getLinks(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
+        Pair<String, List<Object>> pair = getWhereString(linkUsage, apiOfflinePlayer);
+        pair.getTwo().add(s);
+        return new ArrayList<>() {{
+            this.addAll(new SQLModels<>(PlayerLinkModel.class).get("(" + pair.getOne() + ") AND " + getStringSQL(LinkDataValue.LINK_TYPE_SQL.getString(), s.length) + " ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC", pair.getTwo().toArray(), s));
+        }};
     }
 
     @Override
-    public LinkData getLinkWith(APIOfflinePlayer apiOfflinePlayer, String strings, boolean received) {
-        return getLinksWith(apiOfflinePlayer, strings, received).get(0);
+    public LinkData getLink(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
+        return getLinks(linkUsage, apiOfflinePlayer, s).get(0);
     }
 
     @Override
-    public LinkData createLinkWith(APIOfflinePlayer apiOfflinePlayer, String s) {
+    public LinkData createLink(APIOfflinePlayer apiOfflinePlayer, String s) {
 
         PlayerLinkModel linkData = new PlayerLinkModel(this, apiOfflinePlayer, s);
 
         new SQLModels<>(PlayerLinkModel.class).insert(linkData);
 
-        return getLinkWith(apiOfflinePlayer, s, false);
+        return getLink(LinkUsage.TO, apiOfflinePlayer, s);
 
     }
 
@@ -415,6 +412,60 @@ public class CPlayerOffline implements APIOfflinePlayer {
         }
 
         return false;
+
+    }
+
+    public Pair<String, List<Object>> getWhereString(LinkUsage linkUsage, @Nullable APIOfflinePlayer player2) {
+        int id1 = Long.valueOf(getMemberId()).intValue();
+        Integer id2 = null;
+        if (player2 != null)
+            id2 = Long.valueOf(player2.getMemberId()).intValue();
+        switch (linkUsage) {
+            case FROM: {
+                String queries = LinkDataValue.TO_ID_SQL.getString() + " = ?";
+                if (id2 != null)
+                    queries += " AND " + LinkDataValue.FROM_ID_SQL.getString() + " = ?";
+                Integer finalId = id2;
+                return new Pair<>(queries, new ArrayList<>() {{
+                    add(id1);
+                    if (finalId != null)
+                        add(finalId);
+                }});
+            }
+            case TO: {
+                String queries = LinkDataValue.FROM_ID_SQL.getString() + " = ?";
+                if (id2 != null)
+                    queries += " AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?";
+                Integer finalId = id2;
+                return new Pair<>(queries, new ArrayList<>() {{
+                    add(id1);
+                    if (finalId != null)
+                        add(finalId);
+                }});
+            }
+            case BOTH: {
+                Pair<String, List<Object>> one = getWhereString(LinkUsage.FROM, player2);
+                Pair<String, List<Object>> two = getWhereString(LinkUsage.TO, player2);
+                return new Pair<>("(" + one.getOne() + ") OR (" + two.getOne() + ")", new ArrayList<>(one.getTwo()) {{
+                    add(two.getTwo());
+                }});
+            }
+            default: {
+                return null;
+            }
+        }
+
+    }
+
+    public String getStringSQL(String s, int size) {
+
+        if (size == 1)
+            return s + " = ?";
+        StringBuilder stringBuilder = new StringBuilder("(" + s + " = ?");
+        for (int i = size - 1; i != 0; i--) {
+            stringBuilder.append(" ").append("OR").append(" ").append(s).append(" = ?");
+        }
+        return stringBuilder.append(")").toString();
 
     }
 

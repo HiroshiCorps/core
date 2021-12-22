@@ -17,6 +17,9 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.LinkData;
+import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 import net.kyori.adventure.text.TextComponent;
@@ -111,7 +114,11 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        apiPlayer.sendFriendInvite(target);
+        if (apiPlayer.hasLinkWith(LinkUsage.BOTH, target, "friend", "friendInvite")) {
+            TextComponentBuilder.createTextComponent("Une ou un semblant de relation existe déjà entre vous").sendTo(apiPlayer);
+            return;
+        }
+        apiPlayer.createLink(target, "friendInvite");
         TextComponentBuilder.createTextComponent("Demande d'amis envoyée").setColor(Color.GREEN).sendTo(apiPlayer);
 
     }
@@ -125,7 +132,12 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        apiPlayer.acceptFriendInvite(target);
+        LinkData linkData = apiPlayer.getLink(LinkUsage.FROM, target, "friendInvite");
+        if (linkData == null) {
+            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
+        }
+        linkData.setLinkType("friend");
         TextComponentBuilder.createTextComponent("Sa demande d'amis à été accepté").setColor(Color.GREEN).sendTo(apiPlayer);
         return 1;
 
@@ -140,7 +152,12 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        apiPlayer.refusedFriendInvite(target);
+        LinkData linkData = apiPlayer.getLink(LinkUsage.FROM, target, "friendInvite");
+        if (linkData == null) {
+            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
+        }
+        linkData.setLinkType("friendRefused");
         TextComponentBuilder.createTextComponent("Sa demande d'amis à été refusée").setColor(Color.GREEN).sendTo(apiPlayer);
         return 1;
 
@@ -155,7 +172,12 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        apiPlayer.revokeFriendInvite(target);
+        LinkData linkData = apiPlayer.getLink(LinkUsage.TO, target, "friendInvite");
+        if (linkData == null) {
+            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
+        }
+        linkData.setLinkType("friendRevoke");
         TextComponentBuilder.createTextComponent("Votre demande d'amis à été retiré").setColor(Color.GREEN).sendTo(apiPlayer);
 
         return 1;
@@ -170,16 +192,21 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        apiPlayer.removeFriend(target);
-        TextComponentBuilder.createTextComponent("Joueur retiré de vos Amis").setColor(Color.GREEN).sendTo(apiPlayer);
+        LinkData linkData = apiPlayer.getLink(LinkUsage.FROM, target, "friend");
+        if (linkData == null) {
+            TextComponentBuilder.createTextComponent("Cette personne n'est pas dans vos amis").setColor(Color.RED).sendTo(apiPlayer);
+            return 1;
+        }
 
+        linkData.setLinkType("friendRemove");
+        TextComponentBuilder.createTextComponent("Joueur retiré de vos Amis").setColor(Color.GREEN).sendTo(apiPlayer);
         return 1;
     }
 
     public int listCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        List<String> amisList = apiPlayer.getFriendList();
+        List<LinkData> amisList = apiPlayer.getLinks(LinkUsage.BOTH, null, "friend");
 
         if (amisList.size() == 0) {
             TextComponentBuilder.createTextComponent("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").setColor(Color.GREEN).sendTo(apiPlayer);
@@ -188,14 +215,15 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
 
         TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("Heuresement pour toi, tu as ").setColor(Color.GREEN).appendNewComponentBuilder(Integer.valueOf(amisList.size()).toString()).setColor(Color.BLUE).appendNewComponentBuilder(" amis").setColor(Color.GREEN);
 
-        for (String ami : amisList) {
+        for (LinkData ami : amisList) {
             String connect = "Déconnecté";
+            long amis = ami.getFromPlayer() == apiPlayer.getMemberId() ? ami.getToPlayer() : ami.getFromPlayer();
             Color bc = Color.RED;
-            if (API.getInstance().getPlayerManager().isLoadedPlayer(ami)) {
+            if (API.getInstance().getPlayerManager().isLoadedPlayer(amis)) {
                 connect = "Connecté";
                 bc = Color.GREEN;
             }
-            tcb.appendNewComponentBuilder("\n" + ami + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
+            tcb.appendNewComponentBuilder("\n" + CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(amis).getName() + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
         }
 
         tcb.sendTo(apiPlayer);

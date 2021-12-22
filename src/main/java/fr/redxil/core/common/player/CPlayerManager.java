@@ -14,6 +14,7 @@ import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 
@@ -206,6 +207,11 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public boolean hasLinkType(String s) {
         return linkMap.containsKey(s);
+    }
+
+    @Override
+    public LinkData getLink(int i) {
+        return new SQLModels<>(PlayerLinkModel.class).get(i);
     }
 
 }
