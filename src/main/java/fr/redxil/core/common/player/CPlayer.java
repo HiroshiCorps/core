@@ -156,15 +156,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         rm.getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(name);
         rm.getRedisList(PlayerDataValue.LIST_PLAYER_ID.getString(this)).remove(memberID);
 
-        MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-
-        /// Money Part
-
-        if (moneyModel != null) {
-            moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), getSolde());
-            moneyModel.set(MoneyDataValue.PLAYER_COINS_SQL.getString(), getCoins());
-        }
-
         MoneyDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
         LinkDataValue.clearRedisData(DataType.PLAYER, name, memberID);
@@ -199,7 +190,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void addSolde(long value) {
-        API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), getSolde() + value);
+        setSolde(getSolde() + value);
     }
 
     @Override
@@ -208,6 +199,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         if (value <= 0)
             return false;
 
+        super.setSolde(value);
         API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), value);
 
         return true;
@@ -220,17 +212,15 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void addCoins(long value) {
-        API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), getCoins() + value);
+        setCoins(getCoins() + value);
     }
-
-
-    /// <!-------------------- Rank part --------------------!>
 
     @Override
     public boolean setCoins(long value) {
         if (value <= 0)
             return false;
 
+        super.setCoins(value);
         API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), value);
         return true;
     }
@@ -239,6 +229,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public long getCoins() {
         return API.getInstance().getRedisManager().getRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this));
     }
+
+    /// <!-------------------- Rank part --------------------!>
 
     @Override
     public Rank getRank() {
@@ -253,11 +245,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
         String timeStampString = timestamp == null ? null : timestamp.toString();
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-        if (playerModel != null) {
-            playerModel.set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
-            playerModel.set(PlayerDataValue.PLAYER_RANK_TIME_SQL.getString(this), timestamp);
-        }
+        super.setRank(rank, timestamp);
         API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), rank.getRankPower());
         API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_RANK_TIME_REDIS.getString(this), timeStampString);
         RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
@@ -413,7 +401,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public List<String> getTempDataKeyList() {
-        return new ArrayList<String>() {{
+        return new ArrayList<>() {{
             API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.PLAYER_MAP_REDIS.getString(getName(), getMemberId())).keySet().forEach((object) -> add((String) object));
         }};
     }

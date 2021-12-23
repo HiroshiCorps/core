@@ -39,20 +39,20 @@ public class CPlayerOffline implements APIOfflinePlayer {
     List<SanctionInfo> sanctionModelList = null;
     List<Setting> settingsModelList = null;
     private long memberID;
-    private PlayerModel model = null;
-    private MoneyModel moneyModel;
+    private PlayerModel playerModel = null;
+    private MoneyModel moneyModel = null;
 
     public CPlayerOffline(String name) {
 
-        this.model = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name);
-        initPlayer(this.model.getMemberId());
+        playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name);
+        initPlayer(this.getPlayerModel().getMemberId());
 
     }
 
     public CPlayerOffline(UUID uuid) {
 
-        this.model = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString());
-        initPlayer(this.model.getMemberId());
+        playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString());
+        initPlayer(this.getPlayerModel().getMemberId());
 
     }
 
@@ -64,24 +64,35 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public void initPlayer(long memberID) {
 
         this.memberID = memberID;
-        initPlayerModel();
 
     }
 
     private void initPlayerModel() {
-        if (this.model == null)
-            this.model = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+        if (this.getPlayerModel() == null)
+            playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
     }
 
     private void initMoneyModel() {
-        if (this.moneyModel == null)
+        if (this.getMoneyModel() == null)
             this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+    }
+
+    public PlayerModel getPlayerModel() {
+        if (playerModel == null)
+            initPlayerModel();
+        return playerModel;
+    }
+
+    public MoneyModel getMoneyModel() {
+        if (moneyModel == null)
+            initMoneyModel();
+        return moneyModel;
     }
 
     @Override
     public void addSolde(long i) {
-        initMoneyModel();
-        moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), moneyModel.getSolde() + i);
+
+        getMoneyModel().set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), getMoneyModel().getSolde() + i);
     }
 
     @Override
@@ -90,8 +101,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
-        initMoneyModel();
-        moneyModel.set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), i);
+
+        getMoneyModel().set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), i);
 
         return true;
 
@@ -99,7 +110,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void addCoins(long i) {
-        moneyModel.set(MoneyDataValue.PLAYER_COINS_SQL.getString(), moneyModel.getCoins() + i);
+
+        getMoneyModel().set(MoneyDataValue.PLAYER_COINS_SQL.getString(), getMoneyModel().getCoins() + i);
     }
 
     @Override
@@ -107,23 +119,25 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
-        moneyModel.set(MoneyDataValue.PLAYER_COINS_SQL.getString(), moneyModel.getCoins() + i);
+
+        getMoneyModel().set(MoneyDataValue.PLAYER_COINS_SQL.getString(), getMoneyModel().getCoins() + i);
         return true;
     }
 
     @Override
     public Rank getRank() {
-        return model.getRank();
+        return getPlayerModel().getRank();
     }
 
     @Override
     public void setRank(Rank Rank) {
-        model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.getRankPower().intValue());
+        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.getRankPower().intValue());
     }
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
-
+        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
+        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_TIME_SQL.getString(this), timestamp);
     }
 
     @Override
@@ -153,25 +167,25 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public long getSolde() {
-        initMoneyModel();
-        return moneyModel.getSolde();
+
+        return getMoneyModel().getSolde();
     }
 
     @Override
     public long getCoins() {
-        initMoneyModel();
-        return moneyModel.getCoins();
+
+        return getMoneyModel().getCoins();
     }
 
     @Override
     public String getName() {
-        return model.getName();
+        return getPlayerModel().getName();
     }
 
     @Override
     public void setName(String s) {
         if (s != null || CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
-            model.set(PlayerDataValue.PLAYER_NAME_SQL.getString(), s);
+            getPlayerModel().set(PlayerDataValue.PLAYER_NAME_SQL.getString(), s);
     }
 
     @Override
@@ -185,15 +199,15 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public UUID getUUID() {
-        return model.getUUID();
+        return getPlayerModel().getUUID();
     }
 
     @Override
     public void setUUID(UUID uuid) {
         if (uuid != null)
-            model.set(PlayerDataValue.PLAYER_UUID_SQL.getString(), uuid.toString());
+            getPlayerModel().set(PlayerDataValue.PLAYER_UUID_SQL.getString(), uuid.toString());
         else if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
-            model.set(PlayerDataValue.PLAYER_UUID_SQL.getString(), null);
+            getPlayerModel().set(PlayerDataValue.PLAYER_UUID_SQL.getString(), null);
     }
 
     @Override
