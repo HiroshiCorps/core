@@ -17,6 +17,8 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.LinkData;
+import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -58,21 +60,22 @@ public class BlackListCmd extends BrigadierAPI<CommandSource> {
             boolean remove = cmd.equalsIgnoreCase("remove");
             if (remove) {
 
-                if (!sp.isBlackList(osp)) {
+                LinkData linkData = sp.getLink(LinkUsage.TO, osp, "blacklist");
+                if (linkData == null) {
                     TextComponentBuilder.createTextComponent("Erreur, le joueur: " + target + " n'est pas BlackList").setColor(Color.RED).sendTo(playerUUID);
                     return 1;
                 }
 
-                sp.removeBlackList(osp);
+                linkData.setLinkType("blacklistRevoked");
 
             } else {
 
-                if (sp.isBlackList(osp)) {
+                if (sp.hasLinkWith(LinkUsage.TO, osp, "blacklist")) {
                     TextComponentBuilder.createTextComponent("Erreur, le joueur: " + target + " est déjà BlackList").setColor(Color.RED).sendTo(playerUUID);
                     return 1;
                 }
 
-                sp.addBlackList(osp);
+                sp.createLink(osp, "blacklist");
 
             }
 
