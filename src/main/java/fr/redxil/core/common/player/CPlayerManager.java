@@ -12,7 +12,6 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
@@ -26,6 +25,11 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 public class CPlayerManager implements APIPlayerManager {
+
+    @Override
+    public boolean dataExist(String s) {
+        return isLoadedPlayer(s) || getOfflinePlayer(s) != null;
+    }
 
     /**
      * Get the APIPlayer with this name / nick (supported but take more query on redis, please use APIPlayerManager.getPlayer(memberID) if you can)
@@ -79,7 +83,6 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIOfflinePlayer getOfflinePlayer(UUID uuid) {
-
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 1");
 
         APIPlayer apiPlayer = getPlayer(uuid);
@@ -87,13 +90,12 @@ public class CPlayerManager implements APIPlayerManager {
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 2");
 
-        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString()) == null) {
+        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString()) != null) {
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 3");
-            return API.getInstance().getNickGestion().getAPIOfflinePlayer(uuid.toString());
-        } else {
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 4");
             return new CPlayerOffline(uuid);
         }
+
+        return null;
     }
 
     /**
@@ -113,13 +115,11 @@ public class CPlayerManager implements APIPlayerManager {
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 2");
 
-        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name) == null) {
+        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name) != null) {
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 3");
-            return API.getInstance().getNickGestion().getAPIOfflinePlayer(name);
-        } else {
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 4");
             return new CPlayerOffline(name);
         }
+        return null;
     }
 
     /**
@@ -163,21 +163,6 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public List<Long> getLoadedPlayer() {
         return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null));
-    }
-
-    @Override
-    public String getIdentifierString(APIOfflinePlayer aop) {
-        return CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK ? aop.getName() : aop.getUUID().toString();
-    }
-
-    @Override
-    public String getIdentifierString(String name, UUID uuid) {
-        return CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK ? name : uuid.toString();
-    }
-
-    @Override
-    public String getPlayerIdentifierColumn() {
-        return CoreAPI.getInstance().getServerAccessEnum().getPDV().getString();
     }
 
     HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();

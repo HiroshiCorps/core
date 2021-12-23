@@ -198,14 +198,14 @@ public class CTeam implements Team {
      *
      */
 
-    public List<String> getListPlayerName(boolean nickCare) {
-        return new ArrayList<String>() {{
-            getPlayers().forEach((apiPlayer) -> add(apiPlayer.getName(nickCare)));
+    public List<String> getListPlayerName() {
+        return new ArrayList<>() {{
+            getPlayers().forEach((apiPlayer) -> add(apiPlayer.getName()));
         }};
     }
 
     public List<APIPlayer> getPlayers() {
-        return new ArrayList<APIPlayer>() {{
+        return new ArrayList<>() {{
             APIPlayerManager spm = API.getInstance().getPlayerManager();
             getListPlayerUUIDS().forEach(uuids -> add(spm.getPlayer(UUID.fromString(uuids))));
         }};

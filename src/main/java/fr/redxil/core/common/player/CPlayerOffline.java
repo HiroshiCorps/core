@@ -13,11 +13,9 @@ import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.Pair;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.LinkDataValue;
 import fr.redxil.core.common.data.MoneyDataValue;
 import fr.redxil.core.common.data.PlayerDataValue;
@@ -141,23 +139,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public Rank getRank(boolean nickCare) {
-        return Rank.getRank(getRankPower(nickCare));
-    }
-
-    @Override
     public Long getRankPower() {
         return getRank().getRankPower();
-    }
-
-    @Override
-    public Long getRankPower(boolean nickCare) {
-        if (nickCare) {
-            NickData nick = API.getInstance().getNickGestion().getNickData(this);
-            if (nick != null)
-                return nick.getRank().getRankPower();
-        }
-        return getRankPower();
     }
 
     @Override
@@ -183,18 +166,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public void setName(String s) {
-        if (s != null || CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.PRENIUM)
+    public boolean setName(String s) {
+        if (s != null) {
             getPlayerModel().set(PlayerDataValue.PLAYER_NAME_SQL.getString(), s);
-    }
-
-    @Override
-    public String getName(boolean nickCare) {
-        if (nickCare) {
-            NickData nickData = API.getInstance().getNickGestion().getNickData(this);
-            if (nickData != null) return nickData.getName();
+            return true;
         }
-        return getName();
+        return false;
     }
 
     @Override
@@ -206,8 +183,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public void setUUID(UUID uuid) {
         if (uuid != null)
             getPlayerModel().set(PlayerDataValue.PLAYER_UUID_SQL.getString(), uuid.toString());
-        else if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
-            getPlayerModel().set(PlayerDataValue.PLAYER_UUID_SQL.getString(), null);
     }
 
     @Override
@@ -218,11 +193,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean isConnected() {
         return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null)).contains(getMemberId());
-    }
-
-    @Override
-    public boolean isNick() {
-        return API.getInstance().getNickGestion().hasNick(this);
     }
 
     @Override

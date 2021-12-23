@@ -12,7 +12,6 @@ import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.paper.minigame.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
@@ -130,7 +129,7 @@ public class ConnectionListener implements Listener {
 
         if (!spectator) {
             games.getPlayers().remove(osp.getUUID());
-            gameBuilder.broadcastActionBar("§a" + osp.getName(true) + "§7 à quitté la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
+            gameBuilder.broadcastActionBar("§a" + osp.getName() + "§7 à quitté la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
             gameBuilder.onPlayerLeave(player);
         } else {
             if (games.getPlayerSpectators().contains(osp.getUUID()))
@@ -144,9 +143,7 @@ public class ConnectionListener implements Listener {
 
     public void sendJoinMessage(APIPlayer apiPlayer) {
 
-        NickData nickData = API.getInstance().getNickGestion().getNickData(apiPlayer);
-
-        String message = "§fLe joueur " + nickData.getRank().getChatRankString() + nickData.getName() + " §fà rejoint le serveur";
+        String message = "§fLe joueur " + apiPlayer.getRank().getChatRankString() + apiPlayer.getName() + " §fà rejoint le serveur";
 
         Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
 
@@ -154,9 +151,7 @@ public class ConnectionListener implements Listener {
 
     public void sendQuitMessage(APIOfflinePlayer apiPlayer) {
 
-        NickData nickData = API.getInstance().getNickGestion().getNickData(apiPlayer);
-
-        String message = "§fLe joueur " + nickData.getRank().getChatRankString() + " " + nickData.getName() + " §fà quitté le serveur";
+        String message = "§fLe joueur " + apiPlayer.getRank().getChatRankString() + " " + apiPlayer.getName() + " §fà quitté le serveur";
         Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
 
     }

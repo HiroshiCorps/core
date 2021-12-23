@@ -14,7 +14,6 @@ import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
@@ -38,10 +37,10 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
         if (!apiPlayer.getRank().isModeratorRank())
             return 1;
 
-        APIOfflinePlayer targetPlayer = API.getInstance().getNickGestion().getAPIOfflinePlayer(commandContext.getArgument("target", String.class));
+        APIPlayer targetPlayer = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
         TextComponentBuilder tcb;
-        if (targetPlayer != null)
-            tcb = TextComponentBuilder.createTextComponent("Le vrai pseudo de cette personne: " + targetPlayer.getName());
+        if (targetPlayer != null && targetPlayer.isNick())
+            tcb = TextComponentBuilder.createTextComponent("Le vrai pseudo de cette personne: " + targetPlayer.getRealName());
         else
             tcb = TextComponentBuilder.createTextComponent("Ceci n'est pas un nick").setColor(Color.RED);
 

@@ -129,7 +129,13 @@ public class CPlayerModerator implements APIPlayerModerator {
     public void printInfo(APIOfflinePlayer apiOfflinePlayer) {
 
         TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§m                    \n");
-        tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + apiOfflinePlayer.getName() + "§r\n");
+
+        if (apiOfflinePlayer instanceof APIPlayer && ((APIPlayer) apiOfflinePlayer).isNick()) {
+            tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + ((APIPlayer) apiOfflinePlayer).getRealName() + "§r\n");
+            tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + apiOfflinePlayer.getName() + "§r\n");
+        } else {
+            tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + apiOfflinePlayer.getName() + "§r\n");
+        }
 
         String connectedMsg = "§c✘", server = null;
         if (apiOfflinePlayer.isConnected()) {
@@ -138,10 +144,6 @@ public class CPlayerModerator implements APIPlayerModerator {
         }
 
         tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
-
-        if (API.getInstance().getNickGestion().hasNick(apiOfflinePlayer)) {
-            tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + API.getInstance().getNickGestion().getNickData(apiOfflinePlayer).getName() + "§r\n");
-        }
 
         tcb.appendNewComponentBuilder("§7→ §rRank§7・" + apiOfflinePlayer.getRank().getRankName() + "§r\n");
 

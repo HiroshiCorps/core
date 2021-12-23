@@ -8,10 +8,10 @@ package fr.redxil.core.common.game;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
-import fr.redxil.api.common.game.GameEnum;
 import fr.redxil.api.common.game.GameManager;
 import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.game.error.GameCreateError;
+import fr.redxil.api.common.game.utils.GameEnum;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.data.GameDataValue;
 

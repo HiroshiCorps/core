@@ -89,7 +89,7 @@ public class CorePlugin extends Paper {
         );
 
         printLog(Level.FINE, SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
-        new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
+        new CoreAPI(this);
 
         if (!API.getInstance().isEnabled()) {
             printLog(Level.SEVERE, SystemColor.RED + "Error while loading API, please check error code below" + SystemColor.RESET);

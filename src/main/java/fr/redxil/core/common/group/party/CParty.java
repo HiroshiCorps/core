@@ -12,6 +12,7 @@ import fr.redxil.api.common.group.party.PartyAccess;
 import fr.redxil.api.common.group.party.PartyRank;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
+import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.PartyDataValue;
@@ -50,7 +51,7 @@ public class CParty implements Party {
                 return false;
             }
             case FRIEND: {
-                if (!hisInvitePlayer(apiPlayer) && !getPartyOwner().hasFriend(apiPlayer))
+                if (!hisInvitePlayer(apiPlayer) && !getPartyOwner().hasLinkWith(LinkUsage.BOTH, apiPlayer, "friend"))
                     return false;
             }
         }

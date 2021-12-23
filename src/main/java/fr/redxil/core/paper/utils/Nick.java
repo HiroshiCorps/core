@@ -20,7 +20,7 @@ public class Nick {
         tagsManager.removePlayer(p);
 
         JavaUtils.setDeclaredField(craftPlayerP, "listName", CraftChatMessage.fromString(apiPlayer.getTabString())[0]);
-        JavaUtils.setDeclaredField(craftPlayerP.getProfile(), "name", apiPlayer.getName(true));
+        JavaUtils.setDeclaredField(craftPlayerP.getProfile(), "name", apiPlayer.getName());
 
         tagsManager.addPlayer(p);
         tagsManager.updatePlayer(p);

@@ -16,6 +16,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
@@ -49,29 +50,24 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        if (sp.isBlackList(target)) {
+        if (sp.hasLinkWith(LinkUsage.TO, target, "blacklist")) {
             TextComponentBuilder.createTextComponent("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
             return 1;
         }
 
-        if (target.isBlackList(sp)) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + target.getName() + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
-        }
-
-
         String message = commandContext.getArgument("message", String.class);
 
-        TextComponentBuilder.createTextComponent(sp.getName(true)).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
-                .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(message).sendTo(target.getUUID());
+        if (!target.hasLinkWith(LinkUsage.TO, sp, "blacklist"))
+            TextComponentBuilder.createTextComponent(sp.getName()).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
+                    .appendNewComponentBuilder(": ").setColor(Color.WHITE)
+                    .appendNewComponentBuilder(message).sendTo(target.getUUID());
 
         TextComponentBuilder.createTextComponent(target.getName()).setColor(Color.RED)
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(message).sendTo(sp.getUUID());
 
-        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp), target.getName(true));
-        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(target), sp.getName(true));
+        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp), target.getName());
+        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(target), sp.getName());
         return 1;
     }
 

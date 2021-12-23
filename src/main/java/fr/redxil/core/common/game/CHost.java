@@ -13,6 +13,7 @@ import fr.redxil.api.common.game.utils.GameEnum;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.game.utils.HostAccess;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.data.GameDataValue;
 
@@ -79,7 +80,7 @@ public class CHost extends CGame implements Host {
             if (hostAccess == HostAccess.CLOSE)
                 return false;
             if (hostAccess.toString().equals(HostAccess.FRIEND.toString()))
-                return getAllowPlayer().contains(apiPlayer.getUUID()) || apiPlayer.hasFriend(API.getInstance().getPlayerManager().getPlayer(getAuthor()));
+                return getAllowPlayer().contains(apiPlayer.getUUID()) || apiPlayer.getLink(LinkUsage.BOTH, API.getInstance().getPlayerManager().getPlayer(getAuthor()), "friend") != null;
             return true;
         }
 

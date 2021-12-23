@@ -11,6 +11,7 @@ package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
+import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -27,11 +28,15 @@ public enum PlayerDataValue {
     PLAYER_NAME_SQL(DataBaseType.SQL, DataType.PLAYER, "member_name", false, false),
     PLAYER_UUID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_uuid", false, false),
 
-    PLAYER_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/name", false, true),
     PLAYER_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/uuid", false, true),
 
+    PLAYER_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/name", false, true),
     PLAYER_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/rank", false, true),
     PLAYER_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ranklimit", false, true),
+
+    PLAYER_REAL_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_name", false, true),
+    PLAYER_REAL_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_rank", false, true),
+    PLAYER_REAL_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_ranklimit", false, true),
 
     PLAYER_MAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/map", false, true),
 
@@ -94,17 +99,17 @@ public enum PlayerDataValue {
         return location;
     }
 
-    public String getString(APIOfflinePlayer APIPlayer) {
+    public String getString(APIOfflinePlayer apiPlayer) {
 
         String location = this.location;
         if (needName) {
-            String pseudo = APIPlayer.getName();
+            String pseudo = apiPlayer instanceof APIPlayer ? ((APIPlayer) apiPlayer).getRealName() : apiPlayer.getName();
             if (pseudo == null) return null;
             location = location.replace("<pseudo>", pseudo);
         }
 
         if (needId) {
-            long memberId = APIPlayer.getMemberId();
+            long memberId = apiPlayer.getMemberId();
             location = location.replace("<memberID>", Long.valueOf(memberId).toString());
         }
 

@@ -21,7 +21,6 @@ import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.Component;
 
 import java.util.logging.Level;
@@ -32,15 +31,15 @@ public class JoinListener {
 
         String[] splittedIP = player.getRemoteAddress().toString().split(":");
 
+        APIPlayer nicked = API.getInstance().getPlayerManager().getPlayer(player.getUsername());
+        if (nicked != null)
+            nicked.restoreRealData();
+
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().loadPlayer(
                 player.getUsername(),
                 player.getUniqueId(),
                 new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
         );
-
-        APIOfflinePlayer nicked = API.getInstance().getNickGestion().getAPIOfflinePlayer(player.getUsername());
-        if (nicked != null)
-            API.getInstance().getNickGestion().removeNick(nicked);
 
         API.getInstance().getModeratorManager().loadModerator(apiPlayer);
 
@@ -50,7 +49,7 @@ public class JoinListener {
 
     @Subscribe
     public void connection(PreLoginEvent event) {
-        if (API.getInstance().getNickGestion().isIllegalName(event.getUsername())) {
+        if (event.getUsername().contains(" ")) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected").getFinalTextComponent()));
         }
         if (API.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
@@ -72,21 +71,8 @@ public class JoinListener {
             return;
         }
 
-        if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK)
-            if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUsername())) {
-                e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
-                        "§4§lSERVER NETWORK§r\n"
-                                + "§cConnexion non autorisé§r\n\n"
-                                + "§7Raison: Une personne est déjà connecté avec votre username§e§r\n"
-                ).getFinalTextComponent()));
-                return;
-            }
-
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline PLayer");
-        APIOfflinePlayer apiOfflinePlayer;
-        if (CoreAPI.getInstance().getServerAccessEnum() == CoreAPI.ServerAccessEnum.CRACK) {
-            apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername());
-        } else apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
+        APIOfflinePlayer apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 2");

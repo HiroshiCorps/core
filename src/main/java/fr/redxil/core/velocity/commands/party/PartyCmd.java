@@ -248,7 +248,7 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         }
 
         if (partyManager.getPlayerParty(apiPlayer).invitePlayer(targetPlayer)) {
-            TextComponentBuilder.createTextComponent(Color.WHITE + "Vous avez été invité par " + Color.GREEN + apiPlayer.getName(true));
+            TextComponentBuilder.createTextComponent(Color.WHITE + "Vous avez été invité par " + Color.GREEN + apiPlayer.getName());
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous venez d'inviter " + Color.GREEN + subArgument)).getFinalTextComponent());
         } else {
             player.sendMessage(

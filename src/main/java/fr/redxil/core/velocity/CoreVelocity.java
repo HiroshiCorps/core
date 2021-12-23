@@ -77,7 +77,7 @@ public class CoreVelocity extends Velocity {
 
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
-        new CoreAPI(this, CoreAPI.ServerAccessEnum.PRENIUM);
+        new CoreAPI(this);
 
         if (API.getInstance().isEnabled()) {
             checkCrash();

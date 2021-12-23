@@ -6,7 +6,6 @@
 
 package fr.redxil.core.common;
 
-import fr.redline.pms.connect.linker.SocketGestion;
 import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
@@ -18,17 +17,14 @@ import fr.redxil.api.common.group.party.PartyManager;
 import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
-import fr.redxil.api.common.player.nick.NickGestion;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
-import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.game.CGameManager;
 import fr.redxil.core.common.group.party.CPartyManager;
 import fr.redxil.core.common.group.team.CTeamManager;
-import fr.redxil.core.common.player.CNickGestion;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
 import fr.redxil.core.common.pmsListener.ShutdownOrderListener;
@@ -40,27 +36,22 @@ import java.io.File;
 
 public class CoreAPI extends API {
 
-    private final ServerAccessEnum sea;
     private final String serverName;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
-    private final CNickGestion nickGestion;
     private CRedisManager manager;
     private final CGameManager cGameManager;
     private final SQLConnection sqlConnection;
     private final PartyManager partyManager;
     private final CTeamManager cTeamManager;
 
-    public CoreAPI(PluginEnabler plugin, ServerAccessEnum sea) {
+    public CoreAPI(PluginEnabler plugin) {
         super(plugin);
-
-        this.sea = sea;
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
         this.moderatorManager = new CModeratorManager();
-        this.nickGestion = new CNickGestion();
         this.cGameManager = new CGameManager();
         this.partyManager = new CPartyManager();
         this.cTeamManager = new CTeamManager();
@@ -161,14 +152,8 @@ public class CoreAPI extends API {
     }
 
     @Override
-    public NickGestion getNickGestion() {
-        return this.nickGestion;
-    }
-
-    @Override
     public void shutdown() {
         CoreAPI.setEnabled(false);
-        SocketGestion.closeAllConnection();
         Server server = getServer();
         if (server != null)
             server.shutdown();
@@ -221,40 +206,6 @@ public class CoreAPI extends API {
     @Override
     public boolean isGameServer() {
         return getGameManager().isGameExist(getServerName());
-    }
-
-    public ServerAccessEnum getServerAccessEnum() {
-        return this.sea;
-    }
-
-    public enum ServerAccessEnum {
-
-        PRENIUM(PlayerDataValue.PLAYER_UUID_SQL),
-        CRACK(PlayerDataValue.PLAYER_NAME_SQL);
-
-        final PlayerDataValue pdv;
-
-        public static ServerAccessEnum getInstance(String name) {
-
-            for (ServerAccessEnum sea : ServerAccessEnum.values())
-                if (sea.getName().equals(name))
-                    return sea;
-
-            return null;
-        }
-
-        ServerAccessEnum(PlayerDataValue playerDataValue) {
-            this.pdv = playerDataValue;
-        }
-
-        public PlayerDataValue getPDV() {
-            return pdv;
-        }
-
-        public String getName() {
-            return getPDV().getString();
-        }
-
     }
 
 }

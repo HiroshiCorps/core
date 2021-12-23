@@ -16,7 +16,6 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.rank.Rank;
 
 public class NickCmd extends BrigadierAPI<CommandSource> {
@@ -43,14 +42,14 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
 
         if (commandContext.getArguments().size() == 0) {
 
-            if (!API.getInstance().getNickGestion().hasNick(apiPlayer)) {
+            if (!apiPlayer.isNick()) {
 
                 TextComponentBuilder.createTextComponent("Syntax: /nick <nick>").setColor(Color.RED)
                         .sendTo(((Player) commandContext.getSource()).getUniqueId());
 
             } else {
 
-                API.getInstance().getNickGestion().removeNick(apiPlayer);
+                apiPlayer.setName(apiPlayer.getRealName());
                 TextComponentBuilder.createTextComponent("Vous avez retrouvé votre Pseudo: " + apiPlayer.getName())
                         .sendTo(((Player) commandContext.getSource()).getUniqueId());
 
@@ -84,7 +83,7 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
                 return 1;
             }
 
-            if (nickRank.getRankPower() > apiPlayer.getRankPower()) {
+            if (nickRank.getRankPower() > apiPlayer.getRealRankPower()) {
                 TextComponentBuilder.createTextComponent("Erreur, " + argRank + " vous ne pouvez pas vous nick en " + nickRank.getRankName()).setColor(Color.RED)
                         .sendTo(((Player) commandContext.getSource()).getUniqueId());
                 return 1;
@@ -92,7 +91,8 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
 
         }
 
-        if (API.getInstance().getNickGestion().setNick(apiPlayer, new NickData(nick, nickRank))) {
+        if (apiPlayer.setName(nick)) {
+            apiPlayer.setRank(nickRank);
             TextComponentBuilder.createTextComponent("Nick changé")
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
         } else {
