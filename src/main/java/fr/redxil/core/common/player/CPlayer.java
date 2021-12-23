@@ -31,6 +31,8 @@ import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,13 +58,16 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<String, Object>() {{
+        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(null), uuid.toString());
+            this.put(PlayerDataValue.PLAYER_IP_SQL.getString(null), ipInfo.toString());
             this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.JOUEUR.getRankPower().intValue());
+
         }}, "WHERE " + CoreAPI.getInstance().getPlayerManager().getPlayerIdentifierColumn() + " = ?", CoreAPI.getInstance().getPlayerManager().getIdentifierString(name, uuid));
 
         long memberID = playerModel.getMemberId();
+        playerModel.set(PlayerDataValue.PLAYER_IP_SQL.getString(), ipInfo.toString());
 
         MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<String, Object>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
@@ -80,6 +85,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         redisManager.setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(name, memberID), playerModel.getPowerRank());
         redisManager.setRedisString(PlayerDataValue.PLAYER_INPUT_REDIS.getString(name, memberID), null);
         redisManager.setRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(name, memberID), ipInfo.toString());
+
+        Timestamp timestamp = (Timestamp) playerModel.get(PlayerDataValue.PLAYER_RANK_TIME_SQL.getString());
+        if (timestamp != null)
+            redisManager.setRedisString(PlayerDataValue.PLAYER_RANK_TIME_REDIS.getString(name, memberID), timestamp.toString());
 
         redisManager.getRedisList("ip/" + ipInfo.getIp()).add(name);
 
@@ -237,12 +246,22 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public void setRank(Rank Rank) {
+    public void setRank(Rank rank) {
+        this.setRank(rank, null);
+    }
+
+    @Override
+    public void setRank(Rank rank, Timestamp timestamp) {
+        String timeStampString = timestamp == null ? null : timestamp.toString();
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-        if (playerModel != null)
+        if (playerModel != null) {
             playerModel.set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
-        API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), Rank.getRankPower());
+            playerModel.set(PlayerDataValue.PLAYER_RANK_TIME_SQL.getString(this), timestamp);
+        }
+        API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), rank.getRankPower());
+        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_RANK_TIME_REDIS.getString(this), timeStampString);
         RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
+
     }
 
     @Override
@@ -252,6 +271,14 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Long getRankPower() {
+        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_RANK_TIME_REDIS.getString());
+        if (timeStamp != null) {
+            Timestamp timestamp = Timestamp.valueOf(timeStamp);
+            if (timestamp.before(Timestamp.from(Instant.now()))) {
+                setRank(Rank.JOUEUR);
+                CoreAPI.getInstance().getNickGestion().removeNick(this);
+            }
+        }
         return API.getInstance().getRedisManager().getRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(this));
     }
 

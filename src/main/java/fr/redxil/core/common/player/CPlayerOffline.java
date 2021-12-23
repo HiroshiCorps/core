@@ -29,6 +29,7 @@ import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
 
 import javax.annotation.Nullable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -118,6 +119,11 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public void setRank(Rank Rank) {
         model.set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.getRankPower().intValue());
+    }
+
+    @Override
+    public void setRank(Rank rank, Timestamp timestamp) {
+
     }
 
     @Override

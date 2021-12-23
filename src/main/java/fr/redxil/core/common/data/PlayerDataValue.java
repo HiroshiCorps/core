@@ -18,7 +18,11 @@ import org.redisson.api.RedissonClient;
 public enum PlayerDataValue {
 
     PLAYER_RANK_SQL(DataBaseType.SQL, DataType.PLAYER, "member_rank", false, false),
+    PLAYER_RANK_TIME_SQL(DataBaseType.SQL, DataType.PLAYER, "rank_limit", false, false),
+
+
     PLAYER_MEMBERID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_id", false, false),
+    PLAYER_IP_SQL(DataBaseType.SQL, DataType.PLAYER, "member_ip", false, false),
 
     PLAYER_NAME_SQL(DataBaseType.SQL, DataType.PLAYER, "member_name", false, false),
     PLAYER_UUID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_uuid", false, false),
@@ -27,6 +31,7 @@ public enum PlayerDataValue {
     PLAYER_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/uuid", false, true),
 
     PLAYER_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/rank", false, true),
+    PLAYER_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ranklimit", false, true),
 
     PLAYER_MAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/map", false, true),
 
