@@ -35,7 +35,7 @@ public class CPlayerManager implements APIPlayerManager {
      */
     public APIPlayer getPlayer(String name) {
         if (!isLoadedPlayer(name)) {
-            return API.getInstance().getNickGestion().getAPIPlayer(name);
+            return null;
         }
         return getPlayer((long) API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString(null)).get(name));
     }

@@ -13,6 +13,8 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.nick.NickData;
 import fr.redxil.api.common.player.nick.NickGestion;
 import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.core.common.data.PlayerDataValue;
+import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 
 public class CNickGestion implements NickGestion {
@@ -41,9 +43,11 @@ public class CNickGestion implements NickGestion {
         removeNick(apiPlayer);
 
         RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
-        redis.getMapCache("nick/nickToPlayerList").put(nickData.getName(), apiPlayer.getMemberId());
-        redis.getMapCache("nick/playerToNickList").put(apiPlayer.getMemberId(), nickData.getName());
-        redis.getMapCache("nick/Rank").put(apiPlayer.getMemberId(), nickData.getRank().getRankPower());
+        redis.getMap("nick/playerToNickList").put(apiPlayer.getMemberId(), nickData.getName());
+        redis.getMap("nick/Rank").put(apiPlayer.getMemberId(), nickData.getRank().getRankPower());
+        RMap<Object, Object> rmap = redis.getMap(PlayerDataValue.MAP_PLAYER_NAME.getString());
+        rmap.remove(apiPlayer.getName());
+        rmap.put(apiPlayer.getName(true), apiPlayer.getMemberId());
 
         if (apiPlayer instanceof APIPlayer)
             nickUpdate((APIPlayer) apiPlayer);
@@ -61,7 +65,11 @@ public class CNickGestion implements NickGestion {
         long playerID = apiPlayer.getMemberId();
 
         RedissonClient redis = API.getInstance().getRedisManager().getRedissonClient();
-        redis.getMapCache("nick/nickToPlayerList").remove(nickData.getName());
+
+        RMap<Object, Object> rmap = redis.getMap(PlayerDataValue.MAP_PLAYER_NAME.getString());
+        rmap.remove(getNickData(apiPlayer).getName());
+        rmap.put(apiPlayer.getName(), apiPlayer.getMemberId());
+
         redis.getMapCache("nick/playerToNickList").remove(playerID);
         redis.getMapCache("nick/Rank").remove(playerID);
 
@@ -74,7 +82,10 @@ public class CNickGestion implements NickGestion {
 
     @Override
     public boolean isNickName(String s) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/nickToPlayerList").containsKey(s);
+        Long realID = getRealID(s);
+        if (realID == null)
+            return false;
+        return API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/playerToNickList").containsKey(realID);
     }
 
     /// Part: nick -> APIPlayer
@@ -97,7 +108,7 @@ public class CNickGestion implements NickGestion {
     @Override
     public Long getRealID(String s) {
         if (!isNickName(s)) return null;
-        return (long) API.getInstance().getRedisManager().getRedissonClient().getMapCache("nick/nickToPlayerList").get(s);
+        return (long) API.getInstance().getRedisManager().getRedissonClient().getMapCache(PlayerDataValue.MAP_PLAYER_NAME.getString()).get(s);
     }
 
     /// Part: APIPlayer -> nick
