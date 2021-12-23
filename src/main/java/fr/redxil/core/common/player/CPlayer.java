@@ -69,7 +69,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         long memberID = playerModel.getMemberId();
         playerModel.set(PlayerDataValue.PLAYER_IP_SQL.getString(), ipInfo.toString());
 
-        MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<String, Object>() {{
+        MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
             this.put(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), 0);
             this.put(MoneyDataValue.PLAYER_COINS_SQL.getString(), 0);
