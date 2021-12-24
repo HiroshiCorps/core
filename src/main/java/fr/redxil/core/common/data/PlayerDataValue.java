@@ -85,11 +85,13 @@ public enum PlayerDataValue {
 
     }
 
-    public static void clearRedisData(DataType dataType, APIOfflinePlayer APIPlayer) {
+    public static void clearRedisData(DataType dataType, APIOfflinePlayer apiPlayer) {
 
-        if (APIPlayer != null)
-            clearRedisData(dataType, APIPlayer.getName(), APIPlayer.getMemberId());
-        else
+        if (apiPlayer != null) {
+            if (apiPlayer instanceof APIPlayer)
+                clearRedisData(dataType, ((APIPlayer) apiPlayer).getRealName(), apiPlayer.getMemberId());
+            else clearRedisData(dataType, apiPlayer.getName(), apiPlayer.getMemberId());
+        } else
             clearRedisData(dataType, null, null);
 
     }

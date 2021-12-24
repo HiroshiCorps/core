@@ -11,6 +11,7 @@ package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
+import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -56,11 +57,13 @@ public enum LinkDataValue {
 
     }
 
-    public static void clearRedisData(DataType dataType, APIOfflinePlayer APIPlayer) {
+    public static void clearRedisData(DataType dataType, APIOfflinePlayer apiPlayer) {
 
-        if (APIPlayer != null)
-            clearRedisData(dataType, APIPlayer.getName(), APIPlayer.getMemberId());
-        else
+        if (apiPlayer != null) {
+            if (apiPlayer instanceof APIPlayer)
+                clearRedisData(dataType, ((APIPlayer) apiPlayer).getRealName(), apiPlayer.getMemberId());
+            else clearRedisData(dataType, apiPlayer.getName(), apiPlayer.getMemberId());
+        } else
             clearRedisData(dataType, null, null);
 
     }
@@ -70,17 +73,17 @@ public enum LinkDataValue {
         return location;
     }
 
-    public String getString(APIOfflinePlayer APIPlayer) {
+    public String getString(APIOfflinePlayer apiPlayer) {
 
         String location = this.location;
         if (needName) {
-            String pseudo = APIPlayer.getName();
+            String pseudo = apiPlayer instanceof APIPlayer ? ((APIPlayer) apiPlayer).getRealName() : apiPlayer.getName();
             if (pseudo == null) return null;
             location = location.replace("<pseudo>", pseudo);
         }
 
         if (needId) {
-            long memberId = APIPlayer.getMemberId();
+            long memberId = apiPlayer.getMemberId();
             location = location.replace("<memberID>", Long.valueOf(memberId).toString());
         }
 

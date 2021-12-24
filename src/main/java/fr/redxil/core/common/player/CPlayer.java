@@ -133,8 +133,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public void unloadPlayer() {
         if (!API.getInstance().isVelocity()) return;
 
-        String name = getName();
-
         APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(getMemberId());
         if (spm != null)
             spm.disconnectModerator();
@@ -156,13 +154,13 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         rm.getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(getName());
         rm.getRedisList(PlayerDataValue.LIST_PLAYER_ID.getString(this)).remove(memberID);
 
-        MoneyDataValue.clearRedisData(DataType.PLAYER, name, memberID);
+        MoneyDataValue.clearRedisData(DataType.PLAYER, this);
 
-        LinkDataValue.clearRedisData(DataType.PLAYER, name, memberID);
+        LinkDataValue.clearRedisData(DataType.PLAYER, this);
 
-        rm.getRedisList("ip/" + getIpInfo().getIp()).remove(name);
+        rm.getRedisList("ip/" + getIpInfo().getIp()).remove(getRealName());
 
-        PlayerDataValue.clearRedisData(DataType.PLAYER, name, memberID);
+        PlayerDataValue.clearRedisData(DataType.PLAYER, this);
 
     }
 
