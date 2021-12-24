@@ -362,7 +362,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public boolean setName(String s) {
-        if (s != null && !API.getInstance().getPlayerManager().dataExist(s)) {
+        if (s != null && (getRealName().equals(s) || !API.getInstance().getPlayerManager().dataExist(s))) {
             API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(getName());
             API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(this), s);
             API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).put(getName(), memberID);
