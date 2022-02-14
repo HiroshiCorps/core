@@ -13,7 +13,6 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.utils.IpInfo;
-import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
@@ -44,14 +43,11 @@ import fr.redxil.core.velocity.listener.LeaveListener;
 import fr.redxil.core.velocity.listener.PlayerListener;
 import fr.redxil.core.velocity.listener.ServerListener;
 import fr.redxil.core.velocity.pmsListener.PlayerSwitchListener;
-import fr.redxil.core.velocity.pmsListener.UpdaterReceiver;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,13 +75,19 @@ public class CoreVelocity extends Velocity {
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
         new CoreAPI(this);
 
-        if (API.getInstance().isEnabled()) {
-            checkCrash();
-            registerCommands();
-            registerEvents();
-            assert server != null;
-            server.getEventManager().fire(new CoreEnabledEvent(this));
-        }
+    }
+
+    @Override
+    public void onAPIEnabled() {
+        checkCrash();
+        registerCommands();
+        registerEvents();
+        assert getProxyServer() != null;
+        getProxyServer().getEventManager().fire(new CoreEnabledEvent(this));
+    }
+
+    @Override
+    public void onAPIDisabled() {
 
     }
 
@@ -96,7 +98,6 @@ public class CoreVelocity extends Velocity {
         proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new ServerListener());
         proxyServer.getEventManager().register(VelocityEnabler.getInstance(), this);
         new PlayerSwitchListener();
-        new UpdaterReceiver();
     }
 
     public void registerCommands() {
@@ -171,10 +172,6 @@ public class CoreVelocity extends Velocity {
 
     @Subscribe
     public void proxyShutdown(ProxyShutdownEvent event) {
-        onDisable();
-    }
-
-    public void onDisable() {
         API.getInstance().shutdown();
     }
 
@@ -196,24 +193,6 @@ public class CoreVelocity extends Velocity {
     @Override
     public int getMaxPlayer() {
         return 0;
-    }
-
-    @Override
-    public void shutdownPlugin(String s) {
-
-        API.getInstance().getPluginEnabler().printLog(Level.SEVERE, SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
-        getProxyServer().getEventManager().unregisterListeners(this);
-        onDisable();
-
-    }
-
-    @Override
-    public void shutdownServer(String s) {
-
-        API.getInstance().getPluginEnabler().printLog(Level.SEVERE, SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
-        getProxyServer().getAllPlayers().forEach(proxPlayer -> proxPlayer.disconnect((Component) TextComponentBuilder.createTextComponent(s)));
-        Executors.newSingleThreadScheduledExecutor().schedule(() -> getProxyServer().shutdown(), 5, TimeUnit.SECONDS);
-
     }
 
     @Override

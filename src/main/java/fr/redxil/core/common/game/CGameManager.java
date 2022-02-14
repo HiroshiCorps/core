@@ -22,7 +22,7 @@ public class CGameManager implements GameManager {
 
     @Override
     public List<Game> getListGames() {
-        return new ArrayList<Game>() {{
+        return new ArrayList<>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).values())
                 add(getGame(Long.parseLong((String) serverName)));
         }};
@@ -61,7 +61,7 @@ public class CGameManager implements GameManager {
 
     @Override
     public List<Host> getListHost() {
-        return new ArrayList<Host>() {{
+        return new ArrayList<>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).values())
                 add(getHost(Long.parseLong((String) serverName)));
         }};

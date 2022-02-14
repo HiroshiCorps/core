@@ -30,7 +30,6 @@ import fr.redxil.core.paper.holograms.CoreHologramsManager;
 import fr.redxil.core.paper.holograms.HologramListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.Receiver;
-import fr.redxil.core.paper.receiver.UpdaterReceiver;
 import fr.redxil.core.paper.scoreboard.CoreBoardManager;
 import fr.redxil.core.paper.tags.CoreTagsManager;
 import fr.redxil.core.paper.tags.OutboundHandler;
@@ -43,8 +42,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class CorePlugin extends Paper {
@@ -91,11 +88,10 @@ public class CorePlugin extends Paper {
         printLog(Level.FINE, SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
         new CoreAPI(this);
 
-        if (!API.getInstance().isEnabled()) {
-            printLog(Level.SEVERE, SystemColor.RED + "Error while loading API, please check error code below" + SystemColor.RESET);
-            return;
-        }
+    }
 
+    @Override
+    public void onAPIEnabled() {
         printLog(Level.FINE, SystemColor.GREEN + "API Started" + SystemColor.RESET);
         checkCrash();
 
@@ -110,7 +106,6 @@ public class CorePlugin extends Paper {
         this.coreBoardManager = new CoreBoardManager();
 
         new Receiver();
-        new UpdaterReceiver();
 
         PluginManager p = this.getServer().getPluginManager();
         p.registerEvents(new INVEventListener(), this);
@@ -131,7 +126,14 @@ public class CorePlugin extends Paper {
         Bukkit.getServer().getPluginManager().callEvent(new CoreEnabledEvent(this));
 
         this.setEnabled(true);
+    }
 
+    @Override
+    public void onAPIDisabled() {
+        if (API.getInstance().isHostServer()) {
+            API.getInstance().getHost().stop();
+            API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", API.getInstance().getServerName());
+        }
     }
 
     public void checkCrash() {
@@ -159,15 +161,11 @@ public class CorePlugin extends Paper {
 
     }
 
+
+
     @Override
     public void onDisable() {
-        if (API.getInstance().isHostServer()) {
-            API.getInstance().getHost().stop();
-            API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", API.getInstance().getServerName());
-        }
-
         API.getInstance().shutdown();
-        this.setEnabled(false);
     }
 
     public VanishGestion getVanish() {
@@ -204,23 +202,6 @@ public class CorePlugin extends Paper {
 
     public int getMaxPlayer() {
         return Bukkit.getServer().getMaxPlayers();
-    }
-
-    @Override
-    public void shutdownServer(String s) {
-
-        API.getInstance().getPluginEnabler().printLog(Level.SEVERE, SystemColor.RED + "Shutting down server: " + s + SystemColor.RESET);
-        Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(s));
-        Executors.newSingleThreadScheduledExecutor().schedule(() -> Bukkit.getServer().shutdown(), 5, TimeUnit.SECONDS);
-
-    }
-
-    @Override
-    public void shutdownPlugin(String s) {
-
-        printLog(Level.SEVERE, SystemColor.RED + "Shutting down plugin: " + s + SystemColor.RESET);
-        Bukkit.getPluginManager().disablePlugin(this);
-
     }
 
     @Override

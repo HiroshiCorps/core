@@ -27,7 +27,6 @@ import fr.redxil.core.common.group.party.CPartyManager;
 import fr.redxil.core.common.group.team.CTeamManager;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
-import fr.redxil.core.common.pmsListener.ShutdownOrderListener;
 import fr.redxil.core.common.redis.CRedisManager;
 import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.CSQLConnection;
@@ -86,7 +85,6 @@ public class CoreAPI extends API {
             if (redisUser == null)
                 GSONSaver.writeGSON(redisUserFile, "userhere");
 
-            CoreAPI.setEnabled(false);
             return;
 
         }
@@ -94,7 +92,8 @@ public class CoreAPI extends API {
         this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
         this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
-        new ShutdownOrderListener();
+        if(!dataConnected())
+            return;
 
         ServerType serverType;
         if (plugin.isVelocity())
@@ -115,10 +114,6 @@ public class CoreAPI extends API {
 
         CoreAPI.setEnabled(true);
 
-    }
-
-    public static CoreAPI getInstance() {
-        return (CoreAPI) API.getInstance();
     }
 
     @Override
@@ -153,7 +148,12 @@ public class CoreAPI extends API {
 
     @Override
     public void shutdown() {
-        CoreAPI.setEnabled(false);
+
+        if(!API.isEnabled())
+            return;
+
+        API.setEnabled(false);
+
         Server server = getServer();
         if (server != null)
             server.shutdown();
@@ -161,6 +161,9 @@ public class CoreAPI extends API {
         RedisManager rm = getRedisManager();
         if (rm != null)
             rm.closeConnection();
+
+        getSQLConnection().closeConnection();
+
     }
 
     @Override
@@ -171,6 +174,11 @@ public class CoreAPI extends API {
     @Override
     public String getServerName() {
         return serverName;
+    }
+
+    @Override
+    public boolean dataConnected() {
+        return this.sqlConnection.isConnected() && !this.getRedisManager().getRedissonClient().isShuttingDown() && !this.getRedisManager().getRedissonClient().isShutdown();
     }
 
     @Override

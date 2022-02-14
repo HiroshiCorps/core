@@ -71,12 +71,11 @@ public class CSQLConnection implements SQLConnection {
         config.setMaxLifetime(45000);
 
         this.pool = new HikariDataSource(config);
-        this.logs.info("Connected to MySQL with HikariCP!");
     }
 
     @Override
     public boolean isConnected() {
-        return this.pool != null && this.pool.isClosed();
+        return this.pool != null && this.pool.isRunning();
     }
 
     @Override
