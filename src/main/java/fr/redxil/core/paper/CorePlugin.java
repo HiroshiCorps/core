@@ -23,7 +23,6 @@ import fr.redxil.core.paper.cmd.FreezeCmd;
 import fr.redxil.core.paper.cmd.ModCmd;
 import fr.redxil.core.paper.cmd.VanishCmd;
 import fr.redxil.core.paper.event.ConnectionListener;
-import fr.redxil.core.paper.event.INVEventListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
 import fr.redxil.core.paper.holograms.CoreHologramsManager;
@@ -108,7 +107,6 @@ public class CorePlugin extends Paper {
         new Receiver();
 
         PluginManager p = this.getServer().getPluginManager();
-        p.registerEvents(new INVEventListener(), this);
 
         p.registerEvents(new ConnectionListener(this), this);
         p.registerEvents(new PlayerInteractEvent(), this);
@@ -130,10 +128,10 @@ public class CorePlugin extends Paper {
 
     @Override
     public void onAPIDisabled() {
-        if (API.getInstance().isHostServer()) {
-            API.getInstance().getHost().stop();
+        if(API.getInstance().isGameServer())
+            API.getInstance().getGame().clearData();
+        if (API.getInstance().isHostServer())
             API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", API.getInstance().getServerName());
-        }
     }
 
     public void checkCrash() {

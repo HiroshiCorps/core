@@ -53,7 +53,6 @@ public class CGame implements Game {
         redisManager.getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).put(server, gameID);
 
         redisManager.setRedisString(GameDataValue.GAME_GAME_REDIS.getString(server, gameID), gameEnum.toString());
-        redisManager.setRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(server, gameID), !GameBuilder.getGameBuilder().getTeamManager().getTeamList().isEmpty());
         redisManager.setRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(server, gameID), GameState.WAITING.getName());
         redisManager.setRedisString(GameDataValue.GAME_SERVER_REDIS.getString(server, gameID), server);
         redisManager.setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMinP()).longValue());
@@ -66,7 +65,7 @@ public class CGame implements Game {
     }
 
     @Override
-    public void stop() {
+    public void clearData() {
         String name = getServerName();
         long id = getGameID();
 
@@ -273,16 +272,6 @@ public class CGame implements Game {
     @Override
     public void setMap(String map) {
         API.getInstance().getRedisManager().setRedisString(GameDataValue.GAME_MAP_REDIS.getString(this), map);
-    }
-
-    @Override
-    public boolean hasTeam() {
-        return API.getInstance().getRedisManager().getRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(this));
-    }
-
-    @Override
-    public void setHasTeam(boolean b) {
-        API.getInstance().getRedisManager().setRedisBoolean(GameDataValue.GAME_TEAM_REDIS.getString(this), b);
     }
 
     @Override

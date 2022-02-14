@@ -10,7 +10,6 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.event.PlayerJoinModerationEvent;
 import fr.redxil.api.paper.event.PlayerQuitModerationEvent;
-import fr.redxil.api.paper.utils.ModeratorTools;
 import fr.redxil.api.paper.utils.Title;
 import fr.redxil.core.common.data.ModeratorDataValue;
 import org.bukkit.Bukkit;
@@ -27,7 +26,6 @@ public class ModeratorMain {
 
         if (b) {
             player.setCollidable(false);
-            ModeratorTools.setModeratorInventory(player);
             if (!onConnection) {
                 Title.sendTitle(player, "§b§lModération", "§7Vous êtes en mode modération", 1, 40, 1);
                 Bukkit.getPluginManager().callEvent(new PlayerJoinModerationEvent(APIPlayerModerator));

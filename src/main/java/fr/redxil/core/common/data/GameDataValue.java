@@ -18,7 +18,6 @@ import org.redisson.api.RedissonClient;
 public enum GameDataValue {
 
     GAME_GAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/game", false, true),
-    GAME_TEAM_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/team", false, true),
 
     GAME_SETTINGS_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/settings", false, true),
     GAME_GAMESTATE_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/gamestate", false, true),
