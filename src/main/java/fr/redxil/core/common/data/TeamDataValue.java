@@ -10,6 +10,7 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
@@ -17,87 +18,92 @@ import org.redisson.api.RedissonClient;
 
 public enum TeamDataValue {
 
-    TEAM_NAME_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/name", true),
-    TEAM_SERVER_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/server", true),
-    TEAM_DISPLAY_NAME_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/dname", true),
+    TEAM_GAME_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/game", true, true),
+    TEAM_DISPLAY_NAME_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/dname", true, true),
 
-    TEAM_COLOR_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/color", true),
-    TEAM_CHAT_COLOR_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/chatcolor", true),
+    TEAM_COLOR_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/color", true, true),
+    TEAM_CHAT_COLOR_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/chatcolor", true, true),
 
-    TEAM_PREFIX_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/prefix", true),
-    TEAM_SUFFIX_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/suffix", true),
+    TEAM_PREFIX_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/prefix", true, true),
+    TEAM_SUFFIX_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/suffix", true, true),
 
-    TEAM_HIDE_OTHER_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/ho", true),
-    TEAM_CS_AV_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/csav", true),
-    TEAM_FF_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/ff", true),
-    TEAM_COLISION_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/col", true),
+    TEAM_HIDE_OTHER_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/ho", true, true),
+    TEAM_CS_AV_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/csav", true, true),
+    TEAM_FF_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/ff", true, true),
+    TEAM_COLISION_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/col", true, true),
 
-    TEAM_PLAYERS_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/players", true),
+    TEAM_PLAYERS_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/players", true, true),
 
-    TEAM_MAXP_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/maxp", true),
+    TEAM_MAXP_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/maxp", true, true),
 
-    TEAM_ATTACHED_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<teamID>/attached", true),
+    TEAM_ATTACHED_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/attached", true, true),
 
-    TEAM_LINK_MAP_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "team/link/map", false),
-    TEAM_LIST_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "team/map", false);
+    TEAM_LINK_MAP_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/link", true, false),
+    TEAM_LIST_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/list", true, false);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needId;
+    final boolean needGame;
+    final boolean needTeam;
 
-    TeamDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
+    TeamDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needGame, boolean needTeam) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needId = needId;
+        this.needGame = needGame;
+        this.needTeam = needTeam;
     }
 
-    public static void clearRedisData(DataType dataType, Long hostID) {
+    public static void clearRedisData(DataType dataType, long gameID, String teamName) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (TeamDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.isNeedId() && hostID != null)
-                    redissonClient.getBucket(mdv.getString(hostID)).delete();
-                else if (!mdv.isNeedId() && hostID == null) redissonClient.getBucket(mdv.getString(hostID)).delete();
+                if (mdv.hasNeedInfo(gameID, teamName))
+                    redissonClient.getBucket(mdv.getString(gameID, teamName)).delete();
 
     }
 
-    public static void clearRedisData(DataType dataType, Team host) {
+    public static void clearRedisData(DataType dataType, Game game) {
 
-        clearRedisData(dataType, host.getTeamID());
+        for(Team team : API.getInstance().getTeamManager().getTeamList(game))
+        clearRedisData(dataType, game.getGameID(), team.getTeamName());
 
     }
 
-    public String getString(Team hosts) {
+    public boolean hasNeedInfo(Long gameID, String teamName) {
+        if (isNeedGame() && gameID == null)
+            return false;
+        return !isNeedTeam() || teamName != null;
+    }
+
+    public String getString(Game game, Team team) {
+        return getString(game == null ? null : game.getGameID(), team == null ? null : team.getTeamName());
+    }
+
+    public String getString(Long gameID, String teamName) {
         String location = this.location;
+        if (needTeam) {
+            if (teamName == null) return null;
+            location = location.replace("<teamName>", teamName);
+        }
 
-        if (needId) {
-            long memberId = hosts.getTeamID();
-            location = location.replace("<hostID>", Long.valueOf(memberId).toString());
+        if(needGame){
+            if(gameID == null) return null;
+            location = location.replace("<serverID>", gameID.toString());
         }
 
         return location;
     }
 
-    public String getString(Long serverId) {
-        String location = this.location;
-        if (needId) {
-            if (serverId == null) return null;
-            location = location.replace("<hostID>", serverId.toString());
-        }
-
-        return location;
+    public boolean isNeedGame() {
+        return needGame;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public boolean isNeedId() {
-        return needId;
+    public boolean isNeedTeam() {
+        return needTeam;
     }
 
     public boolean isDataBase(DataBaseType dataBaseType) {

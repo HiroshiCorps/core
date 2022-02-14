@@ -36,7 +36,6 @@ public enum ServerDataValue {
     SERVER_NEEDRANK_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_needrank", false, true),
     SERVER_PORT_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_port", false, true),
     SERVER_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/server_player", false, true),
-    SERVER_LINK_TEAM_REDIS(DataBaseType.REDIS, DataType.SERVER, "servers/<serverID>/link_team", false, true),
 
     MAP_SERVER_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "servers/map", false, false);
 

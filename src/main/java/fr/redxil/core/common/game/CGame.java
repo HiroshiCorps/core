@@ -16,9 +16,9 @@ import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.api.paper.minigame.GameBuilder;
 import fr.redxil.core.common.data.GameDataValue;
 import fr.redxil.core.common.data.IDDataValue;
+import fr.redxil.core.common.data.TeamDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.redis.IDGenerator;
 
@@ -70,6 +70,8 @@ public class CGame implements Game {
         long id = getGameID();
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "[Host] Clearing redis data");
+
+        TeamDataValue.clearRedisData(DataType.TEAM, this);
 
         boolean host = isHostLinked();
 
@@ -299,7 +301,7 @@ public class CGame implements Game {
     @Override
     public boolean forceWin(APIPlayerModerator APIPlayer, Team team, String reason) {
         if (reason.contains("<split>")) return false;
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceWIN", APIPlayer.getName() + "<split>" + team.getName() + "<split>" + reason);
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceWIN", APIPlayer.getName() + "<split>" + team.getTeamName() + "<split>" + reason);
         return true;
     }
 

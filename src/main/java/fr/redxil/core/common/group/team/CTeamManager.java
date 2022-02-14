@@ -7,6 +7,7 @@
 package fr.redxil.core.common.group.team;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.message.Color;
@@ -20,18 +21,18 @@ import java.util.UUID;
 public class CTeamManager implements TeamManager {
 
     @Override
-    public List<Team> getTeamList() {
-        return new ArrayList<Team>() {{
-            getTeamIDList().forEach((id) -> add(getTeam(id)));
+    public List<Team> getTeamList(Game game) {
+        return new ArrayList<>() {{
+            getTeamNameList(game).forEach((id) -> add(getTeam(game, id)));
         }};
     }
 
     @Override
-    public List<Long> getTeamIDList() {
-        return new ArrayList<Long>() {{
-            for (Object l : API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LIST_REDIS.getLocation()).entrySet())
-                if (l instanceof Long)
-                    add((Long) l);
+    public List<String> getTeamNameList(Game game) {
+        return new ArrayList<>() {{
+            for (Object l : API.getInstance().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getString(game, null)))
+                if (l instanceof String)
+                    add((String) l);
         }};
     }
 
@@ -52,13 +53,13 @@ public class CTeamManager implements TeamManager {
     }
 
     @Override
-    public List<Team> getTeamWithRemainingPlace(int i) {
-        return getTeamWithRemainingPlace(getTeamList(), i);
+    public List<Team> getTeamWithRemainingPlace(Game game, int i) {
+        return getTeamWithRemainingPlace(getTeamList(game), i);
     }
 
     @Override
-    public List<Team> getTeamWithRemainingPlace() {
-        return getTeamWithRemainingPlace(getTeamList(), 1);
+    public List<Team> getTeamWithRemainingPlace(Game game) {
+        return getTeamWithRemainingPlace(getTeamList(game), 1);
     }
 
     @Override
@@ -77,8 +78,8 @@ public class CTeamManager implements TeamManager {
     }
 
     @Override
-    public List<Team> getTeamWithMinPlayer(int playerMin) {
-        return getTeamWithMinPlayer(getTeamList(), playerMin);
+    public List<Team> getTeamWithMinPlayer(Game game, int playerMin) {
+        return getTeamWithMinPlayer(getTeamList(game), playerMin);
     }
 
     @Override
@@ -87,8 +88,8 @@ public class CTeamManager implements TeamManager {
     }
 
     @Override
-    public List<Team> getTeamWithMinPlayer() {
-        return getTeamWithMinPlayer(getTeamList(), 1);
+    public List<Team> getTeamWithMinPlayer(Game game) {
+        return getTeamWithMinPlayer(getTeamList(game), 1);
     }
 
 
@@ -116,82 +117,87 @@ public class CTeamManager implements TeamManager {
     }
 
     @Override
-    public List<Team> getTeamOrderByRemainingPlace(boolean remainingOnly) {
+    public List<Team> getTeamOrderByRemainingPlace(Game game, boolean remainingOnly) {
         if (remainingOnly)
-            return getTeamOrderByRemainingPlace(getTeamWithRemainingPlace());
+            return getTeamOrderByRemainingPlace(getTeamWithRemainingPlace(game));
         else
-            return getTeamOrderByRemainingPlace(getTeamList());
+            return getTeamOrderByRemainingPlace(getTeamList(game));
     }
 
     @Override
-    public List<Team> getTeamOrderByRemainingPlace() {
-        return getTeamOrderByRemainingPlace(getTeamList());
+    public List<Team> getTeamOrderByRemainingPlace(Game game) {
+        return getTeamOrderByRemainingPlace(getTeamList(game));
     }
 
 
     @Override
-    public boolean hasTeam(APIPlayer player) {
-        return hasTeam(player.getUUID());
+    public boolean hasTeam(Game game, APIPlayer player) {
+        return hasTeam(game, player.getUUID());
     }
 
     @Override
-    public boolean hasTeam(UUID playerUUID) {
-        return API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getLocation()).containsKey(playerUUID.toString());
+    public boolean hasTeam(Game game, UUID playerUUID) {
+        return API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(game, null)).containsKey(playerUUID.toString());
     }
 
     @Override
-    public boolean isTeamExist(long teamID) {
-        return API.getInstance().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getLocation()).contains(teamID);
+    public boolean hasTeam(Game game) {
+        return !API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(game, null)).isEmpty();
     }
 
     @Override
-    public CTeam getTeam(long teamID) {
-
-        if (!isTeamExist(teamID)) return null;
-        return new CTeam(teamID);
-
+    public boolean isTeamExist(Game game, String teamName) {
+        return API.getInstance().getRedisManager().getRedisList(TeamDataValue.TEAM_LIST_REDIS.getString(game, null)).contains(teamName);
     }
 
     @Override
-    public CTeam createTeam(String name, int maxPlayer) {
+    public CTeam getTeam(Game game, String teamName) {
 
-        return CTeam.initTeam(name, maxPlayer);
-
-    }
-
-    @Override
-    public CTeam createTeam(String name, int maxPlayer, Color color) {
-
-        return CTeam.initTeam(name, maxPlayer, color);
+        if (!isTeamExist(game, teamName)) return null;
+        return new CTeam(game.getGameID(), teamName);
 
     }
 
     @Override
-    public CTeam getPlayerTeam(UUID uuid) {
-        if (!hasTeam(uuid)) return null;
-        return getTeam((long) API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getLocation()).get(uuid.toString()));
+    public CTeam createTeam(Game game, String name, int maxPlayer) {
+
+        return CTeam.initTeam(game.getGameID(), name, maxPlayer);
+
     }
 
     @Override
-    public CTeam getPlayerTeam(APIPlayer player) {
-        return getPlayerTeam(player.getUUID());
+    public CTeam createTeam(Game game, String name, int maxPlayer, Color color) {
+
+        return CTeam.initTeam(game.getGameID(), name, maxPlayer, color);
+
     }
 
     @Override
-    public boolean areAllInTeams(List<UUID> playerList) {
+    public CTeam getPlayerTeam(Game game, UUID uuid) {
+        if (!hasTeam(game, uuid)) return null;
+        return getTeam(game, (String) API.getInstance().getRedisManager().getRedisMap(TeamDataValue.TEAM_LINK_MAP_REDIS.getString(game, null)).get(uuid.toString()));
+    }
+
+    @Override
+    public CTeam getPlayerTeam(Game game, APIPlayer player) {
+        return getPlayerTeam(game, player.getUUID());
+    }
+
+    @Override
+    public boolean areAllInTeams(Game game, List<UUID> playerList) {
 
         for (UUID player : playerList)
-            if (getPlayerTeam(player) == null)
+            if (getPlayerTeam(game, player) == null)
                 return false;
 
         return true;
     }
 
     @Override
-    public boolean attributeTeamToAll(List<UUID> playerList) {
+    public boolean attributeTeamToAll(Game game, List<UUID> playerList) {
         for (UUID player : playerList) {
 
-            List<Team> teamList = getTeamOrderByRemainingPlace(getTeamWithMinPlayer());
+            List<Team> teamList = getTeamOrderByRemainingPlace(getTeamWithMinPlayer(game));
             if (teamList.isEmpty()) return false;
             teamList.get(0).addPlayer(player);
 

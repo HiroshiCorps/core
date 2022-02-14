@@ -158,8 +158,6 @@ public class CServer implements Server {
 
         API.getInstance().getPluginEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
 
-        getTeamLinked().forEach((teamID) -> API.getInstance().getTeamManager().getTeam(teamID).deleteTeam());
-
         ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataValue.SERVER_ID_SQL.getString(null) + " = ?", id);
 
         model.set(ServerDataValue.SERVER_STATUS_SQL.getString(name, id), ServerStatus.OFFLINE.toString());
@@ -242,11 +240,6 @@ public class CServer implements Server {
     @Override
     public Host getHost() {
         return API.getInstance().getGameManager().getHost(getServerName());
-    }
-
-    @Override
-    public List<Long> getTeamLinked() {
-        return API.getInstance().getRedisManager().getRedisList(ServerDataValue.SERVER_LINK_TEAM_REDIS.getString(this));
     }
 
     @Override

@@ -144,9 +144,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
 
         UUID uuid = getUUID();
-        Team team = API.getInstance().getTeamManager().getPlayerTeam(uuid);
-        if (team != null)
-            team.removePlayer(uuid);
 
         RedisManager rm = API.getInstance().getRedisManager();
 
@@ -415,16 +412,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public Party getParty() {
         return API.getInstance().getPartyManager().getPlayerParty(this);
-    }
-
-    @Override
-    public boolean hasTeam() {
-        return API.getInstance().getTeamManager().hasTeam(this);
-    }
-
-    @Override
-    public Team getTeam() {
-        return API.getInstance().getTeamManager().getPlayerTeam(this);
     }
 
     @Override
