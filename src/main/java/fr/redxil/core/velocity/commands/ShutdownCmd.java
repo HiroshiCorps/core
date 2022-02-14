@@ -44,8 +44,8 @@ public class ShutdownCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        server.sendShutdownOrder();
-        TextComponentBuilder.createTextComponent("L'ordre de shutdown est envoyé").setColor(Color.GREEN).sendTo(apiPlayer);
+        ///server.sendShutdownOrder();
+        TextComponentBuilder.createTextComponent("L'ordre de shutdown est désactivé").setColor(Color.GREEN).sendTo(apiPlayer);
         return 1;
     }
 

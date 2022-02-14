@@ -6,7 +6,6 @@
 
 package fr.redxil.core.common.server;
 
-import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
@@ -47,7 +46,7 @@ public class CServer implements Server {
 
         int maxPlayer = API.getInstance().getPluginEnabler().getMaxPlayer();
 
-        ServerModel model = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<String, Object>() {{
+        ServerModel model = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<>() {{
             put(ServerDataValue.SERVER_NAME_SQL.getString(null), name);
             put(ServerDataValue.SERVER_MAXP_SQL.getString(null), maxPlayer);
             put(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
@@ -135,16 +134,6 @@ public class CServer implements Server {
     }
 
     @Override
-    public long getLastPing() {
-        return 0;
-    }
-
-    @Override
-    public Object getServerResponseMessage(int i) {
-        return null;
-    }
-
-    @Override
     public boolean isOnline() {
         return API.getInstance().getServerManager().isServerExist(getServerName());
     }
@@ -158,10 +147,10 @@ public class CServer implements Server {
     }
 
     @Override
-    public boolean shutdown() {
+    public void shutdown() {
 
         String name = getServerName();
-        if (!API.getInstance().getServerName().equals(name)) return false;
+        if (!API.getInstance().getServerName().equals(name)) return;
 
         long id = getServerId();
 
@@ -181,8 +170,6 @@ public class CServer implements Server {
         ServerDataValue.clearRedisData(DataType.SERVER, name, id);
 
         API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).remove(name);
-
-        return true;
 
     }
 
@@ -235,15 +222,6 @@ public class CServer implements Server {
     @Override
     public void removePlayerInServer(UUID uuid) {
         API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataValue.SERVER_PLAYER_REDIS.getString(this)).remove(uuid.toString());
-    }
-
-    @Override
-    public void sendShutdownOrder() {
-        if (getServerName().equals(API.getInstance().getServerName())) {
-            API.getInstance().getPluginEnabler().shutdownServer("Shutdown Order from: " + getServerName());
-            return;
-        }
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "shutdownOrder", API.getInstance().getServerName());
     }
 
     @Override

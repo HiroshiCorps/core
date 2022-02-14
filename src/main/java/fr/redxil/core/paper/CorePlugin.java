@@ -103,7 +103,7 @@ public class CorePlugin extends Paper {
         this.freezeGestion = new FreezeMessageGestion(this);
 
         this.coreTagsManager = new CoreTagsManager();
-        HiroshiPaper.INSTANCE.registerPacketHandler(new OutboundHandler());
+        HiroshiPaper.getInstance().registerPacketHandler(new OutboundHandler());
 
         this.moderatorMain = new ModeratorMain();
         this.coreHologramsManager = new CoreHologramsManager();

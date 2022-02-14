@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class OutboundHandler implements PacketOutboundHandler {
 
     @Override
-    public PacketResult onPacketSend(Player player, Packet<?> packet) {
+    public PacketResult onPacketSend(Player player, Object packet) {
         if (packet instanceof PacketPlayOutUpdateHealth && Paper.getInstance().getTagsManager().isDisplayHealth()) {
             PacketPlayOutUpdateHealth updateHealth = (PacketPlayOutUpdateHealth) packet;
             if (updateHealth.getScaledHealth() != player.getLastScaledHealth()) {

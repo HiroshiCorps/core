@@ -11,9 +11,11 @@ repositories {
     mavenCentral()
 
     flatDir {
-        dirs "../api/build/libs/"
         dirs "../api/libs/"
-        dirs "../paper/Paper-Server/target"
+    }
+
+    flatDir {
+        dirs "../api/build/libs/"
     }
 
     maven {
