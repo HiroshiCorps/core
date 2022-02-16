@@ -26,9 +26,9 @@ public class CHost extends CGame implements Host {
         super(gameID, false);
     }
 
-    public static Host initHost(String author, GameEnum gameEnum) {
+    public static Host initHost(long serverID, String author, GameEnum gameEnum) {
 
-        Game game = CGame.initGame(gameEnum);
+        Game game = CGame.initGame(serverID, gameEnum);
 
         long gameID = game.getGameID();
 

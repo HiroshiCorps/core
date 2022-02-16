@@ -35,7 +35,7 @@ public class CGame implements Game {
         this.gameID = serverID ? (long) API.getInstance().getRedisManager().getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString()).get(id) : id;
     }
 
-    public static Game initGame(GameEnum gameEnum) {
+    public static Game initGame(long serverID, GameEnum gameEnum) {
 
         long gameID = IDGenerator.generateLONGID(IDDataValue.GAME);
 
@@ -43,6 +43,8 @@ public class CGame implements Game {
 
         GameDataValue.clearRedisData(DataType.SERVER, gameID);
 
+        redisManager.getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString(gameID)).put(serverID, gameID);
+        redisManager.setRedisLong(GameDataValue.GAME_SERVER_REDIS.getString(gameID), serverID);
         redisManager.setRedisString(GameDataValue.GAME_GAME_REDIS.getString(gameID), gameEnum.toString());
         redisManager.setRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(gameID), GameState.WAITING.getName());
         redisManager.setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(gameID), Integer.valueOf(gameEnum.getDefaultMinP()).longValue());
@@ -67,8 +69,7 @@ public class CGame implements Game {
 
         GameDataValue.clearRedisData(DataType.SERVER, gameID);
 
-        if(serverID != null)
-            API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.MAP_SERVER_REDIS.getString()).remove(serverID);
+        API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.MAP_SERVER_REDIS.getString()).remove(serverID);
         API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_GAME_REDIS.getString()).remove(gameID);
         API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_HOST_REDIS.getString()).remove(gameID);
     }
@@ -113,22 +114,8 @@ public class CGame implements Game {
      */
 
     @Override
-    public Long getServerID() {
+    public long getServerID() {
         return API.getInstance().getRedisManager().getRedisLong(GameDataValue.GAME_SERVER_REDIS.getString(gameID));
-    }
-
-    @Override
-    public void setServerID(long l) {
-
-        Long currentServerID = getServerID();
-        RedisManager redisManager = API.getInstance().getRedisManager();
-        if(currentServerID != null){
-            redisManager.getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString(gameID)).remove(currentServerID);
-        }
-
-        redisManager.getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString(gameID)).put(l, getGameID());
-        redisManager.setRedisLong(GameDataValue.GAME_SERVER_REDIS.getString(gameID), l);
-
     }
 
     @Override
