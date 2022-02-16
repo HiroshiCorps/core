@@ -12,6 +12,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
@@ -58,6 +59,7 @@ public class CoreVelocity extends Velocity {
     final File folder;
     final CommandManager commandManager;
     final IpInfo ipInfo;
+    final String serverName;
 
     public CoreVelocity(ProxyServer server, CommandManager commandManager, Logger logger, File folder) {
 
@@ -66,13 +68,19 @@ public class CoreVelocity extends Velocity {
         this.logger = logger;
         this.folder = folder;
 
-        if (proxyServer == null)
-            this.logger.log(Level.SEVERE, "ProxyServer null");
-        else
-            logger.log(Level.FINE, "ProxyServer not null");
-
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
+
+        File serverName = new File(folder + File.separator + "serverName.json");
+
+        this.serverName = GSONSaver.loadGSON(serverName, String.class);
+
+        if(this.serverName == null) {
+            logger.log(Level.SEVERE, "Missing file: "+serverName.getPath());
+            server.shutdown();
+            return;
+        }
+
         new CoreAPI(this);
 
     }
@@ -208,6 +216,11 @@ public class CoreVelocity extends Velocity {
     @Override
     public void printLog(Level level, String msg) {
         System.out.println("[" + level.getName() + "] " + msg);
+    }
+
+    @Override
+    public String getServerName() {
+        return serverName;
     }
 
 }

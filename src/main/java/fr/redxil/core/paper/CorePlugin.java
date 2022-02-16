@@ -130,8 +130,6 @@ public class CorePlugin extends Paper {
     public void onAPIDisabled() {
         if(API.getInstance().isGameServer())
             API.getInstance().getGame().clearData();
-        if (API.getInstance().isHostServer())
-            API.getInstance().getSQLConnection().execute("DELETE FROM members_hosts WHERE host_server=?", API.getInstance().getServerName());
     }
 
     public void checkCrash() {
@@ -215,6 +213,11 @@ public class CorePlugin extends Paper {
     @Override
     public void printLog(Level level, String msg) {
         System.out.println("[" + level.getName() + "] " + msg);
+    }
+
+    @Override
+    public String getServerName() {
+        return Bukkit.getServerName();
     }
 
 }

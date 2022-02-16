@@ -35,7 +35,7 @@ import java.io.File;
 
 public class CoreAPI extends API {
 
-    private final String serverName;
+    private Long serverID;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
@@ -56,22 +56,19 @@ public class CoreAPI extends API {
         this.cTeamManager = new CTeamManager();
         this.sqlConnection = new CSQLConnection();
 
-        File serverNameFile = new File(plugin.getPluginDataFolder() + File.separator + "servername.json");
+        File serverIDFile = new File(plugin.getPluginDataFolder() + File.separator + "serverid.json");
         File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlUser.json");
         File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlPass.json");
         File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
 
-        this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
+        this.serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
         String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
 
-        if (serverName == null || sqlUser == null || sqlPass == null || redisPass == null) {
-
-            if (serverName == null)
-                GSONSaver.writeGSON(serverNameFile, "servername");
+        if (sqlUser == null || sqlPass == null || redisPass == null) {
 
             if (sqlUser == null)
                 GSONSaver.writeGSON(sqlUserFile, "userhere");
@@ -109,9 +106,9 @@ public class CoreAPI extends API {
 
         }
 
-        if (!getServerManager().isServerExist(getServerName()))
-            this.serverManager.initServer(serverType, getServerName(), plugin.getServerIp());
-
+        if (serverID == null)
+            this.serverID = this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp()).getServerId();
+        else getServer().setServerName(plugin.getServerName());
         CoreAPI.setEnabled(true);
 
     }
@@ -143,7 +140,7 @@ public class CoreAPI extends API {
 
     @Override
     public Server getServer() {
-        return this.serverManager.getServer(getServerName());
+        return this.serverManager.getServer(getServerID());
     }
 
     @Override
@@ -172,8 +169,8 @@ public class CoreAPI extends API {
     }
 
     @Override
-    public String getServerName() {
-        return serverName;
+    public long getServerID() {
+        return serverID;
     }
 
     @Override

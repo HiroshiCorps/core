@@ -94,6 +94,15 @@ public class CServer implements Server {
     }
 
     @Override
+    public void setServerName(String s) {
+        String currentName = getServerName();
+        RedisManager redisManager = API.getInstance().getRedisManager();
+        redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).remove(currentName, serverId);
+        redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).put(s, serverId);
+        redisManager.setRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(this), s);
+    }
+
+    @Override
     public Collection<APIPlayer> getPlayerList() {
 
         List<APIPlayer> playerList = new ArrayList<>();
@@ -142,7 +151,7 @@ public class CServer implements Server {
     public void shutdown() {
 
         String name = getServerName();
-        if (!API.getInstance().getServerName().equals(name)) return;
+        if (API.getInstance().getServerID() != getServerId()) return;
 
         long id = getServerId();
 
@@ -201,11 +210,11 @@ public class CServer implements Server {
             listPlayer.add(uuid.toString());
 
         if (API.getInstance().isVelocity())
-            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), API.getInstance().getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), getServerName());
         else {
             Server server = apiPlayer.getServer();
             if (server != null) server.removePlayerInServer(apiPlayer.getUUID());
-            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), API.getInstance().getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), getServerName());
         }
     }
 
