@@ -12,7 +12,6 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.api.paper.minigame.GameBuilder;
 import fr.redxil.core.common.data.TeamDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RMap;
@@ -217,7 +216,7 @@ public class CTeam implements Team {
         if (getRemainingPlace() == 0 || getListPlayerUUIDS().contains(player.toString()))
             return false;
 
-        Team beforeTeam = GameBuilder.getGameBuilder().getTeamManager().getPlayerTeam(API.getInstance().getGameManager().getGame(getGameID()), player);
+        Team beforeTeam = API.getInstance().getTeamManager().getPlayerTeam(API.getInstance().getGameManager().getGame(getGameID()), player);
         if (beforeTeam != null && !beforeTeam.removePlayer(player))
             return false;
 

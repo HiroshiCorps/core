@@ -12,7 +12,7 @@ import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.paper.minigame.GameBuilder;
+import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
 import fr.redxil.core.paper.utils.PlayerInjector;
