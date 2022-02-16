@@ -23,65 +23,67 @@ public class CGameManager implements GameManager {
     @Override
     public List<Game> getListGames() {
         return new ArrayList<>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).values())
-                add(getGame(Long.parseLong((String) serverName)));
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.LIST_GAME_REDIS.getString()).values())
+                add(getGame((long) serverName));
         }};
     }
 
     @Override
-    public boolean isGameExist(String s) {
-        return API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).containsKey(s);
+    public boolean isGameExistByServerID(long s) {
+        return API.getInstance().getRedisManager().getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString()).containsKey(s);
     }
 
     @Override
     public boolean isGameExist(long l) {
-        return API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).containsValue(l);
+        return API.getInstance().getRedisManager().getRedisList(GameDataValue.LIST_GAME_REDIS.getString()).contains(l);
     }
 
     @Override
-    public Game getGame(String s) {
-        if (!isGameExist(s)) return null;
-        if (isHostExist(s)) getHost(s);
-        return new CGame(s);
+    public Game getGameByServerID(long serverID) {
+        if (!isGameExistByServerID(serverID)) return null;
+        return new CGame(serverID, true);
     }
 
     @Override
     public Game getGame(long s) {
         if (!isGameExist(s)) return null;
-        if (isHostExist(s)) return getHost(s);
-        return new CGame(s);
+        return new CGame(s, false);
     }
 
     @Override
-    public Game initGameServer(String s, GameEnum gameEnum) {
-        Game games = getGame(s);
-        if (games != null) return games;
-        return CGame.initGame(s, gameEnum);
+    public Game initGameServer(GameEnum gameEnum) {
+        return CGame.initGame(gameEnum);
     }
 
     @Override
     public List<Host> getListHost() {
         return new ArrayList<>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).values())
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_HOST_REDIS.getString()).readAll())
                 add(getHost(Long.parseLong((String) serverName)));
         }};
     }
 
     @Override
-    public boolean isHostExist(String s) {
-        if (s == null) return false;
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).containsKey(s);
+    public boolean isHostExistByServerID(long s) {
+        Game game = getGameByServerID(s);
+        if(game == null)
+            return false;
+        return API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_HOST_REDIS.getString()).contains(game.getGameID());
     }
 
     @Override
     public boolean isHostExist(long s) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).containsValue(s);
+        return API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_HOST_REDIS.getString()).contains(s);
     }
 
     @Override
-    public Host getHost(String s) {
-        if (!isHostExist(s)) return null;
-        return new CHost((long) API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).get(s));
+    public Host getHostByServerID(long s) {
+        Game game = getGameByServerID(s);
+        if(game == null)
+            return null;
+        if(!isHostExist(game.getGameID()))
+            return null;
+        return new CHost(game.getGameID());
     }
 
     @Override
@@ -91,10 +93,8 @@ public class CGameManager implements GameManager {
     }
 
     @Override
-    public Host initHostServer(String s, APIPlayer s1, GameEnum hostGame) throws GameCreateError {
-        if (isHostExist(s))
-            throw new GameCreateError("Host name already used");
-        return CHost.initHost(s, s1.getName(), hostGame);
+    public Host initHostServer(APIPlayer s1, GameEnum hostGame) {
+        return CHost.initHost(s1.getName(), hostGame);
     }
 
 }

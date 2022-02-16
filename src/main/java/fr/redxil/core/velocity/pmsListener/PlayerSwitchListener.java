@@ -13,6 +13,7 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
+import fr.redxil.api.common.server.Server;
 import fr.redxil.api.velocity.Velocity;
 import net.kyori.adventure.text.Component;
 
@@ -36,7 +37,13 @@ public class PlayerSwitchListener implements PMReceiver {
 
         Player player = playerO.get();
 
-        Optional<RegisteredServer> serverInfo = Velocity.getInstance().getProxyServer().getServer(dataList[1]);
+        Server server = API.getInstance().getServerManager().getServer(Long.parseLong(dataList[1]));
+        if (server == null) {
+            player.sendMessage((Component) TextComponentBuilder.createTextComponent(Color.RED + "Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
+            return;
+        }
+
+        Optional<RegisteredServer> serverInfo = Velocity.getInstance().getProxyServer().getServer(server.getServerName());
         if (serverInfo.isEmpty()) {
             player.sendMessage((Component) TextComponentBuilder.createTextComponent(Color.RED + "Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
             return;

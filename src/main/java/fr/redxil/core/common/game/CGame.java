@@ -29,57 +29,48 @@ import java.util.logging.Level;
 
 public class CGame implements Game {
 
-    final String server;
     final long gameID;
 
-    public CGame(long gameID) {
-        this.server = API.getInstance().getRedisManager().getRedisString(GameDataValue.GAME_SERVER_REDIS.getString(null, gameID));
-        this.gameID = gameID;
+    public CGame(long id, boolean serverID) {
+        this.gameID = serverID ? (long) API.getInstance().getRedisManager().getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString()).get(id) : id;
     }
 
-    public CGame(String serverName) {
-        this.server = serverName;
-        this.gameID = (long) API.getInstance().getRedisManager().getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).get(serverName);
-    }
-
-    public static Game initGame(String server, GameEnum gameEnum) {
+    public static Game initGame(GameEnum gameEnum) {
 
         long gameID = IDGenerator.generateLONGID(IDDataValue.GAME);
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        GameDataValue.clearRedisData(DataType.SERVER, server, gameID);
+        GameDataValue.clearRedisData(DataType.SERVER, gameID);
 
-        redisManager.getRedisMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).put(server, gameID);
-
-        redisManager.setRedisString(GameDataValue.GAME_GAME_REDIS.getString(server, gameID), gameEnum.toString());
-        redisManager.setRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(server, gameID), GameState.WAITING.getName());
-        redisManager.setRedisString(GameDataValue.GAME_SERVER_REDIS.getString(server, gameID), server);
-        redisManager.setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMinP()).longValue());
-        redisManager.setRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMaxP()).longValue());
-        redisManager.setRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(server, gameID), Integer.valueOf(gameEnum.getDefaultMaxNPSpec()).longValue());
-        redisManager.setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(server, gameID), gameEnum.name());
-        redisManager.setRedisString(GameDataValue.GAME_MAP_REDIS.getString(server, gameID), "None");
-        return new CGame(gameID);
+        redisManager.setRedisString(GameDataValue.GAME_GAME_REDIS.getString(gameID), gameEnum.toString());
+        redisManager.setRedisString(GameDataValue.GAME_GAMESTATE_REDIS.getString(gameID), GameState.WAITING.getName());
+        redisManager.setRedisLong(GameDataValue.GAME_MINP_REDIS.getString(gameID), Integer.valueOf(gameEnum.getDefaultMinP()).longValue());
+        redisManager.setRedisLong(GameDataValue.GAME_MAXP_REDIS.getString(gameID), Integer.valueOf(gameEnum.getDefaultMaxP()).longValue());
+        redisManager.setRedisLong(GameDataValue.GAME_MAXPLSPEC_REDIS.getString(gameID), Integer.valueOf(gameEnum.getDefaultMaxNPSpec()).longValue());
+        redisManager.setRedisString(GameDataValue.GAME_SUBGAME_REDIS.getString(gameID), gameEnum.name());
+        redisManager.setRedisString(GameDataValue.GAME_MAP_REDIS.getString(gameID), "None");
+        redisManager.getRedisList(GameDataValue.LIST_GAME_REDIS.getString()).add(gameID);
+        return new CGame(gameID, false);
 
     }
 
     @Override
     public void clearData() {
-        String name = getServerName();
-        long id = getGameID();
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "[Host] Clearing redis data");
 
         TeamDataValue.clearRedisData(DataType.TEAM, this);
 
-        boolean host = isHostLinked();
+        Long serverID = getServerID();
+        long gameID = getGameID();
 
-        GameDataValue.clearRedisData(DataType.SERVER, name, id);
+        GameDataValue.clearRedisData(DataType.SERVER, gameID);
 
-        API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.GAMEMAP_SERVER_REDIS.getString(null)).remove(name);
-        if (host)
-            API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).remove(name);
+        if(serverID != null)
+            API.getInstance().getRedisManager().getRedissonClient().getMap(GameDataValue.MAP_SERVER_REDIS.getString()).remove(serverID);
+        API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_GAME_REDIS.getString()).remove(gameID);
+        API.getInstance().getRedisManager().getRedissonClient().getList(GameDataValue.LIST_HOST_REDIS.getString()).remove(gameID);
     }
 
     @Override
@@ -112,7 +103,7 @@ public class CGame implements Game {
         } else {
             getPlayers().add(apiPlayer.getUUID());
         }
-        apiPlayer.switchServer(getServerName());
+        apiPlayer.switchServer(getServerID());
 
         return true;
     }
@@ -122,8 +113,22 @@ public class CGame implements Game {
      */
 
     @Override
-    public String getServerName() {
-        return server;
+    public Long getServerID() {
+        return API.getInstance().getRedisManager().getRedisLong(GameDataValue.GAME_SERVER_REDIS.getString(gameID));
+    }
+
+    @Override
+    public void setServerID(long l) {
+
+        Long currentServerID = getServerID();
+        RedisManager redisManager = API.getInstance().getRedisManager();
+        if(currentServerID != null){
+            redisManager.getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString(gameID)).remove(currentServerID);
+        }
+
+        redisManager.getRedisMap(GameDataValue.MAP_SERVER_REDIS.getString(gameID)).put(l, getGameID());
+        redisManager.setRedisLong(GameDataValue.GAME_SERVER_REDIS.getString(gameID), l);
+
     }
 
     @Override
@@ -208,7 +213,7 @@ public class CGame implements Game {
 
     @Override
     public boolean isHostLinked() {
-        return API.getInstance().getGameManager().isHostExist(getServerName());
+        return API.getInstance().getGameManager().isHostExist(getGameID());
     }
 
     @Override
@@ -229,7 +234,7 @@ public class CGame implements Game {
 
     @Override
     public Host getHost() {
-        return API.getInstance().getGameManager().getHost(getServerName());
+        return API.getInstance().getGameManager().getHost(getGameID());
     }
 
     @Override

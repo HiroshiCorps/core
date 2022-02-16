@@ -28,18 +28,10 @@ import java.util.logging.Level;
 
 public class CServer implements Server {
 
-    private final String name;
-
     private final long serverId;
 
     public CServer(long serverID) {
         this.serverId = serverID;
-        this.name = API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(this));
-    }
-
-    public CServer(String serverName) {
-        this.serverId = Long.parseLong((String) API.getInstance().getRedisManager().getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(serverName));
-        this.name = serverName;
     }
 
     public static Server initServer(ServerType serverType, String name, IpInfo serverIp) {
@@ -98,7 +90,7 @@ public class CServer implements Server {
 
     @Override
     public String getServerName() {
-        return name;
+        return API.getInstance().getRedisManager().getRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(this));
     }
 
     @Override
@@ -224,7 +216,7 @@ public class CServer implements Server {
 
     @Override
     public boolean isHostServer() {
-        return API.getInstance().getGameManager().getHost(getServerName()) != null;
+        return API.getInstance().getGameManager().isHostExistByServerID(getServerId());
     }
 
     @Override
@@ -234,12 +226,12 @@ public class CServer implements Server {
 
     @Override
     public Game getGame() {
-        return API.getInstance().getGameManager().getGame(getServerName());
+        return API.getInstance().getGameManager().getGameByServerID(getServerId());
     }
 
     @Override
     public Host getHost() {
-        return API.getInstance().getGameManager().getHost(getServerName());
+        return API.getInstance().getGameManager().getHostByServerID(getServerId());
     }
 
     @Override

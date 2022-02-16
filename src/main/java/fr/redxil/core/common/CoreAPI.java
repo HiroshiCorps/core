@@ -193,7 +193,7 @@ public class CoreAPI extends API {
 
     @Override
     public Host getHost() {
-        return getGameManager().getHost(getServerName());
+        return getGameManager().getHostByServerID(getServer().getServerId());
     }
 
     @Override
@@ -208,12 +208,12 @@ public class CoreAPI extends API {
 
     @Override
     public Game getGame() {
-        return getGameManager().getGame(getServerName());
+        return getGameManager().getGameByServerID(getServer().getServerId());
     }
 
     @Override
     public boolean isGameServer() {
-        return getGameManager().isGameExist(getServerName());
+        return getGameManager().isGameExistByServerID(getServer().getServerId());
     }
 
 }

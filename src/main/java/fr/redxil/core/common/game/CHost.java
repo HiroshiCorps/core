@@ -23,20 +23,20 @@ import java.util.UUID;
 public class CHost extends CGame implements Host {
 
     public CHost(long gameID) {
-        super(gameID);
+        super(gameID, false);
     }
 
-    public static Host initHost(String server, String author, GameEnum gameEnum) {
+    public static Host initHost(String author, GameEnum gameEnum) {
 
-        Game game = CGame.initGame(server, gameEnum);
+        Game game = CGame.initGame(gameEnum);
 
         long gameID = game.getGameID();
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        redisManager.getRedisMap(GameDataValue.HOSTMAP_SERVER_REDIS.getString(null)).put(server, gameID);
-        redisManager.setRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(server, gameID), author);
-        redisManager.setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(server, gameID), HostAccess.CLOSE.toString());
+        redisManager.setRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(gameID), author);
+        redisManager.setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(gameID), HostAccess.CLOSE.toString());
+        redisManager.getRedisList(GameDataValue.LIST_HOST_REDIS.getString()).add(gameID);
 
         return new CHost(gameID);
 

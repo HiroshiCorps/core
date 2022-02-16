@@ -17,74 +17,64 @@ import org.redisson.api.RedissonClient;
 
 public enum GameDataValue {
 
-    GAME_GAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/game", false, true),
+    GAME_GAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/game", true),
 
-    GAME_SETTINGS_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/settings", false, true),
-    GAME_GAMESTATE_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/gamestate", false, true),
-    GAME_SERVER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/server", false, true),
-    GAME_MINP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/minp", false, true),
-    GAME_MAXP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/maxp", false, true),
-    GAME_SUBGAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/subgame", false, true),
-    GAME_MAP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/map", false, true),
+    GAME_SETTINGS_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/settings", true),
+    GAME_GAMESTATE_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/gamestate", true),
+    GAME_SERVER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/server", true),
+    GAME_MINP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/minp", true),
+    GAME_MAXP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/maxp", true),
+    GAME_SUBGAME_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/subgame", true),
+    GAME_MAP_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/map", true),
 
-    GAME_INCOPLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/incopllist", false, true),
-    GAME_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/pllist", false, true),
+    GAME_INCOPLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/incopllist", true),
+    GAME_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/pllist", true),
 
-    GAME_MAXPLSPEC_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specmax", false, true),
-    GAME_SPEC_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specingame", false, true),
-    GAME_SPEC_MODERATOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specoutgame", false, true),
+    GAME_MAXPLSPEC_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specmax", true),
+    GAME_SPEC_PLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specingame", true),
+    GAME_SPEC_MODERATOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/specoutgame", true),
 
-    HOST_AUTHOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/author", false, true),
-    HOST_ACCESS_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/access", false, true),
-    HOST_ALLOWPLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/allpl", false, true),
-    HOST_ALLOWSPECTATOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/allspec", false, true),
+    HOST_AUTHOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/author", true),
+    HOST_ACCESS_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/access", true),
+    HOST_ALLOWPLAYER_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/allpl",  true),
+    HOST_ALLOWSPECTATOR_REDIS(DataBaseType.REDIS, DataType.SERVER, "game/<gameID>/allspec", true),
 
-    GAME_ID_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/id", false, false),
-    GAMEMAP_SERVER_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/map", false, false),
-    HOSTMAP_SERVER_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/hostmap", false, false);
+    GAME_ID_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/id", false),
+    LIST_GAME_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/list", false),
+    LIST_HOST_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/host/list", false),
+    MAP_SERVER_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "game/map", false);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needName, needId;
+    final boolean needId;
 
-    GameDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
+    GameDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needName = needName;
         this.needId = needId;
     }
 
-    public static void clearRedisData(DataType dataType, String serverName, Long hostID) {
+    public static void clearRedisData(DataType dataType, long gameID) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (GameDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.isArgNeeded() && mdv.hasNeedInfo(serverName, hostID))
-                    redissonClient.getBucket(mdv.getString(serverName, hostID)).delete();
-                else if (!mdv.isArgNeeded() && serverName == null && hostID == null)
-                    redissonClient.getBucket(mdv.getString(null)).delete();
+                if (mdv.isArgNeeded() && mdv.hasNeedInfo(gameID))
+                    redissonClient.getBucket(mdv.getString(gameID)).delete();
 
     }
 
     public static void clearRedisData(DataType dataType, Game host) {
 
-        if (host != null)
-            clearRedisData(dataType, host.getServerName(), host.getGameID());
-        else
-            clearRedisData(dataType, null, null);
+        clearRedisData(dataType, host.getGameID());
 
     }
 
     public String getString(Game hosts) {
         String location = this.location;
-        if (needName) {
-            String pseudo = hosts.getServerName();
-            if (pseudo == null) return null;
-            location = location.replace("<serverName>", pseudo);
-        }
 
         if (needId) {
             long memberId = hosts.getGameID();
@@ -94,12 +84,8 @@ public enum GameDataValue {
         return location;
     }
 
-    public String getString(String serverName, Long serverId) {
+    public String getString(Long serverId) {
         String location = this.location;
-        if (needName) {
-            if (serverName == null) return null;
-            location = location.replace("<serverName>", serverName);
-        }
 
         if (needId) {
             if (serverId == null) return null;
@@ -109,18 +95,20 @@ public enum GameDataValue {
         return location;
     }
 
-    public boolean hasNeedInfo(String playerName, Long memberID) {
-        if (isNeedId() && memberID == null)
-            return false;
-        return !isNeedName() || playerName != null;
+    public String getString(){
+        if(isArgNeeded())
+            return null;
+        return location;
+    }
+
+    public boolean hasNeedInfo(Long gameID) {
+        if(isNeedId())
+            return gameID != null;
+        return false;
     }
 
     public boolean isArgNeeded() {
-        return isNeedId() || isNeedName();
-    }
-
-    public boolean isNeedName() {
-        return needName;
+        return isNeedId();
     }
 
     public boolean isNeedId() {

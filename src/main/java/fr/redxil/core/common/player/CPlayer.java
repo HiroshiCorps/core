@@ -179,8 +179,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public void switchServer(String server) {
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + server);
+    public void switchServer(long server) {
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
     }
 
     @Override
