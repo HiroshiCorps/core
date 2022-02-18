@@ -30,7 +30,7 @@ repositories {
 
 dependencies {
     compileOnly name: 'paper-1.12.2'
-    implementation name: 'api-4.0.0'
+    implementation name: 'hiroshimc-api-1.0.0'
     implementation group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE

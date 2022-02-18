@@ -35,7 +35,8 @@ import java.io.File;
 
 public class CoreAPI extends API {
 
-    private Long serverID;
+    private Server server;
+    private Game game;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
@@ -62,7 +63,7 @@ public class CoreAPI extends API {
         File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
 
-        this.serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
+        Long serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
@@ -92,23 +93,17 @@ public class CoreAPI extends API {
         if(!dataConnected())
             return;
 
-        ServerType serverType;
-        if (plugin.isVelocity())
-            serverType = ServerType.VELOCITY;
-        else {
-
-            Game games = getGame();
-            if (games != null) {
-                if (games instanceof Host)
-                    serverType = ServerType.HOST;
-                else serverType = ServerType.GAME;
-            } else serverType = ServerType.HUB;
-
+        if (serverID == null) {
+            ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
+            this.server = this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp());
+            GSONSaver.writeGSON(serverIDFile, this.server.getServerId());
+            game = null;
+        }else{
+            this.server = getServerManager().getServer(serverID);
+            this.server.setServerName(plugin.getServerName());
+            this.game = getGameManager().getGameByServerID(this.server.getServerId());
         }
 
-        if (serverID == null)
-            this.serverID = this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp()).getServerId();
-        else getServer().setServerName(plugin.getServerName());
         CoreAPI.setEnabled(true);
 
     }
@@ -140,7 +135,7 @@ public class CoreAPI extends API {
 
     @Override
     public Server getServer() {
-        return this.serverManager.getServer(getServerID());
+        return this.server;
     }
 
     @Override
@@ -170,7 +165,7 @@ public class CoreAPI extends API {
 
     @Override
     public long getServerID() {
-        return serverID;
+        return this.server.getServerId();
     }
 
     @Override
@@ -190,7 +185,9 @@ public class CoreAPI extends API {
 
     @Override
     public Host getHost() {
-        return getGameManager().getHostByServerID(getServer().getServerId());
+        Game game = getGame();
+        if(game instanceof Host) return (Host) game;
+        return null;
     }
 
     @Override
@@ -205,12 +202,12 @@ public class CoreAPI extends API {
 
     @Override
     public Game getGame() {
-        return getGameManager().getGameByServerID(getServer().getServerId());
+        return this.game;
     }
 
     @Override
     public boolean isGameServer() {
-        return getGameManager().isGameExistByServerID(getServer().getServerId());
+        return this.game != null;
     }
 
 }
