@@ -21,6 +21,7 @@ import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
+import org.bukkit.ChatColor;
 import org.redisson.api.RList;
 
 import java.util.HashMap;
@@ -103,7 +104,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
                 TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("\nSanction n°§r§6" + (sanctionInfos.size() - i) + ":");
                 tcb.appendNewComponentBuilder("\n§r     §7Sanction ID: §d" + sanction.getSanctionID());
-                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + API.getInstance().getPlayerManager().getOfflinePlayer(sanction.getAuthorID()).getName());
+                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + sanction.getAuthorID());
                 tcb.appendNewComponentBuilder("\n§r     §7Le: §d" + DateUtility.getMessage(sanction.getSanctionDateTS()));
                 tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS()));
                 tcb.appendNewComponentBuilder("\n§r     §7Pour: §d" + sanction.getReason());
@@ -111,7 +112,7 @@ public class CPlayerModerator implements APIPlayerModerator {
                 String cancelledString = "§aPas cancel";
                 Long longID = sanction.getCanceller();
                 if (longID != null)
-                    cancelledString = API.getInstance().getPlayerManager().getOfflinePlayer(sanction.getCanceller()).getName();
+                    cancelledString = longID.toString();
 
                 tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
 
@@ -150,7 +151,7 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (server != null)
             tcb.appendNewComponentBuilder("§7→ §rServeur§7・§a" + server + "§r\n");
 
-        String ip = Color.RED + "Déconnecté";
+        String ip = ChatColor.RED + "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer)
             ip = String.valueOf(API.getInstance().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiOfflinePlayer).getIpInfo().getIp()).size() - 1);
 
