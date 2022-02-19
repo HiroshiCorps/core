@@ -20,7 +20,6 @@ import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
-import net.md_5.bungee.api.ChatColor;
 import org.redisson.api.RList;
 
 import java.util.HashMap;
@@ -65,18 +64,36 @@ public class CPlayerModerator implements APIPlayerModerator {
     }
 
     @Override
-    public boolean hasCible() {
-        return getCible() != null;
+    public void disconnectModerator() {
+        if (!API.getInstance().isVelocity()) return;
+
+        long memberID = this.memberID;
+
+        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+
+        model.set(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null), Boolean.valueOf(this.isModeratorMod()).toString());
+        model.set(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null), Boolean.valueOf(this.isVanish()).toString());
+        model.set(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(null, null), this.getCible());
+
+        ModeratorDataValue.clearRedisData(DataType.PLAYER, this);
+
+        API.getInstance().getRedisManager().getRedisList(ModeratorDataValue.LIST_MODERATOR.getString(null)).remove(memberID);
+    }
+
+
+
+    @Override
+    public boolean isConnected() {
+        return getAPIPlayer() != null;
     }
 
     @Override
-    public String getCible() {
-        return API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this));
-    }
-
-    @Override
-    public void setCible(String s) {
-        API.getInstance().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this), s);
+    public boolean isModeratorMod() {
+        String bool = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(this));
+        if (bool == null)
+            return false;
+        else
+            return Boolean.parseBoolean(bool);
     }
 
     @Override
@@ -86,6 +103,55 @@ public class CPlayerModerator implements APIPlayerModerator {
             return false;
         else
             return Boolean.parseBoolean(bool);
+    }
+
+    @Override
+    public boolean hasCible() {
+        return getCible() != null;
+    }
+
+
+
+    @Override
+    public String getCible() {
+        return API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this));
+    }
+
+    @Override
+    public String getName() {
+        return API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(this));
+    }
+
+    @Override
+    public APIPlayer getAPIPlayer() {
+        return API.getInstance().getPlayerManager().getPlayer(getMemberId());
+    }
+
+    /**
+     * @return This function return the MemberId of the moderator
+     */
+
+    @Override
+    public long getMemberId() {
+        return memberID;
+    }
+
+    /**
+     * @return This function return the current UUID of the moderator
+     */
+
+    @Override
+    public UUID getUUID() {
+        String uuid = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_UUID_REDIS.getString(this));
+        if (uuid == null) return null;
+        return UUID.fromString(uuid);
+    }
+
+
+
+    @Override
+    public void setCible(String s) {
+        API.getInstance().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(this), s);
     }
 
     @Override
@@ -169,69 +235,6 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         tcb.sendTo(this.getUUID());
 
-        return;
-
-    }
-
-    @Override
-    public String getName() {
-        return API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(this));
-    }
-
-    @Override
-    public boolean isModeratorMod() {
-        String bool = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(this));
-        if (bool == null)
-            return false;
-        else
-            return Boolean.parseBoolean(bool);
-    }
-
-    @Override
-    public APIPlayer getAPIPlayer() {
-        return API.getInstance().getPlayerManager().getPlayer(getMemberId());
-    }
-
-    /**
-     * @return This function return the MemberId of the moderator
-     */
-
-    @Override
-    public long getMemberId() {
-        return memberID;
-    }
-
-    @Override
-    public void disconnectModerator() {
-        if (!API.getInstance().isVelocity()) return;
-
-        long memberID = this.memberID;
-
-        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
-
-        model.set(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null), Boolean.valueOf(this.isModeratorMod()).toString());
-        model.set(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null), Boolean.valueOf(this.isVanish()).toString());
-        model.set(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(null, null), this.getCible());
-
-        ModeratorDataValue.clearRedisData(DataType.PLAYER, this);
-
-        API.getInstance().getRedisManager().getRedisList(ModeratorDataValue.LIST_MODERATOR.getString(null)).remove(memberID);
-    }
-
-    @Override
-    public boolean isConnected() {
-        return getAPIPlayer() != null;
-    }
-
-    /**
-     * @return This function return the current UUID of the moderator
-     */
-
-    @Override
-    public UUID getUUID() {
-        String uuid = API.getInstance().getRedisManager().getRedisString(ModeratorDataValue.MODERATOR_UUID_REDIS.getString(this));
-        if (uuid == null) return null;
-        return UUID.fromString(uuid);
     }
 
     public static class ModeratorModel extends SQLModel {
