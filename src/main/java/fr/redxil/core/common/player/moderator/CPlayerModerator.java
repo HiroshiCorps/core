@@ -7,7 +7,6 @@
 package fr.redxil.core.common.player.moderator;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
@@ -21,7 +20,7 @@ import fr.redxil.core.common.data.PlayerDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.redisson.api.RList;
 
 import java.util.HashMap;
@@ -151,7 +150,7 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (server != null)
             tcb.appendNewComponentBuilder("§7→ §rServeur§7・§a" + server + "§r\n");
 
-        String ip = ChatColor.RED + "Déconnecté";
+        String ip = "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer)
             ip = String.valueOf(API.getInstance().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiOfflinePlayer).getIpInfo().getIp()).size() - 1);
 
