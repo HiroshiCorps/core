@@ -32,7 +32,6 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     public CPlayerModerator(long memberID) {
         this.memberID = memberID;
-        new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", Long.valueOf(memberID).intValue());
     }
 
     protected static APIPlayerModerator initModerator(APIPlayer apiPlayer) {
