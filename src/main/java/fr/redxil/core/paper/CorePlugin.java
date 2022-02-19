@@ -15,6 +15,9 @@ import fr.redxil.api.common.server.Server;
 import fr.redxil.api.paper.Paper;
 import fr.redxil.api.paper.holograms.HologramsManager;
 import fr.redxil.api.paper.scoreboard.BoardManager;
+import fr.redxil.api.paper.tags.TagPlayer;
+import fr.redxil.api.paper.tags.TagProvider;
+import fr.redxil.api.paper.tags.TagType;
 import fr.redxil.api.paper.tags.TagsManager;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.FlyCmd;
@@ -97,6 +100,17 @@ public class CorePlugin extends Paper {
         this.freezeGestion = new FreezeMessageGestion(this);
 
         this.coreTagsManager = new CoreTagsManager();
+        this.coreTagsManager.setTagProvider(new TagProvider() {
+            @Override
+            public void update(TagPlayer tagPlayer, TagPlayer tagPlayer1) {
+
+            }
+
+            @Override
+            public TagType type() {
+                return TagType.INDIVIDUAL;
+            }
+        });
         HiroshiPaper.getInstance().registerPacketHandler(new OutboundHandler());
 
         this.moderatorMain = new ModeratorMain();

@@ -3,6 +3,8 @@ package fr.redxil.core.velocity.listener;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import com.velocitypowered.api.proxy.server.ServerInfo;
+import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
@@ -10,6 +12,7 @@ import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.velocity.Velocity;
 import net.kyori.adventure.text.Component;
 
+import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -33,8 +36,14 @@ public class ServerListener {
 
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "ServerListener 4");
             Optional<RegisteredServer> registeredServerOptional = Velocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
-            if (registeredServerOptional.isPresent())
-                event.setResult(ServerPreConnectEvent.ServerResult.allowed(registeredServerOptional.get()));
+            if (registeredServerOptional.isEmpty()) {
+                IpInfo ipInfo = serverFinalTarget.getServerIP();
+                Velocity.getInstance().getProxyServer().registerServer(new ServerInfo(serverFinalTarget.getServerName(), new InetSocketAddress(ipInfo.getIp(), ipInfo.getPort())));
+                registeredServerOptional = Velocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
+            }
+
+            if(registeredServerOptional.isPresent())
+            event.setResult(ServerPreConnectEvent.ServerResult.allowed(registeredServerOptional.get()));
             else {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());
                 event.getPlayer().disconnect(Component.text("No Server available"));

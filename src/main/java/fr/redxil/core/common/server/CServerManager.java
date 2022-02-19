@@ -119,9 +119,17 @@ public class CServerManager implements ServerManager {
 
         for (Server testServer : availableServer) {
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 5");
-            if (testServer.getConnectedPlayer() < testServer.getMaxPlayers() && testServer.getServerAccess().canAccess(testServer, apiPlayer))
-                if (server == null || server.getConnectedPlayer() > testServer.getConnectedPlayer())
-                    server = testServer;
+            API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 1");
+            if(testServer.getConnectedPlayer() < testServer.getMaxPlayers()) {
+                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 1");
+                if (testServer.getServerAccess().canAccess(testServer, apiPlayer)) {
+                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 2");
+                    if (server == null || server.getConnectedPlayer() > testServer.getConnectedPlayer()) {
+                        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 3");
+                        server = testServer;
+                    }
+                }
+            }
         }
 
         return server;

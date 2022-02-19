@@ -15,7 +15,6 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
-import fr.redxil.core.paper.utils.PlayerInjector;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,8 +49,6 @@ public class ConnectionListener implements Listener {
                 games.setSpectator(apiPlayer.getUUID(), true);
             }
         }
-
-        PlayerInjector.injectPlayer(p);
 
     }
 
@@ -107,8 +104,6 @@ public class ConnectionListener implements Listener {
     public void playerQuitEvent(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
-        PlayerInjector.removeInject(player);
-
         APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(event.getPlayer().getUniqueId());
 
         API.getInstance().getServer().removePlayerInServer(event.getPlayer().getUniqueId());
