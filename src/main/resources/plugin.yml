@@ -1,6 +1,6 @@
 main: "fr.redxil.core.paper.CorePlugin"
 version: "1.0"
-name: "Core"
+name: "core"
 commands:
   mod:
     description: "Mode moderateur"

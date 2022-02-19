@@ -22,7 +22,7 @@ public class CServerManager implements ServerManager {
 
     @Override
     public List<String> getListServerName() {
-        return new ArrayList<String>() {{
+        return new ArrayList<>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).keySet()) {
                 add((String) serverName);
                 API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 1");
@@ -32,7 +32,7 @@ public class CServerManager implements ServerManager {
 
     @Override
     public List<Long> getListServerID() {
-        return new ArrayList<Long>() {{
+        return new ArrayList<>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).values()) {
                 add((long) serverName);
                 API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 2");
@@ -42,7 +42,7 @@ public class CServerManager implements ServerManager {
 
     @Override
     public List<Server> getListServer() {
-        return new ArrayList<Server>() {{
+        return new ArrayList<>() {{
             for (long serverID : getListServerID()) {
                 add(getServer(serverID));
                 API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 3");
@@ -55,7 +55,7 @@ public class CServerManager implements ServerManager {
 
         if (serverType == null) return getListServer();
 
-        return new ArrayList<Server>() {{
+        return new ArrayList<>() {{
             for (Server server : getListServer()) {
                 API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 4");
                 if (server.getServerType() == serverType) {
@@ -95,10 +95,20 @@ public class CServerManager implements ServerManager {
     public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
         if (name == null || ipInfo == null) return null;
         if (!isServerExist(name)) {
-            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with: " + name);
+            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
             return CServer.initServer(serverType, name, ipInfo);
         }
         return getServer(name);
+    }
+
+    @Override
+    public Server initServer(ServerType serverType, Long serverID, IpInfo ipInfo) {
+        if (serverID == null || ipInfo == null) return null;
+        if (!isServerExist(serverID)) {
+            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with id: " + serverID);
+            return CServer.initServer(serverType, serverID, ipInfo);
+        }
+        return getServer(serverID);
     }
 
     @Override

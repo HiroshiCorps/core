@@ -10,7 +10,6 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.party.Party;
-import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.SanctionInfo;
@@ -60,19 +59,17 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(null), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(null), uuid.toString());
-            this.put(PlayerDataValue.PLAYER_IP_SQL.getString(null), ipInfo.toString());
             this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.JOUEUR.getRankPower().intValue());
 
         }}, "WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString() + " = ?", uuid.toString());
 
         long memberID = playerModel.getMemberId();
-        playerModel.set(PlayerDataValue.PLAYER_IP_SQL.getString(), ipInfo.toString());
 
         MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<>() {{
             this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID);
             this.put(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), 0);
             this.put(MoneyDataValue.PLAYER_COINS_SQL.getString(), 0);
-        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", Long.valueOf(memberID).intValue());
 
         PlayerDataValue.clearRedisData(DataType.PLAYER, name, memberID);
 
@@ -151,6 +148,9 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         rm.getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString(this)).remove(getName());
         rm.getRedisList(PlayerDataValue.LIST_PLAYER_ID.getString(this)).remove(memberID);
 
+        super.setSolde(this.getSolde());
+        super.setCoins(this.getCoins());
+
         MoneyDataValue.clearRedisData(DataType.PLAYER, this);
 
         LinkDataValue.clearRedisData(DataType.PLAYER, this);
@@ -194,7 +194,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         if (value <= 0)
             return false;
 
-        super.setSolde(value);
         API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_SOLDE_REDIS.getString(this), value);
 
         return true;
@@ -215,7 +214,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         if (value <= 0)
             return false;
 
-        super.setCoins(value);
         API.getInstance().getRedisManager().setRedisLong(MoneyDataValue.PLAYER_COINS_REDIS.getString(this), value);
         return true;
     }
@@ -243,7 +241,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         super.setRank(rank, timestamp);
         API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_REAL_RANK_REDIS.getString(this), rank.getRankPower());
         API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_REAL_RANK_TIME_REDIS.getString(this), timeStampString);
-
     }
 
     @Override
@@ -265,7 +262,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Timestamp getRankTimeStamp() {
-        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_RANK_TIME_REDIS.getString());
+        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_RANK_TIME_REDIS.getString(this));
         if (timeStamp != null)
             return Timestamp.valueOf(timeStamp);
         return null;
@@ -273,7 +270,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Timestamp getRealRankTimeStamp() {
-        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_REAL_RANK_TIME_REDIS.getString());
+        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_REAL_RANK_TIME_REDIS.getString(this));
         if (timeStamp != null)
             return Timestamp.valueOf(timeStamp);
         return null;

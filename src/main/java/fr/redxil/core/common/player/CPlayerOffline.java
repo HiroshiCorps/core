@@ -36,38 +36,33 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     List<SanctionInfo> sanctionModelList = null;
     List<Setting> settingsModelList = null;
-    private long memberID;
+    private final long memberID;
     private PlayerModel playerModel = null;
     private MoneyModel moneyModel = null;
 
     public CPlayerOffline(String name) {
 
         playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name);
-        initPlayer(this.getPlayerModel().getMemberId());
+        this.memberID = this.getPlayerModel().getMemberId();
 
     }
 
     public CPlayerOffline(UUID uuid) {
 
         playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString());
-        initPlayer(this.getPlayerModel().getMemberId());
+        this.memberID = this.getPlayerModel().getMemberId();
 
     }
 
 
     public CPlayerOffline(long memberID) {
-        initPlayer(memberID);
-    }
-
-    public void initPlayer(long memberID) {
-
         this.memberID = memberID;
-
     }
+
 
     private void initPlayerModel() {
         if (this.getPlayerModel() == null)
-            playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
     }
 
     private void initMoneyModel() {

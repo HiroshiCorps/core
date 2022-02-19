@@ -13,7 +13,6 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.paper.Paper;
-import fr.redxil.api.paper.event.CoreEnabledEvent;
 import fr.redxil.api.paper.holograms.HologramsManager;
 import fr.redxil.api.paper.scoreboard.BoardManager;
 import fr.redxil.api.paper.tags.TagsManager;
@@ -120,8 +119,6 @@ public class CorePlugin extends Paper {
         this.getCommand("fly").setExecutor(new FlyCmd());
 
         printLog(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
-
-        Bukkit.getServer().getPluginManager().callEvent(new CoreEnabledEvent(this));
 
         this.setEnabled(true);
     }

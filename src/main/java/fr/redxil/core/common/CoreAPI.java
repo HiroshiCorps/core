@@ -32,6 +32,7 @@ import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.CSQLConnection;
 
 import java.io.File;
+import java.util.logging.Level;
 
 public class CoreAPI extends API {
 
@@ -63,7 +64,7 @@ public class CoreAPI extends API {
         File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
 
-        Long serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
+        String serverID = GSONSaver.loadGSON(serverIDFile, String.class);
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
@@ -87,22 +88,31 @@ public class CoreAPI extends API {
 
         }
 
+        plugin.printLog(Level.INFO, "Connecting to db");
+
         this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
         this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
         if(!dataConnected())
             return;
 
+        plugin.printLog(Level.FINE, serverID == null ? "serverid: null" : "serverid: "+serverID);
+
+        ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
+
         if (serverID == null) {
-            ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
+            plugin.printLog(Level.FINE, "Generating new Server on db");
             this.server = this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp());
-            GSONSaver.writeGSON(serverIDFile, this.server.getServerId());
+            GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerId()).toString());
             game = null;
         }else{
-            this.server = getServerManager().getServer(serverID);
+            plugin.printLog(Level.FINE, "Loading server with ID: "+serverID);
+            this.server = getServerManager().initServer(serverType, Long.parseLong(serverID), plugin.getServerIp());
             this.server.setServerName(plugin.getServerName());
             this.game = getGameManager().getGameByServerID(this.server.getServerId());
         }
+
+        plugin.printLog(Level.INFO, "Server id: "+this.server.getServerId());
 
         CoreAPI.setEnabled(true);
 
