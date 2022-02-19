@@ -30,32 +30,32 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     private final long memberID;
 
-    public CPlayerModerator(long memberId) {
-        this.memberID = memberId;
-        new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", Long.valueOf(memberId).intValue());
+    public CPlayerModerator(long memberID) {
+        this.memberID = memberID;
+        new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", Long.valueOf(memberID).intValue());
     }
 
     protected static APIPlayerModerator initModerator(APIPlayer apiPlayer) {
 
-        Long memberID = apiPlayer.getMemberId();
+        Long memberID = apiPlayer.getMemberID();
 
         if (!API.getInstance().getModeratorManager().isModerator(memberID)) return null;
 
-        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<String, Object>() {{
-            this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null), memberID.intValue());
-            this.put(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null), Boolean.valueOf(false).toString());
-            this.put(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null), Boolean.valueOf(false).toString());
-        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID.intValue());
+        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<>() {{
+            this.put(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(), memberID.intValue());
+            this.put(ModeratorDataValue.MODERATOR_MOD_SQL.getString(), Boolean.valueOf(false).toString());
+            this.put(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(), Boolean.valueOf(false).toString());
+        }}, "WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID.intValue());
 
         RedisManager rm = API.getInstance().getRedisManager();
 
-        rm.setRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(null, memberID), apiPlayer.getName());
-        rm.setRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(null, memberID), model.getString(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null)));
-        rm.setRedisString(ModeratorDataValue.MODERATOR_VANISH_REDIS.getString(null, memberID), model.getString(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null)));
-        rm.setRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(null, memberID), model.getString(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(null, null)));
-        rm.setRedisString(ModeratorDataValue.MODERATOR_UUID_REDIS.getString(null, memberID), apiPlayer.getUUID().toString());
+        rm.setRedisString(ModeratorDataValue.MODERATOR_NAME_REDIS.getString(memberID), apiPlayer.getName());
+        rm.setRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(memberID), model.getString(ModeratorDataValue.MODERATOR_MOD_SQL.getString()));
+        rm.setRedisString(ModeratorDataValue.MODERATOR_VANISH_REDIS.getString(memberID), model.getString(ModeratorDataValue.MODERATOR_VANISH_SQL.getString()));
+        rm.setRedisString(ModeratorDataValue.MODERATOR_CIBLE_REDIS.getString(memberID), model.getString(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString()));
+        rm.setRedisString(ModeratorDataValue.MODERATOR_UUID_REDIS.getString(memberID), apiPlayer.getUUID().toString());
 
-        RList<Long> idList = rm.getRedisList(ModeratorDataValue.LIST_MODERATOR.getString(null));
+        RList<Long> idList = rm.getRedisList(ModeratorDataValue.LIST_MODERATOR.getString());
         if (!idList.contains(memberID))
             idList.add(memberID);
 
@@ -69,15 +69,15 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         long memberID = this.memberID;
 
-        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID);
 
-        model.set(ModeratorDataValue.MODERATOR_MOD_SQL.getString(null, null), Boolean.valueOf(this.isModeratorMod()).toString());
-        model.set(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(null, null), Boolean.valueOf(this.isVanish()).toString());
-        model.set(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(null, null), this.getCible());
+        model.set(ModeratorDataValue.MODERATOR_MOD_SQL.getString(), Boolean.valueOf(this.isModeratorMod()).toString());
+        model.set(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(), Boolean.valueOf(this.isVanish()).toString());
+        model.set(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(), this.getCible());
 
-        ModeratorDataValue.clearRedisData(DataType.PLAYER, this);
+        ModeratorDataValue.clearRedisData(DataType.PLAYER, this.getMemberID());
 
-        API.getInstance().getRedisManager().getRedisList(ModeratorDataValue.LIST_MODERATOR.getString(null)).remove(memberID);
+        API.getInstance().getRedisManager().getRedisList(ModeratorDataValue.LIST_MODERATOR.getString()).remove(memberID);
     }
 
 
@@ -124,15 +124,15 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public APIPlayer getAPIPlayer() {
-        return API.getInstance().getPlayerManager().getPlayer(getMemberId());
+        return API.getInstance().getPlayerManager().getPlayer(getMemberID());
     }
 
     /**
-     * @return This function return the MemberId of the moderator
+     * @return This function return the MemberID of the moderator
      */
 
     @Override
-    public long getMemberId() {
+    public long getMemberID() {
         return memberID;
     }
 
@@ -206,7 +206,7 @@ public class CPlayerModerator implements APIPlayerModerator {
         String connectedMsg = "§c✘", server = null;
         if (apiOfflinePlayer.isConnected()) {
             connectedMsg = "§a✓";
-            server = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberId()).getServer().getServerName();
+            server = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID()).getServer().getServerName();
         }
 
         tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
@@ -240,7 +240,7 @@ public class CPlayerModerator implements APIPlayerModerator {
     public static class ModeratorModel extends SQLModel {
 
         public ModeratorModel() {
-            super("moderator", PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null));
+            super("moderator", PlayerDataValue.PLAYER_MEMBERID_SQL.getString());
         }
 
     }

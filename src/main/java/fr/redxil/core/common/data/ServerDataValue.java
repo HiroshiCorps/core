@@ -42,13 +42,13 @@ public enum ServerDataValue {
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needId;
+    final boolean needID;
 
-    ServerDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
+    ServerDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needId = needId;
+        this.needID = needID;
     }
 
     public static void clearRedisData(DataType dataType, Long serverID) {
@@ -62,27 +62,32 @@ public enum ServerDataValue {
 
     }
 
-    public String getString(Server server) {
-        return getString(server.getServerId());
+    public String getString() {
+        if (!hasNeedInfo(null)) return null;
+        return location;
     }
 
-    public String getString(Long serverId) {
+    public String getString(Server server) {
+        return getString(server.getServerID());
+    }
+
+    public String getString(Long serverID) {
         String location = this.location;
 
-        if (needId) {
-            if (serverId == null) return null;
-            location = location.replace("<serverID>", serverId.toString());
+        if (needID) {
+            if (serverID == null) return null;
+            location = location.replace("<serverID>", serverID.toString());
         }
 
         return location;
     }
 
     public boolean hasNeedInfo(Long memberID) {
-        return !isNeedId() || memberID != null;
+        return !isNeedID() || memberID != null;
     }
 
-    public boolean isNeedId() {
-        return needId;
+    public boolean isNeedID() {
+        return needID;
     }
 
     public boolean isDataBase(DataBaseType dataBaseType) {

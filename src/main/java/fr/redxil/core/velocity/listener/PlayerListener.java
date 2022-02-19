@@ -60,7 +60,7 @@ public class PlayerListener {
             return;
         }
 
-        APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberId());
+        APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
 
         if (APIPlayerModerator != null && message[0].startsWith("!s")) {
             String newMessage = chatEvent.getMessage().replace("!s", "");

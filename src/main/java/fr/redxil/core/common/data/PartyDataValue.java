@@ -27,13 +27,13 @@ public enum PartyDataValue {
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needId;
+    final boolean needID;
 
-    PartyDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
+    PartyDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needId = needId;
+        this.needID = needID;
     }
 
     public static void clearRedisData(DataType dataType, Long partyID) {
@@ -61,7 +61,7 @@ public enum PartyDataValue {
     public String getString(Long partyID) {
         String location = this.location;
 
-        if (needId) {
+        if (needID) {
             if (partyID == null) return null;
             location = location.replace("<hostID>", partyID.toString());
         }
@@ -70,15 +70,15 @@ public enum PartyDataValue {
     }
 
     public boolean hasNeedInfo(Long memberID) {
-        return !isNeedId() || memberID != null;
+        return !isNeedID() || memberID != null;
     }
 
     public boolean isArgNeeded() {
-        return isNeedId();
+        return isNeedID();
     }
 
-    public boolean isNeedId() {
-        return needId;
+    public boolean isNeedID() {
+        return needID;
     }
 
     public boolean isDataBase(DataBaseType dataBaseType) {

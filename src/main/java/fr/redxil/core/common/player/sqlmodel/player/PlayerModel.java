@@ -21,15 +21,15 @@ public class PlayerModel extends SQLModel {
     }
 
     public long getPowerRank() {
-        return Integer.valueOf(this.getInt(PlayerDataValue.PLAYER_RANK_SQL.getString(null))).longValue();
+        return Integer.valueOf(this.getInt(PlayerDataValue.PLAYER_RANK_SQL.getString())).longValue();
     }
 
     public Rank getRank() {
         return Rank.getRank(getPowerRank());
     }
 
-    public int getMemberId() {
-        return this.getInt(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null));
+    public int getMemberID() {
+        return this.getInt(PlayerDataValue.PLAYER_MEMBERID_SQL.getString());
     }
 
     public String getName() {
@@ -37,7 +37,7 @@ public class PlayerModel extends SQLModel {
     }
 
     public UUID getUUID() {
-        String uuidString = this.getString(PlayerDataValue.PLAYER_UUID_SQL.getString(null));
+        String uuidString = this.getString(PlayerDataValue.PLAYER_UUID_SQL.getString());
         return uuidString != null ? UUID.fromString(uuidString) : null;
     }
 

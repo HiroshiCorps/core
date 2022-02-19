@@ -23,7 +23,7 @@ public class CPartyManager implements PartyManager {
     @Override
     public Party getPlayerParty(APIPlayer apiPlayer) {
         if (!hasParty(apiPlayer)) return null;
-        return getParty((long) API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString()).get(apiPlayer.getMemberId()));
+        return getParty((long) API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString()).get(apiPlayer.getMemberID()));
     }
 
     @Override
@@ -34,7 +34,7 @@ public class CPartyManager implements PartyManager {
 
     @Override
     public boolean hasParty(APIPlayer apiPlayer) {
-        return API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString()).containsKey(apiPlayer.getMemberId());
+        return API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString()).containsKey(apiPlayer.getMemberID());
     }
 
     @Override

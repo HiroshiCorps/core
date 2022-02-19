@@ -40,7 +40,7 @@ public class ApiCmd extends Command {
                 "\n§7§m                  §6 [§e SERVER Api §6] §7§m                  \n " +
                         "\n§r§eApi reponse time§7: §b" + response + " ms" +
                         "\n§r§eUser cache size§7: §b" + API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString()).size() +
-                        "\n§r§eServers cache size§7: §b" + redis.getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).size() +
+                        "\n§r§eServers cache size§7: §b" + redis.getMap(ServerDataValue.MAP_SERVER_REDIS.getString()).size() +
                         "\n \n§r§7§m                                                              \n"
         ).sendTo(((Player) commandSender).getUniqueId());
         return true;

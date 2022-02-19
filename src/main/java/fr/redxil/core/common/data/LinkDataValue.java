@@ -11,7 +11,6 @@ package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
-import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -34,13 +33,13 @@ public enum LinkDataValue {
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needId;
+    final boolean needID;
 
-    LinkDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
+    LinkDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needId = needId;
+        this.needID = needID;
     }
 
     public static void clearRedisData(DataType dataType, Long playerID) {
@@ -60,13 +59,13 @@ public enum LinkDataValue {
     }
 
     public String getString(APIOfflinePlayer apiPlayer) {
-        return getString(apiPlayer.getMemberId());
+        return getString(apiPlayer.getMemberID());
     }
 
     public String getString(Long playerID) {
         String location = this.location;
 
-        if (needId) {
+        if (needID) {
             if (playerID == null) return null;
             location = location.replace("<memberID>", playerID.toString());
         }
@@ -75,11 +74,11 @@ public enum LinkDataValue {
     }
 
     public boolean hasNeedInfo(Long memberID) {
-        return !isNeedId() || memberID != null;
+        return !isNeedID() || memberID != null;
     }
 
-    public boolean isNeedId() {
-        return needId;
+    public boolean isNeedID() {
+        return needID;
     }
 
     public boolean isDataBase(DataBaseType dataBaseType) {

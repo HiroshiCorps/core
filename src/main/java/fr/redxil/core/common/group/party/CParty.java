@@ -37,9 +37,9 @@ public class CParty implements Party {
         long partyID = IDGenerator.generateLONGID(IDDataValue.PARTY);
         RedisManager rm = API.getInstance().getRedisManager();
         rm.setRedisString(PartyDataValue.PARTY_ACCESS_REDIS.getString(partyID), PartyAccess.FRIEND.getAccessName());
-        rm.setRedisLong(PartyDataValue.PARTY_OWNER_REDIS.getString(partyID), owner.getMemberId());
-        rm.getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(partyID)).put(owner.getMemberId(), PartyRank.OWNER.getRankName());
-        rm.getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString()).put(owner.getMemberId(), partyID);
+        rm.setRedisLong(PartyDataValue.PARTY_OWNER_REDIS.getString(partyID), owner.getMemberID());
+        rm.getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(partyID)).put(owner.getMemberID(), PartyRank.OWNER.getRankName());
+        rm.getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString()).put(owner.getMemberID(), partyID);
         return partyID;
     }
 
@@ -57,8 +57,8 @@ public class CParty implements Party {
         }
 
         revokeInvite(apiPlayer);
-        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).put(apiPlayer.getMemberId(), PartyRank.PLAYER.getRankName());
-        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString(this)).put(apiPlayer.getMemberId(), getPartyID());
+        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).put(apiPlayer.getMemberID(), PartyRank.PLAYER.getRankName());
+        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString(this)).put(apiPlayer.getMemberID(), getPartyID());
         return true;
     }
 
@@ -68,8 +68,8 @@ public class CParty implements Party {
             return false;
         if (isPartyOwner(apiPlayer))
             return deleteParty(apiPlayer);
-        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).remove(apiPlayer.getMemberId());
-        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString(this)).remove(apiPlayer.getMemberId());
+        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).remove(apiPlayer.getMemberID());
+        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString(this)).remove(apiPlayer.getMemberID());
         return true;
     }
 
@@ -80,8 +80,8 @@ public class CParty implements Party {
         if (!getPartyRank(kicker).isOver(getPartyRank(apiPlayer1)))
             return false;
 
-        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).remove(apiPlayer1.getMemberId());
-        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString(this)).remove(apiPlayer1.getMemberId());
+        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).remove(apiPlayer1.getMemberID());
+        API.getInstance().getRedisManager().getRedisMap(PartyDataValue.MAP_PLAYERPARTY_REDIS.getString(this)).remove(apiPlayer1.getMemberID());
 
         return true;
     }
@@ -94,8 +94,8 @@ public class CParty implements Party {
             return false;
 
         RMap<Long, String> rankMap = API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this));
-        rankMap.remove(apiPlayer1.getMemberId());
-        rankMap.put(apiPlayer1.getMemberId(), partyRank.getRankName());
+        rankMap.remove(apiPlayer1.getMemberID());
+        rankMap.put(apiPlayer1.getMemberID(), partyRank.getRankName());
 
         return true;
     }
@@ -104,7 +104,7 @@ public class CParty implements Party {
     public PartyRank getPartyRank(APIPlayer apiPlayer) {
         if (!hisInParty(apiPlayer))
             return null;
-        return PartyRank.getPartyRank((String) API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).get(apiPlayer.getMemberId()));
+        return PartyRank.getPartyRank((String) API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).get(apiPlayer.getMemberID()));
     }
 
     @Override
@@ -119,7 +119,7 @@ public class CParty implements Party {
 
     @Override
     public boolean hisInParty(APIPlayer apiPlayer) {
-        return API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).containsKey(apiPlayer.getMemberId());
+        return API.getInstance().getRedisManager().getRedisMap(PartyDataValue.PARTY_PLAYERRANKMAP_REDIS.getString(this)).containsKey(apiPlayer.getMemberID());
     }
 
     @Override
@@ -147,7 +147,7 @@ public class CParty implements Party {
         if (!pr.equals(PartyRank.ADMIN)) return false;
         for (APIPlayer apiPlayers : getAPIPlayerList())
             quitParty(apiPlayers);
-        PartyDataValue.clearRedisData(DataType.PLAYER, this);
+        PartyDataValue.clearRedisData(DataType.PLAYER, getPartyID());
         return true;
     }
 

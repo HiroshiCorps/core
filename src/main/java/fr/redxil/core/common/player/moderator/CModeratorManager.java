@@ -22,7 +22,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public APIPlayerModerator loadModerator(APIPlayer apiPlayer) {
-        if (isLoaded(apiPlayer.getMemberId())) return getModerator(apiPlayer);
+        if (isLoaded(apiPlayer.getMemberID())) return getModerator(apiPlayer);
         return CPlayerModerator.initModerator(apiPlayer);
     }
 
@@ -49,13 +49,13 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public APIPlayerModerator getModerator(APIPlayer apiPlayer) {
-        return getModerator(apiPlayer.getMemberId());
+        return getModerator(apiPlayer.getMemberID());
     }
 
     /**
-     * Get the moderator with the MemberId
+     * Get the moderator with the MemberID
      *
-     * @param l this need to be the MemberId of the APIPlayer
+     * @param l this need to be the MemberID of the APIPlayer
      * @return APIPlayerModerator or null if player is not loaded or not a moderator
      */
 
@@ -76,18 +76,18 @@ public class CModeratorManager implements ModeratorManager {
     public APIPlayerModerator getModerator(UUID uuid) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
         if (apiPlayer == null) return null;
-        return getModerator(apiPlayer.getMemberId());
+        return getModerator(apiPlayer.getMemberID());
     }
 
     /**
      * Get a list of the connected moderator
      *
-     * @return The MemberId of the connected Moderator
+     * @return The MemberID of the connected Moderator
      */
 
     @Override
     public Collection<Long> getLoadedModerator() {
-        List<Long> moderatorString = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString(null));
+        List<Long> moderatorString = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString());
         return new ArrayList<Long>() {{
             for (long longS : moderatorString)
                 add(longS);
@@ -130,13 +130,13 @@ public class CModeratorManager implements ModeratorManager {
     /**
      * Check if a player is a server moderator
      *
-     * @param memberId this need to be the MemberId of the APIPlayer
+     * @param memberID this need to be the MemberID of the APIPlayer
      * @return True if the player is a moderator
      */
 
     @Override
-    public boolean isModerator(long memberId) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberId);
+    public boolean isModerator(long memberID) {
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberID);
         if (apiPlayer == null) return false;
         return isModerator(apiPlayer);
     }
@@ -156,8 +156,8 @@ public class CModeratorManager implements ModeratorManager {
     }
 
     @Override
-    public boolean isLoaded(long memberId) {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString(null)).contains(memberId);
+    public boolean isLoaded(long memberID) {
+        return API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString()).contains(memberID);
     }
 
 }

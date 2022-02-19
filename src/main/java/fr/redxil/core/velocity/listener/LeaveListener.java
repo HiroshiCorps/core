@@ -21,12 +21,12 @@ public class LeaveListener {
 
         if (apiPlayer == null) return;
 
-        Long moderatorId = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
+        Long moderatorID = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
         API.getInstance().getServer().removePlayerInServer(player.getUniqueId());
         apiPlayer.unloadPlayer();
 
-        if (moderatorId != null) {
-            APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(moderatorId);
+        if (moderatorID != null) {
+            APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(moderatorID);
             if (playerModerator != null)
                 BanCmd.banPlayer(API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", playerModerator, "{Core} Déconnexion en inspection");
         }

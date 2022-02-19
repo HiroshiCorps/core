@@ -57,7 +57,7 @@ public class PlayerInteractEvent implements Listener {
         if (apiPlayer.isFreeze())
             event.setCancelled(true);
 
-        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberId());
+        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 

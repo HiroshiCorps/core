@@ -37,7 +37,7 @@ public class FreezeCmd implements CommandExecutor {
             return true;
         }
 
-        if (target.getServer().getServerId() != API.getInstance().getServerID()) {
+        if (target.getServer().getServerID() != API.getInstance().getServerID()) {
 
             commandSender.sendMessage(ChatColor.RED + "Impossible d'interargir avec la cible, server different: " + target.getServer().getServerName());
             return true;

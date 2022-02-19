@@ -33,7 +33,7 @@ public class FreezeMessageGestion {
         if (b) {
             Player player = Bukkit.getPlayer(apiPlayer.getUUID());
             if (player == null) return;
-            API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer), moderator.getMemberId());
+            API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer), moderator.getMemberID());
             sendMessage(player, moderator);
         } else {
             API.getInstance().getRedisManager().getRedissonClient().getBucket(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer)).delete();

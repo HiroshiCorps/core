@@ -42,7 +42,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     public CPlayerOffline(PlayerModel playerModel) {
         this.playerModel = playerModel;
-        this.memberID = playerModel.getMemberId();
+        this.memberID = playerModel.getMemberID();
     }
 
     public CPlayerOffline(long memberID) {
@@ -52,12 +52,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     private void initPlayerModel() {
         if (this.getPlayerModel() == null)
-            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID);
     }
 
     private void initMoneyModel() {
         if (this.getMoneyModel() == null)
-            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString(null) + " = ?", memberID);
+            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID);
     }
 
     public PlayerModel getPlayerModel() {
@@ -114,7 +114,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void setRank(Rank Rank) {
-        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_SQL.getString(null), Rank.getRankPower().intValue());
+        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_SQL.getString(), Rank.getRankPower().intValue());
     }
 
     @Override
@@ -171,19 +171,19 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public long getMemberId() {
+    public long getMemberID() {
         return memberID;
     }
 
     @Override
     public boolean isConnected() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString(null)).contains(getMemberId());
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString()).contains(getMemberID());
     }
 
     @Override
     public void loadSettings() {
         this.settingsModelList = new ArrayList<>();
-        this.settingsModelList.addAll(new SQLModels<>(SettingsModel.class).get("WHERE member_id = ? ORDER BY settings_name ASC", getMemberId()));
+        this.settingsModelList.addAll(new SQLModels<>(SettingsModel.class).get("WHERE member_id = ? ORDER BY settings_name ASC", getMemberID()));
     }
 
     @Override
@@ -194,7 +194,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void removeSetting(String settingName) {
-        new SQLModels<>(SettingsModel.class).delete("WHERE settings_name = ? AND player_id = ?", settingName, getMemberId());
+        new SQLModels<>(SettingsModel.class).delete("WHERE settings_name = ? AND player_id = ?", settingName, getMemberID());
         loadSettings();
     }
 
@@ -208,7 +208,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
         }
 
         SettingsModel sm = new SettingsModel(
-                getMemberId(),
+                getMemberID(),
                 settingName,
                 settingValue
         );
@@ -263,7 +263,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public void loadSanction() {
         this.sanctionModelList = new ArrayList<>();
-        this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberId()));
+        this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberID()));
     }
 
     @Override
@@ -272,8 +272,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (isBan()) return null;
 
         SanctionModel sm = new SanctionModel(
-                getMemberId(),
-                author.getMemberId(),
+                getMemberID(),
+                author.getMemberID(),
                 SanctionType.BAN,
                 reason,
                 time
@@ -293,8 +293,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (isMute()) return null;
 
         SanctionModel sm = new SanctionModel(
-                getMemberId(),
-                author.getMemberId(),
+                getMemberID(),
+                author.getMemberID(),
                 SanctionType.MUTE,
                 reason,
                 time
@@ -312,8 +312,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public SanctionInfo warnPlayer(String reason, APIPlayerModerator author) {
 
         SanctionModel sm = new SanctionModel(
-                getMemberId(),
-                author.getMemberId(),
+                getMemberID(),
+                author.getMemberID(),
                 SanctionType.WARN,
                 reason
         );
@@ -369,7 +369,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
         SanctionInfo sm = getLastSanction(SanctionType.BAN);
         if (sm != null && sm.isEffective()) {
-            sm.setCanceller(mod.getMemberId());
+            sm.setCanceller(mod.getMemberID());
             return true;
         }
 
@@ -382,7 +382,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
         SanctionInfo sm = getLastSanction(SanctionType.MUTE);
         if (sm != null && sm.isEffective()) {
-            sm.setCanceller(mod.getMemberId());
+            sm.setCanceller(mod.getMemberID());
             return true;
         }
 
@@ -391,31 +391,31 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     public Pair<String, List<Object>> getWhereString(LinkUsage linkUsage, @Nullable APIOfflinePlayer player2) {
-        int id1 = Long.valueOf(getMemberId()).intValue();
+        int id1 = Long.valueOf(getMemberID()).intValue();
         Integer id2 = null;
         if (player2 != null)
-            id2 = Long.valueOf(player2.getMemberId()).intValue();
+            id2 = Long.valueOf(player2.getMemberID()).intValue();
         switch (linkUsage) {
             case FROM: {
                 String queries = LinkDataValue.TO_ID_SQL.getString() + " = ?";
                 if (id2 != null)
                     queries += " AND " + LinkDataValue.FROM_ID_SQL.getString() + " = ?";
-                Integer finalId = id2;
+                Integer finalID = id2;
                 return new Pair<>(queries, new ArrayList<>() {{
                     add(id1);
-                    if (finalId != null)
-                        add(finalId);
+                    if (finalID != null)
+                        add(finalID);
                 }});
             }
             case TO: {
                 String queries = LinkDataValue.FROM_ID_SQL.getString() + " = ?";
                 if (id2 != null)
                     queries += " AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?";
-                Integer finalId = id2;
+                Integer finalID = id2;
                 return new Pair<>(queries, new ArrayList<>() {{
                     add(id1);
-                    if (finalId != null)
-                        add(finalId);
+                    if (finalID != null)
+                        add(finalID);
                 }});
             }
             case BOTH: {

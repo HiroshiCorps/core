@@ -103,7 +103,7 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(offlineTarget.getMemberId());
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(offlineTarget.getMemberID());
         if (playerModerator != null)
             playerModerator.disconnectModerator();
 

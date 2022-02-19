@@ -217,7 +217,7 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
 
         for (LinkData ami : amisList) {
             String connect = "Déconnecté";
-            long amis = ami.getFromPlayer() == apiPlayer.getMemberId() ? ami.getToPlayer() : ami.getFromPlayer();
+            long amis = ami.getFromPlayer() == apiPlayer.getMemberID() ? ami.getToPlayer() : ami.getFromPlayer();
             Color bc = Color.RED;
             if (API.getInstance().getPlayerManager().isLoadedPlayer(amis)) {
                 connect = "Connecté";

@@ -11,8 +11,6 @@ package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
-import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -28,13 +26,13 @@ public enum MoneyDataValue {
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needId;
+    final boolean needID;
 
-    MoneyDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
+    MoneyDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needId = needId;
+        this.needID = needID;
     }
 
     public static void clearRedisData(DataType dataType, Long playerID) {
@@ -48,27 +46,32 @@ public enum MoneyDataValue {
 
     }
 
-    public String getString(APIOfflinePlayer player) {
-        return getString(player.getMemberId());
+    public String getString() {
+        if (!hasNeedInfo(null)) return null;
+        return location;
     }
 
-    public String getString(Long serverId) {
+    public String getString(APIOfflinePlayer player) {
+        return getString(player.getMemberID());
+    }
+
+    public String getString(Long serverID) {
         String location = this.location;
 
-        if (needId) {
-            if (serverId == null) return null;
-            location = location.replace("<memberID>", serverId.toString());
+        if (needID) {
+            if (serverID == null) return null;
+            location = location.replace("<memberID>", serverID.toString());
         }
 
         return location;
     }
 
     public boolean hasNeedInfo(Long memberID) {
-        return !isNeedId() || memberID != null;
+        return !isNeedID() || memberID != null;
     }
 
-    public boolean isNeedId() {
-        return needId;
+    public boolean isNeedID() {
+        return needID;
     }
 
     public boolean isDataBase(DataBaseType dataBaseType) {

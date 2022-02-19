@@ -24,7 +24,7 @@ public class CServerManager implements ServerManager {
     @Override
     public List<String> getListServerName() {
         return new ArrayList<>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).keySet()) {
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString()).keySet()) {
                 add((String) serverName);
                 API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 1");
             }
@@ -34,7 +34,7 @@ public class CServerManager implements ServerManager {
     @Override
     public List<Long> getListServerID() {
         return new ArrayList<>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).values()) {
+            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString()).values()) {
                 add((long) serverName);
                 API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 2");
             }
@@ -71,17 +71,17 @@ public class CServerManager implements ServerManager {
 
     @Override
     public boolean isServerExist(String s) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsKey(s);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString()).containsKey(s);
     }
 
     @Override
     public boolean isServerExist(long l) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsValue(l);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString()).containsValue(l);
     }
 
     @Override
     public Server getServer(String s) {
-        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null));
+        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString());
         if (!serverMap.containsKey(s)) return null;
         return new CServer(serverMap.get(s));
     }
@@ -94,7 +94,7 @@ public class CServerManager implements ServerManager {
 
     @Override
     public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
-        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null));
+        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString());
         if (!serverMap.containsKey(name)) {
             API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
             return CServer.initServer(serverType, name, ipInfo);
