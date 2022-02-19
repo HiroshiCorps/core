@@ -11,6 +11,7 @@ package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
+import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
@@ -56,59 +57,39 @@ public enum GameDataValue {
         this.needId = needId;
     }
 
-    public static void clearRedisData(DataType dataType, long gameID) {
+    public static void clearRedisData(DataType dataType, Long playerID) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (GameDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.isArgNeeded() && mdv.hasNeedInfo(gameID))
-                    redissonClient.getBucket(mdv.getString(gameID)).delete();
+                if (mdv.hasNeedInfo(playerID))
+                    redissonClient.getBucket(mdv.getString(playerID)).delete();
 
     }
 
-    public static void clearRedisData(DataType dataType, Game host) {
-
-        clearRedisData(dataType, host.getGameID());
-
+    public String getString() {
+        if (!hasNeedInfo(null)) return null;
+        return location;
     }
 
-    public String getString(Game hosts) {
+    public String getString(Game game) {
+        return getString(game.getGameID());
+    }
+
+    public String getString(Long gameID) {
         String location = this.location;
 
         if (needId) {
-            long memberId = hosts.getGameID();
-            location = location.replace("<hostID>", Long.valueOf(memberId).toString());
+            if (gameID == null) return null;
+            location = location.replace("<gameID>", gameID.toString());
         }
 
         return location;
     }
 
-    public String getString(Long serverId) {
-        String location = this.location;
-
-        if (needId) {
-            if (serverId == null) return null;
-            location = location.replace("<hostID>", serverId.toString());
-        }
-
-        return location;
-    }
-
-    public String getString(){
-        if(isArgNeeded())
-            return null;
-        return location;
-    }
-
-    public boolean hasNeedInfo(Long gameID) {
-        if(isNeedId())
-            return gameID != null;
-        return false;
-    }
-
-    public boolean isArgNeeded() {
-        return isNeedId();
+    public boolean hasNeedInfo(Long memberID) {
+        return !isNeedId() || memberID != null;
     }
 
     public boolean isNeedId() {

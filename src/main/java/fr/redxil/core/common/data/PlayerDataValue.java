@@ -18,112 +18,81 @@ import org.redisson.api.RedissonClient;
 
 public enum PlayerDataValue {
 
-    PLAYER_RANK_SQL(DataBaseType.SQL, DataType.PLAYER, "member_rank", false, false),
-    PLAYER_RANK_TIME_SQL(DataBaseType.SQL, DataType.PLAYER, "rank_limit", false, false),
+    PLAYER_RANK_SQL(DataBaseType.SQL, DataType.PLAYER, "member_rank", false),
+    PLAYER_RANK_TIME_SQL(DataBaseType.SQL, DataType.PLAYER, "rank_limit", false),
 
 
-    PLAYER_MEMBERID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_id", false, false),
-    PLAYER_IP_SQL(DataBaseType.SQL, DataType.PLAYER, "member_ip", false, false),
+    PLAYER_MEMBERID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_id", false),
+    PLAYER_IP_SQL(DataBaseType.SQL, DataType.PLAYER, "member_ip", false),
 
-    PLAYER_NAME_SQL(DataBaseType.SQL, DataType.PLAYER, "member_name", false, false),
-    PLAYER_UUID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_uuid", false, false),
+    PLAYER_NAME_SQL(DataBaseType.SQL, DataType.PLAYER, "member_name", false),
+    PLAYER_UUID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_uuid", false),
 
-    PLAYER_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/uuid", false, true),
+    PLAYER_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/uuid", true),
 
-    PLAYER_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/name", false, true),
-    PLAYER_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/rank", false, true),
-    PLAYER_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ranklimit", false, true),
+    PLAYER_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/name", true),
+    PLAYER_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/rank", true),
+    PLAYER_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ranklimit", true),
 
-    PLAYER_REAL_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_name", false, true),
-    PLAYER_REAL_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_rank", false, true),
-    PLAYER_REAL_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_ranklimit", false, true),
+    PLAYER_REAL_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_name", true),
+    PLAYER_REAL_RANK_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_rank", true),
+    PLAYER_REAL_RANK_TIME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/real_ranklimit", true),
 
-    PLAYER_MAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/map", false, true),
+    PLAYER_MAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/map", true),
 
-    PLAYER_IPINFO_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ipinfo", false, true),
-    PLAYER_FREEZE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/freeze", false, true),
+    PLAYER_IPINFO_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ipinfo", true),
+    PLAYER_FREEZE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/freeze", true),
 
-    PLAYER_HUBLOGGED_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublogged", false, true),
-    PLAYER_HUBPASS_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hubpass", false, true),
-    PLAYER_HUBLEVEL_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublevel", false, true),
-    PLAYER_HUBREWARD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hubreward", false, true),
+    PLAYER_HUBLOGGED_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublogged", true),
+    PLAYER_HUBPASS_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hubpass", true),
+    PLAYER_HUBLEVEL_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublevel", true),
+    PLAYER_HUBREWARD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hubreward", true),
 
-    PLAYER_INPUT_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/input", false, true),
+    PLAYER_INPUT_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/input", true),
 
-    CONNECTED_BUNGEESERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/bungee_server", false, true),
-    CONNECTED_SPIGOTSERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/spigot_server", false, true),
+    CONNECTED_BUNGEESERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/bungee_server", true),
+    CONNECTED_SPIGOTSERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/spigot_server", true),
 
-    PLAYER_LASTMSG_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/lastmsg", false, true),
+    PLAYER_LASTMSG_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/lastmsg", true),
 
-    MAP_PLAYER_NAME(DataBaseType.REDIS, DataType.GLOBAL, "player/name", false, false),
-    MAP_PLAYER_UUID(DataBaseType.REDIS, DataType.GLOBAL, "player/uuid", false, false),
-    LIST_PLAYER_ID(DataBaseType.REDIS, DataType.GLOBAL, "player/list", false, false);
+    MAP_PLAYER_NAME(DataBaseType.REDIS, DataType.GLOBAL, "player/name", false),
+    MAP_PLAYER_UUID(DataBaseType.REDIS, DataType.GLOBAL, "player/uuid", false),
+    LIST_PLAYER_ID(DataBaseType.REDIS, DataType.GLOBAL, "player/list", false);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needName, needId;
+    final boolean needId;
 
-    PlayerDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
+    PlayerDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needName = needName;
         this.needId = needId;
     }
 
-    public static void clearRedisData(DataType dataType, String playerName, Long playerID) {
+    public static void clearRedisData(DataType dataType, Long playerID) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (PlayerDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.isArgNeeded() && mdv.hasNeedInfo(playerName, playerID))
-                    redissonClient.getBucket(mdv.getString(playerName, playerID)).delete();
-                else if (!mdv.isArgNeeded() && playerName == null && playerID == null)
-                    redissonClient.getBucket(mdv.getString(null)).delete();
-
-    }
-
-    public static void clearRedisData(DataType dataType, APIOfflinePlayer apiPlayer) {
-
-        if (apiPlayer != null) {
-            if (apiPlayer instanceof APIPlayer)
-                clearRedisData(dataType, ((APIPlayer) apiPlayer).getRealName(), apiPlayer.getMemberId());
-            else clearRedisData(dataType, apiPlayer.getName(), apiPlayer.getMemberId());
-        } else
-            clearRedisData(dataType, null, null);
+                if (mdv.hasNeedInfo(playerID))
+                    redissonClient.getBucket(mdv.getString(playerID)).delete();
 
     }
 
     public String getString() {
-        if (needId || needName) return null;
+        if (!hasNeedInfo(null)) return null;
         return location;
     }
 
     public String getString(APIOfflinePlayer apiPlayer) {
-
-        String location = this.location;
-        if (needName) {
-            String pseudo = apiPlayer instanceof APIPlayer ? ((APIPlayer) apiPlayer).getRealName() : apiPlayer.getName();
-            if (pseudo == null) return null;
-            location = location.replace("<pseudo>", pseudo);
-        }
-
-        if (needId) {
-            long memberId = apiPlayer.getMemberId();
-            location = location.replace("<memberID>", Long.valueOf(memberId).toString());
-        }
-
-        return location;
+        return getString(apiPlayer.getMemberId());
     }
 
-    public String getString(String playerName, Long playerID) {
+    public String getString(Long playerID) {
         String location = this.location;
-        if (needName) {
-            if (playerName == null) return null;
-            location = location.replace("<pseudo>", playerName);
-        }
 
         if (needId) {
             if (playerID == null) return null;
@@ -133,18 +102,8 @@ public enum PlayerDataValue {
         return location;
     }
 
-    public boolean hasNeedInfo(String playerName, Long memberID) {
-        if (isNeedId() && memberID == null)
-            return false;
-        return !isNeedName() || playerName != null;
-    }
-
-    public boolean isArgNeeded() {
-        return isNeedId() || isNeedName();
-    }
-
-    public boolean isNeedName() {
-        return needName;
+    public boolean hasNeedInfo(Long memberID) {
+        return !isNeedId() || memberID != null;
     }
 
     public boolean isNeedId() {

@@ -10,6 +10,7 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
@@ -17,95 +18,57 @@ import org.redisson.api.RedissonClient;
 
 public enum ModeratorDataValue {
 
-    LIST_MODERATOR(DataBaseType.REDIS, DataType.GLOBAL, "moderator/list", false, false),
-    MODERATOR_MOD_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_mod", false, false),
-    MODERATOR_VANISH_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_vanish", false, false),
-    MODERATOR_CIBLE_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_cible", false, false),
+    LIST_MODERATOR(DataBaseType.REDIS, DataType.GLOBAL, "moderator/list", false),
+    MODERATOR_MOD_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_mod", false),
+    MODERATOR_VANISH_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_vanish", false),
+    MODERATOR_CIBLE_SQL(DataBaseType.SQL, DataType.PLAYER, "moderator_cible", false),
 
-    MODERATOR_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_name", false, true),
-    MODERATOR_MOD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_mod", false, true),
-    MODERATOR_VANISH_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_vanish", false, true),
-    MODERATOR_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/member_uuid", false, true),
-    MODERATOR_CIBLE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_cible", false, true);
+    MODERATOR_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_name", true),
+    MODERATOR_MOD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_mod", true),
+    MODERATOR_VANISH_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_vanish", true),
+    MODERATOR_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/member_uuid", true),
+    MODERATOR_CIBLE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_cible", true);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
-    final boolean needName, needId;
+    final boolean needId;
 
-    ModeratorDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needName, boolean needId) {
+    ModeratorDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needId) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
-        this.needName = needName;
         this.needId = needId;
     }
 
-    public static void clearRedisData(DataType dataType, String moderatorName, Long moderatorID) {
+    public static void clearRedisData(DataType dataType, Long playerID) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (ModeratorDataValue mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.isArgNeeded() && mdv.hasNeedInfo(moderatorName, moderatorID))
-                    redissonClient.getBucket(mdv.getString(moderatorName, moderatorID)).delete();
-                else if (!mdv.isArgNeeded() && moderatorName == null && moderatorID == null)
-                    redissonClient.getBucket(mdv.getString(null)).delete();
+                if (mdv.hasNeedInfo(playerID))
+                    redissonClient.getBucket(mdv.getString(playerID)).delete();
 
     }
 
-    public static void clearRedisData(DataType dataType, APIPlayerModerator APIPlayerModerator) {
-
-        if (APIPlayerModerator != null)
-            clearRedisData(dataType, APIPlayerModerator.getName(), APIPlayerModerator.getMemberId());
-        else
-            clearRedisData(dataType, null, null);
-
+    public String getString(APIPlayerModerator player) {
+        return getString(player.getMemberId());
     }
 
-    public String getString(APIPlayerModerator APIPlayer) {
+    public String getString(Long memberID) {
         String location = this.location;
-        if (needName) {
-            String pseudo = APIPlayer.getName();
-            if (pseudo == null) return null;
-            location = location.replace("<modName>", pseudo);
-        }
 
         if (needId) {
-            long memberId = APIPlayer.getMemberId();
-            location = location.replace("<memberID>", Long.valueOf(memberId).toString());
+            if (memberID == null) return null;
+            location = location.replace("<memberID>", memberID.toString());
         }
 
         return location;
     }
 
-    public String getString(String modName, Long modID) {
-        String location = this.location;
-        if (needName) {
-            if (modName == null) return null;
-            location = location.replace("<modName>", modName);
-        }
-
-        if (needId) {
-            if (modID == null) return null;
-            location = location.replace("<memberID>", modID.toString());
-        }
-
-        return location;
-    }
-
-    public boolean hasNeedInfo(String playerName, Long memberID) {
-        if (isNeedId() && memberID == null)
-            return false;
-        return !isNeedName() || playerName != null;
-    }
-
-    public boolean isArgNeeded() {
-        return isNeedId() || isNeedName();
-    }
-
-    public boolean isNeedName() {
-        return needName;
+    public boolean hasNeedInfo(Long memberID) {
+        return !isNeedId() || memberID != null;
     }
 
     public boolean isNeedId() {

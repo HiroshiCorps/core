@@ -36,17 +36,6 @@ public enum PartyDataValue {
         this.needId = needId;
     }
 
-    public static void clearRedisData(DataType dataType) {
-
-        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
-
-        for (PartyDataValue mdv : values())
-            if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (!mdv.isArgNeeded())
-                    redissonClient.getBucket(mdv.getString()).delete();
-
-    }
-
     public static void clearRedisData(DataType dataType, Long partyID) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
@@ -59,26 +48,14 @@ public enum PartyDataValue {
 
     }
 
-    public static void clearRedisData(DataType dataType, Party host) {
-
-        if (host != null)
-            clearRedisData(dataType, host.getPartyID());
-        else
-            clearRedisData(dataType);
-
-    }
-
     public String getString() {
+        if(!hasNeedInfo(null))
+            return null;
         return this.location;
     }
 
     public String getString(Party party) {
-        String location = this.location;
-
-        if (needId)
-            location = location.replace("<hostID>", Long.valueOf(party.getPartyID()).toString());
-
-        return location;
+        return getString(party.getPartyID());
     }
 
     public String getString(Long partyID) {

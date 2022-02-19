@@ -15,7 +15,7 @@ public enum IDDataValue {
     GAME("id/game"),
     TEAM("id/team");
 
-    public String location;
+    public final String location;
 
     IDDataValue(String location) {
         this.location = location;

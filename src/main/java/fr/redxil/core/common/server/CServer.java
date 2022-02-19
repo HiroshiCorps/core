@@ -49,67 +49,44 @@ public class CServer implements Server {
             put(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
         }}, "WHERE " + ServerDataValue.SERVER_NAME_SQL.getString(null) + " = ?", name);
 
-        Long serverId = Integer.valueOf(model.getServerID()).longValue();
-
-        model.set(ServerDataValue.SERVER_MAXP_SQL.getString(null), maxPlayer);
-        model.set(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
-        model.set(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
-        model.set(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
-        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.toString());
-
-        ServerDataValue.clearRedisData(DataType.SERVER, name, serverId);
-        RedisManager redisManager = API.getInstance().getRedisManager();
-
-        redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).put(name, serverId);
-        redisManager.setRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(name, serverId), name);
-        redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null, null)));
-
-        redisManager.setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(name, serverId), maxPlayer);
-        redisManager.setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_STATUS_SQL.getString(null, null)));
-
-        redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null)));
-        redisManager.setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_ACCESS_SQL.getString(null)));
-        redisManager.setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(name, serverId), model.getInt(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null)));
-
-        redisManager.setRedisString(ServerDataValue.SERVER_IP_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_IP_SQL.getString(null, null)));
-        redisManager.setRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(name, serverId), Long.parseLong(model.getString(ServerDataValue.SERVER_PORT_SQL.getString(null, null))));
-
-        return new CServer(serverId);
+        return initData(model, Integer.valueOf(model.getServerID()).longValue(), name, serverType, serverIp);
 
     }
 
-    public static Server initServer(ServerType serverType, Long serverId, IpInfo serverIp) {
+    public static Server initServer(ServerType serverType, Long serverID, IpInfo serverIP) {
 
-        int maxPlayer = API.getInstance().getPluginEnabler().getMaxPlayer();
+        ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataValue.SERVER_ID_SQL.getString(null) + " = ?", serverID.intValue());
 
-        ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataValue.SERVER_ID_SQL.getString(null) + " = ?", serverId.intValue());
+        return initData(model, serverID, model.getServerName(), serverType, serverIP);
 
-        String name = model.getServerName();
+    }
 
-        model.set(ServerDataValue.SERVER_MAXP_SQL.getString(null), maxPlayer);
-        model.set(ServerDataValue.SERVER_IP_SQL.getString(null), serverIp.getIp());
-        model.set(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIp.getPort().toString());
-        model.set(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
-        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.toString());
+    private static CServer initData(ServerModel serverModel, long serverID, String serverName, ServerType serverType, IpInfo serverIP){
 
-        ServerDataValue.clearRedisData(DataType.SERVER, name, serverId);
+        serverModel.set(ServerDataValue.SERVER_MAXP_SQL.getString(null), API.getInstance().getPluginEnabler().getMaxPlayer());
+        serverModel.set(ServerDataValue.SERVER_IP_SQL.getString(null), serverIP.getIp());
+        serverModel.set(ServerDataValue.SERVER_PORT_SQL.getString(null), serverIP.getPort().toString());
+        serverModel.set(ServerDataValue.SERVER_STATUS_SQL.getString(null), ServerStatus.ONLINE.toString());
+        serverModel.set(ServerDataValue.SERVER_TYPE_SQL.getString(null), serverType.toString());
+
+        ServerDataValue.clearRedisData(DataType.SERVER, serverName, serverID);
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).put(name, serverId);
-        redisManager.setRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(name, serverId), name);
-        redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null, null)));
+        redisManager.getRedisMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).put(serverName, serverID);
+        redisManager.setRedisString(ServerDataValue.SERVER_NAME_REDIS.getString(serverName, serverID), serverName);
+        redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(serverName, serverID), serverModel.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null, null)));
 
-        redisManager.setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(name, serverId), maxPlayer);
-        redisManager.setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_STATUS_SQL.getString(null, null)));
+        redisManager.setRedisLong(ServerDataValue.SERVER_MAXP_REDIS.getString(serverName, serverID), API.getInstance().getPluginEnabler().getMaxPlayer());
+        redisManager.setRedisString(ServerDataValue.SERVER_STATUS_REDIS.getString(serverName, serverID), serverModel.getString(ServerDataValue.SERVER_STATUS_SQL.getString(null, null)));
 
-        redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null)));
-        redisManager.setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_ACCESS_SQL.getString(null)));
-        redisManager.setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(name, serverId), model.getInt(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null)));
+        redisManager.setRedisString(ServerDataValue.SERVER_TYPE_REDIS.getString(serverName, serverID), serverModel.getString(ServerDataValue.SERVER_TYPE_SQL.getString(null)));
+        redisManager.setRedisString(ServerDataValue.SERVER_ACCESS_REDIS.getString(serverName, serverID), serverModel.getString(ServerDataValue.SERVER_ACCESS_SQL.getString(null)));
+        redisManager.setRedisLong(ServerDataValue.SERVER_NEEDRANK_REDIS.getString(serverName, serverID), serverModel.getInt(ServerDataValue.SERVER_NEEDRANK_SQL.getString(null)));
 
-        redisManager.setRedisString(ServerDataValue.SERVER_IP_REDIS.getString(name, serverId), model.getString(ServerDataValue.SERVER_IP_SQL.getString(null, null)));
-        redisManager.setRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(name, serverId), Long.parseLong(model.getString(ServerDataValue.SERVER_PORT_SQL.getString(null, null))));
+        redisManager.setRedisString(ServerDataValue.SERVER_IP_REDIS.getString(serverName, serverID), serverModel.getString(ServerDataValue.SERVER_IP_SQL.getString(null, null)));
+        redisManager.setRedisLong(ServerDataValue.SERVER_PORT_REDIS.getString(serverName, serverID), Long.parseLong(serverModel.getString(ServerDataValue.SERVER_PORT_SQL.getString(null, null))));
 
-        return new CServer(serverId);
+        return new CServer(serverID);
 
     }
 

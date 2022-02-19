@@ -40,20 +40,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
     private PlayerModel playerModel = null;
     private MoneyModel moneyModel = null;
 
-    public CPlayerOffline(String name) {
-
-        playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString(null) + " = ?", name);
-        this.memberID = this.getPlayerModel().getMemberId();
-
+    public CPlayerOffline(PlayerModel playerModel) {
+        this.playerModel = playerModel;
+        this.memberID = playerModel.getMemberId();
     }
-
-    public CPlayerOffline(UUID uuid) {
-
-        playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString(null) + " = ?", uuid.toString());
-        this.memberID = this.getPlayerModel().getMemberId();
-
-    }
-
 
     public CPlayerOffline(long memberID) {
         this.memberID = memberID;

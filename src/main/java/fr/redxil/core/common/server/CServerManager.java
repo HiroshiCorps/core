@@ -16,6 +16,7 @@ import fr.redxil.core.common.data.ServerDataValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class CServerManager implements ServerManager {
@@ -70,7 +71,6 @@ public class CServerManager implements ServerManager {
 
     @Override
     public boolean isServerExist(String s) {
-        if (s == null) return false;
         return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).containsKey(s);
     }
 
@@ -81,8 +81,9 @@ public class CServerManager implements ServerManager {
 
     @Override
     public Server getServer(String s) {
-        if (!isServerExist(s)) return null;
-        return getServer((long) API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null)).get(s));
+        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null));
+        if (!serverMap.containsKey(s)) return null;
+        return new CServer(serverMap.get(s));
     }
 
     @Override
@@ -93,12 +94,12 @@ public class CServerManager implements ServerManager {
 
     @Override
     public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
-        if (name == null || ipInfo == null) return null;
-        if (!isServerExist(name)) {
+        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataValue.MAP_SERVER_REDIS.getString(null));
+        if (!serverMap.containsKey(name)) {
             API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
             return CServer.initServer(serverType, name, ipInfo);
         }
-        return getServer(name);
+        return new CServer(serverMap.get(name));
     }
 
     @Override
@@ -108,7 +109,7 @@ public class CServerManager implements ServerManager {
             API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with id: " + serverID);
             return CServer.initServer(serverType, serverID, ipInfo);
         }
-        return getServer(serverID);
+        return new CServer(serverID);
     }
 
     @Override
