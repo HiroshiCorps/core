@@ -24,22 +24,31 @@ import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class InfoCmd extends BrigadierAPI<CommandSource> {
-
 
     public InfoCmd() {
         super("info");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /info (joueur) (info|ban|other)").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player))
-            return 1;
+            return;
 
         APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
         if (playerModerator == null)
-            return 1;
+            return;
 
         APIOfflinePlayer target;
         String targetName = commandContext.getArgument("target", String.class);
@@ -56,7 +65,7 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
 
         if(target == null){
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
-            return 1;
+            return;
         }
 
         String sanc = commandContext.getArgument("sanc", String.class);
@@ -64,12 +73,11 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         SanctionType sanctionType = SanctionType.getSanctionType(sanc);
         if (sanctionType == null || sanc.equalsIgnoreCase("info")) {
             playerModerator.printInfo(target);
-            return 1;
+            return;
         }
 
         playerModerator.printSanction(target, sanctionType);
 
-        return 1;
     }
 
     @Override
@@ -87,9 +95,9 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
             sanctionName.add(sanctionType.getName());
         }
 
-        CommandNode<CommandSource> sanc = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        CommandNode<CommandSource> sanc = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
 
-        this.addArgumentCommand(sanc, "sanc", StringArgumentType.word(), sanctionName.toArray(new String[0]));
+        this.addArgumentCommand(sanc, "sanc", StringArgumentType.word(), this::execute, sanctionName.toArray(new String[0]));
 
     }
 }

@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly name: 'paper-1.12.2'
+    compileOnly name: 'spigot-1.17.1'
     implementation name: 'hiroshimc-api-1.0.1.1'
     implementation group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
     jar {

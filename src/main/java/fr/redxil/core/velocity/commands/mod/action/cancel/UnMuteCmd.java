@@ -21,32 +21,34 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class UnMuteCmd extends BrigadierAPI<CommandSource> {
-
 
     public UnMuteCmd() {
         super("unmute");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Syntax: /unmute <pseudo>").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
 
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void execute(CommandContext<CommandSource> commandContext) {
 
-        Player player = (Player) commandContext.getSource();
+        if (!(commandContext.getSource() instanceof Player player)) return;
+
         APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModerator == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
-        }
-
-        if (commandContext.getArguments().size() < 1) {
-            TextComponentBuilder.createTextComponent("Syntax: /unmute <pseudo>").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
@@ -55,7 +57,7 @@ public class UnMuteCmd extends BrigadierAPI<CommandSource> {
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         if (apiPlayerTarget.unMute(APIPlayerModerator)) {
@@ -65,7 +67,6 @@ public class UnMuteCmd extends BrigadierAPI<CommandSource> {
             TextComponentBuilder.createTextComponent("Impossible de unmute: " + apiPlayerTarget.getName()).setColor(Color.RED)
                     .sendTo(player.getUniqueId());
         }
-        return 1;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class UnMuteCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::execute, playerName.toArray(new String[0]));
 
     }
 }

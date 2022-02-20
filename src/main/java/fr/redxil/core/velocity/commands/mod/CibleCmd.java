@@ -20,6 +20,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class CibleCmd extends BrigadierAPI<CommandSource> {
 
@@ -28,38 +29,50 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
         super("nickcheck");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /cible <pseudo>").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
         CommandSource sender = commandContext.getSource();
 
-        if (!(sender instanceof Player)) return 0;
+        if (!(sender instanceof Player player)) return;
 
-        Player player = (Player) sender;
-        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+        APIPlayerModerator apiPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
 
-        if (APIPlayerModAuthor == null) {
+        if (apiPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(((Player) sender).getUniqueId());
-            return 1;
+            return;
         }
 
         if (commandContext.getArgument("player", String.class) == null) {
-            if (APIPlayerModAuthor.hasCible()) {
-                APIPlayerModAuthor.setCible(null);
+            if (apiPlayerModAuthor.hasCible()) {
+                apiPlayerModAuthor.setCible(null);
                 TextComponentBuilder.createTextComponent("Vous n'avez plus de cible.").setColor(Color.RED)
                         .sendTo(((Player) sender).getUniqueId());
 
             } else
                 TextComponentBuilder.createTextComponent("Syntax: /cible <pseudo>").setColor(Color.RED)
                         .sendTo(player.getUniqueId());
-            return 1;
         }
+
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        CommandSource sender = commandContext.getSource();
+
+        if (!(sender instanceof Player player)) return;
+
+        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
 
         if (!APIPlayerModAuthor.isModeratorMod()) {
 
             TextComponentBuilder.createTextComponent("Commande accessible uniquement en mod moderation").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 0;
+            return;
 
         }
 
@@ -71,21 +84,20 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
                             Color.RED +
                                     "Cette target ne s'est jamais connecté").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         if (playerTarget.getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent(
                             "Impossible de cibler " + target).setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 0;
+            return;
         }
 
         APIPlayerModAuthor.setCible(playerTarget.getName());
         TextComponentBuilder.createTextComponent(
                         "Nouvelle cible: " + playerTarget.getName()).setColor(Color.GREEN)
                 .sendTo(player.getUniqueId());
-        return 1;
     }
 
     @Override
@@ -97,7 +109,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
         for (Long id : availablePlayer)
             playerName.add(API.getInstance().getPlayerManager().getPlayer(id).getName());
 
-        this.addArgumentCommand(command, "player", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(command, "player", StringArgumentType.word(), this::execute, playerName.toArray(new String[0]));
 
     }
 }

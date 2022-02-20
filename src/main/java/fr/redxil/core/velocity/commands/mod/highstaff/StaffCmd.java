@@ -17,6 +17,8 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
+import java.util.UUID;
+
 public class StaffCmd extends BrigadierAPI<CommandSource> {
 
 
@@ -24,35 +26,34 @@ public class StaffCmd extends BrigadierAPI<CommandSource> {
         super("staff");
     }
 
-    @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /staff" + Color.GREEN + " (message)").setColor(Color.RED).sendTo(playerUUID);
+    }
 
-        Player player = (Player) commandContext.getSource();
+    @Override
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player player)) return;
+
         APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent(
                     Color.RED + "Vous n'avez pas la permission d'effectuer cette commande."
             ).sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
-
-        if (commandContext.getArguments().size() == 0) {
-            TextComponentBuilder.createTextComponent(
-                    Color.RED + "Syntax: /staff" + Color.GREEN + " (message)"
-            ).sendTo(player.getUniqueId());
-            return 1;
-        }
-
 
         API.getInstance().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("§4{StaffChat} §r" + player.getUsername() + ": " + commandContext.getArgument("message", String.class)));
 
-        return 1;
     }
 
     @Override
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        this.addArgumentCommand(literalCommandNode, "message", StringArgumentType.string());
+        this.addArgumentCommand(literalCommandNode, "message", StringArgumentType.greedyString(), this::execute);
     }
 }

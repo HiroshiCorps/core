@@ -6,7 +6,6 @@
 
 package fr.redxil.core.paper;
 
-import fr.hiroshi.paper.HiroshiPaper;
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
@@ -15,9 +14,6 @@ import fr.redxil.api.common.server.Server;
 import fr.redxil.api.paper.Paper;
 import fr.redxil.api.paper.holograms.HologramsManager;
 import fr.redxil.api.paper.scoreboard.BoardManager;
-import fr.redxil.api.paper.tags.TagPlayer;
-import fr.redxil.api.paper.tags.TagProvider;
-import fr.redxil.api.paper.tags.TagType;
 import fr.redxil.api.paper.tags.TagsManager;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.FlyCmd;
@@ -27,13 +23,8 @@ import fr.redxil.core.paper.cmd.VanishCmd;
 import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
-import fr.redxil.core.paper.holograms.CoreHologramsManager;
-import fr.redxil.core.paper.holograms.HologramListener;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.Receiver;
-import fr.redxil.core.paper.scoreboard.CoreBoardManager;
-import fr.redxil.core.paper.tags.CoreTagsManager;
-import fr.redxil.core.paper.tags.OutboundHandler;
 import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -42,6 +33,7 @@ import org.bukkit.plugin.PluginManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -52,9 +44,6 @@ public class CorePlugin extends Paper {
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
-    private CoreTagsManager coreTagsManager;
-    private CoreHologramsManager coreHologramsManager;
-    private CoreBoardManager coreBoardManager;
 
     public static CorePlugin getInstance() {
         return instance;
@@ -62,17 +51,17 @@ public class CorePlugin extends Paper {
 
     @Override
     public TagsManager getTagsManager() {
-        return coreTagsManager;
+        return null;
     }
 
     @Override
     public BoardManager getBoardManager() {
-        return coreBoardManager;
+        return null;
     }
 
     @Override
     public HologramsManager getHologramManager() {
-        return coreHologramsManager;
+        return null;
     }
 
     @Override
@@ -99,6 +88,8 @@ public class CorePlugin extends Paper {
         this.vanish = new VanishGestion(this);
         this.freezeGestion = new FreezeMessageGestion(this);
 
+        /*
+
         this.coreTagsManager = new CoreTagsManager();
         this.coreTagsManager.setTagProvider(new TagProvider() {
             @Override
@@ -111,11 +102,12 @@ public class CorePlugin extends Paper {
                 return TagType.INDIVIDUAL;
             }
         });
-        HiroshiPaper.getInstance().registerPacketHandler(new OutboundHandler());
+
+        this.coreBoardManager = new CoreBoardManager();
+
+        */
 
         this.moderatorMain = new ModeratorMain();
-        this.coreHologramsManager = new CoreHologramsManager();
-        this.coreBoardManager = new CoreBoardManager();
 
         new Receiver();
 
@@ -123,14 +115,13 @@ public class CorePlugin extends Paper {
 
         p.registerEvents(new ConnectionListener(this), this);
         p.registerEvents(new PlayerInteractEvent(), this);
-        p.registerEvents(new HologramListener(), this);
 
         printLog(Level.INFO, SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
 
-        this.getCommand("mod").setExecutor(new ModCmd());
-        this.getCommand("freeze").setExecutor(new FreezeCmd());
-        this.getCommand("vanish").setExecutor(new VanishCmd());
-        this.getCommand("fly").setExecutor(new FlyCmd());
+        Objects.requireNonNull(this.getCommand("mod")).setExecutor(new ModCmd());
+        Objects.requireNonNull(this.getCommand("freeze")).setExecutor(new FreezeCmd());
+        Objects.requireNonNull(this.getCommand("vanish")).setExecutor(new VanishCmd());
+        Objects.requireNonNull(this.getCommand("fly")).setExecutor(new FlyCmd());
 
         printLog(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
@@ -228,7 +219,7 @@ public class CorePlugin extends Paper {
 
     @Override
     public String getServerName() {
-        return Bukkit.getServerName();
+        return Bukkit.getName();
     }
 
 }

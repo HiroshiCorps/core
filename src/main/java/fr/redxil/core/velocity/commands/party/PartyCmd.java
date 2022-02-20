@@ -36,18 +36,21 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         super("party");
     }
 
-    @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) {
-            return 0;
-        }
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        this.sendCommandList(commandContext);
+    }
 
-        Player player = (Player) commandContext.getSource();
+    @Override
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player player)) {
+            return;
+        }
 
         String usedCmd = commandContext.getArgument("cmd", String.class);
-        if (usedCmd == null) {
-            return this.sendCommandList(commandContext);
-        }
 
         int i = 0;
         boolean cmdAvailable = false;
@@ -66,30 +69,25 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
 
 
         switch (Objects.requireNonNull(ListCmd.getCommand(usedCmd))) {
-            case LEAVE: {
-                return leaveCmd(commandContext, player, null);
-            }
-            case LIST: {
-                return listCmd(commandContext, player, null);
-            }
-            case CREATE: {
-                return createCmd(commandContext, player, null);
-            }
-            case JOIN: {
+            case LEAVE -> leaveCmd(commandContext, player, null);
+            case LIST -> listCmd(commandContext, player, null);
+            case CREATE -> createCmd(commandContext, player, null);
+            case JOIN -> {
                 if (nameArg == null) {
-                    return this.sendCommandList(commandContext);
+                    this.sendCommandList(commandContext);
+                    return;
                 }
-                return joinCmd(commandContext, player, nameArg);
+                joinCmd(commandContext, player, nameArg);
             }
-            case INVITE: {
+            case INVITE -> {
                 if (nameArg == null) {
-                    return this.sendCommandList(commandContext);
+                    this.sendCommandList(commandContext);
+                    return;
                 }
-                return inviteCmd(commandContext, player, nameArg);
+                inviteCmd(commandContext, player, nameArg);
             }
-
         }
-        return 1;
+
     }
 
     @Override
@@ -101,13 +99,13 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        CommandNode<CommandSource> cmd = this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(cmd, "name", StringArgumentType.greedyString());
+        CommandNode<CommandSource> cmd = this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
+        this.addArgumentCommand(cmd, "name", StringArgumentType.greedyString(), this::execute);
 
     }
 
 
-    public int sendCommandList(CommandContext<CommandSource> commandContext) {
+    public void sendCommandList(CommandContext<CommandSource> commandContext) {
         CommandSource commandSource = commandContext.getSource();
         TextComponentBuilder textComponentBuilder = TextComponentBuilder.createTextComponent("Veuillez utiliser l'une des composantes suivantes:");
         for (ListCmd cmd : ListCmd.values()) {
@@ -115,10 +113,9 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
                     cmd.getName() + ": " + Color.BLUE + " " + cmd.getUtility());
         }
         commandSource.sendMessage((TextComponent) textComponentBuilder.getFinalTextComponentBuilder().getTextComponent());
-        return 1;
     }
 
-    public int createCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+    public void createCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
         PartyManager partyManager = API.getInstance().getPartyManager();
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (partyManager.createParty(apiPlayer) != null) {
@@ -132,12 +129,10 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
                             Color.GREEN + "pour quitter votre partie.")).getFinalTextComponent()
             );
         }
-
-        return 1;
     }
 
 
-    public int leaveCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+    public void leaveCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
         PartyManager partyManager = API.getInstance().getPartyManager();
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
 
@@ -145,7 +140,7 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous devez être dans une partie.")).getFinalTextComponent()
             );
-            return 1;
+            return;
         }
 
         partyManager.getPlayerParty(apiPlayer).quitParty(apiPlayer);
@@ -153,18 +148,17 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         player.sendMessage(
                 ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.GREEN + "Vous avez quitté votre partie.")).getFinalTextComponent()
         );
-        return 1;
     }
 
 
-    public int listCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+    public void listCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
         PartyManager partyManager = API.getInstance().getPartyManager();
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (!partyManager.hasParty(apiPlayer)) {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être dans une partie pour faire ceci.")).getFinalTextComponent()
             );
-            return 1;
+            return;
         }
 
         player.sendMessage(
@@ -185,22 +179,21 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
                 );
             }
         }
-        return 1;
     }
 
 
-    public int joinCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+    public void joinCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         APIPlayer owner = API.getInstance().getPlayerManager().getPlayer(subArgument);
         if (owner == null) {
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'existe pas")).getFinalTextComponent());
-            return 1;
+            return;
         }
 
         Party party = API.getInstance().getPartyManager().getPlayerParty(owner);
         if (party == null) {
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'a pas de partie")).getFinalTextComponent());
-            return 1;
+            return;
         }
 
         if (party.joinParty(apiPlayer)) {
@@ -216,11 +209,10 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
             );
 
         }
-        return 1;
     }
 
 
-    public int inviteCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
+    public void inviteCmd(CommandContext<CommandSource> commandContext, Player player, String subArgument) {
         PartyManager partyManager = API.getInstance().getPartyManager();
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
 
@@ -228,14 +220,14 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'êtes pas dans une partie.")).getFinalTextComponent()
             );
-            return 1;
+            return;
         }
 
         if (!partyManager.getPlayerParty(apiPlayer).isPartyOwner(apiPlayer)) {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être le chef de la partie.")).getFinalTextComponent()
             );
-            return 1;
+            return;
         }
 
         APIPlayer targetPlayer = API.getInstance().getPlayerManager().getPlayer(subArgument);
@@ -244,7 +236,7 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
             player.sendMessage(
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur est déja dans une partie.")).getFinalTextComponent()
             );
-            return 1;
+            return;
         }
 
         if (partyManager.getPlayerParty(apiPlayer).invitePlayer(targetPlayer)) {
@@ -255,7 +247,6 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
                     ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.WHITE + "Vous n'avez pas pûes inviter " + Color.RED + subArgument)).getFinalTextComponent()
             );
         }
-        return 1;
     }
 
 
@@ -266,9 +257,9 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         LEAVE("leave", "Permet de leave une partie.", 1), /// *
         LIST("list", "Permet de voir la liste des joueurs", 1); /// *
 
-        String name;
-        String utility;
-        int argument;
+        final String name;
+        final String utility;
+        final int argument;
 
         ListCmd(String name, String utility, int argument) {
             this.name = name;

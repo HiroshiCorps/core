@@ -25,31 +25,33 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class WarnCmd extends BrigadierAPI<CommandSource> {
-
 
     public WarnCmd() {
         super("warn");
     }
 
-    @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Syntax: /warn <pseudo> <raison>").setColor(Color.RED).sendTo(playerUUID);
+    }
 
-        Player player = (Player) commandContext.getSource();
+    @Override
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player player)) return;
+
         APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
-        }
-
-        if (commandContext.getArguments().size() < 2) {
-            TextComponentBuilder.createTextComponent("Syntax: /warn <pseudo> <raison>").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
@@ -57,13 +59,13 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         if (apiPlayerTarget.getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         String reason = commandContext.getArgument("reason", String.class);
@@ -71,7 +73,7 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
         if (reason.contains("{") || reason.contains("}")) {
             TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         SanctionInfo sm = apiPlayerTarget.warnPlayer(reason, APIPlayerModAuthor);
@@ -82,7 +84,6 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
 
-        return 1;
     }
 
     @Override
@@ -94,8 +95,8 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(target, "reason", StringArgumentType.string());
+        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
+        this.addArgumentCommand(target, "reason", StringArgumentType.string(), this::execute);
 
     }
 }

@@ -27,6 +27,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class BanCmd extends BrigadierAPI<CommandSource> {
 
@@ -75,25 +76,26 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Syntax: /ban <pseudo> <temps> <raison>").setColor(Color.RED).sendTo(playerUUID);
+    }
 
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
 
-        Player player = (Player) commandContext.getSource();
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player player)) return;
+
         APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
 
         if (APIPlayerModAuthor == null) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
-        }
-
-        if (commandContext.getArguments().size() < 3) {
-            TextComponentBuilder.createTextComponent("Syntax: /ban <pseudo> <temps> <raison>").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
@@ -102,19 +104,19 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
         if (apiPlayerTarget == null) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         if (apiPlayerTarget.getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         if (apiPlayerTarget.isBan()) {
             TextComponentBuilder.createTextComponent("Erreur, le joueur est déjà ban.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         String timeArgs = commandContext.getArgument("time", String.class);
@@ -124,11 +126,10 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
         if (reason.contains("{") || reason.contains("}")) {
             TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
-            return 1;
+            return;
         }
 
         banPlayer(apiPlayerTarget, timeArgs, APIPlayerModAuthor, reason);
-        return 1;
     }
 
     @Override
@@ -140,8 +141,8 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        CommandNode<CommandSource> targetNode = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        CommandNode<CommandSource> timeNode = this.addArgumentCommand(targetNode, "time", StringArgumentType.word(), "perm", "0s", "0h", "0j", "0m");
-        this.addArgumentCommand(timeNode, "reason", StringArgumentType.string());
+        CommandNode<CommandSource> targetNode = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
+        CommandNode<CommandSource> timeNode = this.addArgumentCommand(targetNode, "time", StringArgumentType.word(), this::onMissingArgument, "perm", "0s", "0h", "0j", "0m");
+        this.addArgumentCommand(timeNode, "reason", StringArgumentType.string(), this::onMissingArgument);
     }
 }

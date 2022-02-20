@@ -25,6 +25,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class SetRankCmd extends BrigadierAPI<CommandSource> {
 
@@ -42,25 +43,27 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
         }
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Merci de faire /setrank (joueur) (rank)").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return;
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
-        if (apiPlayer == null) return 1;
+        if (apiPlayer == null) return;
 
         if (!apiPlayer.hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Seulement un adminnistrateur peut executer cette commande"
             ).setColor(Color.RED)).getFinalTextComponent());
-            return 1;
-        }
-
-        if (commandContext.getArguments().size() != 2) {
-            commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                    "Merci de faire /setrank (joueur) (rank)"
-            ).setColor(Color.RED)).getFinalTextComponent());
-            return 1;
+            return;
         }
 
         APIOfflinePlayer offlineTarget = API.getInstance().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
@@ -68,14 +71,14 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Le joueur: " + commandContext.getArgument("target", String.class) + " ne s'est jamais connecté").setColor(Color.RED)
             ).getFinalTextComponent());
-            return 1;
+            return;
         }
 
         if (offlineTarget.hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Impossible d'affecter un nouveau rank à ce joueur"
             ).setColor(Color.RED)).getFinalTextComponent());
-            return 1;
+            return;
         }
 
         String rankArg = commandContext.getArgument("rank", String.class);
@@ -100,7 +103,7 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Aucun rank avec le power ou le nom: " + commandContext.getArgument("rank", String.class)
             ).setColor(Color.RED)).getFinalTextComponent());
-            return 1;
+            return;
         }
 
         APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(offlineTarget.getMemberID());
@@ -118,8 +121,6 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
                                 newRank.getRankName()
                 )).getFinalTextComponent()
         );
-
-        return 1;
     }
 
     @Override
@@ -137,7 +138,7 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             argRank.add(String.valueOf(Rank.getRankPower()));
         }
 
-        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(target, "rank", StringArgumentType.word(), argRank.toArray(new String[0]));
+        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
+        this.addArgumentCommand(target, "rank", StringArgumentType.word(), this::execute, argRank.toArray(new String[0]));
     }
 }

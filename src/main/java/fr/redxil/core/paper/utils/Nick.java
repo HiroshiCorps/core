@@ -4,9 +4,9 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.utils.JavaUtils;
 import fr.redxil.api.paper.Paper;
 import fr.redxil.api.paper.tags.TagsManager;
-import net.minecraft.server.v1_12_R1.EntityPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage;
+import net.minecraft.server.level.EntityPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.util.CraftChatMessage;
 import org.bukkit.entity.Player;
 
 public class Nick {

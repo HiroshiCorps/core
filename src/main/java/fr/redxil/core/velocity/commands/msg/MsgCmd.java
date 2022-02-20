@@ -32,27 +32,31 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
         super("msg");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Merci de faire /msg (pseudo) (message)").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
 
-        if (commandContext.getArguments().size() < 2) {
-            TextComponentBuilder.createTextComponent("Merci de faire /msg (pseudo) (message)").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
-        }
-
         APIPlayer target = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
         if (target == null) {
             TextComponentBuilder.createTextComponent("Le joueur: " + commandContext.getArgument("target", String.class) + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
+            return;
         }
 
         if (sp.hasLinkWith(LinkUsage.TO, target, "blacklist")) {
             TextComponentBuilder.createTextComponent("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
+            return;
         }
 
         String message = commandContext.getArgument("message", String.class);
@@ -68,7 +72,6 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
 
         API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp), target.getName());
         API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(target), sp.getName());
-        return 1;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
-        this.addArgumentCommand(target, "message", StringArgumentType.string());
+        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
+        this.addArgumentCommand(target, "message", StringArgumentType.string(), this::execute);
     }
 }

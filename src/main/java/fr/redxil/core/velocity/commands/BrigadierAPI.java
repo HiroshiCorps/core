@@ -8,6 +8,8 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
+import java.util.function.Consumer;
+
 public abstract class BrigadierAPI<C> {
 
     private final String name;
@@ -16,16 +18,15 @@ public abstract class BrigadierAPI<C> {
         this.name = name;
     }
 
-
-    public abstract int execute(CommandContext<C> context);
-
     public abstract void registerArgs(LiteralCommandNode<C> commandNode);
+
+    public abstract void onCommandWithoutArgs(CommandContext<C> commandExecutor);
 
     public LiteralCommandNode<C> buildCommands() {
 
         LiteralCommandNode<C> commands = LiteralArgumentBuilder.<C>literal(this.name)
                 .executes(context -> {
-                    execute(context);
+                    onCommandWithoutArgs(context);
                     return 1;
                 }).build();
 
@@ -35,15 +36,18 @@ public abstract class BrigadierAPI<C> {
 
     }
 
-    public <T> CommandNode<C> addArgumentCommand(CommandNode<C> literalCommandNode, String name, ArgumentType<T> type) {
+    public <T> CommandNode<C> addArgumentCommand(CommandNode<C> literalCommandNode, String name, ArgumentType<T> type, Consumer<CommandContext<C>> argumentExecutor) {
         ArgumentCommandNode<C, T> node = RequiredArgumentBuilder.<C, T>argument(name, type)
-                .suggests(((context, builder) -> builder.buildFuture())).executes(literalCommandNode.getCommand()).build();
+                .suggests(((context, builder) -> builder.buildFuture())).executes(context -> {
+                    argumentExecutor.accept(context);
+                    return 1;
+                }).build();
 
         literalCommandNode.addChild(node);
         return node;
     }
 
-    public <T> CommandNode<C> addArgumentCommand(CommandNode<C> literalCommandNode, String name, ArgumentType<T> type, String... argsTab) {
+    public <T> CommandNode<C> addArgumentCommand(CommandNode<C> literalCommandNode, String name, ArgumentType<T> type, Consumer<CommandContext<C>> argumentExecutor, String... argsTab) {
         ArgumentCommandNode<C, T> node = RequiredArgumentBuilder.<C, T>argument(name, type)
                 .suggests(((context, builder) -> {
 
@@ -52,7 +56,10 @@ public abstract class BrigadierAPI<C> {
                     }
 
                     return builder.buildFuture();
-                })).executes(literalCommandNode.getCommand()).build();
+                })).executes(context -> {
+                    argumentExecutor.accept(context);
+                    return 1;
+                }).build();
 
         literalCommandNode.addChild(node);
         return node;

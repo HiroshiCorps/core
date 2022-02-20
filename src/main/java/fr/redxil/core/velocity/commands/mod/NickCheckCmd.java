@@ -20,6 +20,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class NickCheckCmd extends BrigadierAPI<CommandSource> {
 
@@ -28,14 +29,23 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
         super("nickcheck");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /nickcheck (joueur)").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player))
-            return 1;
+            return;
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (!apiPlayer.getRank().isModeratorRank())
-            return 1;
+            return;
 
         APIPlayer targetPlayer = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
         TextComponentBuilder tcb;
@@ -46,7 +56,6 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
 
         tcb.sendTo(((Player) commandContext.getSource()).getUniqueId());
 
-        return 1;
     }
 
     @Override
@@ -57,7 +66,7 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), playerName.toArray(new String[0]));
+        this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::execute, playerName.toArray(new String[0]));
 
     }
 }

@@ -18,6 +18,8 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 
+import java.util.UUID;
+
 public class ShutdownCmd extends BrigadierAPI<CommandSource> {
 
 
@@ -25,16 +27,20 @@ public class ShutdownCmd extends BrigadierAPI<CommandSource> {
         super("shutdown");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
     public int execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (!apiPlayer.hasPermission(Rank.DEVELOPPEUR.getRankPower())) {
-            return 1;
-        }
-
-        if (commandContext.getArguments().size() != 1) {
-            TextComponentBuilder.createTextComponent("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(apiPlayer);
             return 1;
         }
 
@@ -51,6 +57,6 @@ public class ShutdownCmd extends BrigadierAPI<CommandSource> {
 
     @Override
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        this.addArgumentCommand(literalCommandNode, "server", StringArgumentType.word());
+        this.addArgumentCommand(literalCommandNode, "server", StringArgumentType.word(), this::execute);
     }
 }

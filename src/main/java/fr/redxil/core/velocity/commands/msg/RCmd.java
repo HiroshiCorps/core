@@ -23,37 +23,39 @@ import java.util.UUID;
 
 public class RCmd extends BrigadierAPI<CommandSource> {
 
-
     public RCmd() {
         super("r");
     }
 
+    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Merci de faire /r (message)").setColor(Color.RED).sendTo(playerUUID);
+    }
+
     @Override
-    public int execute(CommandContext<CommandSource> commandContext) {
-        if (!(commandContext.getSource() instanceof Player)) return 1;
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
+        this.onMissingArgument(commandExecutor);
+    }
+
+    public void execute(CommandContext<CommandSource> commandContext) {
+        if (!(commandContext.getSource() instanceof Player)) return;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
-
-        if (commandContext.getArguments().size() < 1) {
-            TextComponentBuilder.createTextComponent("Merci de faire /r (message)").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
-        }
 
         String targetName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp));
 
         if (targetName == null) {
             TextComponentBuilder.createTextComponent("Erreur, vous avez jusque la pas envoyé de message").setColor(Color.RED).sendTo(playerUUID);
-            return 1;
+            return;
         }
 
         Velocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName + " " + commandContext.getArgument("message", String.class));
 
-        return 1;
     }
 
     @Override
     public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        this.addArgumentCommand(literalCommandNode, "message", StringArgumentType.string());
+        this.addArgumentCommand(literalCommandNode, "message", StringArgumentType.greedyString(), this::execute);
     }
 }
