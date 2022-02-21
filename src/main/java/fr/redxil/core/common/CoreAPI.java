@@ -59,10 +59,13 @@ public class CoreAPI extends API {
         this.sqlConnection = new CSQLConnection();
 
         File serverIDFile = new File(plugin.getPluginDataFolder() + File.separator + "serverid.json");
-        File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlUser.json");
-        File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "sqlCredential" + File.separator + "sqlPass.json");
-        File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisPass.json");
-        File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "redisCredential" + File.separator + "redisUser.json");
+        File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "sql" + File.separator + "user.json");
+        File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "sql" + File.separator + "pass.json");
+        File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "redis" + File.separator + "pass.json");
+        File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "redis" + File.separator + "user.json");
+        File serverNameFile = new File(plugin.getPluginDataFolder() + File.separator + "servername.json");
+
+        String serverName = GSONSaver.loadGSON(serverNameFile, String.class);
 
         String serverID = GSONSaver.loadGSON(serverIDFile, String.class);
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
@@ -70,8 +73,10 @@ public class CoreAPI extends API {
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
         String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
 
-        if (sqlUser == null || sqlPass == null || redisPass == null) {
+        if (serverName == null || sqlUser == null || sqlPass == null || redisPass == null) {
 
+            if (serverName == null)
+                GSONSaver.writeGSON(serverNameFile, "servername");
             if (sqlUser == null)
                 GSONSaver.writeGSON(sqlUserFile, "userhere");
 
@@ -102,13 +107,13 @@ public class CoreAPI extends API {
 
         if (serverID == null) {
             plugin.printLog(Level.FINE, "Generating new Server on db");
-            this.server = this.serverManager.initServer(serverType, plugin.getServerName(), plugin.getServerIp());
+            this.server = this.serverManager.initServer(serverType, serverName, plugin.getServerIp());
             GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
             game = null;
         }else{
             plugin.printLog(Level.FINE, "Loading server with ID: "+serverID);
             this.server = getServerManager().initServer(serverType, Long.parseLong(serverID), plugin.getServerIp());
-            this.server.setServerName(plugin.getServerName());
+            this.server.setServerName(serverName);
             this.game = getGameManager().getGameByServerID(this.server.getServerID());
         }
 

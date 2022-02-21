@@ -217,9 +217,4 @@ public class CorePlugin extends Paper {
         System.out.println("[" + level.getName() + "] " + msg);
     }
 
-    @Override
-    public String getServerName() {
-        return Bukkit.getName();
-    }
-
 }
