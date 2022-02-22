@@ -6,6 +6,7 @@
 
 package fr.redxil.core.paper;
 
+import fr.redline.invinteract.event.EventInventory;
 import fr.redline.pms.utils.IpInfo;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
@@ -87,6 +88,8 @@ public class CorePlugin extends Paper {
 
         this.vanish = new VanishGestion(this);
         this.freezeGestion = new FreezeMessageGestion(this);
+
+        EventInventory.enableEvent(this);
 
         /*
 
