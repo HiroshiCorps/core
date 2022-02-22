@@ -4,7 +4,9 @@ import fr.redline.invinteract.inv.InventoryCreator;
 import fr.redline.invinteract.inv.container.Container;
 import fr.redline.invinteract.inv.holder.InventoryInfoHolder;
 import fr.redline.invinteract.inv.page.Page;
+import fr.redxil.core.paper.info.item.PlayerConnectedItem;
 import fr.redxil.core.paper.info.item.PlayerInfoItem;
+import fr.redxil.core.paper.info.item.RankItem;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -24,6 +26,8 @@ public class InfoInventory extends InventoryCreator {
             return;
         Page page = opPage.get();
         page.setItem(new PlayerInfoItem(), 0);
+        page.setItem(new PlayerConnectedItem(), 1);
+        page.setItem(new RankItem(), 2);
     }
 
     @Override
@@ -45,4 +49,5 @@ public class InfoInventory extends InventoryCreator {
     public void onDrag(InventoryDragEvent inventoryDragEvent) {
 
     }
+
 }
