@@ -26,15 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class CPlayerModerator implements APIPlayerModerator {
+public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
-    private final long memberID;
-
-    public CPlayerModerator(long memberID) {
-        this.memberID = memberID;
-    }
-
-    protected static APIPlayerModerator initModerator(APIPlayer apiPlayer) {
+    static APIPlayerModerator initModerator(APIPlayer apiPlayer) {
 
         Long memberID = apiPlayer.getMemberID();
 
@@ -80,7 +74,6 @@ public class CPlayerModerator implements APIPlayerModerator {
     }
 
 
-
     @Override
     public boolean isConnected() {
         return getAPIPlayer() != null;
@@ -108,7 +101,6 @@ public class CPlayerModerator implements APIPlayerModerator {
     public boolean hasCible() {
         return getCible() != null;
     }
-
 
 
     @Override
@@ -145,7 +137,6 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (uuid == null) return null;
         return UUID.fromString(uuid);
     }
-
 
 
     @Override
