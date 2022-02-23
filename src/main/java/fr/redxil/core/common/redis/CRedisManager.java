@@ -6,6 +6,7 @@
 
 package fr.redxil.core.common.redis;
 
+import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.redis.RedisManager;
 import org.redisson.Redisson;
 import org.redisson.api.RList;
@@ -20,13 +21,13 @@ import java.util.Map;
 
 public class CRedisManager implements RedisManager {
 
-    private final String host, port, user, password;
+    private final IpInfo ipInfo;
+    private final String user, password;
     private final int database;
     private RedissonClient connection;
 
-    public CRedisManager(String host, String port, int database, String user, String password) {
-        this.host = host;
-        this.port = port;
+    public CRedisManager(IpInfo ipInfo, int database, String user, String password) {
+        this.ipInfo = ipInfo;
         this.database = database;
         this.user = user;
         this.password = password;
@@ -130,7 +131,7 @@ public class CRedisManager implements RedisManager {
         config.setNettyThreads(8);
 
         SingleServerConfig singleServerConfig = config.useSingleServer()
-                .setAddress("redis://" + host + ":" + port)
+                .setAddress("redis://" + ipInfo.toString())
                 .setDatabase(database);
 
         if (user != null)

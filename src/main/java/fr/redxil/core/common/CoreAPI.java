@@ -59,24 +59,32 @@ public class CoreAPI extends API {
         this.sqlConnection = new CSQLConnection();
 
         File serverIDFile = new File(plugin.getPluginDataFolder() + File.separator + "serverid.json");
-        File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "sql" + File.separator + "user.json");
-        File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "sql" + File.separator + "pass.json");
-        File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "redis" + File.separator + "pass.json");
-        File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "account" + File.separator + "redis" + File.separator + "user.json");
         File serverNameFile = new File(plugin.getPluginDataFolder() + File.separator + "servername.json");
 
-        String serverName = GSONSaver.loadGSON(serverNameFile, String.class);
+        File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "user.json");
+        File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "pass.json");
+        File sqlIpFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "ip.json");
 
+        File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "pass.json");
+        File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
+        File redisIpFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
+
+        String serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         String serverID = GSONSaver.loadGSON(serverIDFile, String.class);
+
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
+        String sqlIp = GSONSaver.loadGSON(sqlIpFile, String.class);
+
         String redisPass = GSONSaver.loadGSON(redisPassFile, String.class);
         String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
+        String redisIp = GSONSaver.loadGSON(redisIpFile, String.class);
 
-        if (serverName == null || sqlUser == null || sqlPass == null || redisPass == null) {
+        if (serverName == null || sqlUser == null || sqlPass == null || redisPass == null || sqlIp == null || redisIp == null) {
 
             if (serverName == null)
                 GSONSaver.writeGSON(serverNameFile, "servername");
+
             if (sqlUser == null)
                 GSONSaver.writeGSON(sqlUserFile, "userhere");
 
@@ -89,19 +97,23 @@ public class CoreAPI extends API {
             if (redisUser == null)
                 GSONSaver.writeGSON(redisUserFile, "userhere");
 
+            if (redisIp == null)
+                GSONSaver.writeGSON(sqlIpFile, "127.0.0.1:6379");
+
+            if (sqlIp == null)
+                GSONSaver.writeGSON(sqlIpFile, "127.0.0.1:3306");
+
             return;
 
         }
 
         plugin.printLog(Level.INFO, "Connecting to db");
 
-        this.sqlConnection.connect(new IpInfo("127.0.0.1", 3306), "hiroshi", sqlUser, sqlPass);
-        this.manager = new CRedisManager("127.0.0.1", "6379", 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
+        this.sqlConnection.connect(IpInfo.fromString(sqlIp), "hiroshi", sqlUser, sqlPass);
+        this.manager = new CRedisManager(IpInfo.fromString(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
-        if(!dataConnected())
+        if (!dataConnected())
             return;
-
-        plugin.printLog(Level.FINE, serverID == null ? "serverid: null" : "serverid: "+serverID);
 
         ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
 
