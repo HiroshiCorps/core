@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.velocity.commands.mod.action.punish.BanCmd;
 
 public class LeaveListener {
@@ -21,7 +21,7 @@ public class LeaveListener {
 
         if (apiPlayer == null) return;
 
-        Long moderatorID = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer));
+        Long moderatorID = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataRedis.PLAYER_FREEZE_REDIS.getString(apiPlayer));
         API.getInstance().getServer().removePlayerInServer(player.getUniqueId());
         apiPlayer.unloadPlayer();
 

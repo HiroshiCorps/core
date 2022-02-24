@@ -12,7 +12,8 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.player.PlayerDataRedis;
+import fr.redxil.core.common.data.player.PlayerDataSql;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -35,7 +36,7 @@ public class CPlayerManager implements APIPlayerManager {
      * @return APIPlayer or null if the player is not loaded
      */
     public APIPlayer getPlayer(String name) {
-        Map<String, Long> playerMap = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString());
+        Map<String, Long> playerMap = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString());
         if (!playerMap.containsKey(name)) {
             return null;
         }
@@ -51,7 +52,7 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIPlayer getPlayer(UUID uuid) {
-        Map<String, Long> playerMap = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString());
+        Map<String, Long> playerMap = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString());
         if (!playerMap.containsKey(uuid.toString())) {
             return null;
         }
@@ -89,7 +90,7 @@ public class CPlayerManager implements APIPlayerManager {
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 2");
 
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString() + " = ?", uuid.toString());
+        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
 
         if (playerModel != null) {
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 3");
@@ -116,7 +117,7 @@ public class CPlayerManager implements APIPlayerManager {
 
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 2");
 
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_NAME_SQL.getString() + " = ?", name);
+        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
 
         if (playerModel != null) {
             API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 3");
@@ -137,7 +138,7 @@ public class CPlayerManager implements APIPlayerManager {
         APIPlayer apiPlayer = getPlayer(memberID);
         if (apiPlayer != null) return apiPlayer;
 
-        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID) == null)
+        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID) == null)
             return null;
         return new CPlayerOffline(memberID);
     }
@@ -150,22 +151,22 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public boolean isLoadedPlayer(String p) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_NAME.getString()).containsKey(p);
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString()).containsKey(p);
     }
 
     @Override
     public boolean isLoadedPlayer(long l) {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString()).contains(l);
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString()).contains(l);
     }
 
     @Override
     public boolean isLoadedPlayer(UUID uuid) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataValue.MAP_PLAYER_UUID.getString()).containsKey(uuid.toString());
+        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString()).containsKey(uuid.toString());
     }
 
     @Override
     public List<Long> getLoadedPlayer() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString());
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString());
     }
 
     HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();

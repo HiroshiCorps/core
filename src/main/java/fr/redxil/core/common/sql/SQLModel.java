@@ -9,25 +9,27 @@
 package fr.redxil.core.common.sql;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.utils.Pair;
+import fr.redxil.core.common.data.utils.SQLColumns;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 public abstract class SQLModel {
 
     private final String table;
 
-    private final String primaryKey;
+    private final SQLColumns primaryKey;
 
-    private final HashMap<String, Object> columns = new HashMap<>();
+    private final HashMap<SQLColumns, Object> columns = new HashMap<>();
 
     private boolean populate = false;
 
-    public SQLModel(String table, String primaryKey) {
+    public SQLModel(String table, SQLColumns primaryKey) {
         this.table = table;
         this.primaryKey = primaryKey;
     }
@@ -36,19 +38,27 @@ public abstract class SQLModel {
         return this.table;
     }
 
-    public String getPrimaryKey() {
+    public SQLColumns getPrimaryKey() {
         return this.primaryKey;
     }
 
-    public HashMap<String, Object> getColumns() {
+    public HashMap<SQLColumns, Object> getDataMap() {
         return this.columns;
+    }
+
+    public HashMap<SQLColumns, Object> getDataMap(String table) {
+        return new HashMap<>() {{
+            for (Map.Entry<SQLColumns, Object> value : columns.entrySet())
+                if (value.getKey().getTable().equalsIgnoreCase(table))
+                    put(value.getKey(), value.getValue());
+        }};
     }
 
     public void populate(ResultSet resultSet) {
         try {
             ResultSetMetaData meta = resultSet.getMetaData();
             for (int i = 1; i <= meta.getColumnCount(); ++i) {
-                this.columns.put(meta.getColumnName(i), resultSet.getObject(i));
+                this.columns.put(new SQLColumns(meta.getTableName(i), meta.getColumnName(i)), resultSet.getObject(i));
             }
             this.populate = true;
             this.onPopulated();
@@ -60,102 +70,69 @@ public abstract class SQLModel {
     protected void onPopulated() {
     }
 
-    public Object get(String columnName) {
+    public Object get(SQLColumns columnName) {
         return this.columns.get(columnName);
     }
 
-    public String getString(String columnName) {
+    public String getString(SQLColumns columnName) {
         return (String) this.columns.get(columnName);
     }
 
-    public int getInt(String columnName) {
+    public int getInt(SQLColumns columnName) {
         return Integer.parseInt(this.columns.get(columnName).toString());
     }
 
-    public double getDouble(String columnName) {
+    public double getDouble(SQLColumns columnName) {
         return Double.parseDouble(this.columns.get(columnName).toString());
     }
 
-    public long getLong(String columnName) {
+    public long getLong(SQLColumns columnName) {
         return Long.parseLong(this.columns.get(columnName).toString());
     }
 
-    public void set(String columnName, Object value) {
-        if (this.exists() && columnName.equals(this.primaryKey)) {
-            return;
-        }
-        this.columns.put(columnName, value);
-        if (!this.populate) {
-            return;
-        }
-        if (value == null) {
-            API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
-                    + " SET " + columnName + " = NULL WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
-        } else {
-            API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
-                    + " SET " + columnName + " = ? WHERE " + this.primaryKey + " = ?", value, this.getInt(this.primaryKey));
-        }
+
+    public void set(SQLColumns columnName, Object value) {
+        this.set(new HashMap<>() {{
+            put(columnName, value);
+        }});
     }
 
-    public void set(Map<String, Object> values) {
-        if (this.exists() && values.containsKey(this.primaryKey)) {
-            return;
-        }
-        this.columns.putAll(values);
+    public void setSync(SQLColumns columnName, Object value) {
+        this.setSync(new HashMap<>() {{
+            put(columnName, value);
+        }});
+    }
+
+
+    public void set(HashMap<SQLColumns, Object> map) {
+        Pair<String, Collection<Object>> pair = this.setSQL(map);
+        assert pair != null;
+        API.getInstance().getSQLConnection().asyncExecute(pair.getOne(), pair.getTwo());
+    }
+
+    public void setSync(HashMap<SQLColumns, Object> map) {
+        Pair<String, Collection<Object>> pair = this.setSQL(map);
+        assert pair != null;
+        API.getInstance().getSQLConnection().execute(pair.getOne(), pair.getTwo());
+    }
+
+
+    private Pair<String, Collection<Object>> setSQL(Map<SQLColumns, Object> values) {
         if (!this.populate) {
-            return;
+            return null;
         }
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(this.table).append(" SET ");
         StringBuilder setterBuilder = new StringBuilder();
-        for (Map.Entry<String, Object> value : values.entrySet()) {
+        for (Map.Entry<SQLColumns, Object> value : values.entrySet()) {
+            columns.put(value.getKey(), value.getValue());
             if (!setterBuilder.isEmpty())
                 setterBuilder.append(", ");
-            setterBuilder.append(value.getKey()).append(" = ?");
+            setterBuilder.append(value.getKey().toSQL()).append(" = ?");
         }
         stringBuilder.append(setterBuilder).append(" WHERE ").append(this.primaryKey).append(" = ?");
-        API.getInstance().getSQLConnection().asyncExecute(stringBuilder.toString(), values.values(), this.getInt(this.primaryKey));
-    }
-
-    public void setSync(String columnName, Object value) {
-        if (this.exists() && columnName.equals(this.primaryKey)) {
-            return;
-        }
-        this.columns.put(columnName, value);
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "UPDATE " + this.table
-                + " SET " + columnName + " = " + value + " WHERE " + this.primaryKey + " = " + this.getInt(this.primaryKey));
-        if (value == null) {
-            API.getInstance().getSQLConnection().execute("UPDATE " + this.table
-                    + " SET " + columnName + " = NULL WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
-        } else {
-            API.getInstance().getSQLConnection().execute("UPDATE " + this.table
-                    + " SET " + columnName + " = ? WHERE " + this.primaryKey + " = ?", value, this.getInt(this.primaryKey));
-        }
-    }
-
-    public void add(String columnName, int add) {
-        if (this.exists() && columnName.equals(this.primaryKey)) {
-            return;
-        }
-        if (!this.populate) {
-            return;
-        }
-        this.columns.put(columnName, this.getInt(columnName) + add);
-        API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
-                + " SET " + columnName + " = " + columnName + " + " + add
-                + " WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
-    }
-
-    public void sub(String columnName, int sub) {
-        if (this.exists() && columnName.equals(this.primaryKey)) {
-            return;
-        }
-        if (!this.populate) {
-            return;
-        }
-        this.columns.put(columnName, this.getInt(columnName) - sub);
-        API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
-                + " SET " + columnName + " = " + columnName + " - " + sub
-                + " WHERE " + this.primaryKey + " = ?", this.getInt(this.primaryKey));
+        Collection<Object> objects = values.values();
+        objects.add(this.getInt(this.primaryKey));
+        return new Pair<>(stringBuilder.toString(), objects);
     }
 
     public boolean exists() {

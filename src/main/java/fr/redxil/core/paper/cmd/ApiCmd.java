@@ -8,8 +8,8 @@ package fr.redxil.core.paper.cmd;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.core.common.data.PlayerDataValue;
-import fr.redxil.core.common.data.ServerDataValue;
+import fr.redxil.core.common.data.player.PlayerDataRedis;
+import fr.redxil.core.common.data.server.ServerDataRedis;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -39,8 +39,8 @@ public class ApiCmd extends Command {
         TextComponentBuilder.createTextComponent(
                 "\n§7§m                  §6 [§e SERVER Api §6] §7§m                  \n " +
                         "\n§r§eApi reponse time§7: §b" + response + " ms" +
-                        "\n§r§eUser cache size§7: §b" + API.getInstance().getRedisManager().getRedisMap(PlayerDataValue.MAP_PLAYER_NAME.getString()).size() +
-                        "\n§r§eServers cache size§7: §b" + redis.getMap(ServerDataValue.MAP_SERVER_REDIS.getString()).size() +
+                        "\n§r§eUser cache size§7: §b" + API.getInstance().getRedisManager().getRedisMap(PlayerDataRedis.MAP_PLAYER_NAME.getString()).size() +
+                        "\n§r§eServers cache size§7: §b" + redis.getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).size() +
                         "\n \n§r§7§m                                                              \n"
         ).sendTo(((Player) commandSender).getUniqueId());
         return true;

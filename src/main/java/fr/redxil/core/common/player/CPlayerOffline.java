@@ -17,9 +17,11 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.Pair;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.core.common.data.LinkDataValue;
-import fr.redxil.core.common.data.MoneyDataValue;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.link.LinkDataSql;
+import fr.redxil.core.common.data.money.MoneyDataSql;
+import fr.redxil.core.common.data.player.PlayerDataRedis;
+import fr.redxil.core.common.data.player.PlayerDataSql;
+import fr.redxil.core.common.data.utils.SQLColumns;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
@@ -53,12 +55,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     private void initPlayerModel() {
         if (this.getPlayerModel() == null)
-            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID);
+            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
     private void initMoneyModel() {
         if (this.getMoneyModel() == null)
-            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID);
+            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
     public PlayerModel getPlayerModel() {
@@ -75,8 +77,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void addSolde(long i) {
-
-        getMoneyModel().set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), getMoneyModel().getSolde() + i);
+        getMoneyModel().set(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), getMoneyModel().getSolde() + i);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
             return false;
 
 
-        getMoneyModel().set(MoneyDataValue.PLAYER_SOLDE_SQL.getString(), i);
+        getMoneyModel().set(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), i);
 
         return true;
 
@@ -95,7 +96,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public void addCoins(long i) {
 
-        getMoneyModel().set(MoneyDataValue.PLAYER_COINS_SQL.getString(), getMoneyModel().getCoins() + i);
+        getMoneyModel().set(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), getMoneyModel().getCoins() + i);
     }
 
     @Override
@@ -104,7 +105,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
             return false;
 
 
-        getMoneyModel().set(MoneyDataValue.PLAYER_COINS_SQL.getString(), getMoneyModel().getCoins() + i);
+        getMoneyModel().set(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), getMoneyModel().getCoins() + i);
         return true;
     }
 
@@ -115,13 +116,13 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void setRank(Rank Rank) {
-        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_SQL.getString(), Rank.getRankPower().intValue());
+        getPlayerModel().set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), Rank.getRankPower().intValue());
     }
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
-        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_REDIS.getString(this), getRankPower().intValue());
-        getPlayerModel().set(PlayerDataValue.PLAYER_RANK_TIME_SQL.getString(this), timestamp);
+        getPlayerModel().set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), getRankPower().intValue());
+        getPlayerModel().set(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns(), timestamp);
     }
 
     @Override
@@ -154,7 +155,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean setName(String s) {
         if (s != null) {
-            getPlayerModel().set(PlayerDataValue.PLAYER_NAME_SQL.getString(), s);
+            getPlayerModel().set(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), s);
             return true;
         }
         return false;
@@ -168,7 +169,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public void setUUID(UUID uuid) {
         if (uuid != null)
-            getPlayerModel().set(PlayerDataValue.PLAYER_UUID_SQL.getString(), uuid.toString());
+            getPlayerModel().set(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns(), uuid.toString());
     }
 
     @Override
@@ -178,7 +179,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public boolean isConnected() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataValue.LIST_PLAYER_ID.getString()).contains(getMemberID());
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString()).contains(getMemberID());
     }
 
     @Override
@@ -241,7 +242,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
         Pair<String, List<Object>> pair = getWhereString(linkUsage, apiOfflinePlayer);
         pair.getTwo().add(s);
         return new ArrayList<>() {{
-            this.addAll(new SQLModels<>(PlayerLinkModel.class).get("(" + pair.getOne() + ") AND " + getStringSQL(LinkDataValue.LINK_TYPE_SQL.getString(), s.length) + " ORDER BY " + LinkDataValue.LINK_ID_SQL.getString() + " DESC", pair.getTwo().toArray(), s));
+            this.addAll(new SQLModels<>(PlayerLinkModel.class).get("(" + pair.getOne() + ") AND " + getStringSQL(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), s.length) + " ORDER BY " + LinkDataSql.LINK_ID_SQL.getSQLColumns().toSQL() + " DESC", pair.getTwo().toArray(), s));
         }};
     }
 
@@ -263,12 +264,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public IpInfo getIP() {
-        return IpInfo.fromString(getPlayerModel().getString(PlayerDataValue.PLAYER_IP_SQL.getString(this)));
+        return IpInfo.fromString(getPlayerModel().getString(PlayerDataSql.PLAYER_IP_SQL.getSQLColumns()));
     }
 
     @Override
     public void setIP(IpInfo ipInfo) {
-        getPlayerModel().set(PlayerDataValue.PLAYER_IP_SQL.getString(this), ipInfo.getIp());
+        getPlayerModel().set(PlayerDataSql.PLAYER_IP_SQL.getSQLColumns(), ipInfo.getIp());
     }
 
     @Override
@@ -407,10 +408,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (player2 != null)
             id2 = Long.valueOf(player2.getMemberID()).intValue();
         switch (linkUsage) {
-            case FROM: {
-                String queries = LinkDataValue.TO_ID_SQL.getString() + " = ?";
+            case FROM -> {
+                String queries = LinkDataSql.TO_ID_SQL.getSQLColumns() + " = ?";
                 if (id2 != null)
-                    queries += " AND " + LinkDataValue.FROM_ID_SQL.getString() + " = ?";
+                    queries += " AND " + LinkDataSql.FROM_ID_SQL.getSQLColumns() + " = ?";
                 Integer finalID = id2;
                 return new Pair<>(queries, new ArrayList<>() {{
                     add(id1);
@@ -418,10 +419,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
                         add(finalID);
                 }});
             }
-            case TO: {
-                String queries = LinkDataValue.FROM_ID_SQL.getString() + " = ?";
+            case TO -> {
+                String queries = LinkDataSql.FROM_ID_SQL.getSQLColumns() + " = ?";
                 if (id2 != null)
-                    queries += " AND " + LinkDataValue.TO_ID_SQL.getString() + " = ?";
+                    queries += " AND " + LinkDataSql.TO_ID_SQL.getSQLColumns() + " = ?";
                 Integer finalID = id2;
                 return new Pair<>(queries, new ArrayList<>() {{
                     add(id1);
@@ -429,27 +430,27 @@ public class CPlayerOffline implements APIOfflinePlayer {
                         add(finalID);
                 }});
             }
-            case BOTH: {
+            case BOTH -> {
                 Pair<String, List<Object>> one = getWhereString(LinkUsage.FROM, player2);
                 Pair<String, List<Object>> two = getWhereString(LinkUsage.TO, player2);
                 return new Pair<>("(" + one.getOne() + ") OR (" + two.getOne() + ")", new ArrayList<>(one.getTwo()) {{
                     add(two.getTwo());
                 }});
             }
-            default: {
+            default -> {
                 return null;
             }
         }
 
     }
 
-    public String getStringSQL(String s, int size) {
+    public String getStringSQL(SQLColumns s, int size) {
 
         if (size == 1)
             return s + " = ?";
-        StringBuilder stringBuilder = new StringBuilder("(" + s + " = ?");
+        StringBuilder stringBuilder = new StringBuilder("(" + s.toSQL() + " = ?");
         for (int i = size - 1; i != 0; i--) {
-            stringBuilder.append(" ").append("OR").append(" ").append(s).append(" = ?");
+            stringBuilder.append(" ").append("OR").append(" ").append(s.toSQL()).append(" = ?");
         }
         return stringBuilder.append(")").toString();
 

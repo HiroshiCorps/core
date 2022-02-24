@@ -9,9 +9,16 @@
 package fr.redxil.core.common.sql;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.utils.Pair;
+import fr.redxil.core.common.data.utils.SQLColumns;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class SQLModels<T extends SQLModel> {
@@ -25,14 +32,9 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public T get(int primaryKey) {
-        try {
-            T model = this.method.newInstance();
-            this.get(model, primaryKey);
-            return model;
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
+        T model = generateInstance();
+        this.get(model, primaryKey);
+        return model;
     }
 
     public void get(T model, int primaryKey) {
@@ -58,13 +60,14 @@ public class SQLModels<T extends SQLModel> {
     public List<T> get(String query, Object... vars) {
         ArrayList<T> results = new ArrayList<>();
         try {
-            T model = this.method.newInstance();
-
+            T model = generateInstance();
+            assert model != null;
             API.getInstance().getSQLConnection().query("SELECT * FROM " + model.getTable() + (query != null ? " " + query : ""),
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
-                                T newModel = this.method.newInstance();
+                                T newModel = generateInstance();
+                                assert newModel != null;
                                 newModel.populate(resultSet);
                                 results.add(newModel);
                             }
@@ -88,31 +91,24 @@ public class SQLModels<T extends SQLModel> {
         return this.getOrInsert(new HashMap<>(), primaryKey);
     }
 
-    public T getOrInsert(HashMap<String, Object> defaultValues, int primaryKey) {
-        try {
-            T model = this.method.newInstance();
-            this.getOrInsert(model, defaultValues, primaryKey);
-            return model;
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            this.logs.severe("Error SQL getOrInsert() = " + e.getMessage());
-        }
-        return null;
+    public T getOrInsert(HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
+        T model = generateInstance();
+        assert model != null;
+        this.getOrInsert(model, defaultValues, primaryKey);
+        return model;
     }
 
     public void getOrInsert(T model, int primaryKey) {
         this.getOrInsert(model, null, primaryKey);
     }
 
-    public void getOrInsert(T model, HashMap<String, Object> defaultValues, int primaryKey) {
+    public void getOrInsert(T model, HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         try {
             this.get(model, primaryKey);
             if (!model.exists()) {
                 model.set(model.getPrimaryKey(), primaryKey);
                 if (defaultValues != null) {
-                    for (Map.Entry<String, Object> entry : defaultValues.entrySet()) {
-                        model.set(entry.getKey(), entry.getValue());
-                    }
+                    model.set(defaultValues);
                 }
                 this.insert(model);
                 this.get(model, primaryKey);
@@ -123,17 +119,16 @@ public class SQLModels<T extends SQLModel> {
         }
     }
 
-    public T getOrInsert(HashMap<String, Object> defaultValues, String query, Object... vars) {
+    public T getOrInsert(HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
         try {
             T foundRow = this.getFirst(query, vars);
             if (foundRow != null) {
                 return foundRow;
             }
-            T model = this.method.newInstance();
+            T model = generateInstance();
+            assert model != null;
             if (defaultValues != null) {
-                for (Map.Entry<String, Object> entry : defaultValues.entrySet()) {
-                    model.set(entry.getKey(), entry.getValue());
-                }
+                model.set(defaultValues);
             }
             this.insert(model);
             return this.getOrInsert(defaultValues, query, vars);
@@ -145,14 +140,11 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public void delete(String query, Object... vars) {
-        try {
-            T model = this.method.newInstance();
-
-            String queryString = "DELETE FROM " + model.getTable() + " " + query;
-            this.logs.info(queryString);
-            API.getInstance().getSQLConnection().execute(queryString, vars);
-        } catch (Exception ignored) {
-        }
+        T model = generateInstance();
+        assert model != null;
+        String queryString = "DELETE FROM " + model.getTable() + " " + query;
+        this.logs.info(queryString);
+        API.getInstance().getSQLConnection().execute(queryString, vars);
     }
 
     private String listCreator(Collection<Object> collection, String dataCloser) {
@@ -178,27 +170,43 @@ public class SQLModels<T extends SQLModel> {
 
     }
 
-    private List<String> listCreator(T model) {
+    private Pair<String, String> listCreator(T model) {
 
-        HashMap<String, Object> dataList = new HashMap<>(model.getColumns());
+        HashMap<SQLColumns, Object> dataList = new HashMap<>(model.getDataMap(model.getTable()));
 
         if (model.get(model.getPrimaryKey()) != null)
             dataList.put(model.getPrimaryKey(), model.get(model.getPrimaryKey()));
 
-        return Arrays.asList(listCreator(new ArrayList<>(dataList.keySet()), "`"), listCreator(dataList.values(), "'"));
+        ArrayList<Object> columns = new ArrayList<>() {{
+            for (SQLColumns columns1 : dataList.keySet()) {
+                add(columns1.toSQL());
+            }
+        }};
+
+        return new Pair<>(listCreator(columns, null), listCreator(dataList.values(), "'"));
 
     }
 
     public void insert(T model) {
 
-        List<String> listNecString = listCreator(model);
+        Pair<String, String> listNecString = listCreator(model);
 
-        String query = "INSERT INTO " + model.getTable() + "(" + listNecString.get(0) + ") VALUES (" + listNecString.get(1) + ")";
+        String query = "INSERT INTO " + model.getTable() + "(" + listNecString.getOne() + ") VALUES (" + listNecString.getTwo() + ")";
 
         this.logs.info(query);
 
         API.getInstance().getSQLConnection().execute(query);
 
+    }
+
+    public T generateInstance() {
+        try {
+            Constructor<T> constructors = this.method.getDeclaredConstructor();
+            return constructors.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

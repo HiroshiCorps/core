@@ -7,63 +7,62 @@
  *
  */
 
-package fr.redxil.core.common.data;
+package fr.redxil.core.common.data.moderator;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.group.party.Party;
+import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
-public enum PartyDataValue {
+public enum ModeratorDataRedis {
 
-    PARTY_PLAYERRANKMAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "party/<gameID>/playermap", true),
-    PARTY_ACCESS_REDIS(DataBaseType.REDIS, DataType.PLAYER, "party/<gameID>/access", true),
-    PARTY_INVITE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "party/<gameID>/invite", true),
-    PARTY_OWNER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "party/<gameID>/owner", true),
+    LIST_MODERATOR(DataBaseType.REDIS, DataType.GLOBAL, "moderator/list", false),
 
-    MAP_PLAYERPARTY_REDIS(DataBaseType.REDIS, DataType.GLOBAL, "party/linkmap", false);
+    MODERATOR_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_name", true),
+    MODERATOR_MOD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_mod", true),
+    MODERATOR_VANISH_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_vanish", true),
+    MODERATOR_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/member_uuid", true),
+    MODERATOR_CIBLE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_cible", true);
 
     final DataType dataType;
     final DataBaseType dataBaseType;
     final String location;
     final boolean needID;
 
-    PartyDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
+    ModeratorDataRedis(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
         this.dataBaseType = dataBaseType;
         this.dataType = dataType;
         this.location = location;
         this.needID = needID;
     }
 
-    public static void clearRedisData(DataType dataType, Long partyID) {
+    public static void clearRedisData(DataType dataType, Long playerID) {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
-        for (PartyDataValue mdv : values())
+        for (ModeratorDataRedis mdv : values())
             if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.isArgNeeded() && mdv.hasNeedInfo(partyID))
-                    redissonClient.getBucket(mdv.getString(partyID)).delete();
-                else if (!mdv.isArgNeeded() && partyID == null) redissonClient.getBucket(mdv.getString()).delete();
+                if (mdv.hasNeedInfo(playerID))
+                    redissonClient.getBucket(mdv.getString(playerID)).delete();
 
     }
 
     public String getString() {
-        if(!hasNeedInfo(null))
-            return null;
-        return this.location;
+        if (!hasNeedInfo(null)) return null;
+        return location;
     }
 
-    public String getString(Party party) {
-        return getString(party.getPartyID());
+    public String getString(APIPlayerModerator player) {
+        return getString(player.getMemberID());
     }
 
-    public String getString(Long partyID) {
+    public String getString(Long memberID) {
         String location = this.location;
 
         if (needID) {
-            if (partyID == null) return null;
-            location = location.replace("<hostID>", partyID.toString());
+            if (memberID == null) return null;
+            location = location.replace("<memberID>", memberID.toString());
         }
 
         return location;
@@ -71,10 +70,6 @@ public enum PartyDataValue {
 
     public boolean hasNeedInfo(Long memberID) {
         return !isNeedID() || memberID != null;
-    }
-
-    public boolean isArgNeeded() {
-        return isNeedID();
     }
 
     public boolean isNeedID() {

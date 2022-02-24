@@ -10,7 +10,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.utils.Title;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -33,10 +33,10 @@ public class FreezeMessageGestion {
         if (b) {
             Player player = Bukkit.getPlayer(apiPlayer.getUUID());
             if (player == null) return;
-            API.getInstance().getRedisManager().setRedisLong(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer), moderator.getMemberID());
+            API.getInstance().getRedisManager().setRedisLong(PlayerDataRedis.PLAYER_FREEZE_REDIS.getString(apiPlayer), moderator.getMemberID());
             sendMessage(player, moderator);
         } else {
-            API.getInstance().getRedisManager().getRedissonClient().getBucket(PlayerDataValue.PLAYER_FREEZE_REDIS.getString(apiPlayer)).delete();
+            API.getInstance().getRedisManager().getRedissonClient().getBucket(PlayerDataRedis.PLAYER_FREEZE_REDIS.getString(apiPlayer)).delete();
             stopFreezeMessage(apiPlayer.getUUID());
         }
     }

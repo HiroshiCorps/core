@@ -11,31 +11,32 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.event.PlayerJoinModerationEvent;
 import fr.redxil.api.paper.event.PlayerQuitModerationEvent;
 import fr.redxil.api.paper.utils.Title;
-import fr.redxil.core.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class ModeratorMain {
 
-    public void setModerator(APIPlayerModerator APIPlayerModerator, boolean b, boolean onConnection) {
+    public void setModerator(APIPlayerModerator apiPlayerModerator, boolean b, boolean onConnection) {
 
-        API.getInstance().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_MOD_REDIS.getString(APIPlayerModerator), Boolean.valueOf(b).toString());
+        API.getInstance().getRedisManager().setRedisString(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(apiPlayerModerator), Boolean.valueOf(b).toString());
 
-        Player player = Bukkit.getPlayer(APIPlayerModerator.getUUID());
+        Player player = Bukkit.getPlayer(apiPlayerModerator.getUUID());
+        assert player != null;
         player.getInventory().clear();
 
         if (b) {
             player.setCollidable(false);
             if (!onConnection) {
                 Title.sendTitle(player, "§b§lModération", "§7Vous êtes en mode modération", 1, 40, 1);
-                Bukkit.getPluginManager().callEvent(new PlayerJoinModerationEvent(APIPlayerModerator));
+                Bukkit.getPluginManager().callEvent(new PlayerJoinModerationEvent(apiPlayerModerator));
             }
         } else {
             player.setCollidable(true);
-            APIPlayerModerator.setCible(null);
+            apiPlayerModerator.setCible(null);
             if (!onConnection) {
                 Title.sendTitle(player, "§b§lModération", "§7Vous êtes plus en mode modération", 1, 40, 1);
-                Bukkit.getPluginManager().callEvent(new PlayerQuitModerationEvent(APIPlayerModerator));
+                Bukkit.getPluginManager().callEvent(new PlayerQuitModerationEvent(apiPlayerModerator));
             }
         }
 

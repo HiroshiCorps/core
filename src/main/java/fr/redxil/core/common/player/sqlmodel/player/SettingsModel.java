@@ -9,39 +9,39 @@
 package fr.redxil.core.common.player.sqlmodel.player;
 
 import fr.redxil.api.common.player.data.Setting;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.SettingsDataSql;
 import fr.redxil.core.common.sql.SQLModel;
 
 public class SettingsModel extends SQLModel implements Setting {
     public SettingsModel() {
-        super("members_settings", "id");
+        super("members_settings", SettingsDataSql.SETTINGS_ID.getSQLColumns());
     }
 
     public SettingsModel(Long playerID, String settingsName, String settingsValue) {
         this();
-        this.set(PlayerDataValue.PLAYER_MEMBERID_SQL.getString(), playerID.intValue());
-        this.set("settings_name", settingsName);
-        this.set("settings_value", settingsValue);
+        this.set(SettingsDataSql.SETTINGS_MEMBERID.getSQLColumns(), playerID.intValue());
+        this.set(SettingsDataSql.SETTINGS_NAME.getSQLColumns(), settingsName);
+        this.set(SettingsDataSql.SETTINGS_VALUE.getSQLColumns(), settingsValue);
     }
 
     @Override
     public Integer getID() {
-        return this.getInt("id");
+        return this.getInt(SettingsDataSql.SETTINGS_ID.getSQLColumns());
     }
 
     @Override
     public String getName() {
-        return this.getString("settings_name");
+        return this.getString(SettingsDataSql.SETTINGS_NAME.getSQLColumns());
     }
 
     @Override
     public String getValue() {
-        return this.getString("settings_value");
+        return this.getString(SettingsDataSql.SETTINGS_VALUE.getSQLColumns());
     }
 
     @Override
     public void setValue(String value) {
-        this.set("settings_value", value);
+        this.set(SettingsDataSql.SETTINGS_VALUE.getSQLColumns(), value);
     }
 
 }

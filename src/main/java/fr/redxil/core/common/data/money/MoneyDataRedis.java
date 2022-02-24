@@ -7,29 +7,23 @@
  *
  */
 
-package fr.redxil.core.common.data;
+package fr.redxil.core.common.data.money;
 
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
-import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
-public enum MoneyDataValue {
+public enum MoneyDataRedis {
 
-    PLAYER_COINS_SQL(DataBaseType.SQL, DataType.PLAYER, "coins", false),
-    PLAYER_SOLDE_SQL(DataBaseType.SQL, DataType.PLAYER, "solde", false),
-
-    PLAYER_COINS_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/coins", true),
-    PLAYER_SOLDE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/solde", true);
+    PLAYER_COINS_REDIS(DataType.PLAYER, "player/<memberID>/coins", true),
+    PLAYER_SOLDE_REDIS(DataType.PLAYER, "player/<memberID>/solde", true);
 
     final DataType dataType;
-    final DataBaseType dataBaseType;
     final String location;
     final boolean needID;
 
-    MoneyDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
-        this.dataBaseType = dataBaseType;
+    MoneyDataRedis(DataType dataType, String location, boolean needID) {
         this.dataType = dataType;
         this.location = location;
         this.needID = needID;
@@ -39,8 +33,8 @@ public enum MoneyDataValue {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
-        for (MoneyDataValue mdv : values())
-            if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
+        for (MoneyDataRedis mdv : values())
+            if ((dataType == null || mdv.isDataType(dataType)))
                 if (mdv.hasNeedInfo(playerID))
                     redissonClient.getBucket(mdv.getString(playerID)).delete();
 
@@ -51,16 +45,16 @@ public enum MoneyDataValue {
         return location;
     }
 
-    public String getString(APIOfflinePlayer player) {
-        return getString(player.getMemberID());
+    public String getString(APIOfflinePlayer apiPlayer) {
+        return getString(apiPlayer.getMemberID());
     }
 
-    public String getString(Long serverID) {
+    public String getString(Long playerID) {
         String location = this.location;
 
         if (needID) {
-            if (serverID == null) return null;
-            location = location.replace("<memberID>", serverID.toString());
+            if (playerID == null) return null;
+            location = location.replace("<memberID>", playerID.toString());
         }
 
         return location;
@@ -72,10 +66,6 @@ public enum MoneyDataValue {
 
     public boolean isNeedID() {
         return needID;
-    }
-
-    public boolean isDataBase(DataBaseType dataBaseType) {
-        return this.dataBaseType.sqlBase.equals(dataBaseType.sqlBase);
     }
 
     public boolean isDataType(DataType dataType) {

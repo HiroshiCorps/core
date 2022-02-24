@@ -10,33 +10,24 @@
 package fr.redxil.core.common.data;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.player.APIOfflinePlayer;
-import fr.redxil.core.common.data.utils.DataBaseType;
+import fr.redxil.api.common.group.party.Party;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
-public enum LinkDataValue {
+public enum PartyDataRedis {
 
-    LINK_ID_SQL(DataBaseType.SQL, DataType.PLAYER, "link_id", false),
-    FROM_ID_SQL(DataBaseType.SQL, DataType.PLAYER, "from_id", false),
-    TO_ID_SQL(DataBaseType.SQL, DataType.PLAYER, "to_id", false),
-    LINK_TYPE_SQL(DataBaseType.SQL, DataType.PLAYER, "link_state", false),
+    PARTY_PLAYERRANKMAP_REDIS(DataType.PLAYER, "party/<gameID>/playermap", true),
+    PARTY_ACCESS_REDIS(DataType.PLAYER, "party/<gameID>/access", true),
+    PARTY_INVITE_REDIS(DataType.PLAYER, "party/<gameID>/invite", true),
+    PARTY_OWNER_REDIS(DataType.PLAYER, "party/<gameID>/owner", true),
 
-    PLAYER_BLACKLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/blackList", true),
-
-    PLAYER_FRIENDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/friendList", true),
-
-    PLAYER_FRIENDRECEIVEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/receivedList", true),
-
-    PLAYER_FRIENDSENDEDLIST_REDIS(DataBaseType.REDIS, DataType.PLAYER, "friend/<memberID>/sendList", true);
+    MAP_PLAYERPARTY_REDIS(DataType.GLOBAL, "party/linkmap", false);
 
     final DataType dataType;
-    final DataBaseType dataBaseType;
     final String location;
     final boolean needID;
 
-    LinkDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needID) {
-        this.dataBaseType = dataBaseType;
+    PartyDataRedis(DataType dataType, String location, boolean needID) {
         this.dataType = dataType;
         this.location = location;
         this.needID = needID;
@@ -46,8 +37,8 @@ public enum LinkDataValue {
 
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
-        for (LinkDataValue mdv : values())
-            if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
+        for (PartyDataRedis mdv : values())
+            if ((dataType == null || mdv.isDataType(dataType)))
                 if (mdv.hasNeedInfo(playerID))
                     redissonClient.getBucket(mdv.getString(playerID)).delete();
 
@@ -58,8 +49,8 @@ public enum LinkDataValue {
         return location;
     }
 
-    public String getString(APIOfflinePlayer apiPlayer) {
-        return getString(apiPlayer.getMemberID());
+    public String getString(Party apiPlayer) {
+        return getString(apiPlayer.getPartyID());
     }
 
     public String getString(Long playerID) {
@@ -67,7 +58,7 @@ public enum LinkDataValue {
 
         if (needID) {
             if (playerID == null) return null;
-            location = location.replace("<memberID>", playerID.toString());
+            location = location.replace("<gameID>", playerID.toString());
         }
 
         return location;
@@ -79,10 +70,6 @@ public enum LinkDataValue {
 
     public boolean isNeedID() {
         return needID;
-    }
-
-    public boolean isDataBase(DataBaseType dataBaseType) {
-        return this.dataBaseType.sqlBase.equals(dataBaseType.sqlBase);
     }
 
     public boolean isDataType(DataType dataType) {

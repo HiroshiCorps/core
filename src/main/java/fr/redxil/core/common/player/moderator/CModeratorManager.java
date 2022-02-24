@@ -11,7 +11,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
-import fr.redxil.core.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,10 +87,9 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Collection<Long> getLoadedModerator() {
-        List<Long> moderatorString = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString());
-        return new ArrayList<Long>() {{
-            for (long longS : moderatorString)
-                add(longS);
+        List<Long> moderatorString = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataRedis.LIST_MODERATOR.getString());
+        return new ArrayList<>() {{
+            this.addAll(moderatorString);
         }};
     }
 
@@ -157,7 +156,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isLoaded(long memberID) {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataValue.LIST_MODERATOR.getString()).contains(memberID);
+        return API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataRedis.LIST_MODERATOR.getString()).contains(memberID);
     }
 
 }

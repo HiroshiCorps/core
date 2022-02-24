@@ -15,7 +15,7 @@ import fr.redxil.api.common.game.utils.HostAccess;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.core.common.data.GameDataValue;
+import fr.redxil.core.common.data.GameDataRedis;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,9 +34,9 @@ public class CHost extends CGame implements Host {
 
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        redisManager.setRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(gameID), author);
-        redisManager.setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(gameID), HostAccess.CLOSE.toString());
-        redisManager.getRedisList(GameDataValue.LIST_HOST_REDIS.getString()).add(gameID);
+        redisManager.setRedisString(GameDataRedis.HOST_AUTHOR_REDIS.getString(gameID), author);
+        redisManager.setRedisString(GameDataRedis.HOST_ACCESS_REDIS.getString(gameID), HostAccess.CLOSE.toString());
+        redisManager.getRedisList(GameDataRedis.LIST_HOST_REDIS.getString()).add(gameID);
 
         return new CHost(gameID);
 
@@ -44,17 +44,17 @@ public class CHost extends CGame implements Host {
 
     @Override
     public UUID getAuthor() {
-        return UUID.fromString(API.getInstance().getRedisManager().getRedisString(GameDataValue.HOST_AUTHOR_REDIS.getString(this)));
+        return UUID.fromString(API.getInstance().getRedisManager().getRedisString(GameDataRedis.HOST_AUTHOR_REDIS.getString(this)));
     }
 
     @Override
     public HostAccess getHostAccess() {
-        return HostAccess.getStatus(API.getInstance().getRedisManager().getRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(this)));
+        return HostAccess.getStatus(API.getInstance().getRedisManager().getRedisString(GameDataRedis.HOST_ACCESS_REDIS.getString(this)));
     }
 
     @Override
     public void setHostAccess(HostAccess hostAccess) {
-        API.getInstance().getRedisManager().setRedisString(GameDataValue.HOST_ACCESS_REDIS.getString(this), hostAccess.toString());
+        API.getInstance().getRedisManager().setRedisString(GameDataRedis.HOST_ACCESS_REDIS.getString(this), hostAccess.toString());
     }
 
     @Override
@@ -90,12 +90,12 @@ public class CHost extends CGame implements Host {
 
     @Override
     public List<UUID> getAllowPlayer() {
-        return API.getInstance().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWPLAYER_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataRedis.HOST_ALLOWPLAYER_REDIS.getString(this));
     }
 
     @Override
     public List<UUID> getAllowSpectator() {
-        return API.getInstance().getRedisManager().getRedisList(GameDataValue.HOST_ALLOWSPECTATOR_REDIS.getString(this));
+        return API.getInstance().getRedisManager().getRedisList(GameDataRedis.HOST_ALLOWSPECTATOR_REDIS.getString(this));
     }
 
     @Override

@@ -11,46 +11,46 @@ package fr.redxil.core.common.player.sqlmodel.player;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.common.data.LinkDataValue;
+import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.sql.SQLModel;
 
 public class PlayerLinkModel extends SQLModel implements LinkData {
 
     public PlayerLinkModel(APIOfflinePlayer creator, APIOfflinePlayer target, String type) {
-        super("link", LinkDataValue.LINK_ID_SQL.getString());
-        this.set(LinkDataValue.FROM_ID_SQL.getString(), Long.valueOf(creator.getMemberID()).intValue());
-        this.set(LinkDataValue.TO_ID_SQL.getString(), Long.valueOf(target.getMemberID()).intValue());
-        this.set(LinkDataValue.LINK_TYPE_SQL.getString(), type);
+        super("link", LinkDataSql.LINK_ID_SQL.getSQLColumns());
+        this.set(LinkDataSql.FROM_ID_SQL.getSQLColumns(), Long.valueOf(creator.getMemberID()).intValue());
+        this.set(LinkDataSql.TO_ID_SQL.getSQLColumns(), Long.valueOf(target.getMemberID()).intValue());
+        this.set(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), type);
     }
 
     @Override
     public int getLinkID() {
-        return getInt(LinkDataValue.LINK_ID_SQL.getString());
+        return getInt(LinkDataSql.LINK_ID_SQL.getSQLColumns());
     }
 
     @Override
     public long getFromPlayer() {
-        return Integer.valueOf(getInt(LinkDataValue.FROM_ID_SQL.getString())).longValue();
+        return Integer.valueOf(getInt(LinkDataSql.FROM_ID_SQL.getSQLColumns())).longValue();
     }
 
     @Override
     public long getToPlayer() {
-        return Integer.valueOf(getInt(LinkDataValue.TO_ID_SQL.getString())).longValue();
+        return Integer.valueOf(getInt(LinkDataSql.TO_ID_SQL.getSQLColumns())).longValue();
     }
 
     @Override
     public String getLinkType() {
-        return getString(LinkDataValue.LINK_TYPE_SQL.getString());
+        return getString(LinkDataSql.LINK_TYPE_SQL.getSQLColumns());
     }
 
     @Override
     public void setLinkType(String linkType) {
-        set(LinkDataValue.LINK_TYPE_SQL.getString(), linkType);
+        set(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), linkType);
     }
 
     @Override
     public void deleteLink() {
-        CoreAPI.getInstance().getSQLConnection().asyncExecute("DELETE * FROM link WHERE " + LinkDataValue.LINK_ID_SQL.getString() + " = ?", getLinkID());
+        CoreAPI.getInstance().getSQLConnection().asyncExecute("DELETE * FROM link WHERE " + LinkDataSql.LINK_ID_SQL.getSQLColumns() + " = ?", getLinkID());
     }
 
 }

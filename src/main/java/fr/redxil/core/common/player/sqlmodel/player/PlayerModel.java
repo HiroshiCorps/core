@@ -9,7 +9,7 @@
 package fr.redxil.core.common.player.sqlmodel.player;
 
 import fr.redxil.api.common.player.rank.Rank;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.player.PlayerDataSql;
 import fr.redxil.core.common.sql.SQLModel;
 
 import java.util.UUID;
@@ -17,11 +17,11 @@ import java.util.UUID;
 public class PlayerModel extends SQLModel {
 
     public PlayerModel() {
-        super("member", PlayerDataValue.PLAYER_MEMBERID_SQL.getString());
+        super("member", PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns());
     }
 
     public long getPowerRank() {
-        return Integer.valueOf(this.getInt(PlayerDataValue.PLAYER_RANK_SQL.getString())).longValue();
+        return Integer.valueOf(this.getInt(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns())).longValue();
     }
 
     public Rank getRank() {
@@ -29,15 +29,15 @@ public class PlayerModel extends SQLModel {
     }
 
     public int getMemberID() {
-        return this.getInt(PlayerDataValue.PLAYER_MEMBERID_SQL.getString());
+        return this.getInt(PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns());
     }
 
     public String getName() {
-        return this.getString(PlayerDataValue.PLAYER_NAME_SQL.getString());
+        return this.getString(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns());
     }
 
     public UUID getUUID() {
-        String uuidString = this.getString(PlayerDataValue.PLAYER_UUID_SQL.getString());
+        String uuidString = this.getString(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns());
         return uuidString != null ? UUID.fromString(uuidString) : null;
     }
 

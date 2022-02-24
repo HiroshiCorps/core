@@ -9,29 +9,29 @@
 package fr.redxil.core.common.server;
 
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.core.common.data.ServerDataValue;
+import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.sql.SQLModel;
 
 public class ServerModel extends SQLModel {
 
     public ServerModel() {
-        super("server", "server_id");
+        super("server", ServerDataSql.SERVER_ID_SQL.getSQLColumns());
     }
 
     public String getServerName() {
-        return this.getString(ServerDataValue.SERVER_NAME_SQL.getString());
+        return this.getString(ServerDataSql.SERVER_NAME_SQL.getSQLColumns());
     }
 
     public int getMaxPlayers() {
-        return this.getInt(ServerDataValue.SERVER_MAXP_SQL.getString());
+        return this.getInt(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns());
     }
 
     public ServerType getServerType() {
-        return ServerType.valueOf(this.getString(ServerDataValue.SERVER_TYPE_SQL.getString()));
+        return ServerType.valueOf(this.getString(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns()));
     }
 
     public int getServerID() {
-        return this.getInt(ServerDataValue.SERVER_ID_SQL.getString());
+        return this.getInt(ServerDataSql.SERVER_ID_SQL.getSQLColumns());
     }
 
 }

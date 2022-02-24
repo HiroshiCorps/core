@@ -12,7 +12,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.paper.utils.ActionBar;
-import fr.redxil.core.common.data.ModeratorDataValue;
+import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -39,7 +39,7 @@ public class VanishGestion {
         Player modPlayer = Bukkit.getPlayer(mod.getName());
         if (modPlayer == null) return;
 
-        API.getInstance().getRedisManager().setRedisString(ModeratorDataValue.MODERATOR_VANISH_REDIS.getString(mod), Boolean.valueOf(b).toString());
+        API.getInstance().getRedisManager().setRedisString(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(mod), Boolean.valueOf(b).toString());
 
         modPlayer.setGameMode(GameMode.SURVIVAL);
 
@@ -67,23 +67,12 @@ public class VanishGestion {
                         if (!mod.isModeratorMod()) {
 
                             switch (lastMSG.get()) {
-
-                                case 0: {
-                                    message = "§cVous êtes actuellement invisible !";
-                                    break;
-                                }
-
-                                case 1: {
-                                    message = "Mod moderation: §4§lOFF";
-                                    break;
-                                }
-
-                                default: {
+                                case 0 -> message = "§cVous êtes actuellement invisible !";
+                                case 1 -> message = "Mod moderation: §4§lOFF";
+                                default -> {
                                     lastMSG.set(0);
                                     message = "§cVous êtes actuellement invisible !";
-                                    break;
                                 }
-
                             }
 
                         } else {
@@ -100,74 +89,35 @@ public class VanishGestion {
                                     if (player != null) {
 
                                         switch (lastMSG.get()) {
-
-                                            case 0: {
-                                                message = "§cVous êtes actuellement invisible !";
-                                                break;
-                                            }
-
-                                            case 1: {
-                                                message = "Cible: §a§l" + targetName;
-                                                break;
-                                            }
-
-                                            case 2: {
-                                                double healPercent = (100 * player.getHealth()) / 20;
-                                                message = "HP: §a§l" + healPercent;
-                                                break;
-                                            }
-
-                                            case 3: {
-                                                message = "Distance: §a§l" + calculateDiff(modPlayer.getLocation(), player.getLocation());
-                                                break;
-                                            }
-
-                                            case 4: {
+                                            case 0 -> message = "§cVous êtes actuellement invisible !";
+                                            case 1 -> message = "Cible: §a§l" + targetName;
+                                            case 2 -> message = "HP: §a§l" + (100 * player.getHealth()) / 20;
+                                            case 3 -> message = "Distance: §a§l" + calculateDiff(modPlayer.getLocation(), player.getLocation());
+                                            case 4 -> {
                                                 String freezeString = "§c§lNON";
                                                 if (target.isFreeze()) freezeString = "§a§lOUI";
                                                 message = "Gelé: " + freezeString;
-                                                break;
                                             }
-
-                                            default: {
+                                            default -> {
                                                 lastMSG.set(0);
                                                 message = "§cVous êtes actuellement invisible !";
-                                                break;
                                             }
-
                                         }
 
                                     } else {
                                         switch (lastMSG.get()) {
-
-                                            case 0: {
-                                                message = "§cVous êtes actuellement invisible !";
-                                                break;
-                                            }
-
-                                            case 1: {
-                                                message = "Cible: §a§l" + targetName;
-                                                break;
-                                            }
-
-                                            case 2: {
-                                                message = "Serveur: §a§l" + target.getServer().getServerName();
-                                                break;
-                                            }
-
-                                            case 3: {
+                                            case 0 -> message = "§cVous êtes actuellement invisible !";
+                                            case 1 -> message = "Cible: §a§l" + targetName;
+                                            case 2 -> message = "Serveur: §a§l" + target.getServer().getServerName();
+                                            case 3 -> {
                                                 String freezeString = "§c§lNON";
                                                 if (target.isFreeze()) freezeString = "§a§lOUI";
                                                 message = "Gelé: " + freezeString;
-                                                break;
                                             }
-
-                                            default: {
+                                            default -> {
                                                 lastMSG.set(0);
                                                 message = "§cVous êtes actuellement invisible !";
-                                                break;
                                             }
-
                                         }
 
                                     }
@@ -175,32 +125,19 @@ public class VanishGestion {
                                 } else {
 
                                     switch (lastMSG.get()) {
-
-                                        case 0: {
-                                            message = "§cVous êtes actuellement invisible !";
-                                            break;
-                                        }
-
-                                        case 1: {
-                                            message = "Cible: §a§l" + targetName;
-                                            break;
-                                        }
-
-                                        case 2: {
+                                        case 0 -> message = "§cVous êtes actuellement invisible !";
+                                        case 1 -> message = "Cible: §a§l" + targetName;
+                                        case 2 -> {
                                             String msg2 = "§c§lDéconnecté";
                                             APIOfflinePlayer offTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
                                             if (offTarget.isBan())
                                                 msg2 = "§4§lBANNIS";
                                             message = "Etat: " + msg2;
-                                            break;
                                         }
-
-                                        default: {
+                                        default -> {
                                             lastMSG.set(0);
                                             message = "§cVous êtes actuellement invisible !";
-                                            break;
                                         }
-
                                     }
 
                                 }
@@ -208,23 +145,12 @@ public class VanishGestion {
                             } else {
 
                                 switch (lastMSG.get()) {
-
-                                    case 0: {
-                                        message = "§cVous êtes actuellement invisible !";
-                                        break;
-                                    }
-
-                                    case 1: {
-                                        message = "Aucune Cible !";
-                                        break;
-                                    }
-
-                                    default: {
+                                    case 0 -> message = "§cVous êtes actuellement invisible !";
+                                    case 1 -> message = "Aucune Cible !";
+                                    default -> {
                                         lastMSG.set(0);
                                         message = "§cVous êtes actuellement invisible !";
-                                        break;
                                     }
-
                                 }
 
                             }

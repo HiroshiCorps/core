@@ -8,21 +8,20 @@
 
 package fr.redxil.core.common.player.sqlmodel.player;
 
-import fr.redxil.core.common.data.MoneyDataValue;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.money.MoneyDataSql;
 import fr.redxil.core.common.sql.SQLModel;
 
 public class MoneyModel extends SQLModel {
     public MoneyModel() {
-        super("money", PlayerDataValue.PLAYER_MEMBERID_SQL.getString());
+        super("money", MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns());
     }
 
     public int getCoins() {
-        return this.getInt(MoneyDataValue.PLAYER_COINS_SQL.getString());
+        return this.getInt(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns());
     }
 
     public int getSolde() {
-        return this.getInt(MoneyDataValue.PLAYER_SOLDE_SQL.getString());
+        return this.getInt(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns());
     }
 
 }

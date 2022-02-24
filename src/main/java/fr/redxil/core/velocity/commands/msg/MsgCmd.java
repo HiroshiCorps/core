@@ -17,7 +17,7 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkUsage;
-import fr.redxil.core.common.data.PlayerDataValue;
+import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -70,8 +70,8 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(message).sendTo(sp.getUUID());
 
-        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(sp), target.getName());
-        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_LASTMSG_REDIS.getString(target), sp.getName());
+        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(sp), target.getName());
+        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(target), sp.getName());
     }
 
     @Override

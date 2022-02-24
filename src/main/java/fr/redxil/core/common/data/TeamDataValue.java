@@ -12,43 +12,40 @@ package fr.redxil.core.common.data;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.group.team.Team;
-import fr.redxil.core.common.data.utils.DataBaseType;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
 public enum TeamDataValue {
 
-    TEAM_GAME_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/game", true, true),
-    TEAM_DISPLAY_NAME_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/dname", true, true),
+    TEAM_GAME_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/game", true, true),
+    TEAM_DISPLAY_NAME_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/dname", true, true),
 
-    TEAM_COLOR_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/color", true, true),
-    TEAM_CHAT_COLOR_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/chatcolor", true, true),
+    TEAM_COLOR_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/color", true, true),
+    TEAM_CHAT_COLOR_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/chatcolor", true, true),
 
-    TEAM_PREFIX_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/prefix", true, true),
-    TEAM_SUFFIX_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/suffix", true, true),
+    TEAM_PREFIX_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/prefix", true, true),
+    TEAM_SUFFIX_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/suffix", true, true),
 
-    TEAM_HIDE_OTHER_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/ho", true, true),
-    TEAM_CS_AV_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/csav", true, true),
-    TEAM_FF_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/ff", true, true),
-    TEAM_COLISION_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/col", true, true),
+    TEAM_HIDE_OTHER_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/ho", true, true),
+    TEAM_CS_AV_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/csav", true, true),
+    TEAM_FF_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/ff", true, true),
+    TEAM_COLISION_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/col", true, true),
 
-    TEAM_PLAYERS_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/players", true, true),
+    TEAM_PLAYERS_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/players", true, true),
 
-    TEAM_MAXP_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/maxp", true, true),
+    TEAM_MAXP_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/maxp", true, true),
 
-    TEAM_ATTACHED_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/<teamName>/attached", true, true),
+    TEAM_ATTACHED_REDIS(DataType.TEAM, "team/<serverID>/<teamName>/attached", true, true),
 
-    TEAM_LINK_MAP_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/link", true, false),
-    TEAM_LIST_REDIS(DataBaseType.REDIS, DataType.TEAM, "team/<serverID>/list", true, false);
+    TEAM_LINK_MAP_REDIS(DataType.GLOBAL, "team/<serverID>/link", true, false),
+    TEAM_LIST_REDIS(DataType.GLOBAL, "team/<serverID>/list", true, false);
 
     final DataType dataType;
-    final DataBaseType dataBaseType;
     final String location;
     final boolean needGame;
     final boolean needTeam;
 
-    TeamDataValue(DataBaseType dataBaseType, DataType dataType, String location, boolean needGame, boolean needTeam) {
-        this.dataBaseType = dataBaseType;
+    TeamDataValue(DataType dataType, String location, boolean needGame, boolean needTeam) {
         this.dataType = dataType;
         this.location = location;
         this.needGame = needGame;
@@ -60,7 +57,7 @@ public enum TeamDataValue {
         RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
 
         for (TeamDataValue mdv : values())
-            if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
+            if ((dataType == null || mdv.isDataType(dataType)))
                 if (mdv.hasNeedInfo(gameID, teamName))
                     redissonClient.getBucket(mdv.getString(gameID, teamName)).delete();
 
@@ -104,10 +101,6 @@ public enum TeamDataValue {
 
     public boolean isNeedTeam() {
         return needTeam;
-    }
-
-    public boolean isDataBase(DataBaseType dataBaseType) {
-        return this.dataBaseType.sqlBase.equals(dataBaseType.sqlBase);
     }
 
     public boolean isDataType(DataType dataType) {
