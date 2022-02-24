@@ -39,7 +39,7 @@ public enum PlayerDataValue {
 
     PLAYER_MAP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/map", true),
 
-    PLAYER_IPINFO_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ipinfo", true),
+    PLAYER_IP_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/ip", true),
     PLAYER_FREEZE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/freeze", true),
 
     PLAYER_HUBLOGGED_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/hublogged", true),
@@ -49,8 +49,8 @@ public enum PlayerDataValue {
 
     PLAYER_INPUT_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/input", true),
 
-    CONNECTED_BUNGEESERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/bungee_server", true),
-    CONNECTED_SPIGOTSERVER_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/spigot_server", true),
+    PLAYER_BUNGEE_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/bungee_server", true),
+    PLAYER_SPIGOT_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/spigot_server", true),
 
     PLAYER_LASTMSG_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/lastmsg", true),
 

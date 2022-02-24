@@ -60,7 +60,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
             this.put(PlayerDataValue.PLAYER_NAME_SQL.getString(), name);
             this.put(PlayerDataValue.PLAYER_UUID_SQL.getString(), uuid.toString());
             this.put(PlayerDataValue.PLAYER_RANK_SQL.getString(), Rank.JOUEUR.getRankPower().intValue());
-
+            this.put(PlayerDataValue.PLAYER_IP_SQL.getString(), ipInfo.getIp());
         }}, "WHERE " + PlayerDataValue.PLAYER_UUID_SQL.getString() + " = ?", uuid.toString());
 
         long memberID = playerModel.getMemberID();
@@ -78,11 +78,11 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         redisManager.setRedisString(PlayerDataValue.PLAYER_NAME_REDIS.getString(memberID), name);
         redisManager.setRedisString(PlayerDataValue.PLAYER_REAL_NAME_REDIS.getString(memberID), name);
         redisManager.setRedisString(PlayerDataValue.PLAYER_UUID_REDIS.getString(memberID), uuid.toString());
-        redisManager.setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(memberID), API.getInstance().getServer().getServerName());
+        redisManager.setRedisString(PlayerDataValue.PLAYER_BUNGEE_REDIS.getString(memberID), API.getInstance().getServer().getServerName());
         redisManager.setRedisLong(PlayerDataValue.PLAYER_RANK_REDIS.getString(memberID), playerModel.getPowerRank());
         redisManager.setRedisLong(PlayerDataValue.PLAYER_REAL_RANK_REDIS.getString(memberID), playerModel.getPowerRank());
         redisManager.setRedisString(PlayerDataValue.PLAYER_INPUT_REDIS.getString(memberID), null);
-        redisManager.setRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(memberID), ipInfo.toString());
+        redisManager.setRedisString(PlayerDataValue.PLAYER_IP_REDIS.getString(memberID), ipInfo.toString());
 
         Timestamp timestamp = (Timestamp) playerModel.get(PlayerDataValue.PLAYER_RANK_TIME_SQL.getString());
         if (timestamp != null) {
@@ -155,7 +155,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         LinkDataValue.clearRedisData(DataType.PLAYER, this.getMemberID());
 
-        rm.getRedisList("ip/" + getIpInfo().getIp()).remove(getRealName());
+        rm.getRedisList("ip/" + getIP().getIp()).remove(getRealName());
 
         PlayerDataValue.clearRedisData(DataType.PLAYER, this.getMemberID());
 
@@ -163,7 +163,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Server getServer() {
-        String serverName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(this));
+        String serverName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_SPIGOT_REDIS.getString(this));
         if (serverName == null) return null;
         return API.getInstance().getServerManager().getServer(serverName);
     }
@@ -173,7 +173,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Server getBungeeServer() {
-        String serverName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(this));
+        String serverName = API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_BUNGEE_REDIS.getString(this));
         if (serverName == null) return null;
         return API.getInstance().getServerManager().getServer(serverName);
     }
@@ -392,8 +392,14 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public IpInfo getIpInfo() {
-        return IpInfo.fromString(API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_IPINFO_REDIS.getString(this)));
+    public IpInfo getIP() {
+        return IpInfo.fromString(API.getInstance().getRedisManager().getRedisString(PlayerDataValue.PLAYER_IP_REDIS.getString(this)));
+    }
+
+    @Override
+    public void setIP(IpInfo ipInfo) {
+        API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_IP_REDIS.getString(this), ipInfo.getIp());
+        super.setIP(ipInfo);
     }
 
     @Override

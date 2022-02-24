@@ -223,11 +223,11 @@ public class CServer implements Server {
             listPlayer.add(uuid.toString());
 
         if (API.getInstance().isVelocity())
-            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_BUNGEESERVER_REDIS.getString(apiPlayer), getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_BUNGEE_REDIS.getString(apiPlayer), getServerName());
         else {
             Server server = apiPlayer.getServer();
             if (server != null) server.removePlayerInServer(apiPlayer.getUUID());
-            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.CONNECTED_SPIGOTSERVER_REDIS.getString(apiPlayer), getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataValue.PLAYER_SPIGOT_REDIS.getString(apiPlayer), getServerName());
         }
     }
 

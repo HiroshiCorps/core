@@ -6,6 +6,7 @@
 
 package fr.redxil.core.common.player;
 
+import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.LinkData;
@@ -258,6 +259,16 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
         return getLink(LinkUsage.TO, apiOfflinePlayer, s);
 
+    }
+
+    @Override
+    public IpInfo getIP() {
+        return IpInfo.fromString(getPlayerModel().getString(PlayerDataValue.PLAYER_IP_SQL.getString(this)));
+    }
+
+    @Override
+    public void setIP(IpInfo ipInfo) {
+        getPlayerModel().set(PlayerDataValue.PLAYER_IP_SQL.getString(this), ipInfo.getIp());
     }
 
     @Override
