@@ -1,7 +1,10 @@
-/* Copyright (C) GIMENEZ Nino and PHILIPPE Nelson - All Rights Reserved
+/*
+ *
+ * Copyright (C) GIMENEZ Nino and PHILIPPE Nelson - All Rights Reserved
  * Unauthorized copying or modification of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
+ *
  */
 
 package fr.redxil.core.velocity.listener;
@@ -64,9 +67,12 @@ public class JoinListener {
         API.getInstance().getPluginEnabler().printLog(Level.FINE, "First Connection");
         if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
             e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
-                    "§4§lSERVER NETWORK§r\n"
-                            + "§cConnexion non autorisé§r\n\n"
-                            + "§7Raison: Une personne est déjà connecté avec votre UUID§e§r\n"
+                    """
+                                    §4§lSERVER NETWORK§r
+                                    §cConnexion non autorisé§r
+
+                                    §7Raison: Une personne est déjà connecté avec votre UUID§e§r
+                            """
             ).getFinalTextComponent()));
             return;
         }

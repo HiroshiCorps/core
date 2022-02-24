@@ -1,8 +1,9 @@
 /*
- *  Copyright (C) GIMENEZ Nino and PHILIPPE Nelson - All Rights Reserved
- *  * Unauthorized copying or modification of this file, via any medium is strictly prohibited
- *  * Proprietary and confidential
- *  * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
+ *
+ * Copyright (C) GIMENEZ Nino and PHILIPPE Nelson - All Rights Reserved
+ * Unauthorized copying or modification of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
  *
  */
 
@@ -27,11 +28,24 @@ public abstract class SQLModel {
 
     private final HashMap<SQLColumns, Object> columns = new HashMap<>();
 
+    private final JoinData joinData;
+
     private boolean populate = false;
 
     public SQLModel(String table, SQLColumns primaryKey) {
         this.table = table;
         this.primaryKey = primaryKey;
+        this.joinData = null;
+    }
+
+    public SQLModel(String table, SQLColumns primaryKey, JoinData joinData) {
+        this.table = table;
+        this.primaryKey = primaryKey;
+        this.joinData = joinData;
+    }
+
+    public JoinData getJoinData() {
+        return joinData;
     }
 
     public String getTable() {
@@ -123,8 +137,12 @@ public abstract class SQLModel {
             return null;
         }
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(this.table).append(" SET ");
+        if (getJoinData() != null)
+            stringBuilder.append(getJoinData().toSQL());
         StringBuilder setterBuilder = new StringBuilder();
         for (Map.Entry<SQLColumns, Object> value : values.entrySet()) {
+            if (!tablesAccept(value.getKey()))
+                continue;
             if (!setterBuilder.isEmpty())
                 setterBuilder.append(", ");
             setterBuilder.append(value.getKey().toSQL()).append(" = ?");
@@ -137,6 +155,15 @@ public abstract class SQLModel {
 
     public boolean exists() {
         return this.populate;
+    }
+
+    public boolean tablesAccept(SQLColumns sqlColumns) {
+        if (this.getTable().equalsIgnoreCase(sqlColumns.getTable()))
+            return true;
+        JoinData joinData = getJoinData();
+        if (joinData == null)
+            return false;
+        return joinData.getColumnsPair().getTwo().getColumns().equalsIgnoreCase(sqlColumns.getTable());
     }
 
 }

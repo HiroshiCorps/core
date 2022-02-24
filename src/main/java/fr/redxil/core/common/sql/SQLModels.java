@@ -1,8 +1,9 @@
 /*
- *  Copyright (C) GIMENEZ Nino and PHILIPPE Nelson - All Rights Reserved
- *  * Unauthorized copying or modification of this file, via any medium is strictly prohibited
- *  * Proprietary and confidential
- *  * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
+ *
+ * Copyright (C) GIMENEZ Nino and PHILIPPE Nelson - All Rights Reserved
+ * Unauthorized copying or modification of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by GIMENEZ Nino and PHILIPPE Nelson, ninogmz33@gmail.com | philippenelson59@gmail.com - 2021
  *
  */
 
@@ -39,8 +40,15 @@ public class SQLModels<T extends SQLModel> {
 
     public void get(T model, int primaryKey) {
         assert model != null;
-        API.getInstance().getSQLConnection().query("SELECT * FROM " + model.getTable()
-                + " WHERE " + model.getPrimaryKey() + " = " + primaryKey, resultSet -> {
+
+        StringBuilder query = new StringBuilder("SELECT * FROM " + model.getTable()
+                + " WHERE " + model.getPrimaryKey() + " = " + primaryKey);
+
+        JoinData joinData = model.getJoinData();
+        if (joinData != null)
+            query.append(" ").append(joinData.toSQL());
+
+        API.getInstance().getSQLConnection().query(query.toString(), resultSet -> {
             try {
                 if (resultSet.first()) {
                     model.populate(resultSet);
@@ -62,7 +70,17 @@ public class SQLModels<T extends SQLModel> {
         try {
             T model = generateInstance();
             assert model != null;
-            API.getInstance().getSQLConnection().query("SELECT * FROM " + model.getTable() + (query != null ? " " + query : ""),
+
+            StringBuilder query2 = new StringBuilder("SELECT * FROM " + model.getTable());
+
+            if (query != null)
+                query2.append(" ").append(query);
+
+            JoinData joinData = model.getJoinData();
+            if (joinData != null)
+                query2.append(" ").append(joinData.toSQL());
+
+            API.getInstance().getSQLConnection().query(query2.toString(),
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
@@ -170,9 +188,9 @@ public class SQLModels<T extends SQLModel> {
 
     }
 
-    private Pair<String, String> listCreator(T model) {
+    private Pair<String, String> listCreator(T model, String table) {
 
-        HashMap<SQLColumns, Object> dataList = new HashMap<>(model.getDataMap(model.getTable()));
+        HashMap<SQLColumns, Object> dataList = new HashMap<>(model.getDataMap(table));
 
         if (model.get(model.getPrimaryKey()) != null)
             dataList.put(model.getPrimaryKey(), model.get(model.getPrimaryKey()));
@@ -189,7 +207,7 @@ public class SQLModels<T extends SQLModel> {
 
     public void insert(T model) {
 
-        Pair<String, String> listNecString = listCreator(model);
+        Pair<String, String> listNecString = listCreator(model, model.getTable());
 
         String query = "INSERT INTO " + model.getTable() + "(" + listNecString.getOne() + ") VALUES (" + listNecString.getTwo() + ")";
 
