@@ -165,7 +165,7 @@ public class SQLModels<T extends SQLModel> {
         API.getInstance().getSQLConnection().execute(queryString, vars);
     }
 
-    private String listCreator(Collection<Object> collection, String dataCloser) {
+    private String listCreator(Collection<Object> collection, boolean value) {
 
         StringBuilder tableListStr = new StringBuilder();
 
@@ -175,11 +175,15 @@ public class SQLModels<T extends SQLModel> {
                 tableListStr.append(", ");
             }
 
-            if (entry == null) {
-                tableListStr.append("NULL");
+            if (!value) {
+                if (entry == null) {
+                    tableListStr.append("NULL");
+                } else {
+                    String tmp = entry.toString().replaceAll("'", "''");
+                    tableListStr.append(tmp);
+                }
             } else {
-                String tmp = entry.toString().replaceAll("'", "''");
-                tableListStr.append(dataCloser).append(tmp).append(dataCloser);
+                tableListStr.append("?");
             }
 
         }
@@ -188,11 +192,11 @@ public class SQLModels<T extends SQLModel> {
 
     }
 
-    private Pair<String, String> listCreator(T model, String table) {
+    private Pair<Pair<String, String>, Collection<Object>> listCreator(T model, String table) {
 
         HashMap<SQLColumns, Object> dataList = new HashMap<>(model.getDataMap(table));
 
-        if (model.get(model.getPrimaryKey()) != null)
+        if (model.getTable().equals(table) && model.get(model.getPrimaryKey()) != null)
             dataList.put(model.getPrimaryKey(), model.get(model.getPrimaryKey()));
 
         ArrayList<Object> columns = new ArrayList<>() {{
@@ -201,19 +205,38 @@ public class SQLModels<T extends SQLModel> {
             }
         }};
 
-        return new Pair<>(listCreator(columns, null), listCreator(dataList.values(), "'"));
+        return new Pair<>(new Pair<>(listCreator(columns, false), listCreator(dataList.values(), true)), dataList.values());
 
     }
 
     public void insert(T model) {
 
-        Pair<String, String> listNecString = listCreator(model, model.getTable());
+        String query;
+        JoinData joinData = model.getJoinData();
 
-        String query = "INSERT INTO " + model.getTable() + "(" + listNecString.getOne() + ") VALUES (" + listNecString.getTwo() + ")";
+        Pair<Pair<String, String>, Collection<Object>> listNecString = listCreator(model, model.getTable());
+        Collection<Object> objectList = listNecString.getTwo();
+
+        if (joinData == null) {
+
+            query = "INSERT INTO " + model.getTable() + "(" + listNecString.getOne().getOne() + ") VALUES (" + listNecString.getOne().getTwo() + ")";
+
+        } else {
+
+            Pair<Pair<String, String>, Collection<Object>> listNecString2 = listCreator(model, joinData.columnsPair.getTwo().getTable());
+            objectList.addAll(listNecString2.getTwo());
+            query = "BEGIN TRANSACTION" +
+                    "DECLARE @DataID int;" +
+                    "INSERT INTO " + model.getTable() + "(" + listNecString.getOne() + ") VALUES (" + listNecString.getTwo() + ");" +
+                    "SELECT @DataID = scope_identity();" +
+                    "INSERT INTO " + joinData.getColumnsPair().getTwo().getTable() + "(" + joinData.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getOne().getOne() + ") VALUES (@DataID, " + listNecString2.getOne().getTwo() + ");" +
+                    "COMMIT";
+
+        }
 
         this.logs.info(query);
 
-        API.getInstance().getSQLConnection().execute(query);
+        API.getInstance().getSQLConnection().execute(query, objectList);
 
     }
 
