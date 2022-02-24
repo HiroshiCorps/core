@@ -68,6 +68,13 @@ public abstract class SQLModel {
         }};
     }
 
+    public boolean containsDataForTable(String table) {
+        for (Map.Entry<SQLColumns, Object> value : columns.entrySet())
+            if (value.getKey().getTable().equalsIgnoreCase(table))
+                return true;
+        return false;
+    }
+
     public void populate(ResultSet resultSet) {
         try {
             ResultSetMetaData meta = resultSet.getMetaData();

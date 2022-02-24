@@ -217,23 +217,21 @@ public class SQLModels<T extends SQLModel> {
         TripletData<String, String, Collection<Object>> listNecString = listCreator(model, model.getTable());
         Collection<Object> objectList = listNecString.getThird();
 
-        if (joinData == null) {
+        if (joinData == null || !model.containsDataForTable(joinData.getColumnsPair().getTwo().getTable())) {
 
             query = "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ")";
 
         } else {
 
-            TripletData<String, String, Collection<Object>> listNecString2 = listCreator(model, joinData.columnsPair.getTwo().getTable());
-            if (!listNecString2.getFirst().isBlank()) {
-                objectList.addAll(listNecString2.getThird());
-                query = "BEGIN TRANSACTION" +
-                        "DECLARE @DataID int;" +
-                        "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ");" +
+            TripletData<String, String, Collection<Object>> listNecString2 = listCreator(model, joinData.getColumnsPair().getTwo().getTable());
+            objectList.addAll(listNecString2.getThird());
+            query = "BEGIN TRANSACTION" +
+                    "DECLARE @DataID int;" +
+                    "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ");" +
                         "SELECT @DataID = scope_identity();" +
                         "INSERT INTO " + joinData.getColumnsPair().getTwo().getTable() + "(" + joinData.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getFirst() + ") VALUES (@DataID, " + listNecString2.getSecond() + ");" +
                         "COMMIT";
-            } else
-                query = "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ")";
+
         }
 
         this.logs.info(query);
