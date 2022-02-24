@@ -208,7 +208,7 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
         String ip = "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer)
-            ip = String.valueOf(API.getInstance().getRedisManager().getRedissonClient().getList("ip/" + ((APIPlayer) apiOfflinePlayer).getIpInfo().getIp()).size() - 1);
+            ip = String.valueOf(API.getInstance().getRedisManager().getRedissonClient().getList("ip/" + apiOfflinePlayer.getIP().getIp()).size() - 1);
 
         tcb.appendNewComponentBuilder("§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n");
 
