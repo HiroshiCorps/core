@@ -10,8 +10,8 @@
 package fr.redxil.core.common.sql;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.utils.Pair;
 import fr.redxil.core.common.data.utils.SQLColumns;
+import fr.redxil.core.common.utils.TripletData;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -192,7 +192,7 @@ public class SQLModels<T extends SQLModel> {
 
     }
 
-    private Pair<Pair<String, String>, Collection<Object>> listCreator(T model, String table) {
+    private TripletData<String, String, Collection<Object>> listCreator(T model, String table) {
 
         HashMap<SQLColumns, Object> dataList = new HashMap<>(model.getDataMap(table));
 
@@ -205,7 +205,7 @@ public class SQLModels<T extends SQLModel> {
             }
         }};
 
-        return new Pair<>(new Pair<>(listCreator(columns, false), listCreator(dataList.values(), true)), dataList.values());
+        return new TripletData<>(listCreator(columns, false), listCreator(dataList.values(), true), dataList.values());
 
     }
 
@@ -214,24 +214,26 @@ public class SQLModels<T extends SQLModel> {
         String query;
         JoinData joinData = model.getJoinData();
 
-        Pair<Pair<String, String>, Collection<Object>> listNecString = listCreator(model, model.getTable());
-        Collection<Object> objectList = listNecString.getTwo();
+        TripletData<String, String, Collection<Object>> listNecString = listCreator(model, model.getTable());
+        Collection<Object> objectList = listNecString.getThird();
 
         if (joinData == null) {
 
-            query = "INSERT INTO " + model.getTable() + "(" + listNecString.getOne().getOne() + ") VALUES (" + listNecString.getOne().getTwo() + ")";
+            query = "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ")";
 
         } else {
 
-            Pair<Pair<String, String>, Collection<Object>> listNecString2 = listCreator(model, joinData.columnsPair.getTwo().getTable());
-            objectList.addAll(listNecString2.getTwo());
-            query = "BEGIN TRANSACTION" +
-                    "DECLARE @DataID int;" +
-                    "INSERT INTO " + model.getTable() + "(" + listNecString.getOne() + ") VALUES (" + listNecString.getTwo() + ");" +
-                    "SELECT @DataID = scope_identity();" +
-                    "INSERT INTO " + joinData.getColumnsPair().getTwo().getTable() + "(" + joinData.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getOne().getOne() + ") VALUES (@DataID, " + listNecString2.getOne().getTwo() + ");" +
-                    "COMMIT";
-
+            TripletData<String, String, Collection<Object>> listNecString2 = listCreator(model, joinData.columnsPair.getTwo().getTable());
+            if (!listNecString2.getFirst().isBlank()) {
+                objectList.addAll(listNecString2.getThird());
+                query = "BEGIN TRANSACTION" +
+                        "DECLARE @DataID int;" +
+                        "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ");" +
+                        "SELECT @DataID = scope_identity();" +
+                        "INSERT INTO " + joinData.getColumnsPair().getTwo().getTable() + "(" + joinData.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getFirst() + ") VALUES (@DataID, " + listNecString2.getSecond() + ");" +
+                        "COMMIT";
+            } else
+                query = "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ")";
         }
 
         this.logs.info(query);
