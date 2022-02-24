@@ -118,13 +118,13 @@ public abstract class SQLModel {
 
 
     private Pair<String, Collection<Object>> setSQL(Map<SQLColumns, Object> values) {
+        columns.putAll(values);
         if (!this.populate) {
             return null;
         }
         StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(this.table).append(" SET ");
         StringBuilder setterBuilder = new StringBuilder();
         for (Map.Entry<SQLColumns, Object> value : values.entrySet()) {
-            columns.put(value.getKey(), value.getValue());
             if (!setterBuilder.isEmpty())
                 setterBuilder.append(", ");
             setterBuilder.append(value.getKey().toSQL()).append(" = ?");
