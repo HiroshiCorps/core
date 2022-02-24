@@ -150,6 +150,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         super.setSolde(this.getSolde());
         super.setCoins(this.getCoins());
+        getPlayerModel().set(PlayerDataValue.PLAYER_LC_SQL.getString(this), Timestamp.from(Instant.now()));
 
         MoneyDataValue.clearRedisData(DataType.PLAYER, this.getMemberID());
 

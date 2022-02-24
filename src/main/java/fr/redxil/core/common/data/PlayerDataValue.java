@@ -27,6 +27,9 @@ public enum PlayerDataValue {
     PLAYER_NAME_SQL(DataBaseType.SQL, DataType.PLAYER, "member_name", false),
     PLAYER_UUID_SQL(DataBaseType.SQL, DataType.PLAYER, "member_uuid", false),
 
+    PLAYER_FC_SQL(DataBaseType.SQL, DataType.PLAYER, "member_fc", false),
+    PLAYER_LC_SQL(DataBaseType.SQL, DataType.PLAYER, "member_lc", false),
+
     PLAYER_UUID_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/uuid", true),
 
     PLAYER_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "player/<memberID>/name", true),
