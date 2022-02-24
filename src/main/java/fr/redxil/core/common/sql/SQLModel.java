@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 public abstract class SQLModel {
@@ -94,6 +95,25 @@ public abstract class SQLModel {
             API.getInstance().getSQLConnection().asyncExecute("UPDATE " + this.table
                     + " SET " + columnName + " = ? WHERE " + this.primaryKey + " = ?", value, this.getInt(this.primaryKey));
         }
+    }
+
+    public void set(Map<String, Object> values) {
+        if (this.exists() && values.containsKey(this.primaryKey)) {
+            return;
+        }
+        this.columns.putAll(values);
+        if (!this.populate) {
+            return;
+        }
+        StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(this.table).append(" SET ");
+        StringBuilder setterBuilder = new StringBuilder();
+        for (Map.Entry<String, Object> value : values.entrySet()) {
+            if (!setterBuilder.isEmpty())
+                setterBuilder.append(", ");
+            setterBuilder.append(value.getKey()).append(" = ?");
+        }
+        stringBuilder.append(setterBuilder).append(" WHERE ").append(this.primaryKey).append(" = ?");
+        API.getInstance().getSQLConnection().asyncExecute(stringBuilder.toString(), values.values(), this.getInt(this.primaryKey));
     }
 
     public void setSync(String columnName, Object value) {

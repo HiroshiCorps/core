@@ -64,9 +64,11 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
         ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + PlayerDataValue.PLAYER_MEMBERID_SQL.getString() + " = ?", memberID);
 
-        model.set(ModeratorDataValue.MODERATOR_MOD_SQL.getString(), Boolean.valueOf(this.isModeratorMod()).toString());
-        model.set(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(), Boolean.valueOf(this.isVanish()).toString());
-        model.set(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(), this.getCible());
+        model.set(new HashMap<>() {{
+            put(ModeratorDataValue.MODERATOR_MOD_SQL.getString(), Boolean.valueOf(isModeratorMod()).toString());
+            put(ModeratorDataValue.MODERATOR_VANISH_SQL.getString(), Boolean.valueOf(isVanish()).toString());
+            put(ModeratorDataValue.MODERATOR_CIBLE_SQL.getString(), getCible());
+        }});
 
         ModeratorDataValue.clearRedisData(DataType.PLAYER, this.getMemberID());
 

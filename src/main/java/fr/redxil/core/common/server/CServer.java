@@ -167,17 +167,19 @@ public class CServer implements Server {
 
         long id = getServerID();
 
-        //model.set(ServerDataValue.SERVER_TASKS_SQL.getString(), getTasks().toString().toUpperCase());
-
         API.getInstance().getPluginEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
 
         ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataValue.SERVER_ID_SQL.getString() + " = ?", id);
 
-        model.set(ServerDataValue.SERVER_STATUS_SQL.getString(id), ServerStatus.OFFLINE.toString());
-        model.set(ServerDataValue.SERVER_ACCESS_SQL.getString(id), getServerAccess().toString());
-        model.set(ServerDataValue.SERVER_NEEDRANK_SQL.getString(id), getReservedRank().getRankPower().intValue());
-        model.set(ServerDataValue.SERVER_TYPE_SQL.getString(id), getServerType().toString());
-        model.set(ServerDataValue.SERVER_NAME_SQL.getString(id), name);
+        model.set(
+                new HashMap<>() {{
+                    put(ServerDataValue.SERVER_STATUS_SQL.getString(), ServerStatus.OFFLINE.toString());
+                    put(ServerDataValue.SERVER_ACCESS_SQL.getString(id), getServerAccess().toString());
+                    put(ServerDataValue.SERVER_NEEDRANK_SQL.getString(id), getReservedRank().getRankPower().intValue());
+                    put(ServerDataValue.SERVER_TYPE_SQL.getString(id), getServerType().toString());
+                    put(ServerDataValue.SERVER_NAME_SQL.getString(id), name);
+                }}
+        );
 
         ServerDataValue.clearRedisData(DataType.SERVER, id);
 
