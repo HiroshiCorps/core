@@ -80,9 +80,7 @@ public class ConnectionListener implements Listener {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 
         if (event.getJoinMessage() != null && GameBuilder.getGameBuilder() == null) {
-            event.setJoinMessage(null);
-            if (apiPlayer.isLogin())
-                sendJoinMessage(apiPlayer);
+            sendJoinMessage(apiPlayer);
         }
 
         Nick.applyNick(event.getPlayer(), apiPlayer);
