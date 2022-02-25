@@ -201,7 +201,7 @@ public class SQLModels<T extends SQLModel> {
 
         ArrayList<Object> columns = new ArrayList<>() {{
             for (SQLColumns columns1 : dataList.keySet()) {
-                add(columns1.toSQL());
+                add(columns1.getColumns());
             }
         }};
 
