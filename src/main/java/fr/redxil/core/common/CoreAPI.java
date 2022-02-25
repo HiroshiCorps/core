@@ -101,7 +101,7 @@ public class CoreAPI extends API {
                 GSONSaver.writeGSON(redisUserFile, "userhere");
 
             if (redisIp == null)
-                GSONSaver.writeGSON(sqlIpFile, "127.0.0.1:6379");
+                GSONSaver.writeGSON(redisIpFile, "127.0.0.1:6379");
 
             if (sqlIp == null)
                 GSONSaver.writeGSON(sqlIpFile, "127.0.0.1:3306");
@@ -112,8 +112,8 @@ public class CoreAPI extends API {
 
         plugin.printLog(Level.INFO, "Connecting to db");
 
-        this.sqlConnection.connect(IpInfo.fromString(sqlIp), "hiroshi", sqlUser, sqlPass);
-        this.manager = new CRedisManager(IpInfo.fromString(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
+        this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
+        this.manager = new CRedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
         if (!dataConnected())
             return;

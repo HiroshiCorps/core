@@ -12,6 +12,7 @@ package fr.redxil.core.common.sql;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.Callback;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.api.common.utils.Scheduler;
@@ -20,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CSQLConnection implements SQLConnection {
@@ -106,11 +108,13 @@ public class CSQLConnection implements SQLConnection {
     public PreparedStatement prepareStatement(Connection conn, String query, Object... vars) {
         try {
             PreparedStatement ps = conn.prepareStatement(query);
+            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Preparing statement for query: "+query);
             int i = 0;
             if (query.contains("?") && vars.length != 0) {
                 for (Object obj : vars) {
                     i++;
                     ps.setObject(i, obj);
+                    API.getInstance().getPluginEnabler().printLog(Level.INFO, "Set object: "+i+" object: "+obj);
                 }
             }
             return ps;

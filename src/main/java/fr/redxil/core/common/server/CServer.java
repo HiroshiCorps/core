@@ -59,7 +59,7 @@ public class CServer implements Server {
 
     public static Server initServer(ServerType serverType, Long serverID, IpInfo serverIP) {
 
-        ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns() + " = ?", serverID.intValue());
+        ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID.intValue());
 
         return initData(model, serverID, model.getServerName(), serverType, serverIP);
 
@@ -67,11 +67,13 @@ public class CServer implements Server {
 
     private static CServer initData(ServerModel serverModel, long serverID, String serverName, ServerType serverType, IpInfo serverIP) {
 
-        serverModel.set(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), API.getInstance().getPluginEnabler().getMaxPlayer());
-        serverModel.set(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), serverIP.getIp());
-        serverModel.set(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverIP.getPort().toString());
-        serverModel.set(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.ONLINE.toString());
-        serverModel.set(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverType.toString());
+        serverModel.set(new HashMap<>(){{
+            put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), API.getInstance().getPluginEnabler().getMaxPlayer());
+            put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), serverIP.getIp());
+            put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverIP.getPort().toString());
+            put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.ONLINE.toString());
+            put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverType.toString());
+        }});
 
         ServerDataRedis.clearRedisData(DataType.SERVER, serverID);
         RedisManager redisManager = API.getInstance().getRedisManager();

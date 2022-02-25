@@ -57,12 +57,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     private void initPlayerModel() {
-        if (this.getPlayerModel() == null)
+        if (this.playerModel == null)
             this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
     private void initMoneyModel() {
-        if (this.getMoneyModel() == null)
+        if (this.moneyModel == null)
             this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
@@ -450,7 +450,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public String getStringSQL(SQLColumns s, int size) {
 
         if (size == 1)
-            return s + " = ?";
+            return s.toSQL() + " = ?";
         StringBuilder stringBuilder = new StringBuilder("(" + s.toSQL() + " = ?");
         for (int i = size - 1; i != 0; i--) {
             stringBuilder.append(" ").append("OR").append(" ").append(s.toSQL()).append(" = ?");

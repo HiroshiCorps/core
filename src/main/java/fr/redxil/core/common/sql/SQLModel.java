@@ -16,9 +16,11 @@ import fr.redxil.core.common.data.utils.SQLColumns;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 public abstract class SQLModel {
 
@@ -57,14 +59,16 @@ public abstract class SQLModel {
     }
 
     public HashMap<SQLColumns, Object> getDataMap() {
-        return this.columns;
+        return new HashMap<>(this.columns);
     }
 
     public HashMap<SQLColumns, Object> getDataMap(String table) {
         return new HashMap<>() {{
-            for (Map.Entry<SQLColumns, Object> value : columns.entrySet())
-                if (value.getKey().getTable().equalsIgnoreCase(table))
+            for (Map.Entry<SQLColumns, Object> value : columns.entrySet()) {
+                if (value.getKey().getTable().equalsIgnoreCase(table)) {
                     put(value.getKey(), value.getValue());
+                }
+            }
         }};
     }
 
@@ -92,23 +96,28 @@ public abstract class SQLModel {
     }
 
     public Object get(SQLColumns columnName) {
-        return this.columns.get(columnName);
+        for(Map.Entry<SQLColumns, Object> sqlColumns : columns.entrySet()){
+            if(sqlColumns.getKey().toSQL().equals(columnName.toSQL())) {
+                return sqlColumns.getValue();
+            }
+        }
+        return null;
     }
 
     public String getString(SQLColumns columnName) {
-        return (String) this.columns.get(columnName);
+        return (String) this.get(columnName);
     }
 
     public int getInt(SQLColumns columnName) {
-        return Integer.parseInt(this.columns.get(columnName).toString());
+        return Integer.parseInt(this.get(columnName).toString());
     }
 
     public double getDouble(SQLColumns columnName) {
-        return Double.parseDouble(this.columns.get(columnName).toString());
+        return Double.parseDouble(this.get(columnName).toString());
     }
 
     public long getLong(SQLColumns columnName) {
-        return Long.parseLong(this.columns.get(columnName).toString());
+        return Long.parseLong(this.get(columnName).toString());
     }
 
 
@@ -127,14 +136,14 @@ public abstract class SQLModel {
 
     public void set(HashMap<SQLColumns, Object> map) {
         Pair<String, Collection<Object>> pair = this.setSQL(map);
-        assert pair != null;
-        API.getInstance().getSQLConnection().asyncExecute(pair.getOne(), pair.getTwo());
+        if(pair != null)
+        API.getInstance().getSQLConnection().asyncExecute(pair.getOne(), pair.getTwo().toArray());
     }
 
     public void setSync(HashMap<SQLColumns, Object> map) {
         Pair<String, Collection<Object>> pair = this.setSQL(map);
-        assert pair != null;
-        API.getInstance().getSQLConnection().execute(pair.getOne(), pair.getTwo());
+        if(pair != null)
+        API.getInstance().getSQLConnection().execute(pair.getOne(), pair.getTwo().toArray());
     }
 
 
@@ -154,8 +163,8 @@ public abstract class SQLModel {
                 setterBuilder.append(", ");
             setterBuilder.append(value.getKey().toSQL()).append(" = ?");
         }
-        stringBuilder.append(setterBuilder).append(" WHERE ").append(this.primaryKey).append(" = ?");
-        Collection<Object> objects = values.values();
+        stringBuilder.append(setterBuilder).append(" WHERE ").append(this.primaryKey.toSQL()).append(" = ?");
+        ArrayList<Object> objects = new ArrayList<>(values.values());
         objects.add(this.getInt(this.primaryKey));
         return new Pair<>(stringBuilder.toString(), objects);
     }

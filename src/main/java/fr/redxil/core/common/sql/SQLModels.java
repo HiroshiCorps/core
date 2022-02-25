@@ -13,6 +13,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.core.common.data.utils.SQLColumns;
 import fr.redxil.core.common.utils.TripletData;
 
+import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SQLModels<T extends SQLModel> {
@@ -39,7 +41,8 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public void get(T model, int primaryKey) {
-        assert model != null;
+        if(model == null)
+            return;
 
         StringBuilder query = new StringBuilder("SELECT * FROM " + model.getTable()
                 + " WHERE " + model.getPrimaryKey() + " = " + primaryKey);
@@ -69,7 +72,8 @@ public class SQLModels<T extends SQLModel> {
         ArrayList<T> results = new ArrayList<>();
         try {
             T model = generateInstance();
-            assert model != null;
+            if(model == null)
+            return null;
 
             StringBuilder query2 = new StringBuilder("SELECT * FROM " + model.getTable());
 
@@ -111,7 +115,8 @@ public class SQLModels<T extends SQLModel> {
 
     public T getOrInsert(HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         T model = generateInstance();
-        assert model != null;
+        if(model == null)
+            return null;
         this.getOrInsert(model, defaultValues, primaryKey);
         return model;
     }
@@ -144,7 +149,8 @@ public class SQLModels<T extends SQLModel> {
                 return foundRow;
             }
             T model = generateInstance();
-            assert model != null;
+            if(model == null)
+            return null;
             if (defaultValues != null) {
                 model.set(defaultValues);
             }
@@ -159,7 +165,8 @@ public class SQLModels<T extends SQLModel> {
 
     public void delete(String query, Object... vars) {
         T model = generateInstance();
-        assert model != null;
+        if(model == null)
+            return;
         String queryString = "DELETE FROM " + model.getTable() + " " + query;
         this.logs.info(queryString);
         API.getInstance().getSQLConnection().execute(queryString, vars);
@@ -196,14 +203,13 @@ public class SQLModels<T extends SQLModel> {
 
         HashMap<SQLColumns, Object> dataList = new HashMap<>(model.getDataMap(table));
 
-        if (model.getTable().equals(table) && model.get(model.getPrimaryKey()) != null)
-            dataList.put(model.getPrimaryKey(), model.get(model.getPrimaryKey()));
-
         ArrayList<Object> columns = new ArrayList<>() {{
             for (SQLColumns columns1 : dataList.keySet()) {
                 add(columns1.getColumns());
             }
         }};
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Number of data: "+dataList.size());
+
 
         return new TripletData<>(listCreator(columns, false), listCreator(dataList.values(), true), dataList.values());
 
@@ -216,6 +222,7 @@ public class SQLModels<T extends SQLModel> {
 
         TripletData<String, String, Collection<Object>> listNecString = listCreator(model, model.getTable());
         Collection<Object> objectList = listNecString.getThird();
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Number of data: "+objectList.size());
 
         if (joinData == null || !model.containsDataForTable(joinData.getColumnsPair().getTwo().getTable())) {
 
@@ -236,7 +243,7 @@ public class SQLModels<T extends SQLModel> {
 
         this.logs.info(query);
 
-        API.getInstance().getSQLConnection().execute(query, objectList);
+        API.getInstance().getSQLConnection().execute(query, objectList.toArray());
 
     }
 

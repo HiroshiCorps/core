@@ -134,7 +134,7 @@ public class CRedisManager implements RedisManager {
         config.setNettyThreads(8);
 
         SingleServerConfig singleServerConfig = config.useSingleServer()
-                .setAddress("redis://" + ipInfo.toString())
+                .setAddress("redis://127.0.0.1:6379")
                 .setDatabase(database);
 
         if (user != null)
