@@ -34,7 +34,7 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /nickcheck (joueur)").setColor(Color.RED).sendTo(playerUUID);
+        TextComponentBuilder.createTextComponent("Syntax: /nickcheck (joueur)").setColor(Color.RED).sendTo(playerUUID);
     }
 
     @Override

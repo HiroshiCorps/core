@@ -36,13 +36,40 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /info (joueur) (info|ban|other)").setColor(Color.RED).sendTo(playerUUID);
+        if (!(commandContext.getSource() instanceof Player))
+            return;
+
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        if (playerModerator == null) {
+            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
+            return;
+        }
+
+        APIOfflinePlayer target;
+        String targetName = commandContext.getArgument("target", String.class);
+        Long targetID = null;
+        try {
+            targetID = Long.valueOf(targetName);
+        } catch (NumberFormatException ignore) {
+
+        }
+
+        if (targetID == null)
+            target = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
+        else target = API.getInstance().getPlayerManager().getOfflinePlayer(targetID);
+
+        if (target == null) {
+            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
+            return;
+        }
+
+        playerModerator.printInfo(target);
     }
 
     @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
-        this.onMissingArgument(commandExecutor);
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
+        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
+        TextComponentBuilder.createTextComponent("Syntax: /info (joueur) (info|ban|other)").setColor(Color.RED).sendTo(playerUUID);
     }
 
     public void execute(CommandContext<CommandSource> commandContext) {
@@ -50,15 +77,17 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
             return;
 
         APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
-        if (playerModerator == null)
+        if (playerModerator == null) {
+            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
             return;
+        }
 
         APIOfflinePlayer target;
         String targetName = commandContext.getArgument("target", String.class);
         Long targetID = null;
         try {
             targetID = Long.valueOf(targetName);
-        }catch (NumberFormatException ignore){
+        } catch (NumberFormatException ignore) {
 
         }
 

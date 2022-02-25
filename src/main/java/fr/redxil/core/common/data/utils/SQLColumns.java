@@ -9,13 +9,7 @@
 
 package fr.redxil.core.common.data.utils;
 
-public class SQLColumns {
-    final String table, columns;
-
-    public SQLColumns(String table, String columns) {
-        this.table = table;
-        this.columns = columns;
-    }
+public record SQLColumns(String table, String columns) {
 
     public String getColumns() {
         return columns;
@@ -28,4 +22,13 @@ public class SQLColumns {
     public String toSQL() {
         return "`" + getTable() + "`.`" + getColumns() + "`";
     }
+
+    public static SQLColumns fromSQL(String sql) {
+
+        String[] split = sql.split("`.`");
+
+        return new SQLColumns(split[0].replace("`", ""), split[1].replace("`", ""));
+
+    }
+
 }

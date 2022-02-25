@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 public abstract class SQLModel {
 
@@ -28,7 +27,7 @@ public abstract class SQLModel {
 
     private final SQLColumns primaryKey;
 
-    private final HashMap<SQLColumns, Object> columns = new HashMap<>();
+    private final HashMap<String, Object> columns = new HashMap<>();
 
     private final JoinData joinData;
 
@@ -59,31 +58,32 @@ public abstract class SQLModel {
     }
 
     public HashMap<SQLColumns, Object> getDataMap() {
-        return new HashMap<>(this.columns);
+        return new HashMap<>() {{
+            for (Map.Entry<String, Object> value : columns.entrySet())
+                put(SQLColumns.fromSQL(value.getKey()), value.getValue());
+        }};
     }
 
     public HashMap<SQLColumns, Object> getDataMap(String table) {
         return new HashMap<>() {{
-            for (Map.Entry<SQLColumns, Object> value : columns.entrySet()) {
-                if (value.getKey().getTable().equalsIgnoreCase(table)) {
-                    put(value.getKey(), value.getValue());
+            for (Map.Entry<String, Object> value : columns.entrySet()) {
+                SQLColumns converted = SQLColumns.fromSQL(value.getKey());
+                if (converted.getTable().equalsIgnoreCase(table)) {
+                    put(converted, value.getValue());
                 }
             }
         }};
     }
 
     public boolean containsDataForTable(String table) {
-        for (Map.Entry<SQLColumns, Object> value : columns.entrySet())
-            if (value.getKey().getTable().equalsIgnoreCase(table))
-                return true;
-        return false;
+        return !getDataMap(table).isEmpty();
     }
 
     public void populate(ResultSet resultSet) {
         try {
             ResultSetMetaData meta = resultSet.getMetaData();
             for (int i = 1; i <= meta.getColumnCount(); ++i) {
-                this.columns.put(new SQLColumns(meta.getTableName(i), meta.getColumnName(i)), resultSet.getObject(i));
+                this.columns.put(new SQLColumns(meta.getTableName(i), meta.getColumnName(i)).toSQL(), resultSet.getObject(i));
             }
             this.populate = true;
             this.onPopulated();
@@ -96,12 +96,7 @@ public abstract class SQLModel {
     }
 
     public Object get(SQLColumns columnName) {
-        for(Map.Entry<SQLColumns, Object> sqlColumns : columns.entrySet()){
-            if(sqlColumns.getKey().toSQL().equals(columnName.toSQL())) {
-                return sqlColumns.getValue();
-            }
-        }
-        return null;
+        return columns.get(columnName.toSQL());
     }
 
     public String getString(SQLColumns columnName) {
@@ -148,7 +143,9 @@ public abstract class SQLModel {
 
 
     private Pair<String, Collection<Object>> setSQL(Map<SQLColumns, Object> values) {
-        columns.putAll(values);
+        for (Map.Entry<SQLColumns, Object> value : values.entrySet()) {
+            columns.put(value.getKey().toSQL(), value.getValue());
+        }
         if (!this.populate) {
             return null;
         }

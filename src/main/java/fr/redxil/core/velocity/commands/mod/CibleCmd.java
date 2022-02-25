@@ -34,7 +34,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /cible <pseudo>").setColor(Color.RED).sendTo(playerUUID);
+        TextComponentBuilder.createTextComponent("Syntax: /cible <pseudo>").setColor(Color.RED).sendTo(playerUUID);
     }
 
     @Override

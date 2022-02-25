@@ -159,7 +159,7 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (!partyManager.hasParty(apiPlayer)) {
             player.sendMessage(
-                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être dans une partie pour faire ceci.")).getFinalTextComponent()
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous devez être dans une partie pour faire ceci.")).getFinalTextComponent()
             );
             return;
         }
@@ -189,13 +189,13 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         APIPlayer owner = API.getInstance().getPlayerManager().getPlayer(subArgument);
         if (owner == null) {
-            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'existe pas")).getFinalTextComponent());
+            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Ce joueur n'existe pas")).getFinalTextComponent());
             return;
         }
 
         Party party = API.getInstance().getPartyManager().getPlayerParty(owner);
         if (party == null) {
-            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur n'a pas de partie")).getFinalTextComponent());
+            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Ce joueur n'a pas de partie")).getFinalTextComponent());
             return;
         }
 
@@ -208,7 +208,7 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
         } else {
 
             player.sendMessage(
-                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'avez pas pûes rejoindre la partie.")).getFinalTextComponent()
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous n'avez pas pûes rejoindre la partie.")).getFinalTextComponent()
             );
 
         }
@@ -221,14 +221,14 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
 
         if (!partyManager.hasParty(apiPlayer)) {
             player.sendMessage(
-                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous n'êtes pas dans une partie.")).getFinalTextComponent()
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous n'êtes pas dans une partie.")).getFinalTextComponent()
             );
             return;
         }
 
         if (!partyManager.getPlayerParty(apiPlayer).isPartyOwner(apiPlayer)) {
             player.sendMessage(
-                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous devez être le chef de la partie.")).getFinalTextComponent()
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous devez être le chef de la partie.")).getFinalTextComponent()
             );
             return;
         }
@@ -237,7 +237,7 @@ public class PartyCmd extends BrigadierAPI<CommandSource> {
 
         if (partyManager.hasParty(targetPlayer)) {
             player.sendMessage(
-                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Ce joueur est déja dans une partie.")).getFinalTextComponent()
+                    ((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Ce joueur est déja dans une partie.")).getFinalTextComponent()
             );
             return;
         }

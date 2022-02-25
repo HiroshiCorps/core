@@ -16,7 +16,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
@@ -54,12 +53,12 @@ public class PlayerListener {
                 chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
             } else if (!apiPlayer.isLogin() && !(message[0].equals("/login") || message[0].equals("/register"))) {
                 chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
-                chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous avez uniquement le droit à: /login ou /register")).getFinalTextComponent());
+                chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous avez uniquement le droit à: /login ou /register")).getFinalTextComponent());
             }
             return;
         } else if (!apiPlayer.isLogin()) {
             chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
-            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous avez uniquement le droit à: /login ou /register")).getFinalTextComponent());
+            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous avez uniquement le droit à: /login ou /register")).getFinalTextComponent());
             return;
         }
 
@@ -76,7 +75,7 @@ public class PlayerListener {
 
         if (model != null && model.isEffective()) {
 
-            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(Color.RED + "Vous êtes mute jusqu'au " + DateUtility.getMessage(model.getSanctionEndTS()))).getFinalTextComponent());
+            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.getSanctionEndTS()))).getFinalTextComponent());
             chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
 
         }

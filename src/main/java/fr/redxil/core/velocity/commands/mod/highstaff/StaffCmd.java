@@ -31,7 +31,7 @@ public class StaffCmd extends BrigadierAPI<CommandSource> {
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent(Color.RED + "Syntax: /staff" + Color.GREEN + " (message)").setColor(Color.RED).sendTo(playerUUID);
+        TextComponentBuilder.createTextComponent("Syntax: /staff" + Color.GREEN + " (message)").setColor(Color.RED).sendTo(playerUUID);
     }
 
     @Override
