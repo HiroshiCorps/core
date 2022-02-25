@@ -81,6 +81,7 @@ public class ConnectionListener implements Listener {
 
         if (event.getJoinMessage() != null && GameBuilder.getGameBuilder() == null) {
             sendJoinMessage(apiPlayer);
+            event.setJoinMessage(null);
         }
 
         Nick.applyNick(event.getPlayer(), apiPlayer);
