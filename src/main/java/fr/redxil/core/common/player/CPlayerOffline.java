@@ -37,6 +37,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class CPlayerOffline implements APIOfflinePlayer {
 
@@ -279,6 +280,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public void loadSanction() {
         this.sanctionModelList = new ArrayList<>();
         this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberID()));
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Sanction: " + this.sanctionModelList.size());
     }
 
     @Override
@@ -374,7 +376,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public SanctionInfo getLastSanction(SanctionType sanctionType) {
         List<SanctionInfo> sanctionList = getSanction(sanctionType);
-        if (sanctionList.isEmpty()) return null;
+        if (sanctionList.isEmpty()) {
+            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Pas de sanction");
+            return null;
+        }
 
         return sanctionList.get(0);
     }

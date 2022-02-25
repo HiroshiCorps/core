@@ -148,6 +148,6 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
 
         CommandNode<CommandSource> targetNode = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
         CommandNode<CommandSource> timeNode = this.addArgumentCommand(targetNode, "time", StringArgumentType.word(), this::onMissingArgument, "perm", "0s", "0h", "0j", "0m");
-        this.addArgumentCommand(timeNode, "reason", StringArgumentType.string(), this::execute);
+        this.addArgumentCommand(timeNode, "reason", StringArgumentType.greedyString(), this::execute);
     }
 }

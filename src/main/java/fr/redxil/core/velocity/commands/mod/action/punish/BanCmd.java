@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class BanCmd extends BrigadierAPI<CommandSource> {
 
@@ -46,6 +47,8 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
         Player proxiedPlayer = playerOptional.get();
 
         long end = DateUtility.addToCurrentTimeStamp(durationTime);
+
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "End: " + end);
 
         String format = DateUtility.getMessage(end);
 

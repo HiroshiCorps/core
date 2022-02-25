@@ -65,7 +65,7 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
         long memberID = this.memberID;
 
-        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns() + " = ?", memberID);
+        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
 
         model.set(new HashMap<>() {{
             put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(isModeratorMod()).toString());

@@ -99,7 +99,7 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
         }
 
         CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
-        this.addArgumentCommand(target, "reason", StringArgumentType.string(), this::execute);
+        this.addArgumentCommand(target, "reason", StringArgumentType.greedyString(), this::execute);
 
     }
 }

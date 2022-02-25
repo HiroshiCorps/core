@@ -23,7 +23,6 @@ import fr.redxil.core.common.sql.SQLModels;
 
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.logging.Level;
 
 public class CPlayerManager implements APIPlayerManager {
 
@@ -86,17 +85,14 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIOfflinePlayer getOfflinePlayer(UUID uuid) {
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 1");
 
         APIPlayer apiPlayer = getPlayer(uuid);
         if (apiPlayer != null) return apiPlayer;
 
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 2");
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
 
         if (playerModel != null) {
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPUUID - 3");
             return new CPlayerOffline(playerModel);
         }
 
@@ -113,17 +109,12 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public APIOfflinePlayer getOfflinePlayer(String name) {
 
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 1");
-
         APIPlayer apiPlayer = getPlayer(name);
         if (apiPlayer != null) return apiPlayer;
-
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 2");
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
 
         if (playerModel != null) {
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "OPPNAME - 3");
             return new CPlayerOffline(playerModel);
         }
         return null;

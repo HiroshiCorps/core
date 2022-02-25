@@ -29,7 +29,6 @@ public class CServerManager implements ServerManager {
         return new ArrayList<>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).keySet()) {
                 add((String) serverName);
-                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 1");
             }
         }};
     }
@@ -39,7 +38,6 @@ public class CServerManager implements ServerManager {
         return new ArrayList<>() {{
             for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).values()) {
                 add((long) serverName);
-                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 2");
             }
         }};
     }
@@ -49,7 +47,6 @@ public class CServerManager implements ServerManager {
         return new ArrayList<>() {{
             for (long serverID : getListServerID()) {
                 add(getServer(serverID));
-                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 3");
             }
         }};
     }
@@ -61,12 +58,8 @@ public class CServerManager implements ServerManager {
 
         return new ArrayList<>() {{
             for (Server server : getListServer()) {
-                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 4");
                 if (server.getServerType() == serverType) {
-                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 6");
                     add(server);
-                } else {
-                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 7");
                 }
             }
         }};
@@ -122,14 +115,9 @@ public class CServerManager implements ServerManager {
         Server server = null;
 
         for (Server testServer : availableServer) {
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "Boucle 5");
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 1");
             if(testServer.getConnectedPlayer() < testServer.getMaxPlayers()) {
-                API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 1");
                 if (testServer.getServerAccess().canAccess(testServer, apiPlayer)) {
-                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 2");
                     if (server == null || server.getConnectedPlayer() > testServer.getConnectedPlayer()) {
-                        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Server test 3");
                         server = testServer;
                     }
                 }

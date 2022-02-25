@@ -113,7 +113,10 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
         if (playerModerator != null)
             playerModerator.disconnectModerator();
 
-        offlineTarget.setRank(newRank);
+        if (offlineTarget instanceof APIPlayer)
+            ((APIPlayer) offlineTarget).setRealRank(newRank);
+        else
+            offlineTarget.setRank(newRank);
         if (offlineTarget instanceof APIPlayer)
             API.getInstance().getModeratorManager().loadModerator((APIPlayer) offlineTarget);
 

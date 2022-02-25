@@ -51,14 +51,7 @@ public class PlayerListener {
         if (chatEvent.getMessage().charAt(0) == "/".charAt(0)) {
             if (forbiddenCmd.contains(message[0]) || message[0].contains("/minecraft:")) {
                 chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
-            } else if (!apiPlayer.isLogin() && !(message[0].equals("/login") || message[0].equals("/register"))) {
-                chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
-                chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous avez uniquement le droit à: /login ou /register")).getFinalTextComponent());
             }
-            return;
-        } else if (!apiPlayer.isLogin()) {
-            chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
-            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous avez uniquement le droit à: /login ou /register")).getFinalTextComponent());
             return;
         }
 

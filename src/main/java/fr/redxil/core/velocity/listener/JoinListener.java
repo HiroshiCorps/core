@@ -26,8 +26,6 @@ import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.utils.SanctionType;
 import net.kyori.adventure.text.Component;
 
-import java.util.logging.Level;
-
 public class JoinListener {
 
     public APIPlayer loadPlayer(Player player) {
@@ -64,7 +62,6 @@ public class JoinListener {
     public void onPlayerJoin(LoginEvent e) {
 
         Player player = e.getPlayer();
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "First Connection");
         if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
             e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
                     """
@@ -77,34 +74,27 @@ public class JoinListener {
             return;
         }
 
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline PLayer");
         APIOfflinePlayer apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
-
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 2");
         if (apiOfflinePlayer != null) {
 
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "APIOfflinePlayer not null");
             SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
             if (model != null && model.isEffective()) {
                 e.setResult(ResultedEvent.ComponentResult.denied((Component) model.getSancMessage().getFinalTextComponent()));
                 return;
             }
 
-        } else API.getInstance().getPluginEnabler().printLog(Level.FINE, "APIOfflinePlayer null");
+        }
 
         Rank playerRank = apiOfflinePlayer == null ? Rank.JOUEUR : apiOfflinePlayer.getRank();
 
         Server velocityServer = API.getInstance().getServer();
         if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUniqueId(), playerRank)) {
-            API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 6");
             e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server").getFinalTextComponent()));
             return;
         }
 
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 3");
         loadPlayer(player);
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Checking Offline Player 4");
 
     }
 

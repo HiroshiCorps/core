@@ -13,7 +13,6 @@ import fr.redxil.api.common.API;
 import fr.redxil.core.common.data.utils.SQLColumns;
 import fr.redxil.core.common.utils.TripletData;
 
-import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SQLModels<T extends SQLModel> {
@@ -208,8 +206,6 @@ public class SQLModels<T extends SQLModel> {
                 add(columns1.getColumns());
             }
         }};
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Number of data: "+dataList.size());
-
 
         return new TripletData<>(listCreator(columns, false), listCreator(dataList.values(), true), dataList.values());
 
@@ -222,7 +218,6 @@ public class SQLModels<T extends SQLModel> {
 
         TripletData<String, String, Collection<Object>> listNecString = listCreator(model, model.getTable());
         Collection<Object> objectList = listNecString.getThird();
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Number of data: "+objectList.size());
 
         if (joinData == null || !model.containsDataForTable(joinData.getColumnsPair().getTwo().getTable())) {
 
