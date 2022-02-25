@@ -338,7 +338,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public boolean isConnected() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString(this)).contains(Long.valueOf(memberID).toString());
+        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString(this)).contains(memberID);
     }
 
 
