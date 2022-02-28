@@ -32,6 +32,7 @@ import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
@@ -136,8 +137,17 @@ public class CorePlugin extends Paper {
 
     @Override
     public void onAPIDisabled() {
-        if(API.getInstance().isGameServer())
+
+        if (API.getInstance().isGameServer())
             API.getInstance().getGame().clearData();
+
+        HandlerList.unregisterAll(this);
+
+        Objects.requireNonNull(this.getCommand("mod")).setExecutor(new ModCmd());
+        Objects.requireNonNull(this.getCommand("freeze")).setExecutor(new FreezeCmd());
+        Objects.requireNonNull(this.getCommand("vanish")).setExecutor(new VanishCmd());
+        Objects.requireNonNull(this.getCommand("fly")).setExecutor(new FlyCmd());
+
     }
 
     public void checkCrash() {

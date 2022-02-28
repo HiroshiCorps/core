@@ -87,7 +87,32 @@ public class CoreVelocity extends Velocity {
 
     @Override
     public void onAPIDisabled() {
+        proxyServer.getEventManager().unregisterListeners(VelocityEnabler.getInstance());
+        CommandManager cm = commandManager;
 
+        cm.unregister(new PartyCmd().getName());
+
+        cm.unregister(new BanCmd().getName());
+        cm.unregister(new WarnCmd().getName());
+        cm.unregister(new KickCmd().getName());
+        cm.unregister(new MuteCmd().getName());
+
+        cm.unregister(new UnBanCmd().getName());
+        cm.unregister(new UnMuteCmd().getName());
+
+        cm.unregister(new StaffCmd().getName());
+        cm.unregister(new CibleCmd().getName());
+        cm.unregister(new NickCheckCmd().getName());
+        cm.unregister(new SetRankCmd().getName());
+        cm.unregister(new InfoCmd().getName());
+
+        cm.unregister(new BlackListCmd().getName());
+        cm.unregister(new FriendCmd().getName());
+        cm.unregister(new NickCmd().getName());
+
+        cm.unregister(new ShutdownCmd().getName());
+        cm.unregister(new RCmd().getName());
+        cm.unregister(new MsgCmd().getName());
     }
 
     public void registerEvents() {
