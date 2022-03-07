@@ -78,7 +78,7 @@ public class CHost extends CGame implements Host {
 
         }
 
-        if (isGameState(GameState.WAITING) && getPlayers().size() < getMaxPlayer()) {
+        if (isGameState(GameState.WAITING) && getConnectedPlayers().size() < getMaxPlayer()) {
             HostAccess hostAccess = getHostAccess();
             if (hostAccess == HostAccess.CLOSE)
                 return false;

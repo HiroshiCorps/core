@@ -92,7 +92,7 @@ public class CGame implements Game {
 
         }
 
-        return isGameState(GameState.WAITING) && getPlayers().size() < getMaxPlayer();
+        return isGameState(GameState.WAITING) && getConnectedPlayers().size() < getMaxPlayer();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class CGame implements Game {
             else
                 getPlayerSpectators().add(apiPlayer.getUUID());
         } else {
-            getPlayers().add(apiPlayer.getUUID());
+            getConnectedPlayers().add(apiPlayer.getUUID());
         }
         apiPlayer.switchServer(getServerID());
 
@@ -152,7 +152,7 @@ public class CGame implements Game {
     }
 
     @Override
-    public List<UUID> getPlayers() {
+    public List<UUID> getConnectedPlayers() {
         return API.getInstance().getRedisManager().getRedisList(GameDataRedis.GAME_PLAYER_REDIS.getString(this));
     }
 
@@ -175,11 +175,11 @@ public class CGame implements Game {
     public boolean setSpectator(UUID s, boolean b) {
         if (b == isSpectator(s)) return false;
         if (b) {
-            getPlayers().remove(s);
+            getConnectedPlayers().remove(s);
             getPlayerSpectators().add(s);
         } else {
             if (getModeratorSpectators().contains(s)) return false;
-            getPlayers().add(s);
+            getConnectedPlayers().add(s);
             getPlayerSpectators().remove(s);
         }
         return true;
@@ -262,12 +262,12 @@ public class CGame implements Game {
     }
 
     @Override
-    public String getMap() {
+    public String getWorldName() {
         return API.getInstance().getRedisManager().getRedisString(GameDataRedis.GAME_MAP_REDIS.getString(this));
     }
 
     @Override
-    public void setMap(String map) {
+    public void setWorldName(String map) {
         API.getInstance().getRedisManager().setRedisString(GameDataRedis.GAME_MAP_REDIS.getString(this), map);
     }
 
@@ -279,11 +279,6 @@ public class CGame implements Game {
     @Override
     public void forceStart(APIPlayerModerator APIPlayer) {
         RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTART", APIPlayer.getName());
-    }
-
-    @Override
-    public void forceStopStart(APIPlayerModerator APIPlayer) {
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "forceSTOPSTART", APIPlayer.getName());
     }
 
     @Override
@@ -317,7 +312,7 @@ public class CGame implements Game {
 
     @Override
     public boolean isPlayer(UUID playerName) {
-        return getPlayers().contains(playerName);
+        return getConnectedPlayers().contains(playerName);
     }
 
     @Override

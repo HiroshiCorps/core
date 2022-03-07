@@ -10,3 +10,7 @@ commands:
     description: "Se mettre en Invisible"
   fly:
     description: "Voler"
+  speed:
+    description: "Change player speed"
+  flyspeed:
+    description: "Change player sly speed"

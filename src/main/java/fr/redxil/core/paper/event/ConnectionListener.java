@@ -26,13 +26,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class ConnectionListener implements Listener {
-
-    final CorePlugin corePlugin;
-
-    public ConnectionListener(CorePlugin corePlugin) {
-        this.corePlugin = corePlugin;
-    }
+public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
     @EventHandler
     public void playerJoinEvent(PlayerLoginEvent event) {
@@ -68,7 +62,7 @@ public class ConnectionListener implements Listener {
         if (!spectate) {
             games.getInConnectPlayer().remove(apiPlayer.getUUID());
             gameBuilder.onPlayerJoin(p);
-            gameBuilder.broadcastActionBar("§a" + p.getName() + "§7 à rejoins la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
+            gameBuilder.broadcastActionBar("§a" + p.getName() + "§7 à rejoins la partie §8(§a" + games.getConnectedPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
         } else
             gameBuilder.onSpectatorJoin(p);
 
@@ -125,8 +119,8 @@ public class ConnectionListener implements Listener {
         boolean spectator = games.isSpectator(osp.getUUID());
 
         if (!spectator) {
-            games.getPlayers().remove(osp.getUUID());
-            gameBuilder.broadcastActionBar("§a" + osp.getName() + "§7 à quitté la partie §8(§a" + games.getPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
+            games.getConnectedPlayers().remove(osp.getUUID());
+            gameBuilder.broadcastActionBar("§a" + osp.getName() + "§7 à quitté la partie §8(§a" + games.getConnectedPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
             gameBuilder.onPlayerLeave(player);
         } else {
             if (games.getPlayerSpectators().contains(osp.getUUID()))

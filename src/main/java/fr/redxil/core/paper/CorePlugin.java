@@ -20,10 +20,7 @@ import fr.redxil.api.paper.holograms.HologramsManager;
 import fr.redxil.api.paper.scoreboard.BoardManager;
 import fr.redxil.api.paper.tags.TagsManager;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.paper.cmd.FlyCmd;
-import fr.redxil.core.paper.cmd.FreezeCmd;
-import fr.redxil.core.paper.cmd.ModCmd;
-import fr.redxil.core.paper.cmd.VanishCmd;
+import fr.redxil.core.paper.cmd.*;
 import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
@@ -129,6 +126,8 @@ public class CorePlugin extends Paper {
         Objects.requireNonNull(this.getCommand("freeze")).setExecutor(new FreezeCmd());
         Objects.requireNonNull(this.getCommand("vanish")).setExecutor(new VanishCmd());
         Objects.requireNonNull(this.getCommand("fly")).setExecutor(new FlyCmd());
+        Objects.requireNonNull(this.getCommand("speed")).setExecutor(new SpeedCmd());
+        Objects.requireNonNull(this.getCommand("flyspeed")).setExecutor(new SpeedCmd());
 
         printLog(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
