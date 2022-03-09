@@ -7,10 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 
 public class PlayerInteractEvent implements Listener {
 
@@ -24,9 +24,12 @@ public class PlayerInteractEvent implements Listener {
     }
 
     @EventHandler
-    public void playerPickUp(PlayerPickupItemEvent event) {
+    public void playerPickUp(EntityPickupItemEvent event) {
 
-        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
+        if (!(event.getEntity() instanceof Player))
+            return;
+
+        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(event.getEntity().getUniqueId());
         if (spm != null)
             if (spm.isModeratorMod()) event.setCancelled(true);
 
@@ -50,8 +53,7 @@ public class PlayerInteractEvent implements Listener {
     @EventHandler
     public void playerDamage(EntityDamageEvent event) {
 
-        if (!(event.getEntity() instanceof Player)) return;
-        Player player = (Player) event.getEntity();
+        if (!(event.getEntity() instanceof Player player)) return;
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (apiPlayer.isFreeze())

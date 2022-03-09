@@ -130,6 +130,11 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
+    public Timestamp getRankTimeStamp() {
+        return (Timestamp) getPlayerModel().get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns());
+    }
+
+    @Override
     public Long getRankPower() {
         return getRank().getRankPower();
     }
@@ -141,13 +146,11 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public long getSolde() {
-
         return getMoneyModel().getSolde();
     }
 
     @Override
     public long getCoins() {
-
         return getMoneyModel().getCoins();
     }
 

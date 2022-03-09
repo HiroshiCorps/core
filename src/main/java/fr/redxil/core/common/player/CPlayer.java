@@ -300,7 +300,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         API.getInstance().getRedisManager().setRedisLong(PlayerDataRedis.PLAYER_RANK_REDIS.getString(this), rank.getRankPower());
         API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_RANK_TIME_REDIS.getString(this), timeStampString);
         RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
-
     }
 
     @Override
