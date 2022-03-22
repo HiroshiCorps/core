@@ -25,6 +25,7 @@ import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
 import fr.redxil.core.paper.freeze.FreezeMessageGestion;
 import fr.redxil.core.paper.moderatormode.ModeratorMain;
+import fr.redxil.core.paper.pmsListener.AskSwitchListener;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
@@ -91,6 +92,7 @@ public class CorePlugin extends Paper {
         this.freezeGestion = new FreezeMessageGestion(this);
 
         EventInventory.enableEvent(this);
+        new AskSwitchListener();
 
         /*
 

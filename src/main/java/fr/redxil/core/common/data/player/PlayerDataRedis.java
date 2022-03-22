@@ -40,6 +40,7 @@ public enum PlayerDataRedis {
 
     PLAYER_BUNGEE_REDIS(DataType.PLAYER, "player/<memberID>/bungee_server", true),
     PLAYER_SPIGOT_REDIS(DataType.PLAYER, "player/<memberID>/spigot_server", true),
+    PLAYER_SWITCH_REDIS(DataType.PLAYER, "player/<memberID>/switch_server", true),
 
     PLAYER_LASTMSG_REDIS(DataType.PLAYER, "player/<memberID>/lastmsg", true),
 

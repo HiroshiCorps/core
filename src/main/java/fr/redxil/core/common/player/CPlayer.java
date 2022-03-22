@@ -33,6 +33,7 @@ import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
+import org.redisson.api.RBucket;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -185,10 +186,16 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         return API.getInstance().getServerManager().getServer(serverName);
     }
 
+
     @Override
     public void switchServer(long server) {
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
+        RBucket<String> bucket = API.getInstance().getRedisManager().getRedissonClient().getBucket(PlayerDataRedis.PLAYER_SWITCH_REDIS.getString(this));
+        if (bucket.get() != null)
+            return;
+        bucket.set(Long.valueOf(server).toString());
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
     }
+
 
     @Override
     public void addSolde(long value) {
