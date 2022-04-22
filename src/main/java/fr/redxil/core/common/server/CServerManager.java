@@ -89,23 +89,23 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Server initServer(ServerType serverType, String name, IpInfo ipInfo) {
+    public Server createServer(ServerType serverType, String name, IpInfo ipInfo) {
         Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
-        if (!serverMap.containsKey(name)) {
-            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
-            return CServer.initServer(serverType, name, ipInfo);
-        }
-        return new CServer(serverMap.get(name));
+        if (serverMap.containsKey(name))
+            return new CServer(serverMap.get(name));
+
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
+        return CServer.initServer(serverType, name, ipInfo);
     }
 
     @Override
     public Server initServer(ServerType serverType, Long serverID, IpInfo ipInfo) {
         if (serverID == null || ipInfo == null) return null;
-        if (!isServerExist(serverID)) {
-            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with id: " + serverID);
-            return CServer.initServer(serverType, serverID, ipInfo);
-        }
-        return new CServer(serverID);
+        if (isServerExist(serverID))
+            return new CServer(serverID);
+
+        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with id: " + serverID);
+        return CServer.initServer(serverType, serverID, ipInfo);
     }
 
     @Override

@@ -108,14 +108,18 @@ public class CSQLConnection implements SQLConnection {
     public PreparedStatement prepareStatement(Connection conn, String query, Object... vars) {
         try {
             PreparedStatement ps = conn.prepareStatement(query);
-            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Preparing statement for query: "+query);
-            int i = 0;
-            if (query.contains("?") && vars.length != 0) {
+            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Preparing statement for query: " + query);
+            int num = Math.toIntExact(query.chars().filter(ch -> ch == '?').count());
+            if (num == vars.length) {
+                int i = 0;
                 for (Object obj : vars) {
                     i++;
                     ps.setObject(i, obj);
-                    API.getInstance().getPluginEnabler().printLog(Level.INFO, "Set object: "+i+" object: "+obj);
+                    API.getInstance().getPluginEnabler().printLog(Level.INFO, "Set object: " + i + " object: " + obj);
                 }
+            } else {
+                API.getInstance().getPluginEnabler().printLog(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
+                return null;
             }
             return ps;
 

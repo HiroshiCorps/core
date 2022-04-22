@@ -53,7 +53,7 @@ public class CServer implements Server {
             put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverIp.getPort().toString());
         }}, "WHERE " + ServerDataSql.SERVER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
 
-        return initData(model, Integer.valueOf(model.getServerID()).longValue(), name, serverType, serverIp);
+        return initServer(model, Integer.valueOf(model.getServerID()).longValue(), name, serverType, serverIp);
 
     }
 
@@ -61,13 +61,15 @@ public class CServer implements Server {
 
         ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID.intValue());
 
-        return initData(model, serverID, model.getServerName(), serverType, serverIP);
+        return initServer(model, serverID, model.getServerName(), serverType, serverIP);
 
     }
 
-    private static CServer initData(ServerModel serverModel, long serverID, String serverName, ServerType serverType, IpInfo serverIP) {
+    private static CServer initServer(ServerModel serverModel, long serverID, String serverName, ServerType serverType, IpInfo serverIP) {
 
-        serverModel.set(new HashMap<>(){{
+        if (serverModel == null)
+            return null;
+        serverModel.set(new HashMap<>() {{
             put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), API.getInstance().getPluginEnabler().getMaxPlayer());
             put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), serverIP.getIp());
             put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverIP.getPort().toString());

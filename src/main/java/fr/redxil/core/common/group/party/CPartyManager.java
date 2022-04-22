@@ -19,7 +19,8 @@ public class CPartyManager implements PartyManager {
 
     @Override
     public Party createParty(APIPlayer apiPlayer) {
-        if (hasParty(apiPlayer)) return getPlayerParty(apiPlayer);
+        Party party = getPlayerParty(apiPlayer);
+        if (party != null) return party;
         return getParty(CParty.initParty(apiPlayer));
     }
 

@@ -21,7 +21,10 @@ import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public class CPlayerManager implements APIPlayerManager {
@@ -38,11 +41,10 @@ public class CPlayerManager implements APIPlayerManager {
      * @return APIPlayer or null if the player is not loaded
      */
     public APIPlayer getPlayer(String name) {
-        Map<String, Long> playerMap = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString());
-        if (!playerMap.containsKey(name)) {
-            return null;
-        }
-        return new CPlayer(playerMap.get(name));
+        Object value = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString()).get(name);
+        if (value instanceof Long)
+            return new CPlayer((Long) value);
+        else return null;
     }
 
     /**
@@ -54,11 +56,10 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIPlayer getPlayer(UUID uuid) {
-        Map<String, Long> playerMap = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString());
-        if (!playerMap.containsKey(uuid.toString())) {
-            return null;
-        }
-        return new CPlayer(playerMap.get(uuid.toString()));
+        Object value = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString()).get(uuid.toString());
+        if (value instanceof Long)
+            return new CPlayer((Long) value);
+        else return null;
     }
 
     /**
@@ -89,7 +90,6 @@ public class CPlayerManager implements APIPlayerManager {
         APIPlayer apiPlayer = getPlayer(uuid);
         if (apiPlayer != null) return apiPlayer;
 
-
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
 
         if (playerModel != null) {
@@ -97,6 +97,7 @@ public class CPlayerManager implements APIPlayerManager {
         }
 
         return null;
+
     }
 
     /**
@@ -118,6 +119,7 @@ public class CPlayerManager implements APIPlayerManager {
             return new CPlayerOffline(playerModel);
         }
         return null;
+
     }
 
     /**
@@ -139,7 +141,8 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIPlayer loadPlayer(String p, UUID uuid, IpInfo ipInfo) {
-        if (isLoadedPlayer(uuid)) return getPlayer(uuid);
+        APIPlayer apiPlayer = getPlayer(uuid);
+        if (apiPlayer != null) return apiPlayer;
         return CPlayer.loadPlayer(p, uuid, ipInfo);
     }
 

@@ -9,7 +9,7 @@
 
 package fr.redxil.core.common.data.link;
 
-import fr.redxil.core.common.data.utils.SQLColumns;
+import fr.redxil.core.common.sql.utils.SQLColumns;
 
 public enum LinkDataSql {
 

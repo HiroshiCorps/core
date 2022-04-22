@@ -24,13 +24,13 @@ import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.data.money.MoneyDataSql;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
-import fr.redxil.core.common.data.utils.SQLColumns;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
+import fr.redxil.core.common.sql.utils.SQLColumns;
 
 import javax.annotation.Nullable;
 import java.sql.Timestamp;

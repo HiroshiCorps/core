@@ -122,12 +122,20 @@ public class CoreAPI extends API {
 
         if (serverID == null) {
             plugin.printLog(Level.FINE, "Generating new Server on db");
-            this.server = this.serverManager.initServer(serverType, serverName, plugin.getServerIp());
+            this.server = this.serverManager.createServer(serverType, serverName, plugin.getServerIp());
+            if (this.server == null) {
+                plugin.printLog(Level.FINE, "Error on generating server");
+                return;
+            }
             GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
             game = null;
-        }else{
-            plugin.printLog(Level.FINE, "Loading server with ID: "+serverID);
+        } else {
+            plugin.printLog(Level.FINE, "Loading server with ID: " + serverID);
             this.server = getServerManager().initServer(serverType, Long.parseLong(serverID), plugin.getServerIp());
+            if (this.server == null) {
+                plugin.printLog(Level.FINE, "Error on generating server");
+                return;
+            }
             this.server.setServerName(serverName);
             this.game = getGameManager().getGameByServerID(this.server.getServerID());
         }

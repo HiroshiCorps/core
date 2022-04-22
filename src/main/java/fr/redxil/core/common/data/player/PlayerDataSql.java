@@ -9,7 +9,7 @@
 
 package fr.redxil.core.common.data.player;
 
-import fr.redxil.core.common.data.utils.SQLColumns;
+import fr.redxil.core.common.sql.utils.SQLColumns;
 
 public enum PlayerDataSql {
 

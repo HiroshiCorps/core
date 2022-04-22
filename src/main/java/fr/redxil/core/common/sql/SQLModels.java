@@ -10,7 +10,8 @@
 package fr.redxil.core.common.sql;
 
 import fr.redxil.api.common.API;
-import fr.redxil.core.common.data.utils.SQLColumns;
+import fr.redxil.core.common.sql.utils.SQLColumns;
+import fr.redxil.core.common.sql.utils.SQLJoin;
 import fr.redxil.core.common.utils.TripletData;
 
 import java.lang.reflect.Constructor;
@@ -39,15 +40,15 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public void get(T model, int primaryKey) {
-        if(model == null)
+        if (model == null)
             return;
 
         StringBuilder query = new StringBuilder("SELECT * FROM " + model.getTable()
                 + " WHERE " + model.getPrimaryKey() + " = " + primaryKey);
 
-        JoinData joinData = model.getJoinData();
-        if (joinData != null)
-            query.append(" ").append(joinData.toSQL());
+        SQLJoin SQLJoin = model.getJoinData();
+        if (SQLJoin != null)
+            query.append(" ").append(SQLJoin.toSQL());
 
         API.getInstance().getSQLConnection().query(query.toString(), resultSet -> {
             try {
@@ -70,17 +71,17 @@ public class SQLModels<T extends SQLModel> {
         ArrayList<T> results = new ArrayList<>();
         try {
             T model = generateInstance();
-            if(model == null)
-            return null;
+            if (model == null)
+                return null;
 
             StringBuilder query2 = new StringBuilder("SELECT * FROM " + model.getTable());
 
             if (query != null)
                 query2.append(" ").append(query);
 
-            JoinData joinData = model.getJoinData();
-            if (joinData != null)
-                query2.append(" ").append(joinData.toSQL());
+            SQLJoin SQLJoin = model.getJoinData();
+            if (SQLJoin != null)
+                query2.append(" ").append(SQLJoin.toSQL());
 
             API.getInstance().getSQLConnection().query(query2.toString(),
                     resultSet -> {
@@ -148,7 +149,7 @@ public class SQLModels<T extends SQLModel> {
             }
             T model = generateInstance();
             if(model == null)
-            return null;
+                return null;
             if (defaultValues != null) {
                 model.set(defaultValues);
             }
@@ -214,25 +215,25 @@ public class SQLModels<T extends SQLModel> {
     public void insert(T model) {
 
         String query;
-        JoinData joinData = model.getJoinData();
+        SQLJoin SQLJoin = model.getJoinData();
 
         TripletData<String, String, Collection<Object>> listNecString = listCreator(model, model.getTable());
         Collection<Object> objectList = listNecString.getThird();
 
-        if (joinData == null || !model.containsDataForTable(joinData.getColumnsPair().getTwo().getTable())) {
+        if (SQLJoin == null || !model.containsDataForTable(SQLJoin.getColumnsPair().getTwo().getTable())) {
 
             query = "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ")";
 
         } else {
 
-            TripletData<String, String, Collection<Object>> listNecString2 = listCreator(model, joinData.getColumnsPair().getTwo().getTable());
+            TripletData<String, String, Collection<Object>> listNecString2 = listCreator(model, SQLJoin.getColumnsPair().getTwo().getTable());
             objectList.addAll(listNecString2.getThird());
             query = "BEGIN TRANSACTION" +
                     "DECLARE @DataID int;" +
                     "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ");" +
-                        "SELECT @DataID = scope_identity();" +
-                        "INSERT INTO " + joinData.getColumnsPair().getTwo().getTable() + "(" + joinData.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getFirst() + ") VALUES (@DataID, " + listNecString2.getSecond() + ");" +
-                        "COMMIT";
+                    "SELECT @DataID = scope_identity();" +
+                    "INSERT INTO " + SQLJoin.getColumnsPair().getTwo().getTable() + "(" + SQLJoin.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getFirst() + ") VALUES (@DataID, " + listNecString2.getSecond() + ");" +
+                    "COMMIT";
 
         }
 

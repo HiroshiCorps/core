@@ -7,18 +7,17 @@
  *
  */
 
-package fr.redxil.core.common.sql;
+package fr.redxil.core.common.sql.utils;
 
 import fr.redxil.api.common.utils.Pair;
-import fr.redxil.core.common.data.utils.SQLColumns;
 
-public class JoinData {
+public class SQLJoin {
 
     final JoinType joinType;
     final Pair<SQLColumns, SQLColumns> columnsPair;
     boolean nullBoolean = false;
 
-    public JoinData(JoinType joinType, Pair<SQLColumns, SQLColumns> pair) {
+    public SQLJoin(JoinType joinType, Pair<SQLColumns, SQLColumns> pair) {
         this.joinType = joinType;
         this.columnsPair = pair;
     }
