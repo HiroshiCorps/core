@@ -39,33 +39,11 @@ public class CSQLConnection implements SQLConnection {
         }
 
         HikariConfig config = new HikariConfig();
-/*        config.setJdbcUrl("jdbc:mariadb://" + this.host + ":" + this.port + "/" + this.database
-                //        + "?verifyServerCertificate=false"
-                //        + "&useSSL=false"
-                //        + "&serverTimezone=UTC"
-                //        + "&characterEncoding=UTF-8"
-                //        + "&jdbcCompliantTruncation=false"
-                //+ "&allowMultiQueries=true"
-        );
-*/
 
         config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
         config.addDataSourceProperty("url", "jdbc:mariadb://" + ipInfo.getIp() + ":" + ipInfo.getPort() + "/" + database);
         config.addDataSourceProperty("user", username);
         config.addDataSourceProperty("password", password);
-
-        // + "?user="+ this.username + "&password=" + this.password
-        // + "?verifyServerCertificate=false" + "&useSSL=false"
-
-        //config.addDataSourceProperty("cachePrepStmts", "true");
-        //config.addDataSourceProperty("prepStmtCacheSize", "250");
-        //config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        //config.addDataSourceProperty("useLocalSessionState", true);
-        //config.addDataSourceProperty("rewriteBatchedStatements", true);
-        //config.addDataSourceProperty("cacheResultSetMetadata", true);
-        //config.addDataSourceProperty("cacheServerConfiguration", true);
-        //config.addDataSourceProperty("elideSetAutoCommits", true);
-        //config.addDataSourceProperty("maintainTimeStats", false);
 
         // Avoid maxLifeTime disconnection
         config.setMinimumIdle(0);
