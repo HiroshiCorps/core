@@ -135,7 +135,7 @@ public class CSQLConnection implements SQLConnection {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
                 try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                    assert ps != null;
+                    if (ps == null) return;
                     try (ResultSet rs = ps.executeQuery()) {
                         CSQLRowSet CSQLRowSet = new CSQLRowSet(rs);
                         this.closeRessources(rs, ps);
@@ -159,7 +159,7 @@ public class CSQLConnection implements SQLConnection {
     public CSQLRowSet query(final String query, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
             try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                assert ps != null;
+                if (ps == null) return null;
                 try (ResultSet rs = ps.executeQuery()) {
                     CSQLRowSet CSQLRowSet = new CSQLRowSet(rs);
                     this.closeRessources(rs, ps);
@@ -180,7 +180,7 @@ public class CSQLConnection implements SQLConnection {
     public void query(final String query, final Callback<ResultSet> callback, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
             try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                assert ps != null;
+                if (ps == null) return;
                 try (ResultSet rs = ps.executeQuery()) {
                     callback.run(rs);
                     this.closeRessources(rs, ps);
@@ -200,7 +200,7 @@ public class CSQLConnection implements SQLConnection {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
                 try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                    assert ps != null;
+                    if (ps == null) return;
                     ps.execute();
                     this.closeRessources(null, ps);
                     if (callback != null) {
@@ -229,7 +229,7 @@ public class CSQLConnection implements SQLConnection {
     public ResultSet execute(final String query, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
             try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                assert ps != null;
+                if (ps == null) return null;
                 ps.execute();
                 return ps.getResultSet();
             } catch (SQLException exception) {
