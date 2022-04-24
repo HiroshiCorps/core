@@ -24,7 +24,11 @@ import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
+
+import java.util.logging.Level;
 
 public class JoinListener {
 
@@ -32,17 +36,19 @@ public class JoinListener {
 
         String[] splittedIP = player.getRemoteAddress().toString().split(":");
 
-        APIPlayer nicked = API.getInstance().getPlayerManager().getPlayer(player.getUsername());
+        CoreVelocity.getInstance().printLog(Level.INFO, player.getRemoteAddress().toString());
+
+        APIPlayer nicked = CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUsername());
         if (nicked != null)
             nicked.restoreRealData();
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().loadPlayer(
+        APIPlayer apiPlayer = CoreAPI.getInstance().getPlayerManager().loadPlayer(
                 player.getUsername(),
                 player.getUniqueId(),
                 new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
         );
 
-        API.getInstance().getModeratorManager().loadModerator(apiPlayer);
+        CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer);
 
         return apiPlayer;
 
@@ -53,7 +59,7 @@ public class JoinListener {
         if (event.getUsername().contains(" ")) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected").getFinalTextComponent()));
         }
-        if (API.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
+        if (CoreAPI.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Connection refusée").getFinalTextComponent()));
         }
     }
@@ -74,7 +80,7 @@ public class JoinListener {
             return;
         }
 
-        APIOfflinePlayer apiOfflinePlayer = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
+        APIOfflinePlayer apiOfflinePlayer = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
         if (apiOfflinePlayer != null) {
 
@@ -88,7 +94,7 @@ public class JoinListener {
 
         Rank playerRank = apiOfflinePlayer == null ? Rank.JOUEUR : apiOfflinePlayer.getRank();
 
-        Server velocityServer = API.getInstance().getServer();
+        Server velocityServer = CoreAPI.getInstance().getServer();
         if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUniqueId(), playerRank)) {
             e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server").getFinalTextComponent()));
             return;

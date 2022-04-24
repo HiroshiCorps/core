@@ -27,7 +27,7 @@ public record SQLColumns(String table, String columns) {
 
         String[] split = sql.split("`.`");
 
-        if (split.length == 2)
+        if (split.length != 2)
             return null;
 
         return new SQLColumns(split[0].replace("`", ""), split[1].replace("`", ""));

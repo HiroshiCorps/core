@@ -19,8 +19,8 @@ public class PlayerModel extends SQLModel {
 
     public PlayerModel() {
         super("member", PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns());
-    }
 
+    }
     public long getPowerRank() {
         return Integer.valueOf(this.getInt(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns())).longValue();
     }

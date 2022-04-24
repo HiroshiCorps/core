@@ -231,7 +231,8 @@ public class CoreVelocity extends Velocity {
 
     @Override
     public void printLog(Level level, String msg) {
-        System.out.println("[" + level.getName() + "] " + msg);
+        this.logger.log(level, msg);
+        //System.out.println("[" + level.getName() + "] " + msg);
     }
 
 }
