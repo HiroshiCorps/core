@@ -115,7 +115,7 @@ public class CServerManager implements ServerManager {
         Server server = null;
 
         for (Server testServer : availableServer) {
-            if(testServer.getConnectedPlayer() < testServer.getMaxPlayers()) {
+            if (testServer.getConnectedPlayer() < testServer.getMaxPlayers()) {
                 if (testServer.getServerAccess().canAccess(testServer, apiPlayer)) {
                     if (server == null || server.getConnectedPlayer() > testServer.getConnectedPlayer()) {
                         server = testServer;

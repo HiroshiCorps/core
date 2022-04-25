@@ -68,7 +68,7 @@ public class CGameManager implements GameManager {
     @Override
     public boolean isHostExistByServerID(long s) {
         Game game = getGameByServerID(s);
-        if(game == null)
+        if (game == null)
             return false;
         return API.getInstance().getRedisManager().getRedissonClient().getList(GameDataRedis.LIST_HOST_REDIS.getString()).contains(game.getGameID());
     }
@@ -81,9 +81,9 @@ public class CGameManager implements GameManager {
     @Override
     public Host getHostByServerID(long s) {
         Game game = getGameByServerID(s);
-        if(game == null)
+        if (game == null)
             return null;
-        if(!isHostExist(game.getGameID()))
+        if (!isHostExist(game.getGameID()))
             return null;
         return new CHost(game.getGameID());
     }

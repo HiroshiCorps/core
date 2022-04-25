@@ -51,6 +51,10 @@ public abstract class SQLModel {
         return sqlColumns.toSQL();
     }
 
+    public static String toSQL(String table, String columns) {
+        return new SQLColumns(table, columns).toSQL();
+    }
+
     public String getTable() {
         return this.table;
     }
@@ -64,10 +68,6 @@ public abstract class SQLModel {
             for (Map.Entry<String, Object> value : columns.entrySet())
                 put(SQLColumns.fromSQL(value.getKey()), value.getValue());
         }};
-    }
-
-    public static String toSQL(String table, String columns) {
-        return new SQLColumns(table, columns).toSQL();
     }
 
     public boolean containsDataForTable(String table) {

@@ -91,11 +91,11 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
 
         }
 
-        if(targetID == null)
+        if (targetID == null)
             target = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
         else target = API.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
-        if(target == null){
+        if (target == null) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
             return;
         }

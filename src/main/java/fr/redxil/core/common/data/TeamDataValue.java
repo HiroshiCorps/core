@@ -65,8 +65,8 @@ public enum TeamDataValue {
 
     public static void clearRedisData(DataType dataType, Game game) {
 
-        for(Team team : API.getInstance().getTeamManager().getTeamList(game))
-        clearRedisData(dataType, game.getGameID(), team.getTeamName());
+        for (Team team : API.getInstance().getTeamManager().getTeamList(game))
+            clearRedisData(dataType, game.getGameID(), team.getTeamName());
 
     }
 
@@ -87,8 +87,8 @@ public enum TeamDataValue {
             location = location.replace("<teamName>", teamName);
         }
 
-        if(needGame){
-            if(gameID == null) return null;
+        if (needGame) {
+            if (gameID == null) return null;
             location = location.replace("<serverID>", gameID.toString());
         }
 

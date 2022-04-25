@@ -39,17 +39,17 @@ import java.util.logging.Level;
 
 public class CoreAPI extends API {
 
-    private Server server;
     private final String serverName;
-    private Game game;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
-    private CRedisManager manager;
     private final CGameManager cGameManager;
     private final SQLConnection sqlConnection;
     private final PartyManager partyManager;
     private final CTeamManager cTeamManager;
+    private Server server;
+    private Game game;
+    private CRedisManager manager;
 
     public CoreAPI(PluginEnabler plugin) {
         super(plugin);
@@ -237,7 +237,7 @@ public class CoreAPI extends API {
     @Override
     public Host getHost() {
         Game game = getGame();
-        if(game instanceof Host) return (Host) game;
+        if (game instanceof Host) return (Host) game;
         return null;
     }
 

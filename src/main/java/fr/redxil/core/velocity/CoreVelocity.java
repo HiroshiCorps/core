@@ -65,6 +65,7 @@ public class CoreVelocity implements PluginEnabler {
     final File folder;
     final CommandManager commandManager;
     final IpInfo ipInfo;
+    boolean enabled = false;
 
     public CoreVelocity(ProxyServer server, CommandManager commandManager, Logger logger, File folder) {
 
@@ -79,8 +80,6 @@ public class CoreVelocity implements PluginEnabler {
         new CoreAPI(this);
 
     }
-
-    boolean enabled = false;
 
     public static CoreVelocity getInstance() {
         return instance;
@@ -217,6 +216,7 @@ public class CoreVelocity implements PluginEnabler {
         }
 
     }
+
     public ProxyServer getProxyServer() {
         return proxyServer;
     }

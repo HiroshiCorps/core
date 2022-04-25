@@ -114,7 +114,7 @@ public class SQLModels<T extends SQLModel> {
 
     public T getOrInsert(HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         T model = generateInstance();
-        if(model == null)
+        if (model == null)
             return null;
         this.getOrInsert(model, defaultValues, primaryKey);
         return model;
@@ -148,7 +148,7 @@ public class SQLModels<T extends SQLModel> {
                 return foundRow;
             }
             T model = generateInstance();
-            if(model == null)
+            if (model == null)
                 return null;
             if (defaultValues != null) {
                 model.set(defaultValues);
@@ -164,7 +164,7 @@ public class SQLModels<T extends SQLModel> {
 
     public void delete(String query, Object... vars) {
         T model = generateInstance();
-        if(model == null)
+        if (model == null)
             return;
         String queryString = "DELETE FROM " + model.getTable() + " " + query;
         this.logs.info(queryString);
@@ -247,7 +247,8 @@ public class SQLModels<T extends SQLModel> {
         try {
             Constructor<T> constructors = this.method.getDeclaredConstructor();
             return constructors.newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             e.printStackTrace();
         }
         return null;

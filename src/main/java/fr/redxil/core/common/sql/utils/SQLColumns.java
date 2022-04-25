@@ -11,6 +11,17 @@ package fr.redxil.core.common.sql.utils;
 
 public record SQLColumns(String table, String columns) {
 
+    public static SQLColumns fromSQL(String sql) {
+
+        String[] split = sql.split("`.`");
+
+        if (split.length != 2)
+            return null;
+
+        return new SQLColumns(split[0].replace("`", ""), split[1].replace("`", ""));
+
+    }
+
     public String getColumns() {
         return columns;
     }
@@ -21,17 +32,6 @@ public record SQLColumns(String table, String columns) {
 
     public String toSQL() {
         return "`" + getTable() + "`.`" + getColumns() + "`";
-    }
-
-    public static SQLColumns fromSQL(String sql) {
-
-        String[] split = sql.split("`.`");
-
-        if (split.length != 2)
-            return null;
-
-        return new SQLColumns(split[0].replace("`", ""), split[1].replace("`", ""));
-
     }
 
 }

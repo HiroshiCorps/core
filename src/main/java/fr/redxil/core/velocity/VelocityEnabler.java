@@ -16,6 +16,10 @@ import java.util.logging.Logger;
 public class VelocityEnabler {
 
     private static VelocityEnabler instance;
+    private final ProxyServer proxyServer;
+    private final Logger logger;
+    private final File pathFile;
+    private final CommandManager cm;
 
     @Inject
     public VelocityEnabler(ProxyServer server, CommandManager commandManager, Logger logger, @DataDirectory Path folder) {
@@ -32,11 +36,6 @@ public class VelocityEnabler {
         }
         logger.info("Hello there, it's a test plugin I made!");
     }
-
-    private final ProxyServer proxyServer;
-    private final Logger logger;
-    private final File pathFile;
-    private final CommandManager cm;
 
     public static VelocityEnabler getInstance() {
         return instance;

@@ -29,6 +29,8 @@ import java.util.function.BiConsumer;
 
 public class CPlayerManager implements APIPlayerManager {
 
+    HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();
+
     @Override
     public boolean dataExist(String s) {
         return isLoadedPlayer(s) || getOfflinePlayer(s) != null;
@@ -165,8 +167,6 @@ public class CPlayerManager implements APIPlayerManager {
     public List<Long> getLoadedPlayer() {
         return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString());
     }
-
-    HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();
 
     @Override
     public void addLinkOnConnectAction(String s, BiConsumer<APIPlayer, LinkData> biConsumer) {

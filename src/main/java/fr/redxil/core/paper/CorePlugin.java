@@ -48,6 +48,10 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
 
+    public static CorePlugin getInstance() {
+        return instance;
+    }
+
     @Override
     public void onEnable() {
         instance = this;
@@ -62,10 +66,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         printLog(Level.FINE, SystemColor.YELLOW + "Starting API ..." + SystemColor.RESET);
         new CoreAPI(this);
 
-    }
-
-    public static CorePlugin getInstance() {
-        return instance;
     }
 
     @Override
@@ -179,7 +179,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         }
 
     }
-
 
 
     @Override

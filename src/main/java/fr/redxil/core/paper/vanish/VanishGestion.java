@@ -95,7 +95,8 @@ public class VanishGestion {
                                             case 0 -> message = "§cVous êtes actuellement invisible !";
                                             case 1 -> message = "Cible: §a§l" + targetName;
                                             case 2 -> message = "HP: §a§l" + (100 * player.getHealth()) / 20;
-                                            case 3 -> message = "Distance: §a§l" + calculateDiff(modPlayer.getLocation(), player.getLocation());
+                                            case 3 ->
+                                                    message = "Distance: §a§l" + calculateDiff(modPlayer.getLocation(), player.getLocation());
                                             case 4 -> {
                                                 String freezeString = "§c§lNON";
                                                 if (target.isFreeze()) freezeString = "§a§lOUI";

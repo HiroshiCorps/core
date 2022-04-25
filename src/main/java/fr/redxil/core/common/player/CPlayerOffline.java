@@ -41,9 +41,9 @@ import java.util.logging.Level;
 
 public class CPlayerOffline implements APIOfflinePlayer {
 
+    private final long memberID;
     List<SanctionInfo> sanctionModelList = null;
     List<Setting> settingsModelList = null;
-    private final long memberID;
     private PlayerModel playerModel = null;
     private MoneyModel moneyModel = null;
 

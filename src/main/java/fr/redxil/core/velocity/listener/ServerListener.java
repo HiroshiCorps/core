@@ -35,8 +35,8 @@ public class ServerListener {
                 registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
             }
 
-            if(registeredServerOptional.isPresent())
-            event.setResult(ServerPreConnectEvent.ServerResult.allowed(registeredServerOptional.get()));
+            if (registeredServerOptional.isPresent())
+                event.setResult(ServerPreConnectEvent.ServerResult.allowed(registeredServerOptional.get()));
             else {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());
             }
