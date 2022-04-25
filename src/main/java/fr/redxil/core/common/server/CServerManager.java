@@ -89,7 +89,7 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Server createServer(ServerType serverType, String name, IpInfo ipInfo) {
+    public Server createServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
         Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
         if (serverMap.containsKey(name))
             return new CServer(serverMap.get(name));
@@ -99,7 +99,7 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Server initServer(ServerType serverType, Long serverID, IpInfo ipInfo) {
+    public Server loadServer(ServerType serverType, Long serverID, IpInfo ipInfo) {
         if (serverID == null || ipInfo == null) return null;
         if (isServerExist(serverID))
             return new CServer(serverID);

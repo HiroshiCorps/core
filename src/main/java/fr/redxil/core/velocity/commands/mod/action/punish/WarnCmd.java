@@ -22,7 +22,6 @@ import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -82,7 +81,7 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
         SanctionInfo sm = apiPlayerTarget.warnPlayer(reason, APIPlayerModAuthor);
         if (sm != null) {
             player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.getName() + " à été warn.")).getFinalTextComponent());
-            Velocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((proxiedPlayer) -> sm.getSancMessage().sendTo(proxiedPlayer.getUniqueId()));
+            CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((proxiedPlayer) -> sm.getSancMessage().sendTo(proxiedPlayer.getUniqueId()));
         } else
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());

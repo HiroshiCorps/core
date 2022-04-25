@@ -23,7 +23,6 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -42,7 +41,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
     public static void banPlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator APIPlayerModAuthor, String reason) {
         long durationTime = DateUtility.toTimeStamp(timeArgs);
 
-        Optional<Player> playerOptional = Velocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getUUID());
+        Optional<Player> playerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getUUID());
         if (playerOptional.isEmpty()) return;
         Player proxiedPlayer = playerOptional.get();
 
@@ -67,7 +66,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
                 API.getInstance().getModeratorManager().sendToModerators(banMessage);
 
-                Optional<Player> onlinePlayerOptional = Velocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
+                Optional<Player> onlinePlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
 
                 onlinePlayerOptional.ifPresent(player -> player.disconnect(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
 

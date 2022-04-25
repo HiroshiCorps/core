@@ -18,8 +18,8 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
+import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.UUID;
@@ -53,7 +53,7 @@ public class RCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        Velocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName + " " + commandContext.getArgument("message", String.class));
+        CoreVelocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName + " " + commandContext.getArgument("message", String.class));
 
     }
 

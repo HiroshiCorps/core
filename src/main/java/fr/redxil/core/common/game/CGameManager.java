@@ -53,8 +53,8 @@ public class CGameManager implements GameManager {
     }
 
     @Override
-    public Game initGameServer(long serverID, GameEnum gameEnum) {
-        return CGame.initGame(serverID, gameEnum);
+    public Game createGame(long serverID, GameEnum gameEnum) {
+        return CGame.createGame(serverID, gameEnum);
     }
 
     @Override
@@ -95,8 +95,8 @@ public class CGameManager implements GameManager {
     }
 
     @Override
-    public Host initHostServer(long serverID, APIPlayer s1, GameEnum hostGame) {
-        return CHost.initHost(serverID, s1.getName(), hostGame);
+    public Host createHost(long serverID, APIPlayer s1, GameEnum hostGame) {
+        return CHost.createHost(serverID, s1.getName(), hostGame);
     }
 
 }

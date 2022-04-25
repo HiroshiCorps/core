@@ -38,7 +38,7 @@ public class CGame implements Game {
         this.gameID = serverID ? (long) API.getInstance().getRedisManager().getRedisMap(GameDataRedis.MAP_SERVER_REDIS.getString()).get(id) : id;
     }
 
-    public static Game initGame(long serverID, GameEnum gameEnum) {
+    public static Game createGame(long serverID, GameEnum gameEnum) {
 
         long gameID = IDGenerator.generateLONGID(IDDataValue.GAME);
 

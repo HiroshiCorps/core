@@ -9,7 +9,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.api.velocity.Velocity;
+import fr.redxil.core.velocity.CoreVelocity;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -28,11 +28,11 @@ public class ServerListener {
                 return;
             }
 
-            Optional<RegisteredServer> registeredServerOptional = Velocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
+            Optional<RegisteredServer> registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
             if (registeredServerOptional.isEmpty()) {
                 IpInfo ipInfo = serverFinalTarget.getServerIP();
-                Velocity.getInstance().getProxyServer().registerServer(new ServerInfo(serverFinalTarget.getServerName(), new InetSocketAddress(ipInfo.getIp(), ipInfo.getPort())));
-                registeredServerOptional = Velocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
+                CoreVelocity.getInstance().getProxyServer().registerServer(new ServerInfo(serverFinalTarget.getServerName(), new InetSocketAddress(ipInfo.getIp(), ipInfo.getPort())));
+                registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
             }
 
             if(registeredServerOptional.isPresent())

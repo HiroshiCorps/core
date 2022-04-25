@@ -15,13 +15,14 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.PluginEnabler;
+import fr.redxil.api.common.event.CoreEnabledEvent;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.velocity.CoreEnabledEvent;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
 import fr.redxil.core.velocity.commands.ShutdownCmd;
@@ -45,17 +46,20 @@ import fr.redxil.core.velocity.listener.JoinListener;
 import fr.redxil.core.velocity.listener.LeaveListener;
 import fr.redxil.core.velocity.listener.PlayerListener;
 import fr.redxil.core.velocity.listener.ServerListener;
-import fr.redxil.core.velocity.pmsListener.PlayerSwitchListener;
+import fr.redxil.core.velocity.receiver.MessageListener;
+import fr.redxil.core.velocity.receiver.PlayerSwitchListener;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CoreVelocity extends Velocity {
+public class CoreVelocity implements PluginEnabler {
 
+    static CoreVelocity instance;
     final ProxyServer proxyServer;
     final Logger logger;
     final File folder;
@@ -76,6 +80,12 @@ public class CoreVelocity extends Velocity {
 
     }
 
+    boolean enabled = false;
+
+    public static CoreVelocity getInstance() {
+        return instance;
+    }
+
     @Override
     public void onAPIEnabled() {
         checkCrash();
@@ -83,6 +93,7 @@ public class CoreVelocity extends Velocity {
         registerEvents();
         assert getProxyServer() != null;
         getProxyServer().getEventManager().fire(new CoreEnabledEvent(this));
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID());
     }
 
     @Override
@@ -113,6 +124,23 @@ public class CoreVelocity extends Velocity {
         cm.unregister(new ShutdownCmd().getName());
         cm.unregister(new RCmd().getName());
         cm.unregister(new MsgCmd().getName());
+
+        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID());
+    }
+
+    @Override
+    public void onAPILoadFail() {
+
+    }
+
+    @Override
+    public boolean isPluginEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public void setPluginEnable(boolean b) {
+        enabled = b;
     }
 
     public void registerEvents() {
@@ -122,6 +150,7 @@ public class CoreVelocity extends Velocity {
         proxyServer.getEventManager().register(VelocityEnabler.getInstance(), new ServerListener());
         proxyServer.getEventManager().register(VelocityEnabler.getInstance(), this);
         new PlayerSwitchListener();
+        new MessageListener();
     }
 
     public void registerCommands() {
@@ -188,8 +217,6 @@ public class CoreVelocity extends Velocity {
         }
 
     }
-
-    @Override
     public ProxyServer getProxyServer() {
         return proxyServer;
     }
@@ -233,6 +260,39 @@ public class CoreVelocity extends Velocity {
     public void printLog(Level level, String msg) {
         this.logger.log(level, msg);
         //System.out.println("[" + level.getName() + "] " + msg);
+    }
+
+    @Override
+    public void sendMessage(APIPlayer apiPlayer, String s) {
+        Optional<Player> optionalPlayer = this.getProxyServer().getPlayer(apiPlayer.getUUID());
+        optionalPlayer.ifPresentOrElse(
+                player -> player.sendMessage(Component.text(s)),
+                () -> apiPlayer.sendMessage(s)
+        );
+    }
+
+    @Override
+    public void sendMessage(String s, String s1) {
+        this.getProxyServer().getPlayer(s).ifPresentOrElse(
+                player -> player.sendMessage(Component.text(s)),
+                () -> {
+                    APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(s);
+                    if (apiPlayer != null)
+                        apiPlayer.sendMessage(s1);
+                }
+        );
+    }
+
+    @Override
+    public void sendMessage(UUID uuid, String s) {
+        this.getProxyServer().getPlayer(uuid).ifPresentOrElse(
+                player -> player.sendMessage(Component.text(s)),
+                () -> {
+                    APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
+                    if (apiPlayer != null)
+                        apiPlayer.sendMessage(s);
+                }
+        );
     }
 
 }

@@ -22,7 +22,6 @@ import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -84,7 +83,7 @@ public class KickCmd extends BrigadierAPI<CommandSource> {
         if (sm != null) {
             TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.getName() + " à été kick.")
                     .sendTo(player.getUniqueId());
-            Optional<Player> proxiedPlayer = Velocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
+            Optional<Player> proxiedPlayer = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
             proxiedPlayer.ifPresent((player2) -> player2.disconnect(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
         } else
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)

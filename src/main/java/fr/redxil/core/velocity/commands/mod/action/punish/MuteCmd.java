@@ -23,7 +23,6 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -42,7 +41,7 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
 
         long durationTime = DateUtility.toTimeStamp(timeArgs);
 
-        Optional<Player> proxiedPlayerOptional = Velocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getName());
+        Optional<Player> proxiedPlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getName());
 
         if (proxiedPlayerOptional.isEmpty()) return;
 
@@ -57,7 +56,7 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
             SanctionInfo sm = apiPlayerTarget.mutePlayer(reason, end, APIPlayerModAuthor);
 
             if (sm != null) {
-                Velocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((onlinePlayer) -> onlinePlayer.sendMessage(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
+                CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((onlinePlayer) -> onlinePlayer.sendMessage(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
 
                 TextComponentBuilder muteMessage = TextComponentBuilder.createTextComponent(
                         "Le modérateur §d" +

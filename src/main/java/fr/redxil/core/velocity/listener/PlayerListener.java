@@ -25,7 +25,6 @@ import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
-import fr.redxil.api.velocity.Velocity;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.ArrayList;
@@ -102,7 +101,7 @@ public class PlayerListener {
         }
 
         if (server != null) {
-            Optional<RegisteredServer> proxyServer = Velocity.getInstance().getProxyServer().getServer(server.getServerName());
+            Optional<RegisteredServer> proxyServer = CoreVelocity.getInstance().getProxyServer().getServer(server.getServerName());
             if (proxyServer.isPresent()) return proxyServer.get();
         }
         return null;

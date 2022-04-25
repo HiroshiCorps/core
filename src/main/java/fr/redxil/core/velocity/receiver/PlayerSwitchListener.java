@@ -7,7 +7,7 @@
  *
  */
 
-package fr.redxil.core.velocity.pmsListener;
+package fr.redxil.core.velocity.receiver;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -16,7 +16,7 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.velocity.Velocity;
+import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class PlayerSwitchListener implements PMReceiver {
         if (!(message instanceof String)) return;
 
         String[] dataList = ((String) message).split("<switchSplit>");
-        Optional<Player> playerO = Velocity.getInstance().getProxyServer().getPlayer(dataList[0]);
+        Optional<Player> playerO = CoreVelocity.getInstance().getProxyServer().getPlayer(dataList[0]);
 
         if (playerO.isEmpty()) return;
 
@@ -45,7 +45,7 @@ public class PlayerSwitchListener implements PMReceiver {
             return;
         }
 
-        Optional<RegisteredServer> serverInfo = Velocity.getInstance().getProxyServer().getServer(server.getServerName());
+        Optional<RegisteredServer> serverInfo = CoreVelocity.getInstance().getProxyServer().getServer(server.getServerName());
         if (serverInfo.isEmpty()) {
             player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
             return;

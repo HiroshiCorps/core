@@ -7,13 +7,13 @@
  *
  */
 
-package fr.redxil.core.paper.pmsListener;
+package fr.redxil.core.paper.receiver;
 
 import com.velocitypowered.api.proxy.Player;
 import fr.redline.pms.pm.PMReceiver;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
-import fr.redxil.api.velocity.Velocity;
+import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class AskSwitchListener implements PMReceiver {
         if (!(message instanceof String)) return;
 
         String[] dataList = ((String) message).split("<switchSplit>");
-        Optional<Player> playerO = Velocity.getInstance().getProxyServer().getPlayer(dataList[0]);
+        Optional<Player> playerO = CoreVelocity.getInstance().getProxyServer().getPlayer(dataList[0]);
 
         if (playerO.isEmpty()) return;
 

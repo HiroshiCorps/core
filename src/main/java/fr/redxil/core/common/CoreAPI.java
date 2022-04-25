@@ -40,6 +40,7 @@ import java.util.logging.Level;
 public class CoreAPI extends API {
 
     private Server server;
+    private final String serverName;
     private Game game;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
@@ -72,7 +73,7 @@ public class CoreAPI extends API {
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
         File redisIpFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
 
-        String serverName = GSONSaver.loadGSON(serverNameFile, String.class);
+        this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         String serverID = GSONSaver.loadGSON(serverIDFile, String.class);
 
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
@@ -115,25 +116,30 @@ public class CoreAPI extends API {
         this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
         this.manager = new CRedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
-        if (!dataConnected())
+        if (!dataConnected()) {
+            plugin.printLog(Level.SEVERE, "DataBase not connected");
+            plugin.onAPILoadFail();
             return;
+        }
 
         ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
 
         if (serverID == null) {
             plugin.printLog(Level.FINE, "Generating new Server on db");
-            this.server = this.serverManager.createServer(serverType, serverName, plugin.getServerIp());
+            this.server = this.serverManager.createServer(serverType, serverName, plugin.getServerIp(), plugin.getMaxPlayer());
             if (this.server == null) {
                 plugin.printLog(Level.FINE, "Error on generating server");
+                plugin.onAPILoadFail();
                 return;
             }
             GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
             game = null;
         } else {
             plugin.printLog(Level.FINE, "Loading server with ID: " + serverID);
-            this.server = getServerManager().initServer(serverType, Long.parseLong(serverID), plugin.getServerIp());
+            this.server = getServerManager().loadServer(serverType, Long.parseLong(serverID), plugin.getServerIp());
             if (this.server == null) {
                 plugin.printLog(Level.FINE, "Error on generating server");
+                plugin.onAPILoadFail();
                 return;
             }
             this.server.setServerName(serverName);
@@ -141,8 +147,7 @@ public class CoreAPI extends API {
         }
 
         plugin.printLog(Level.INFO, "Server id: " + this.server.getServerID());
-
-        CoreAPI.setEnabled(true);
+        plugin.onAPIEnabled();
 
     }
 
@@ -177,12 +182,20 @@ public class CoreAPI extends API {
     }
 
     @Override
+    public String getServerName() {
+        return this.serverName;
+    }
+
+    @Override
     public void shutdown() {
 
-        if(!API.isEnabled())
+        if (!getPluginEnabler().isPluginEnabled())
             return;
 
-        API.setEnabled(false);
+        getPluginEnabler().onAPIDisabled();
+
+        if (getPluginEnabler().isPluginEnabled())
+            return;
 
         Server server = getServer();
         if (server != null)
