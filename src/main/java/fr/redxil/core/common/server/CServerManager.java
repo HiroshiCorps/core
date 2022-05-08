@@ -20,6 +20,7 @@ import fr.redxil.core.common.data.server.ServerDataRedis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class CServerManager implements ServerManager {
@@ -122,7 +123,13 @@ public class CServerManager implements ServerManager {
         Server server = null;
 
         for (Server testServer : availableServer) {
-            if (testServer.getConnectedPlayer() < testServer.getMaxPlayers()) {
+            Optional<Integer> maxPlayer = testServer.getMaxPlayers();
+            Optional<String> serverName = testServer.getServerName();
+
+            if (maxPlayer.isEmpty() || serverName.isEmpty())
+                continue;
+
+            if (testServer.getConnectedPlayer() < maxPlayer.get()) {
                 if (testServer.getServerAccess().canAccess(testServer, apiPlayer)) {
                     if (server == null || server.getConnectedPlayer() > testServer.getConnectedPlayer()) {
                         server = testServer;

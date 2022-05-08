@@ -20,9 +20,7 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.event.CoreEnabledEvent;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
 import fr.redxil.core.velocity.commands.ShutdownCmd;
@@ -51,7 +49,6 @@ import fr.redxil.core.velocity.receiver.PlayerSwitchListener;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -87,7 +84,6 @@ public class CoreVelocity implements PluginEnabler {
 
     @Override
     public void onAPIEnabled() {
-        checkCrash();
         registerCommands();
         registerEvents();
         assert getProxyServer() != null;
@@ -179,41 +175,6 @@ public class CoreVelocity implements PluginEnabler {
         cm.register(new BrigadierCommand(new ShutdownCmd().buildCommands()));
         cm.register(new BrigadierCommand(new RCmd().buildCommands()));
         cm.register(new BrigadierCommand(new MsgCmd().buildCommands()));
-
-    }
-
-    public void checkCrash() {
-
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Checking for Crashed APIPlayer");
-        for (Player player : getProxyServer().getAllPlayers())
-            player.disconnect((Component) TextComponentBuilder.createTextComponent("Error"));
-
-        Server server = API.getInstance().getServer();
-        String serverName = server.getServerName();
-
-        Collection<UUID> playerUUIDList = server.getPlayerUUIDList();
-        if (playerUUIDList.isEmpty()) return;
-
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Founded " + playerUUIDList.size() + " crashed player data");
-        for (UUID playerUUID : playerUUIDList) {
-
-            server.removePlayerInServer(playerUUID);
-            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(playerUUID);
-
-            if (apiPlayer != null)
-
-                if (apiPlayer.getBungeeServer().getServerName().equals(serverName)) {
-
-                    API.getInstance().getPluginEnabler().printLog(Level.FINE, "Saving player: " + playerUUID.toString());
-                    Server lastSpigotServer = apiPlayer.getServer();
-                    if (lastSpigotServer != null)
-                        lastSpigotServer.removePlayerInServer(playerUUID);
-
-                    apiPlayer.unloadPlayer();
-
-                }
-
-        }
 
     }
 

@@ -28,11 +28,21 @@ public class ServerListener {
                 return;
             }
 
-            Optional<RegisteredServer> registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
+            Optional<String> serverNameOptional = serverFinalTarget.getServerName();
+
+            if (serverNameOptional.isEmpty()) {
+                event.setResult(ServerPreConnectEvent.ServerResult.denied());
+                return;
+            }
+
+            String serverName = serverNameOptional.get();
+
+            Optional<RegisteredServer> registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverNameOptional.get());
+
             if (registeredServerOptional.isEmpty()) {
                 IpInfo ipInfo = serverFinalTarget.getServerIP();
-                CoreVelocity.getInstance().getProxyServer().registerServer(new ServerInfo(serverFinalTarget.getServerName(), new InetSocketAddress(ipInfo.getIp(), ipInfo.getPort())));
-                registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverFinalTarget.getServerName());
+                CoreVelocity.getInstance().getProxyServer().registerServer(new ServerInfo(serverName, new InetSocketAddress(ipInfo.getIp(), ipInfo.getPort())));
+                registeredServerOptional = CoreVelocity.getInstance().getProxyServer().getServer(serverName);
             }
 
             if (registeredServerOptional.isPresent())

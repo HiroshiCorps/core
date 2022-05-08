@@ -48,7 +48,7 @@ public class CRedisManager implements RedisManager {
     }
 
     @Override
-    public long getRedisLong(String key) {
+    public Long getRedisLong(String key) {
         return getRedissonClient().getAtomicLong(key).get();
     }
 
@@ -73,12 +73,12 @@ public class CRedisManager implements RedisManager {
     }
 
     @Override
-    public double getRedisDouble(String key) {
+    public Double getRedisDouble(String key) {
         return getRedissonClient().getAtomicDouble(key).get();
     }
 
     @Override
-    public boolean getRedisBoolean(String s) {
+    public Boolean getRedisBoolean(String s) {
         return Boolean.parseBoolean(getRedisString(s));
     }
 
@@ -134,7 +134,7 @@ public class CRedisManager implements RedisManager {
         config.setNettyThreads(8);
 
         SingleServerConfig singleServerConfig = config.useSingleServer()
-                .setAddress("redis://127.0.0.1:6379")
+                .setAddress("redis://" + ipInfo.getIp() + ":" + ipInfo.getPort())
                 .setDatabase(database);
 
         if (user != null)

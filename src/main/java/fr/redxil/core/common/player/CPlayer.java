@@ -84,7 +84,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         redisManager.setRedisString(PlayerDataRedis.PLAYER_NAME_REDIS.getString(memberID), name);
         redisManager.setRedisString(PlayerDataRedis.PLAYER_REAL_NAME_REDIS.getString(memberID), name);
         redisManager.setRedisString(PlayerDataRedis.PLAYER_UUID_REDIS.getString(memberID), uuid.toString());
-        redisManager.setRedisString(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(memberID), API.getInstance().getServer().getServerName());
+
+        redisManager.setRedisLong(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(memberID), API.getInstance().getServer().getServerID());
         redisManager.setRedisLong(PlayerDataRedis.PLAYER_RANK_REDIS.getString(memberID), playerModel.getPowerRank());
         redisManager.setRedisLong(PlayerDataRedis.PLAYER_REAL_RANK_REDIS.getString(memberID), playerModel.getPowerRank());
         redisManager.setRedisString(PlayerDataRedis.PLAYER_INPUT_REDIS.getString(memberID), null);
@@ -194,14 +195,13 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     /// <!-------------------- Money part --------------------!>
 
     @Override
-    public String getBungeeServerName() {
-        return API.getInstance().getRedisManager().getRedisString(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(this));
+    public long getBungeeServerID() {
+        return API.getInstance().getRedisManager().getRedisLong(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(this));
     }
 
     @Override
     public Server getBungeeServer() {
-        String serverName = getBungeeServerName();
-        if (serverName == null) return null;
+        long serverName = getBungeeServerID();
         return API.getInstance().getServerManager().getServer(serverName);
     }
 

@@ -16,7 +16,6 @@ import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.*;
 import fr.redxil.core.paper.event.ConnectionListener;
@@ -33,8 +32,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -71,7 +68,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     @Override
     public void onAPIEnabled() {
         printLog(Level.FINE, SystemColor.GREEN + "API Started" + SystemColor.RESET);
-        checkCrash();
 
         this.vanish = new VanishGestion(this);
         this.freezeGestion = new FreezeMessageGestion(this);
@@ -153,31 +149,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     @Override
     public void setPluginEnable(boolean b) {
         enabled = b;
-    }
-
-    public void checkCrash() {
-
-        printLog(Level.FINE, SystemColor.YELLOW + "Checking for Crashed APIPlayer" + SystemColor.RESET);
-        for (Player player : Bukkit.getOnlinePlayers())
-            player.kickPlayer("Error");
-
-        Server server = API.getInstance().getServer();
-        String serverName = server.getServerName();
-
-        Collection<UUID> playerUUIDList = new ArrayList<>(server.getPlayerUUIDList());
-        if (playerUUIDList.isEmpty()) return;
-
-        printLog(Level.SEVERE, SystemColor.RED + "Founded " + playerUUIDList.size() + " crashed player data" + SystemColor.RESET);
-        for (UUID playerUUID : playerUUIDList) {
-            server.removePlayerInServer(playerUUID);
-            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(playerUUID);
-            if (apiPlayer != null)
-                if (apiPlayer.getServer().getServerName().equals(serverName)) {
-                    printLog(Level.SEVERE, SystemColor.GREEN + "Saving player: " + apiPlayer.getName() + SystemColor.RESET);
-                    apiPlayer.unloadPlayer();
-                }
-        }
-
     }
 
 

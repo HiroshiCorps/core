@@ -16,6 +16,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.redis.RedisManager;
+import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
@@ -27,6 +28,7 @@ import org.redisson.api.RList;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public record CPlayerModerator(long memberID) implements APIPlayerModerator {
@@ -200,7 +202,10 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
         String connectedMsg = "§c✘", server = null;
         if (apiOfflinePlayer.isConnected()) {
             connectedMsg = "§a✓";
-            server = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID()).getServer().getServerName();
+
+            Server serverAPI = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID()).getServer();
+            Optional<String> serverName = serverAPI.getServerName();
+            server = serverName.orElseGet(() -> Long.valueOf(serverAPI.getServerID()).toString());
         }
 
         tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");

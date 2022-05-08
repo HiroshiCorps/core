@@ -99,8 +99,11 @@ public class CServer implements Server {
     }
 
     @Override
-    public int getMaxPlayers() {
-        return Long.valueOf(API.getInstance().getRedisManager().getRedisLong(ServerDataRedis.SERVER_MAXP_REDIS.getString(this))).intValue();
+    public Optional<Integer> getMaxPlayers() {
+        Long maxPlayer = API.getInstance().getRedisManager().getRedisLong(ServerDataRedis.SERVER_MAXP_REDIS.getString(this));
+        if (maxPlayer == null)
+            return Optional.empty();
+        return Optional.of(maxPlayer.intValue());
     }
 
     @Override
@@ -109,15 +112,19 @@ public class CServer implements Server {
     }
 
     @Override
-    public String getServerName() {
-        return API.getInstance().getRedisManager().getRedisString(ServerDataRedis.SERVER_NAME_REDIS.getString(this));
+    public Optional<String> getServerName() {
+        return Optional.ofNullable(API.getInstance().getRedisManager().getRedisString(ServerDataRedis.SERVER_NAME_REDIS.getString(this)));
     }
 
     @Override
     public void setServerName(String s) {
-        String currentName = getServerName();
+        Optional<String> currentName = getServerName();
         RedisManager redisManager = API.getInstance().getRedisManager();
-        redisManager.getRedisMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).remove(currentName, serverID);
+
+        currentName.ifPresent((serverName) ->
+                redisManager.getRedisMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).remove(serverName, serverID)
+        );
+
         redisManager.getRedisMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).put(s, serverID);
         redisManager.setRedisString(ServerDataRedis.SERVER_NAME_REDIS.getString(this), s);
     }
@@ -156,21 +163,21 @@ public class CServer implements Server {
 
     @Override
     public boolean isOnline() {
-        return API.getInstance().getServerManager().isServerExist(getServerName());
+        return API.getInstance().getServerManager().isServerExist(getServerID());
     }
 
     @Override
     public IpInfo getServerIP() {
         return new IpInfo(
                 API.getInstance().getRedisManager().getRedisString(ServerDataRedis.SERVER_IP_REDIS.getString(this)),
-                Long.valueOf(API.getInstance().getRedisManager().getRedisLong(ServerDataRedis.SERVER_PORT_REDIS.getString(this))).intValue()
+                API.getInstance().getRedisManager().getRedisLong(ServerDataRedis.SERVER_PORT_REDIS.getString(this)).intValue()
         );
     }
 
     @Override
     public void shutdown() {
 
-        String name = getServerName();
+        Optional<String> serverName = getServerName();
         if (API.getInstance().getServerID() != getServerID()) return;
 
         long id = getServerID();
@@ -185,13 +192,13 @@ public class CServer implements Server {
                     put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), getServerAccess().toString());
                     put(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns(), getReservedRank().getRankPower().intValue());
                     put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), getServerType().toString());
-                    put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), name);
+                    serverName.ifPresentOrElse((name) -> put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), name), () -> put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), null));
                 }}
         );
 
         ServerDataRedis.clearRedisData(DataType.SERVER, id);
 
-        API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).remove(name);
+        serverName.ifPresent(s -> API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).remove(s));
 
     }
 
@@ -232,12 +239,17 @@ public class CServer implements Server {
         if (!listPlayer.contains(uuid.toString()))
             listPlayer.add(uuid.toString());
 
+        Optional<String> optionalServerName = getServerName();
+
+        if (optionalServerName.isEmpty())
+            return;
+
         if (API.getInstance().isVelocity())
-            API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(apiPlayer), getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(apiPlayer), optionalServerName.get());
         else {
             Server server = apiPlayer.getServer();
             if (server != null) server.removePlayerInServer(apiPlayer.getUUID());
-            API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_SPIGOT_REDIS.getString(apiPlayer), getServerName());
+            API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_SPIGOT_REDIS.getString(apiPlayer), optionalServerName.get());
         }
     }
 

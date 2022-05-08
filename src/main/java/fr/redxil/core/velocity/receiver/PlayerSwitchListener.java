@@ -45,7 +45,13 @@ public class PlayerSwitchListener implements PMReceiver {
             return;
         }
 
-        Optional<RegisteredServer> serverInfo = CoreVelocity.getInstance().getProxyServer().getServer(server.getServerName());
+        Optional<String> serverName = server.getServerName();
+        if (serverName.isEmpty()) {
+            player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
+            return;
+        }
+
+        Optional<RegisteredServer> serverInfo = CoreVelocity.getInstance().getProxyServer().getServer(serverName.get());
         if (serverInfo.isEmpty()) {
             player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
             return;
