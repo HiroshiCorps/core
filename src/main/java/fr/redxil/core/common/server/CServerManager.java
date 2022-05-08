@@ -88,8 +88,15 @@ public class CServerManager implements ServerManager {
         return new CServer(l);
     }
 
+
     @Override
     public Server createServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
+        ///Temporaire
+        return initServer(serverType, name, ipInfo, maxPlayer);
+    }
+
+    @Override
+    public Server initServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
         Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
         if (serverMap.containsKey(name))
             return new CServer(serverMap.get(name));

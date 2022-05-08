@@ -18,6 +18,10 @@ repositories {
         dirs "../api/build/libs/"
     }
 
+    flatDir {
+        dirs "../sad/build/libs/"
+    }
+
     maven {
         url "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
     }
@@ -31,6 +35,7 @@ repositories {
 dependencies {
     compileOnly name: 'spigot-1.17.1'
     implementation name: 'hiroshimc-api-1.0.2.1'
+    implementation name: 'SAD-1.0-SNAPSHOT'
     implementation group: 'com.velocitypowered', name: 'velocity-api', version: '3.0.0'
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
