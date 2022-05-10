@@ -122,9 +122,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
     @Override
     public void onAPIDisabled() {
 
-        if (API.getInstance().isGameServer())
-            API.getInstance().getGame().clearData();
-
         HandlerList.unregisterAll(this);
 
         Objects.requireNonNull(this.getCommand("mod")).setExecutor(new ModCmd());

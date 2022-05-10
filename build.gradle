@@ -19,11 +19,7 @@ repositories {
     }
 
     flatDir {
-        dirs "../sad/build/libs/"
-    }
-
-    maven {
-        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots"
+        dirs "../../sad/build/libs/"
     }
 
     maven {

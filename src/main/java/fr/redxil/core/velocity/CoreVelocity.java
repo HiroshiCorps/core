@@ -39,7 +39,6 @@ import fr.redxil.core.velocity.commands.mod.highstaff.SetRankCmd;
 import fr.redxil.core.velocity.commands.mod.highstaff.StaffCmd;
 import fr.redxil.core.velocity.commands.msg.MsgCmd;
 import fr.redxil.core.velocity.commands.msg.RCmd;
-import fr.redxil.core.velocity.commands.party.PartyCmd;
 import fr.redxil.core.velocity.listener.JoinListener;
 import fr.redxil.core.velocity.listener.LeaveListener;
 import fr.redxil.core.velocity.listener.PlayerListener;
@@ -96,8 +95,6 @@ public class CoreVelocity implements PluginEnabler {
         proxyServer.getEventManager().unregisterListeners(VelocityEnabler.getInstance());
         CommandManager cm = commandManager;
 
-        cm.unregister(new PartyCmd().getName());
-
         cm.unregister(new BanCmd().getName());
         cm.unregister(new WarnCmd().getName());
         cm.unregister(new KickCmd().getName());
@@ -151,8 +148,6 @@ public class CoreVelocity implements PluginEnabler {
     public void registerCommands() {
 
         CommandManager cm = commandManager;
-
-        cm.register(new BrigadierCommand(new PartyCmd().buildCommands()));
 
         cm.register(new BrigadierCommand(new BanCmd().buildCommands()));
         cm.register(new BrigadierCommand(new WarnCmd().buildCommands()));

@@ -12,7 +12,6 @@ package fr.redxil.core.common.player;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.group.party.Party;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.SanctionInfo;
@@ -149,11 +148,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(getMemberID());
         if (spm != null)
             spm.disconnectModerator();
-
-
-        Party party = getParty();
-        if (party != null)
-            party.quitParty(this);
 
 
         UUID uuid = getUUID();
@@ -445,11 +439,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public Party getParty() {
-        return API.getInstance().getPartyManager().getPlayerParty(this);
-    }
-
-    @Override
     public void addTempData(String s, Object o) {
         API.getInstance().getRedisManager().getRedisMap(PlayerDataRedis.PLAYER_MAP_REDIS.getString(this)).put(s, o);
     }
@@ -487,11 +476,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         return getLastSanction(SanctionType.KICK);
 
-    }
-
-    @Override
-    public boolean hasParty() {
-        return CoreAPI.getInstance().getPartyManager().getParty(getMemberID()) != null;
     }
 
 }

@@ -10,12 +10,9 @@
 package fr.redxil.core.paper.event;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.Game;
-import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
 import org.bukkit.Bukkit;
@@ -36,35 +33,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
         if (apiPlayer == null) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
-            return;
         }
-
-        GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Game games = API.getInstance().getGame();
-        if (gameBuilder != null) {
-            if (!games.isSpectator(apiPlayer.getUUID()) && !games.isGameState(GameState.WAITING)) {
-                games.setSpectator(apiPlayer.getUUID(), true);
-            }
-        }
-
-    }
-
-    public void playerJoinGameServer(Player p, APIPlayer apiPlayer) {
-
-        GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Game games = API.getInstance().getGame();
-
-        if (gameBuilder == null)
-            return;
-
-        boolean spectate = games.isSpectator(p.getUniqueId());
-
-        if (!spectate) {
-            games.getInConnectPlayer().remove(apiPlayer.getUUID());
-            gameBuilder.onPlayerJoin(p);
-            gameBuilder.broadcastActionBar("§a" + p.getName() + "§7 à rejoins la partie §8(§a" + games.getConnectedPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
-        } else
-            gameBuilder.onSpectatorJoin(p);
 
     }
 
@@ -73,7 +42,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
 
-        if (event.getJoinMessage() != null && GameBuilder.getGameBuilder() == null) {
+        if (event.getJoinMessage() != null) {
             sendJoinMessage(apiPlayer);
             event.setJoinMessage(null);
         }
@@ -91,9 +60,6 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
             }
         }
 
-        if (GameBuilder.getGameBuilder() != null)
-            playerJoinGameServer(event.getPlayer(), apiPlayer);
-
     }
 
     @EventHandler
@@ -109,26 +75,6 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         event.setQuitMessage(null);
         sendQuitMessage(osp);
-
-        if (GameBuilder.getGameBuilder() == null)
-            return;
-
-        GameBuilder gameBuilder = GameBuilder.getGameBuilder();
-        Game games = API.getInstance().getGame();
-
-        boolean spectator = games.isSpectator(osp.getUUID());
-
-        if (!spectator) {
-            games.getConnectedPlayers().remove(osp.getUUID());
-            gameBuilder.broadcastActionBar("§a" + osp.getName() + "§7 à quitté la partie §8(§a" + games.getConnectedPlayers() + "§8/§e" + games.getMaxPlayer() + "§8)");
-            gameBuilder.onPlayerLeave(player);
-        } else {
-            if (games.getPlayerSpectators().contains(osp.getUUID()))
-                games.getPlayerSpectators().remove(osp.getUUID());
-            else
-                games.getModeratorSpectators().remove(osp.getUUID());
-            gameBuilder.onSpectatorLeave(player);
-        }
 
     }
 

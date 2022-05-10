@@ -11,8 +11,6 @@ package fr.redxil.core.common.server;
 
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.game.Game;
-import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.redis.RedisManager;
@@ -256,26 +254,6 @@ public class CServer implements Server {
     @Override
     public void removePlayerInServer(UUID uuid) {
         API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_PLAYER_REDIS.getString(this)).remove(uuid.toString());
-    }
-
-    @Override
-    public boolean isHostServer() {
-        return API.getInstance().getGameManager().isHostExistByServerID(getServerID());
-    }
-
-    @Override
-    public boolean isGameServer() {
-        return API.getInstance().getGame() != null;
-    }
-
-    @Override
-    public Game getGame() {
-        return API.getInstance().getGameManager().getGameByServerID(getServerID());
-    }
-
-    @Override
-    public Host getHost() {
-        return API.getInstance().getGameManager().getHostByServerID(getServerID());
     }
 
     @Override
