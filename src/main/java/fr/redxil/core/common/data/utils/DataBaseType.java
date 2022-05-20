@@ -13,7 +13,7 @@ public enum DataBaseType {
     SQL("SQL"),
     REDIS("REDIS");
 
-    public String sqlBase;
+    public final String sqlBase;
 
     DataBaseType(String sqlBase) {
         this.sqlBase = sqlBase;

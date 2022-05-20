@@ -13,7 +13,6 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.event.PlayerJoinModerationEvent;
 import fr.redxil.api.paper.event.PlayerQuitModerationEvent;
-import fr.redxil.api.paper.utils.Title;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -31,14 +30,14 @@ public class ModeratorMain {
         if (b) {
             player.setCollidable(false);
             if (!onConnection) {
-                Title.sendTitle(player, "§b§lModération", "§7Vous êtes en mode modération", 1, 40, 1);
+                player.sendTitle("§b§lModération", "§7Vous êtes en mode modération", 1, 40, 1);
                 Bukkit.getPluginManager().callEvent(new PlayerJoinModerationEvent(apiPlayerModerator));
             }
         } else {
             player.setCollidable(true);
             apiPlayerModerator.setCible(null);
             if (!onConnection) {
-                Title.sendTitle(player, "§b§lModération", "§7Vous êtes plus en mode modération", 1, 40, 1);
+                player.sendTitle("§b§lModération", "§7Vous êtes plus en mode modération", 1, 40, 1);
                 Bukkit.getPluginManager().callEvent(new PlayerQuitModerationEvent(apiPlayerModerator));
             }
         }

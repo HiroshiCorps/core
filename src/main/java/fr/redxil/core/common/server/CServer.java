@@ -11,14 +11,12 @@ package fr.redxil.core.common.server;
 
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.server.ServerDataRedis;
 import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.data.utils.DataType;
@@ -128,22 +126,7 @@ public class CServer implements Server {
     }
 
     @Override
-    public Collection<APIPlayer> getPlayerList() {
-
-        List<APIPlayer> playerList = new ArrayList<>();
-
-        getPlayerUUIDList().forEach((uuid) -> {
-            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
-            if (apiPlayer != null)
-                playerList.add(apiPlayer);
-        });
-
-        return playerList;
-
-    }
-
-    @Override
-    public Collection<UUID> getPlayerUUIDList() {
+    public Collection<UUID> getPlayerList() {
 
         List<UUID> playerList = new ArrayList<>();
 
@@ -201,6 +184,16 @@ public class CServer implements Server {
     }
 
     @Override
+    public void setPlayerConnected(UUID uuid, boolean b) {
+        RList<String> listPlayer = API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_PLAYER_REDIS.getString(this));
+        String uuidString = uuid.toString();
+        if (listPlayer.contains(uuidString) != b)
+            if (b)
+                listPlayer.add(uuidString);
+            else listPlayer.remove(uuidString);
+    }
+
+    @Override
     public ServerStatus getServerStatus() {
         return ServerStatus.getServerStatus(API.getInstance().getRedisManager().getRedisString(ServerDataRedis.SERVER_STATUS_REDIS.getString(this)));
     }
@@ -231,32 +224,6 @@ public class CServer implements Server {
     }
 
     @Override
-    public void setPlayerInServer(APIPlayer apiPlayer) {
-        RList<String> listPlayer = API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_PLAYER_REDIS.getString(this));
-        UUID uuid = apiPlayer.getUUID();
-        if (!listPlayer.contains(uuid.toString()))
-            listPlayer.add(uuid.toString());
-
-        Optional<String> optionalServerName = getServerName();
-
-        if (optionalServerName.isEmpty())
-            return;
-
-        if (API.getInstance().isVelocity())
-            API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_BUNGEE_REDIS.getString(apiPlayer), optionalServerName.get());
-        else {
-            Server server = apiPlayer.getServer();
-            if (server != null) server.removePlayerInServer(apiPlayer.getUUID());
-            API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_SPIGOT_REDIS.getString(apiPlayer), optionalServerName.get());
-        }
-    }
-
-    @Override
-    public void removePlayerInServer(UUID uuid) {
-        API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_PLAYER_REDIS.getString(this)).remove(uuid.toString());
-    }
-
-    @Override
     public Rank getReservedRank() {
         return Rank.getRank(API.getInstance().getRedisManager().getRedisLong(ServerDataRedis.SERVER_NEEDRANK_REDIS.getString(this)));
     }
@@ -265,6 +232,21 @@ public class CServer implements Server {
     public void setReservedRank(Rank Rank) {
         Long power = Rank == null ? fr.redxil.api.common.player.rank.Rank.JOUEUR.getRankPower() : Rank.getRankPower();
         API.getInstance().getRedisManager().setRedisLong(ServerDataRedis.SERVER_NEEDRANK_REDIS.getString(this), power);
+    }
+
+    @Override
+    public void setAllowedConnect(UUID uuid, boolean b) {
+        RList<String> listPlayer = API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_ALLOW_PLAYER_REDIS.getString(this));
+        String uuidString = uuid.toString();
+        if (listPlayer.contains(uuidString) != b)
+            if (b)
+                listPlayer.add(uuidString);
+            else listPlayer.remove(uuidString);
+    }
+
+    @Override
+    public boolean getAllowedConnect(UUID uuid) {
+        return API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_ALLOW_PLAYER_REDIS.getString(this)).contains(uuid.toString());
     }
 
 }

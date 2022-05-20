@@ -13,16 +13,8 @@ public class Nick {
 
         EntityPlayer craftPlayerP = ((CraftPlayer) p).getHandle();
 
-        /*TagsManager tagsManager = Paper.getInstance().getTagsManager();
-
-        tagsManager.removePlayer(p);
-           */
         JavaUtils.setDeclaredField(craftPlayerP, "listName", CraftChatMessage.fromString(apiPlayer.getTabString())[0]);
         JavaUtils.setDeclaredField(craftPlayerP.getProfile(), "name", apiPlayer.getName());
-/*
-        tagsManager.addPlayer(p);
-        tagsManager.updatePlayer(p);
-*/
     }
 
 }

@@ -48,7 +48,7 @@ public class JoinListener {
                 new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
         );
 
-        CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer);
+        CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer.getMemberID(), apiPlayer.getUUID(), apiPlayer.getName());
 
         return apiPlayer;
 

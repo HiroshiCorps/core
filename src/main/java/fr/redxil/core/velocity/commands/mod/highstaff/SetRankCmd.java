@@ -117,8 +117,9 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             ((APIPlayer) offlineTarget).setRealRank(newRank);
         else
             offlineTarget.setRank(newRank);
+
         if (offlineTarget instanceof APIPlayer)
-            API.getInstance().getModeratorManager().loadModerator((APIPlayer) offlineTarget);
+            API.getInstance().getModeratorManager().loadModerator(offlineTarget.getMemberID(), offlineTarget.getUUID(), offlineTarget.getName());
 
         commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                         "La personne §d" +

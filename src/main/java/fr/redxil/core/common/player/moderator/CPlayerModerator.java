@@ -33,9 +33,7 @@ import java.util.UUID;
 
 public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
-    static APIPlayerModerator initModerator(APIPlayer apiPlayer) {
-
-        Long memberID = apiPlayer.getMemberID();
+    static APIPlayerModerator initModerator(Long memberID, UUID uuid, String name) {
 
         if (!API.getInstance().getModeratorManager().isModerator(memberID)) return null;
 
@@ -47,11 +45,11 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
         RedisManager rm = API.getInstance().getRedisManager();
 
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(memberID), apiPlayer.getName());
+        rm.setRedisString(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(memberID), uuid.toString());
+        rm.setRedisString(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(memberID), name);
         rm.setRedisString(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns()));
         rm.setRedisString(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns()));
         rm.setRedisString(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(memberID), apiPlayer.getUUID().toString());
 
         RList<Long> idList = rm.getRedisList(ModeratorDataRedis.LIST_MODERATOR.getString());
         if (!idList.contains(memberID))
@@ -80,10 +78,14 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
         API.getInstance().getRedisManager().getRedisList(ModeratorDataRedis.LIST_MODERATOR.getString()).remove(memberID);
     }
 
+    @Override
+    public UUID getUUID() {
+        return UUID.fromString(API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(getMemberID())));
+    }
 
     @Override
-    public boolean isConnected() {
-        return getAPIPlayer() != null;
+    public String getName() {
+        return API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(getMemberID()));
     }
 
     @Override
@@ -120,11 +122,6 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
         API.getInstance().getRedisManager().setRedisString(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(this), s);
     }
 
-    @Override
-    public APIPlayer getAPIPlayer() {
-        return API.getInstance().getPlayerManager().getPlayer(getMemberID());
-    }
-
     /**
      * @return This function return the MemberID of the moderator
      */
@@ -135,29 +132,14 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
     }
 
     @Override
-    public String getName() {
-        return API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(this));
-    }
-
-    /**
-     * @return This function return the current UUID of the moderator
-     */
-
-    @Override
-    public UUID getUUID() {
-        String uuid = API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(this));
-        if (uuid == null) return null;
-        return UUID.fromString(uuid);
-    }
-
-    @Override
     public void printSanction(APIOfflinePlayer apiOfflinePlayer, SanctionType sanctionType) {
 
         List<SanctionInfo> sanctionInfos = apiOfflinePlayer.getSanction(sanctionType);
+        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(getMemberID());
 
         if (!sanctionInfos.isEmpty()) {
 
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(this.getUUID());
+            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer);
 
             for (int i = sanctionInfos.size() - 1; i >= 0; i--) {
 
@@ -177,13 +159,13 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
                 tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
 
-                tcb.sendTo(this.getUUID());
+                tcb.sendTo(apiPlayer);
 
             }
 
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(this.getUUID());
+            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer);
         } else
-            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(this.getUUID());
+            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(apiPlayer);
 
     }
 
@@ -232,7 +214,7 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
         tcb.appendNewComponentBuilder("§7→ §rEtat§7・Banni: " + ban + " §7Mute: " + mute + "§r\n");
         tcb.appendNewComponentBuilder("§m                    \n");
 
-        tcb.sendTo(this.getUUID());
+        tcb.sendTo(API.getInstance().getPlayerManager().getPlayer(getMemberID()));
 
     }
 

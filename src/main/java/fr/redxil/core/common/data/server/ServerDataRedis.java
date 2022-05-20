@@ -26,6 +26,8 @@ public enum ServerDataRedis {
     SERVER_PORT_REDIS(DataType.SERVER, "servers/<serverID>/server_port", true),
     SERVER_PLAYER_REDIS(DataType.SERVER, "servers/<serverID>/server_player", true),
 
+    SERVER_ALLOW_PLAYER_REDIS(DataType.SERVER, "servers/<serverID>/server_allow_player", true),
+
     MAP_SERVER_REDIS(DataType.GLOBAL, "servers/map", false);
 
     final DataType dataType;

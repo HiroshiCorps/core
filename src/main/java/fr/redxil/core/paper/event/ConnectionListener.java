@@ -41,17 +41,18 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
     public void playerJoin(PlayerJoinEvent event) {
 
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        Player player = event.getPlayer();
 
         if (event.getJoinMessage() != null) {
             sendJoinMessage(apiPlayer);
             event.setJoinMessage(null);
         }
 
-        Nick.applyNick(event.getPlayer(), apiPlayer);
-        corePlugin.getVanish().applyVanish(event.getPlayer());
+        Nick.applyNick(player, apiPlayer);
+        corePlugin.getVanish().applyVanish(player);
 
-        API.getInstance().getServer().setPlayerInServer(apiPlayer);
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer);
+        API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
+        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
 
         if (playerModerator != null) {
             if (apiPlayer.isLogin()) {
@@ -66,12 +67,12 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
     public void playerQuitEvent(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
-        APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(event.getPlayer().getUniqueId());
+        APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
-        API.getInstance().getServer().removePlayerInServer(event.getPlayer().getUniqueId());
+        API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
 
-        corePlugin.getVanish().playerDisconnect(event.getPlayer());
-        corePlugin.getFreezeGestion().stopFreezeMessage(event.getPlayer().getUniqueId());
+        corePlugin.getVanish().playerDisconnect(player);
+        corePlugin.getFreezeGestion().stopFreezeMessage(player.getUniqueId());
 
         event.setQuitMessage(null);
         sendQuitMessage(osp);

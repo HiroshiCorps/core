@@ -12,7 +12,6 @@ package fr.redxil.core.paper.freeze;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.paper.utils.Title;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
@@ -50,9 +49,6 @@ public class FreezeMessageGestion {
             timer.cancel();
             timer.purge();
             map.remove(uuid);
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) return;
-            Title.clearTitle(player);
         }
     }
 
@@ -62,8 +58,9 @@ public class FreezeMessageGestion {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                if (APIPlayerModerator.isConnected() && APIPlayerModerator.getAPIPlayer().getServer().getServerName().equals(apiPlayer.getServer().getServerName()))
-                    Title.sendTitle(player, "§bAttention", "§8Vous êtes actuellement en inspection", 20, 40, 20);
+                APIPlayer apiPlayerMod = API.getInstance().getPlayerManager().getPlayer(APIPlayerModerator.getMemberID());
+                if (apiPlayerMod.isConnected() && apiPlayerMod.getServer().getServerName().equals(apiPlayer.getServer().getServerName()))
+                    player.sendTitle("§bAttention", "§8Vous êtes actuellement en inspection", 20, 40, 20);
                 else
                     setFreeze(false, apiPlayer, null);
             }

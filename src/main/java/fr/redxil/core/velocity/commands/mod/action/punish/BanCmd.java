@@ -38,10 +38,10 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
         super("ban");
     }
 
-    public static void banPlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator APIPlayerModAuthor, String reason) {
+    public static void banPlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator apiPlayerModerator, String reason) {
         long durationTime = DateUtility.toTimeStamp(timeArgs);
 
-        Optional<Player> playerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getUUID());
+        Optional<Player> playerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerModerator.getUUID());
         if (playerOptional.isEmpty()) return;
         Player proxiedPlayer = playerOptional.get();
 
@@ -53,12 +53,12 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
         if (durationTime != -2L) {
 
-            SanctionInfo sm = apiPlayerTarget.banPlayer(reason, end, APIPlayerModAuthor);
+            SanctionInfo sm = apiPlayerTarget.banPlayer(reason, end, apiPlayerModerator);
             if (sm != null) {
 
                 TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
                         "Le modérateur §d" +
-                                APIPlayerModAuthor.getName() +
+                                apiPlayerModerator.getName() +
                                 " §7à ban l'utilisateur §a" +
                                 apiPlayerTarget.getName() + " §7jusqu'au " +
                                 format + " pour raison: "

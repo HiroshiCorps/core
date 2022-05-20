@@ -75,25 +75,6 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         EventInventory.enableEvent(this);
         new AskSwitchListener();
 
-        /*
-
-        this.coreTagsManager = new CoreTagsManager();
-        this.coreTagsManager.setTagProvider(new TagProvider() {
-            @Override
-            public void update(TagPlayer tagPlayer, TagPlayer tagPlayer1) {
-
-            }
-
-            @Override
-            public TagType type() {
-                return TagType.INDIVIDUAL;
-            }
-        });
-
-        this.coreBoardManager = new CoreBoardManager();
-
-        */
-
         this.moderatorMain = new ModeratorMain();
 
         new Receiver();

@@ -24,9 +24,10 @@ import java.util.UUID;
 public class CModeratorManager implements ModeratorManager {
 
     @Override
-    public APIPlayerModerator loadModerator(APIPlayer apiPlayer) {
-        if (isLoaded(apiPlayer.getMemberID())) return getModerator(apiPlayer);
-        return CPlayerModerator.initModerator(apiPlayer);
+    public APIPlayerModerator loadModerator(long id, UUID uuid, String name) {
+        APIPlayerModerator pm = getModerator(id);
+        if (pm != null) return pm;
+        return CPlayerModerator.initModerator(id, uuid, name);
     }
 
     /**
@@ -40,18 +41,6 @@ public class CModeratorManager implements ModeratorManager {
     public APIPlayerModerator getModerator(String s) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(s);
         if (apiPlayer == null) return null;
-        return getModerator(apiPlayer);
-    }
-
-    /**
-     * Get the moderator with the APIPlayer
-     *
-     * @param apiPlayer Of course, the APIPlayer
-     * @return APIPlayerModerator or null if player is not loaded or not a moderator
-     */
-
-    @Override
-    public APIPlayerModerator getModerator(APIPlayer apiPlayer) {
         return getModerator(apiPlayer.getMemberID());
     }
 
@@ -106,18 +95,6 @@ public class CModeratorManager implements ModeratorManager {
     /**
      * Check if a player is a server moderator
      *
-     * @param player Of course the APIPlayer
-     * @return True if the player is a moderator
-     */
-
-    @Override
-    public boolean isModerator(APIPlayer player) {
-        return player.getRank().isModeratorRank();
-    }
-
-    /**
-     * Check if a player is a server moderator
-     *
      * @param uuid This need to be the UUID of the player
      * @return True if the player is a moderator
      */
@@ -126,7 +103,7 @@ public class CModeratorManager implements ModeratorManager {
     public boolean isModerator(UUID uuid) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
         if (apiPlayer == null) return false;
-        return isModerator(apiPlayer);
+        return apiPlayer.getRank().isModeratorRank();
     }
 
     /**
@@ -140,7 +117,7 @@ public class CModeratorManager implements ModeratorManager {
     public boolean isModerator(long memberID) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberID);
         if (apiPlayer == null) return false;
-        return isModerator(apiPlayer);
+        return apiPlayer.getRank().isModeratorRank();
     }
 
     /**
@@ -154,7 +131,7 @@ public class CModeratorManager implements ModeratorManager {
     public boolean isModerator(String name) {
         APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(name);
         if (apiPlayer == null) return false;
-        return isModerator(apiPlayer);
+        return apiPlayer.getRank().isModeratorRank();
     }
 
     @Override

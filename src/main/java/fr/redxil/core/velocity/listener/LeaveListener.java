@@ -22,7 +22,7 @@ public class LeaveListener {
         if (apiPlayer == null) return;
 
         Long moderatorID = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataRedis.PLAYER_FREEZE_REDIS.getString(apiPlayer));
-        API.getInstance().getServer().removePlayerInServer(player.getUniqueId());
+        API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
         apiPlayer.unloadPlayer();
 
         if (moderatorID != null) {
