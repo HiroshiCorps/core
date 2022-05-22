@@ -22,7 +22,6 @@ import fr.redxil.api.common.utils.Pair;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.data.money.MoneyDataSql;
-import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
@@ -186,7 +185,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public boolean isConnected() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString()).contains(getMemberID());
+        return API.getInstance().getPlayerManager().getLoadedPlayer().contains(getMemberID());
     }
 
     @Override

@@ -154,9 +154,9 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         RedisManager rm = API.getInstance().getRedisManager();
 
-        rm.getRedisMap(PlayerDataRedis.MAP_PLAYER_UUID.getString(this)).remove(uuid.toString());
-        rm.getRedisMap(PlayerDataRedis.MAP_PLAYER_NAME.getString(this)).remove(getName());
-        rm.getRedisList(PlayerDataRedis.LIST_PLAYER_ID.getString(this)).remove(memberID);
+        API.getInstance().getPlayerManager().getUUIDToLongMap().remove(uuid.toString());
+        API.getInstance().getPlayerManager().getNameToLongMap().remove(getName());
+        API.getInstance().getPlayerManager().getLoadedPlayer().remove(memberID);
 
         getMoneyModel().set(new HashMap<>() {{
             put(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), getSolde());

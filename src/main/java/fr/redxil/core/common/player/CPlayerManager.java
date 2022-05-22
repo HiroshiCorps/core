@@ -21,15 +21,15 @@ import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class CPlayerManager implements APIPlayerManager {
 
     HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();
+    Map<String, Long> nameToID = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString());
+    Map<String, Long> uuidToID = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString());
+    List<Long> idList = API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString());
 
     @Override
     public boolean dataExist(String s) {
@@ -42,11 +42,12 @@ public class CPlayerManager implements APIPlayerManager {
      * @param name This need to be the name of the player / nick
      * @return APIPlayer or null if the player is not loaded
      */
+    @Override
     public APIPlayer getPlayer(String name) {
-        Object value = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString()).get(name);
-        if (value instanceof Long)
-            return new CPlayer((Long) value);
-        else return null;
+        Long value = nameToID.get(name);
+        if (value == null)
+            return null;
+        return new CPlayer(value);
     }
 
     /**
@@ -58,10 +59,10 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public APIPlayer getPlayer(UUID uuid) {
-        Object value = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString()).get(uuid.toString());
-        if (value instanceof Long)
-            return new CPlayer((Long) value);
-        else return null;
+        Long value = uuidToID.get(uuid.toString());
+        if (value == null)
+            return null;
+        return new CPlayer(value);
     }
 
     /**
@@ -150,22 +151,22 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public boolean isLoadedPlayer(String p) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString()).containsKey(p);
+        return nameToID.containsKey(p);
     }
 
     @Override
     public boolean isLoadedPlayer(long l) {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString()).contains(l);
+        return idList.contains(l);
     }
 
     @Override
     public boolean isLoadedPlayer(UUID uuid) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString()).containsKey(uuid.toString());
+        return uuidToID.containsKey(uuid.toString());
     }
 
     @Override
     public List<Long> getLoadedPlayer() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString());
+        return idList;
     }
 
     @Override
@@ -198,6 +199,16 @@ public class CPlayerManager implements APIPlayerManager {
     @Override
     public LinkData getLink(int i) {
         return new SQLModels<>(PlayerLinkModel.class).get(i);
+    }
+
+    @Override
+    public Map<String, Long> getNameToLongMap() {
+        return nameToID;
+    }
+
+    @Override
+    public Map<String, Long> getUUIDToLongMap() {
+        return uuidToID;
     }
 
 }
