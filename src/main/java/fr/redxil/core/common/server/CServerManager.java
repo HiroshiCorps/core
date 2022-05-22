@@ -18,33 +18,27 @@ import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.core.common.data.server.ServerDataRedis;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 
 public class CServerManager implements ServerManager {
 
+    Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
+
     @Override
-    public List<String> getListServerName() {
-        return new ArrayList<>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).keySet()) {
-                add((String) serverName);
-            }
-        }};
+    public Collection<String> getListServerName() {
+        return getNameToLongMap().keySet();
     }
 
     @Override
-    public List<Long> getListServerID() {
-        return new ArrayList<>() {{
-            for (Object serverName : API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).values()) {
-                add((long) serverName);
-            }
-        }};
+    public Collection<Long> getListServerID() {
+        return getNameToLongMap().values();
     }
 
     @Override
-    public List<Server> getListServer() {
+    public Collection<Server> getListServer() {
         return new ArrayList<>() {{
             for (long serverID : getListServerID()) {
                 add(getServer(serverID));
@@ -53,7 +47,7 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public List<Server> getListServer(ServerType serverType) {
+    public Collection<Server> getListServer(ServerType serverType) {
 
         if (serverType == null) return getListServer();
 
@@ -68,19 +62,20 @@ public class CServerManager implements ServerManager {
 
     @Override
     public boolean isServerExist(String s) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).containsKey(s);
+        return getNameToLongMap().containsKey(s);
     }
 
     @Override
     public boolean isServerExist(long l) {
-        return API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).containsValue(l);
+        return getNameToLongMap().containsValue(l);
     }
 
     @Override
     public Server getServer(String s) {
-        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
-        if (!serverMap.containsKey(s)) return null;
-        return new CServer(serverMap.get(s));
+        Map<String, Long> serverMap = getNameToLongMap();
+        Long result = serverMap.get(s);
+        if (result == null) return null;
+        return new CServer(result);
     }
 
     @Override
@@ -98,9 +93,10 @@ public class CServerManager implements ServerManager {
 
     @Override
     public Server initServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
-        Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
-        if (serverMap.containsKey(name))
-            return new CServer(serverMap.get(name));
+        Map<String, Long> serverMap = getNameToLongMap();
+        Long id = serverMap.get(name);
+        if (id != null)
+            return new CServer(id);
 
         API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
         return CServer.initServer(serverType, name, ipInfo);
@@ -119,7 +115,7 @@ public class CServerManager implements ServerManager {
     @Override
     public Server getConnectableServer(APIPlayer apiPlayer, ServerType serverType) {
 
-        List<Server> availableServer = getListServer(serverType);
+        Collection<Server> availableServer = getListServer(serverType);
         Server server = null;
 
         for (Server testServer : availableServer) {
@@ -140,6 +136,11 @@ public class CServerManager implements ServerManager {
 
         return server;
 
+    }
+
+    @Override
+    public Map<String, Long> getNameToLongMap() {
+        return serverMap;
     }
 
 }

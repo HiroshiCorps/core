@@ -16,12 +16,13 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 public class CModeratorManager implements ModeratorManager {
+
+    List<Long> loadedModerator = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataRedis.LIST_MODERATOR.getString());
 
     @Override
     public APIPlayerModerator loadModerator(long id, UUID uuid, String name) {
@@ -79,10 +80,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Collection<Long> getLoadedModerator() {
-        List<Long> moderatorString = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataRedis.LIST_MODERATOR.getString());
-        return new ArrayList<>() {{
-            this.addAll(moderatorString);
-        }};
+        return loadedModerator;
     }
 
     @Override
@@ -136,7 +134,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isLoaded(long memberID) {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataRedis.LIST_MODERATOR.getString()).contains(memberID);
+        return getLoadedModerator().contains(memberID);
     }
 
 }

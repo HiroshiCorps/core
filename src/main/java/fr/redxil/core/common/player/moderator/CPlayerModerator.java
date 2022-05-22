@@ -24,7 +24,6 @@ import fr.redxil.core.common.data.moderator.ModeratorDataSql;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
-import org.redisson.api.RList;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +50,7 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
         rm.setRedisString(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns()));
         rm.setRedisString(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
 
-        RList<Long> idList = rm.getRedisList(ModeratorDataRedis.LIST_MODERATOR.getString());
-        if (!idList.contains(memberID))
-            idList.add(memberID);
+        API.getInstance().getModeratorManager().getLoadedModerator().add(memberID);
 
         return new CPlayerModerator(memberID);
 
@@ -75,7 +72,7 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
         ModeratorDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
 
-        API.getInstance().getRedisManager().getRedisList(ModeratorDataRedis.LIST_MODERATOR.getString()).remove(memberID);
+        API.getInstance().getModeratorManager().getLoadedModerator().remove(memberID);
     }
 
     @Override

@@ -76,7 +76,7 @@ public class CServer implements Server {
         ServerDataRedis.clearRedisData(DataType.SERVER, serverID);
         RedisManager redisManager = API.getInstance().getRedisManager();
 
-        redisManager.getRedisMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).put(serverName, serverID);
+        API.getInstance().getServerManager().getNameToLongMap().put(serverName, serverID);
         redisManager.setRedisString(ServerDataRedis.SERVER_NAME_REDIS.getString(serverID), serverName);
         redisManager.setRedisString(ServerDataRedis.SERVER_TYPE_REDIS.getString(serverID), serverModel.getString(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns()));
 
@@ -118,10 +118,10 @@ public class CServer implements Server {
         RedisManager redisManager = API.getInstance().getRedisManager();
 
         currentName.ifPresent((serverName) ->
-                redisManager.getRedisMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).remove(serverName, serverID)
+                API.getInstance().getServerManager().getNameToLongMap().remove(serverName, serverID)
         );
 
-        redisManager.getRedisMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).put(s, serverID);
+        API.getInstance().getServerManager().getNameToLongMap().put(s, serverID);
         redisManager.setRedisString(ServerDataRedis.SERVER_NAME_REDIS.getString(this), s);
     }
 
@@ -144,7 +144,7 @@ public class CServer implements Server {
 
     @Override
     public boolean isOnline() {
-        return API.getInstance().getServerManager().isServerExist(getServerID());
+        return API.getInstance().getServerManager().isServerExist(serverID);
     }
 
     @Override
@@ -159,9 +159,9 @@ public class CServer implements Server {
     public void shutdown() {
 
         Optional<String> serverName = getServerName();
-        if (API.getInstance().getServerID() != getServerID()) return;
+        if (API.getInstance().getServerID() != serverID) return;
 
-        long id = getServerID();
+        long id = serverID;
 
         API.getInstance().getPluginEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
 
@@ -179,7 +179,7 @@ public class CServer implements Server {
 
         ServerDataRedis.clearRedisData(DataType.SERVER, id);
 
-        serverName.ifPresent(s -> API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString()).remove(s));
+        serverName.ifPresent(s -> API.getInstance().getServerManager().getNameToLongMap().remove(s));
 
     }
 
