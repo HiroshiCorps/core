@@ -13,13 +13,9 @@ import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
-import fr.redxil.api.common.player.APIPlayerManager;
-import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerType;
-import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
 import fr.redxil.core.common.redis.CRedisManager;
@@ -35,12 +31,15 @@ public class CoreAPI extends API {
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
-    private final SQLConnection sqlConnection;
+    private static CoreAPI instance;
+    private final CSQLConnection sqlConnection;
     private Server server;
     private CRedisManager manager;
 
     public CoreAPI(PluginEnabler plugin) {
         super(plugin);
+
+        CoreAPI.instance = this;
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
@@ -139,19 +138,18 @@ public class CoreAPI extends API {
         return this.manager;
     }
 
+    public static CoreAPI getInstance() {
+        return instance;
+    }
+
     @Override
-    public APIPlayerManager getPlayerManager() {
+    public CPlayerManager getPlayerManager() {
         return this.apiPlayerManager;
     }
 
     @Override
-    public ServerManager getServerManager() {
+    public CServerManager getServerManager() {
         return this.serverManager;
-    }
-
-    @Override
-    public ModeratorManager getModeratorManager() {
-        return this.moderatorManager;
     }
 
     @Override
@@ -198,12 +196,22 @@ public class CoreAPI extends API {
     }
 
     @Override
+    public CModeratorManager getModeratorManager() {
+        return this.moderatorManager;
+    }
+
+    @Override
     public ServerType getServerType() {
         return this.getServer().getServerType();
     }
 
     @Override
-    public SQLConnection getSQLConnection() {
+    public boolean isOnlineMod() {
+        return true;
+    }
+
+    @Override
+    public CSQLConnection getSQLConnection() {
         return this.sqlConnection;
     }
 

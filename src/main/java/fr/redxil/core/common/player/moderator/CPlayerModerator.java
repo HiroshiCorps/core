@@ -15,12 +15,13 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import fr.redxil.core.common.data.moderator.ModeratorDataSql;
+import fr.redxil.core.common.data.utils.DataReminder;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -30,64 +31,92 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public record CPlayerModerator(long memberID) implements APIPlayerModerator {
+public class CPlayerModerator implements APIPlayerModerator {
 
-    static APIPlayerModerator initModerator(Long memberID, UUID uuid, String name) {
+    /*
+     * fully done offline purpose
+     */
+    private final long memberID;
+    private DataReminder<String> uuidReminder;
+    private DataReminder<String> nameReminder;
+    private DataReminder<String> modReminder;
+    private DataReminder<String> vanishReminder;
+    private DataReminder<String> cibleReminder;
 
-        if (!API.getInstance().getModeratorManager().isModerator(memberID)) return null;
 
-        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<>() {{
-            this.put(ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns(), memberID.intValue());
-            this.put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
-            this.put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
-        }}, "WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID.intValue());
+    public CPlayerModerator(long memberID) {
+        this.memberID = memberID;
+        initDataReminder();
+    }
 
-        RedisManager rm = API.getInstance().getRedisManager();
+    public CPlayerModerator(Long memberID, UUID uuid, String name) {
+        this.memberID = memberID;
+        initDataReminder();
 
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(memberID), uuid.toString());
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(memberID), name);
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns()));
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns()));
-        rm.setRedisString(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(memberID), model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
+        uuidReminder.setData(uuid.toString());
+        nameReminder.setData(name);
+
+        if (API.getInstance().isOnlineMod()) {
+
+            ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<>() {{
+                this.put(ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns(), memberID.intValue());
+                this.put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
+                this.put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
+            }}, "WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID.intValue());
+
+            modReminder.setData(model.getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns()));
+            vanishReminder.setData(model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns()));
+            cibleReminder.setData(model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
+
+        }
 
         API.getInstance().getModeratorManager().getLoadedModerator().add(memberID);
+    }
 
-        return new CPlayerModerator(memberID);
-
+    public void initDataReminder() {
+        this.uuidReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(memberID), "none");
+        this.nameReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(memberID), "none");
+        this.modReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(memberID), Boolean.FALSE.toString());
+        this.vanishReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(memberID), Boolean.FALSE.toString());
+        this.cibleReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(memberID), null);
     }
 
     @Override
     public void disconnectModerator() {
-        if (!API.getInstance().isVelocity()) return;
+        if (!API.getInstance().isVelocity() && API.getInstance().isOnlineMod()) return;
 
-        long memberID = this.memberID;
+        if (API.getInstance().isOnlineMod()) {
 
-        ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
+            ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
 
-        model.set(new HashMap<>() {{
-            put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(isModeratorMod()).toString());
-            put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(isVanish()).toString());
-            put(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns(), getCible());
-        }});
+            model.set(new HashMap<>() {{
+                put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(isModeratorMod()).toString());
+                put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(isVanish()).toString());
+                put(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns(), getCible());
+            }});
 
-        ModeratorDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
+            ModeratorDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
+
+        } else {
+            CoreAPI.getInstance().getModeratorManager().getMap().remove(this.getMemberID());
+        }
 
         API.getInstance().getModeratorManager().getLoadedModerator().remove(memberID);
     }
 
     @Override
     public UUID getUUID() {
-        return UUID.fromString(API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(getMemberID())));
+        return UUID.fromString(this.uuidReminder.getData());
     }
 
     @Override
     public String getName() {
-        return API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(getMemberID()));
+        return this.nameReminder.getData();
     }
 
     @Override
     public boolean isModeratorMod() {
-        String bool = API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(this));
+        String bool = this.modReminder.getData();
         if (bool == null)
             return false;
         else
@@ -95,12 +124,22 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
     }
 
     @Override
+    public void setModeratorMod(boolean value) {
+        this.modReminder.setData(Boolean.valueOf(value).toString());
+    }
+
+    @Override
     public boolean isVanish() {
-        String bool = API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(this));
+        String bool = this.vanishReminder.getData();
         if (bool == null)
             return false;
         else
             return Boolean.parseBoolean(bool);
+    }
+
+    @Override
+    public void setVanish(boolean b) {
+        this.vanishReminder.setData(Boolean.valueOf(b).toString());
     }
 
     @Override
@@ -111,12 +150,12 @@ public record CPlayerModerator(long memberID) implements APIPlayerModerator {
 
     @Override
     public String getCible() {
-        return API.getInstance().getRedisManager().getRedisString(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(this));
+        return this.cibleReminder.getData();
     }
 
     @Override
     public void setCible(String s) {
-        API.getInstance().getRedisManager().setRedisString(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(this), s);
+        this.cibleReminder.setData(s);
     }
 
     /**

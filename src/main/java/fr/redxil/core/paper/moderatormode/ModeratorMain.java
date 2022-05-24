@@ -9,11 +9,9 @@
 
 package fr.redxil.core.paper.moderatormode;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.event.PlayerJoinModerationEvent;
 import fr.redxil.api.paper.event.PlayerQuitModerationEvent;
-import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -21,7 +19,7 @@ public class ModeratorMain {
 
     public void setModerator(APIPlayerModerator apiPlayerModerator, boolean b, boolean onConnection) {
 
-        API.getInstance().getRedisManager().setRedisString(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(apiPlayerModerator), Boolean.valueOf(b).toString());
+        apiPlayerModerator.setModeratorMod(b);
 
         Player player = Bukkit.getPlayer(apiPlayerModerator.getUUID());
         assert player != null;

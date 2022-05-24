@@ -74,6 +74,12 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         corePlugin.getVanish().playerDisconnect(player);
         corePlugin.getFreezeGestion().stopFreezeMessage(player.getUniqueId());
 
+        if (!API.getInstance().isOnlineMod()) {
+            APIPlayerModerator moderator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+            if (moderator != null)
+                moderator.disconnectModerator();
+        }
+
         event.setQuitMessage(null);
         sendQuitMessage(osp);
 

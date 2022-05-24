@@ -15,7 +15,6 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.paper.utils.ActionBar;
-import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -42,7 +41,7 @@ public class VanishGestion {
         Player modPlayer = Bukkit.getPlayer(mod.getName());
         if (modPlayer == null) return;
 
-        API.getInstance().getRedisManager().setRedisString(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(mod), Boolean.valueOf(b).toString());
+        mod.setVanish(b);
 
         modPlayer.setGameMode(GameMode.SURVIVAL);
 

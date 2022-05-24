@@ -15,20 +15,30 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
+import fr.redxil.core.common.data.utils.DataReminder;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class CModeratorManager implements ModeratorManager {
 
-    List<Long> loadedModerator = API.getInstance().getRedisManager().getRedissonClient().getList(ModeratorDataRedis.LIST_MODERATOR.getString());
+    DataReminder<List<Long>> loadedModerator = DataReminder.generateReminder(ModeratorDataRedis.LIST_MODERATOR.getString(), new ArrayList<>());
+    HashMap<Long, CPlayerModerator> moderatorHashMap;
+
+    public CModeratorManager() {
+        if (!API.getInstance().isOnlineMod())
+            moderatorHashMap = new HashMap<>();
+    }
 
     @Override
     public APIPlayerModerator loadModerator(long id, UUID uuid, String name) {
         APIPlayerModerator pm = getModerator(id);
         if (pm != null) return pm;
-        return CPlayerModerator.initModerator(id, uuid, name);
+        if (isModerator(uuid)) {
+            CPlayerModerator newMod = new CPlayerModerator(id, uuid, name);
+            moderatorHashMap.put(id, newMod);
+            return newMod;
+        }
+        return null;
     }
 
     /**
@@ -55,6 +65,8 @@ public class CModeratorManager implements ModeratorManager {
     @Override
     public APIPlayerModerator getModerator(long l) {
         if (!isLoaded(l)) return null;
+        if (!API.getInstance().isOnlineMod())
+            return moderatorHashMap.get(l);
         return new CPlayerModerator(l);
     }
 
@@ -80,7 +92,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Collection<Long> getLoadedModerator() {
-        return loadedModerator;
+        return loadedModerator.getData();
     }
 
     @Override
@@ -135,6 +147,10 @@ public class CModeratorManager implements ModeratorManager {
     @Override
     public boolean isLoaded(long memberID) {
         return getLoadedModerator().contains(memberID);
+    }
+
+    public Map<Long, CPlayerModerator> getMap() {
+        return moderatorHashMap;
     }
 
 }
