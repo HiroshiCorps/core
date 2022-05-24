@@ -12,33 +12,74 @@ package fr.redxil.core.common.data.utils;
 import fr.redxil.api.common.API;
 import org.redisson.api.RBucket;
 
-public class DataReminder<K> {
+public interface DataReminder<K> {
 
-    final String location;
-    K data;
-
-    private DataReminder(String location, K base) {
-        this.location = location;
-        this.data = base;
+    static <K> DataReminder<K> generateReminder(String location, K base) {
+        if (API.getInstance().isOnlineMod())
+            return new OnlineReminder<>(location, base);
+        else return new OfflineReminder<>(location, base);
     }
 
-    public static <K> DataReminder<K> generateReminder(String location, K base) {
-        return new DataReminder<>(location, base);
-    }
+    String getLocation();
 
-    public K getData() {
-        if (API.getInstance().isOnlineMod()) {
+    K getData();
+
+    DataReminder<K> setData(K data);
+
+    class OnlineReminder<K> implements DataReminder<K> {
+
+        final String location;
+
+        private OnlineReminder(String location, K base) {
+            this.location = location;
+        }
+
+        @Override
+        public String getLocation() {
+            return this.location;
+        }
+
+        @Override
+        public K getData() {
             RBucket<K> object = API.getInstance().getRedisManager().getRedissonClient().getBucket(location);
             return object.get();
-        } else return data;
-    }
+        }
 
-    public DataReminder<K> setData(K data) {
-        if (API.getInstance().isOnlineMod()) {
+        @Override
+        public DataReminder<K> setData(K data) {
             RBucket<K> object = API.getInstance().getRedisManager().getRedissonClient().getBucket(location);
             object.set(data);
-        } else this.data = data;
-        return this;
+            return this;
+        }
+
+    }
+
+    class OfflineReminder<K> implements DataReminder<K> {
+
+        final String location;
+        K data;
+
+        private OfflineReminder(String location, K base) {
+            this.location = location;
+            this.data = base;
+        }
+
+        @Override
+        public String getLocation() {
+            return this.location;
+        }
+
+        @Override
+        public K getData() {
+            return data;
+        }
+
+        @Override
+        public DataReminder<K> setData(K data) {
+            this.data = data;
+            return this;
+        }
+
     }
 
 }
