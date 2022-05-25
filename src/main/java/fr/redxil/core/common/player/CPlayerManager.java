@@ -17,6 +17,7 @@ import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
+import fr.redxil.core.common.data.utils.DataReminder;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -27,9 +28,9 @@ import java.util.function.BiConsumer;
 public class CPlayerManager implements APIPlayerManager {
 
     HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();
-    Map<String, Long> nameToID = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_NAME.getString());
-    Map<String, Long> uuidToID = API.getInstance().getRedisManager().getRedissonClient().getMap(PlayerDataRedis.MAP_PLAYER_UUID.getString());
-    List<Long> idList = API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString());
+    DataReminder<Map<String, Long>> nameToID = DataReminder.generateReminder(PlayerDataRedis.MAP_PLAYER_NAME.getString(), new HashMap<>());
+    DataReminder<Map<String, Long>> uuidToID = DataReminder.generateReminder(PlayerDataRedis.MAP_PLAYER_UUID.getString(), new HashMap<>());
+    Map<Long, CPlayer> playerMap = new HashMap<>();
 
     @Override
     public boolean dataExist(String s) {
@@ -44,9 +45,11 @@ public class CPlayerManager implements APIPlayerManager {
      */
     @Override
     public Optional<APIPlayer> getPlayer(String name) {
-        Long value = nameToID.get(name);
+        Long value = getNameToLongMap().get(name);
         if (value == null)
             return Optional.empty();
+        if (!API.getInstance().isOnlineMod())
+            return Optional.ofNullable(playerMap.get(value));
         return Optional.of(new CPlayer(value));
     }
 
@@ -59,9 +62,11 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public Optional<APIPlayer> getPlayer(UUID uuid) {
-        Long value = uuidToID.get(uuid.toString());
+        Long value = getUUIDToLongMap().get(uuid.toString());
         if (value == null)
             return Optional.empty();
+        if (!API.getInstance().isOnlineMod())
+            return Optional.ofNullable(playerMap.get(value));
         return Optional.of(new CPlayer(value));
     }
 
@@ -77,6 +82,8 @@ public class CPlayerManager implements APIPlayerManager {
         if (!isLoadedPlayer(id)) {
             return Optional.empty();
         }
+        if (!API.getInstance().isOnlineMod())
+            return Optional.ofNullable(playerMap.get(id));
         return Optional.of(new CPlayer(id));
     }
 
@@ -159,22 +166,22 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public boolean isLoadedPlayer(String p) {
-        return nameToID.containsKey(p);
+        return getNameToLongMap().containsKey(p);
     }
 
     @Override
     public boolean isLoadedPlayer(long l) {
-        return idList.contains(l);
+        return getNameToLongMap().containsValue(l);
     }
 
     @Override
     public boolean isLoadedPlayer(UUID uuid) {
-        return uuidToID.containsKey(uuid.toString());
+        return getUUIDToLongMap().containsKey(uuid.toString());
     }
 
     @Override
-    public List<Long> getLoadedPlayer() {
-        return idList;
+    public Collection<Long> getLoadedPlayer() {
+        return getNameToLongMap().values();
     }
 
     @Override
@@ -211,12 +218,16 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public Map<String, Long> getNameToLongMap() {
-        return nameToID;
+        return nameToID.getData();
     }
 
     @Override
     public Map<String, Long> getUUIDToLongMap() {
-        return uuidToID;
+        return uuidToID.getData();
+    }
+
+    public Map<Long, CPlayer> getMap() {
+        return playerMap;
     }
 
 }

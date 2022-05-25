@@ -66,10 +66,21 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public CPlayer(String name, UUID uuid, IpInfo ipInfo) {
         super(IDGenerator.generateLONGID(IDDataValue.PLAYERID));
 
-        RedisManager redisManager = API.getInstance().getRedisManager();
+        initNameReminder();
+        nameReminder.setData(name);
+        initRealNameReminder();
+        realNameReminder.setData(name);
+
+        initUUIDReminder();
+        uuidReminder.setData(uuid.toString());
+
+        initBungeeReminder();
+        bungeeReminder.setData(API.getInstance().getServer().getServerID());
+
+        setIP(ipInfo);
 
         if (API.getInstance().isOnlineMod()) {
-            PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
+            this.playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
                 this.put(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), name);
                 this.put(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns(), uuid.toString());
                 this.put(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), Rank.JOUEUR.getRankPower().intValue());
@@ -78,7 +89,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
             this.memberID = playerModel.getMemberID();
 
-            MoneyModel moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<>() {{
+            this.moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<>() {{
                 this.put(MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns(), memberID);
                 this.put(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), 0);
                 this.put(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), 0);
@@ -115,26 +126,12 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
             setCoins(0L);
             setSolde(0L);
+
+            CoreAPI.getInstance().getPlayerManager().getMap().put(memberID, this);
         }
 
-        initNameReminder();
-        nameReminder.setData(name);
-        initRealNameReminder();
-        realNameReminder.setData(name);
-
-        initUUIDReminder();
-        uuidReminder.setData(uuid.toString());
-
-        initBungeeReminder();
-        bungeeReminder.setData(API.getInstance().getServer().getServerID());
-        redisManager.setRedisString(PlayerDataRedis.PLAYER_INPUT_REDIS.getString(memberID), null);
-
-        setIP(ipInfo);
-
-        redisManager.getRedisMap(PlayerDataRedis.MAP_PLAYER_NAME.getString(memberID)).put(name, memberID);
-        redisManager.getRedisMap(PlayerDataRedis.MAP_PLAYER_UUID.getString(memberID)).put(uuid.toString(), memberID);
-
-        redisManager.getRedisList(PlayerDataRedis.LIST_PLAYER_ID.getString(memberID)).add(memberID);
+        CoreAPI.getInstance().getPlayerManager().getNameToLongMap().put(name, memberID);
+        CoreAPI.getInstance().getPlayerManager().getUUIDToLongMap().put(uuid.toString(), memberID);
 
         loadLink(this);
 
@@ -220,7 +217,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
             PlayerDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
 
-        }
+        } else
+            CoreAPI.getInstance().getPlayerManager().getMap().remove(memberID);
 
     }
 
@@ -443,7 +441,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public boolean isConnected() {
-        return API.getInstance().getRedisManager().getRedissonClient().getList(PlayerDataRedis.LIST_PLAYER_ID.getString(this)).contains(getMemberID());
+        return API.getInstance().getPlayerManager().isLoadedPlayer(getMemberID());
     }
 
     public void initRealNameReminder() {

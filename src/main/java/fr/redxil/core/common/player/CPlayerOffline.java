@@ -44,8 +44,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
     protected long memberID;
     List<SanctionInfo> sanctionModelList = null;
     List<Setting> settingsModelList = null;
-    private PlayerModel playerModel = null;
-    private MoneyModel moneyModel = null;
+    protected PlayerModel playerModel = null;
+    protected MoneyModel moneyModel = null;
 
     public CPlayerOffline(PlayerModel playerModel) {
         this.playerModel = playerModel;

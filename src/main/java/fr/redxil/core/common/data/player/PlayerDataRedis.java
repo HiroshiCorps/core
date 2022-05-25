@@ -36,16 +36,13 @@ public enum PlayerDataRedis {
     PLAYER_HUBLEVEL_REDIS(DataType.PLAYER, "player/<memberID>/hublevel", true),
     PLAYER_HUBREWARD_REDIS(DataType.PLAYER, "player/<memberID>/hubreward", true),
 
-    PLAYER_INPUT_REDIS(DataType.PLAYER, "player/<memberID>/input", true),
-
     PLAYER_BUNGEE_REDIS(DataType.PLAYER, "player/<memberID>/bungee_server", true),
     PLAYER_SPIGOT_REDIS(DataType.PLAYER, "player/<memberID>/spigot_server", true),
 
     PLAYER_LASTMSG_REDIS(DataType.PLAYER, "player/<memberID>/lastmsg", true),
 
     MAP_PLAYER_NAME(DataType.GLOBAL, "player/name", false),
-    MAP_PLAYER_UUID(DataType.GLOBAL, "player/uuid", false),
-    LIST_PLAYER_ID(DataType.GLOBAL, "player/list", false);
+    MAP_PLAYER_UUID(DataType.GLOBAL, "player/uuid", false);
 
     final DataType dataType;
     final String location;
