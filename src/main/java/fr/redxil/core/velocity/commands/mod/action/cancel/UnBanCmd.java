@@ -24,6 +24,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UnBanCmd extends BrigadierAPI<CommandSource> {
@@ -46,28 +47,28 @@ public class UnBanCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
-        if (APIPlayerModerator == null) {
+        if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIOfflinePlayer apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
+        Optional<APIOfflinePlayer> apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
-        if (apiPlayerTarget == null) {
+        if (apiPlayerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.unBan(APIPlayerModerator)) {
-            TextComponentBuilder.createTextComponent("La personne se nommant: " + apiPlayerTarget.getName() + " est maintenant unBan.").setColor(Color.GREEN)
+        if (apiPlayerTarget.get().unBan(apiPlayerModerator.get())) {
+            TextComponentBuilder.createTextComponent("La personne se nommant: " + apiPlayerTarget.get().getName() + " est maintenant unBan.").setColor(Color.GREEN)
                     .sendTo(player.getUniqueId());
         } else {
-            TextComponentBuilder.createTextComponent("Impossible de unban: " + apiPlayerTarget.getName()).setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Impossible de unban: " + apiPlayerTarget.get().getName()).setColor(Color.RED)
                     .sendTo(player.getUniqueId());
         }
     }

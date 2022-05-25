@@ -28,27 +28,29 @@ import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
 
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class JoinListener {
 
-    public APIPlayer loadPlayer(Player player) {
+    public Optional<APIPlayer> loadPlayer(Player player) {
 
         String[] splittedIP = player.getRemoteAddress().toString().split(":");
 
         CoreVelocity.getInstance().printLog(Level.INFO, player.getRemoteAddress().toString());
 
-        APIPlayer nicked = CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUsername());
-        if (nicked != null)
-            nicked.restoreRealData();
+        CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUsername()).ifPresent(APIPlayer::restoreRealData);
 
-        APIPlayer apiPlayer = CoreAPI.getInstance().getPlayerManager().loadPlayer(
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().loadPlayer(
                 player.getUsername(),
                 player.getUniqueId(),
                 new IpInfo(splittedIP[0].replace("/", ""), Integer.valueOf(splittedIP[1]))
         );
 
-        CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer.getMemberID(), apiPlayer.getUUID(), apiPlayer.getName());
+        if (apiPlayer.isEmpty())
+            return Optional.empty();
+
+        CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer.get().getMemberID(), apiPlayer.get().getUUID(), apiPlayer.get().getName());
 
         return apiPlayer;
 
@@ -80,19 +82,19 @@ public class JoinListener {
             return;
         }
 
-        APIOfflinePlayer apiOfflinePlayer = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
+        Optional<APIOfflinePlayer> apiOfflinePlayer = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
-        if (apiOfflinePlayer != null) {
+        if (apiOfflinePlayer.isPresent()) {
 
-            SanctionInfo model = apiOfflinePlayer.getLastSanction(SanctionType.BAN);
-            if (model != null && model.isEffective()) {
-                e.setResult(ResultedEvent.ComponentResult.denied((Component) model.getSancMessage().getFinalTextComponent()));
+            Optional<SanctionInfo> model = apiOfflinePlayer.get().getLastSanction(SanctionType.BAN);
+            if (model.isPresent() && model.get().isEffective()) {
+                e.setResult(ResultedEvent.ComponentResult.denied((Component) model.get().getSancMessage().getFinalTextComponent()));
                 return;
             }
 
         }
 
-        Rank playerRank = apiOfflinePlayer == null ? Rank.JOUEUR : apiOfflinePlayer.getRank();
+        Rank playerRank = apiOfflinePlayer.isEmpty() ? Rank.JOUEUR : apiOfflinePlayer.get().getRank();
 
         Server velocityServer = CoreAPI.getInstance().getServer();
         if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUniqueId(), playerRank)) {
@@ -100,7 +102,8 @@ public class JoinListener {
             return;
         }
 
-        loadPlayer(player);
+        if (loadPlayer(player).isEmpty())
+            e.setResult(ResultedEvent.ComponentResult.denied(Component.text("Cannot load data")));
 
     }
 

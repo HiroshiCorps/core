@@ -21,10 +21,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class VanishGestion {
@@ -82,11 +79,11 @@ public class VanishGestion {
                             String targetName = mod.getCible();
                             if (targetName != null) {
 
-                                APIPlayer target = API.getInstance().getPlayerManager().getPlayer(targetName);
+                                Optional<APIPlayer> target = API.getInstance().getPlayerManager().getPlayer(targetName);
 
-                                if (target != null) {
+                                if (target.isPresent()) {
 
-                                    Player player = Bukkit.getPlayer(target.getUUID());
+                                    Player player = Bukkit.getPlayer(target.get().getUUID());
 
                                     if (player != null) {
 
@@ -98,7 +95,7 @@ public class VanishGestion {
                                                     message = "Distance: §a§l" + calculateDiff(modPlayer.getLocation(), player.getLocation());
                                             case 4 -> {
                                                 String freezeString = "§c§lNON";
-                                                if (target.isFreeze()) freezeString = "§a§lOUI";
+                                                if (target.get().isFreeze()) freezeString = "§a§lOUI";
                                                 message = "Gelé: " + freezeString;
                                             }
                                             default -> {
@@ -111,10 +108,11 @@ public class VanishGestion {
                                         switch (lastMSG.get()) {
                                             case 0 -> message = "§cVous êtes actuellement invisible !";
                                             case 1 -> message = "Cible: §a§l" + targetName;
-                                            case 2 -> message = "Serveur: §a§l" + target.getServer().getServerName();
+                                            case 2 ->
+                                                    message = "Serveur: §a§l" + target.get().getServer().getServerName();
                                             case 3 -> {
                                                 String freezeString = "§c§lNON";
-                                                if (target.isFreeze()) freezeString = "§a§lOUI";
+                                                if (target.get().isFreeze()) freezeString = "§a§lOUI";
                                                 message = "Gelé: " + freezeString;
                                             }
                                             default -> {
@@ -132,8 +130,8 @@ public class VanishGestion {
                                         case 1 -> message = "Cible: §a§l" + targetName;
                                         case 2 -> {
                                             String msg2 = "§c§lDéconnecté";
-                                            APIOfflinePlayer offTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
-                                            if (offTarget.isBan())
+                                            Optional<APIOfflinePlayer> offTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
+                                            if (offTarget.isPresent() && offTarget.get().isBan())
                                                 msg2 = "§4§lBANNIS";
                                             message = "Etat: " + msg2;
                                         }
@@ -189,9 +187,9 @@ public class VanishGestion {
         if (mods.isEmpty()) return;
 
         for (Long mod : mods) {
-            APIPlayerModerator moderator = API.getInstance().getModeratorManager().getModerator(mod);
-            if (moderator.isVanish()) {
-                Player modPlayer = Bukkit.getPlayer(moderator.getUUID());
+            Optional<APIPlayerModerator> moderator = API.getInstance().getModeratorManager().getModerator(mod);
+            if (moderator.isPresent() && moderator.get().isVanish()) {
+                Player modPlayer = Bukkit.getPlayer(moderator.get().getUUID());
                 if (modPlayer != null) p.hidePlayer(corePlugin, modPlayer);
             }
         }

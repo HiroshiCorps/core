@@ -15,7 +15,6 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
@@ -56,7 +55,6 @@ public class CPlayerModerator implements APIPlayerModerator {
         nameReminder.setData(name);
 
         if (API.getInstance().isOnlineMod()) {
-
             ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<>() {{
                 this.put(ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns(), memberID.intValue());
                 this.put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
@@ -70,7 +68,8 @@ public class CPlayerModerator implements APIPlayerModerator {
         } else
             CoreAPI.getInstance().getModeratorManager().getMap().put(memberID, this);
 
-        API.getInstance().getModeratorManager().getLoadedModerator().add(memberID);
+        API.getInstance().getModeratorManager().getStringToLongModerator().put(name, memberID);
+        API.getInstance().getModeratorManager().getUUIDToLongModerator().put(uuid.toString(), memberID);
     }
 
     public void initDataReminder() {
@@ -81,6 +80,9 @@ public class CPlayerModerator implements APIPlayerModerator {
     @Override
     public void disconnectModerator() {
         if (!API.getInstance().isVelocity() && API.getInstance().isOnlineMod()) return;
+
+        String name = getName();
+        UUID uuid = getUUID();
 
         if (API.getInstance().isOnlineMod()) {
 
@@ -99,6 +101,8 @@ public class CPlayerModerator implements APIPlayerModerator {
         }
 
         API.getInstance().getModeratorManager().getLoadedModerator().remove(memberID);
+        API.getInstance().getModeratorManager().getStringToLongModerator().remove(name);
+        API.getInstance().getModeratorManager().getUUIDToLongModerator().remove(uuid.toString());
     }
 
     public void initUUID() {
@@ -200,12 +204,16 @@ public class CPlayerModerator implements APIPlayerModerator {
     @Override
     public void printSanction(APIOfflinePlayer apiOfflinePlayer, SanctionType sanctionType) {
 
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(getMemberID());
+
+        if (apiPlayer.isEmpty())
+            return;
+
         List<SanctionInfo> sanctionInfos = apiOfflinePlayer.getSanction(sanctionType);
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(getMemberID());
 
         if (!sanctionInfos.isEmpty()) {
 
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer.get());
 
             for (int i = sanctionInfos.size() - 1; i >= 0; i--) {
 
@@ -225,18 +233,22 @@ public class CPlayerModerator implements APIPlayerModerator {
 
                 tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
 
-                tcb.sendTo(apiPlayer);
+                tcb.sendTo(apiPlayer.get());
 
             }
 
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer.get());
         } else
-            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(apiPlayer.get());
 
     }
 
     @Override
     public void printInfo(APIOfflinePlayer apiOfflinePlayer) {
+
+        Optional<APIPlayer> moderator = API.getInstance().getPlayerManager().getPlayer(getMemberID());
+        if (moderator.isEmpty())
+            return;
 
         TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§m                    \n");
 
@@ -251,9 +263,9 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (apiOfflinePlayer.isConnected()) {
             connectedMsg = "§a✓";
 
-            Server serverAPI = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID()).getServer();
-            Optional<String> serverName = serverAPI.getServerName();
-            server = serverName.orElseGet(() -> Long.valueOf(serverAPI.getServerID()).toString());
+            Optional<APIPlayer> player = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID());
+            if (player.isPresent())
+                server = player.get().getServerName();
         }
 
         tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
@@ -280,7 +292,7 @@ public class CPlayerModerator implements APIPlayerModerator {
         tcb.appendNewComponentBuilder("§7→ §rEtat§7・Banni: " + ban + " §7Mute: " + mute + "§r\n");
         tcb.appendNewComponentBuilder("§m                    \n");
 
-        tcb.sendTo(API.getInstance().getPlayerManager().getPlayer(getMemberID()));
+        tcb.sendTo(moderator.get());
 
     }
 

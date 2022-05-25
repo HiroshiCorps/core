@@ -27,6 +27,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class WarnCmd extends BrigadierAPI<CommandSource> {
@@ -48,23 +49,23 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
-        if (APIPlayerModAuthor == null) {
+        if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIOfflinePlayer apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
-        if (apiPlayerTarget == null) {
+        Optional<APIOfflinePlayer> apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
+        if (apiPlayerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.getRank().isModeratorRank()) {
+        if (apiPlayerTarget.get().getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
@@ -78,10 +79,10 @@ public class WarnCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        SanctionInfo sm = apiPlayerTarget.warnPlayer(reason, APIPlayerModAuthor);
-        if (sm != null) {
-            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.getName() + " à été warn.")).getFinalTextComponent());
-            CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((proxiedPlayer) -> sm.getSancMessage().sendTo(proxiedPlayer.getUniqueId()));
+        Optional<SanctionInfo> sm = apiPlayerTarget.get().warnPlayer(reason, apiPlayerModerator.get());
+        if (sm.isPresent()) {
+            player.sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.get().getName() + " à été warn.")).getFinalTextComponent());
+            CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.get().getName()).ifPresent((proxiedPlayer) -> sm.get().getSancMessage().sendTo(proxiedPlayer.getUniqueId()));
         } else
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());

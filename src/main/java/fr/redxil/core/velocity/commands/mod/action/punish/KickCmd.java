@@ -49,23 +49,23 @@ public class KickCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
-        if (APIPlayerModAuthor == null) {
+        if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIPlayer apiPlayerTarget = API.getInstance().getPlayerManager().getPlayer(targetArgs);
-        if (apiPlayerTarget == null) {
+        Optional<APIPlayer> apiPlayerTarget = API.getInstance().getPlayerManager().getPlayer(targetArgs);
+        if (apiPlayerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent("Erreur: Le joueur: " + targetArgs + " n'a pas était trouvé").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.getRank().isModeratorRank()) {
+        if (apiPlayerTarget.get().getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Erreur vous n'avez pas la permission.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
@@ -79,12 +79,12 @@ public class KickCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        SanctionInfo sm = apiPlayerTarget.kickPlayer(reason, APIPlayerModAuthor);
-        if (sm != null) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.getName() + " à été kick.")
+        Optional<SanctionInfo> sm = apiPlayerTarget.get().kickPlayer(reason, apiPlayerModerator.get());
+        if (sm.isPresent()) {
+            TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.get().getName() + " à été kick.")
                     .sendTo(player.getUniqueId());
-            Optional<Player> proxiedPlayer = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
-            proxiedPlayer.ifPresent((player2) -> player2.disconnect(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
+            Optional<Player> proxiedPlayer = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.get().getName());
+            proxiedPlayer.ifPresent((player2) -> player2.disconnect(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
         } else
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());

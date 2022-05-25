@@ -22,6 +22,7 @@ import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class RCmd extends BrigadierAPI<CommandSource> {
@@ -44,9 +45,12 @@ public class RCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player)) return;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
+        Optional<APIPlayer> sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
 
-        String targetName = API.getInstance().getRedisManager().getRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(sp));
+        if (sp.isEmpty())
+            return;
+
+        String targetName = API.getInstance().getRedisManager().getRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(sp.get()));
 
         if (targetName == null) {
             TextComponentBuilder.createTextComponent("Erreur, vous avez jusque la pas envoyé de message").setColor(Color.RED).sendTo(playerUUID);

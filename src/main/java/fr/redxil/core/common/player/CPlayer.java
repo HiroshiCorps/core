@@ -168,7 +168,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         String playerServer = this.getServerName();
         if (playerServer.equals(API.getInstance().getServerName()))
             API.getInstance().getPluginEnabler().sendMessage(getUUID(), s);
-        else
+        else if (API.getInstance().isOnlineMod())
             RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "playerMessage", Long.valueOf(getMemberID()).toString() + "<msp>" + s);
     }
 
@@ -181,7 +181,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void switchServer(long server) {
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
+        if (API.getInstance().isOnlineMod())
+            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
     }
 
     @Override
@@ -193,15 +194,14 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public void unloadPlayer() {
         if (!API.getInstance().isVelocity()) return;
 
-        APIPlayerModerator spm = API.getInstance().getModeratorManager().getModerator(getMemberID());
-        if (spm != null)
-            spm.disconnectModerator();
+        API.getInstance().getModeratorManager().getModerator(getMemberID()).ifPresent(APIPlayerModerator::disconnectModerator);
 
         UUID uuid = getUUID();
+        APIPlayerManager playerManager = API.getInstance().getPlayerManager();
 
-        API.getInstance().getPlayerManager().getUUIDToLongMap().remove(uuid.toString());
-        API.getInstance().getPlayerManager().getNameToLongMap().remove(getName());
-        API.getInstance().getPlayerManager().getLoadedPlayer().remove(getMemberID());
+        playerManager.getUUIDToLongMap().remove(uuid.toString());
+        playerManager.getNameToLongMap().remove(getName());
+        playerManager.getLoadedPlayer().remove(getMemberID());
 
         if (API.getInstance().isOnlineMod()) {
 
@@ -425,7 +425,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         initRankReminder();
         rankReminder.setData(rank.getRankPower());
         rankTimerReminder.setData(timeStampString);
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
+        if (API.getInstance().isOnlineMod())
+            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
     }
 
     @Override
@@ -499,7 +500,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
                 API.getInstance().getRedisManager().getRedisList("ip/" + ipInfo).add(getName());
             }
 
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "nameChange", this.getUUID().toString());
+            if (API.getInstance().isOnlineMod())
+                RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "nameChange", this.getUUID().toString());
             return true;
         }
         return false;
@@ -603,7 +605,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public SanctionInfo kickPlayer(String reason, APIPlayerModerator author) {
+    public Optional<SanctionInfo> kickPlayer(String reason, APIPlayerModerator author) {
+
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
                 getMemberID(),
@@ -611,9 +616,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
                 SanctionType.KICK,
                 reason
         );
-
-        if (!API.getInstance().isOnlineMod())
-            return sm;
 
         new SQLModels<>(SanctionModel.class).insert(sm);
 

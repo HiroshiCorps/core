@@ -17,20 +17,23 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class ModCmd implements CommandExecutor {
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(commandSender instanceof Player)) return false;
 
-        APIPlayerModerator mod = API.getInstance().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
-        if (mod == null)
+        Optional<APIPlayerModerator> mod = API.getInstance().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
+        if (mod.isEmpty())
             return false;
         String message;
 
-        boolean newState = !mod.isModeratorMod();
-        CorePlugin.getInstance().getModeratorMain().setModerator(mod, newState, false);
+        boolean newState = !mod.get().isModeratorMod();
+        CorePlugin.getInstance().getModeratorMain().setModerator(mod.get(), newState, false);
 
         if (!newState)
             message = ChatColor.RED + "Vous avez quitté le mod modérateur";

@@ -53,8 +53,8 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
         if (durationTime != -2L) {
 
-            SanctionInfo sm = apiPlayerTarget.banPlayer(reason, end, apiPlayerModerator);
-            if (sm != null) {
+            Optional<SanctionInfo> sm = apiPlayerTarget.banPlayer(reason, end, apiPlayerModerator);
+            if (sm.isPresent()) {
 
                 TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
                         "Le modérateur §d" +
@@ -68,7 +68,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
                 Optional<Player> onlinePlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
 
-                onlinePlayerOptional.ifPresent(player -> player.disconnect(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
+                onlinePlayerOptional.ifPresent(player -> player.disconnect(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
 
             } else
                 TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
@@ -94,31 +94,31 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
 
-        if (APIPlayerModAuthor == null) {
+        if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIOfflinePlayer apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
+        Optional<APIOfflinePlayer> apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
-        if (apiPlayerTarget == null) {
+        if (apiPlayerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.getRank().isModeratorRank()) {
+        if (apiPlayerTarget.get().getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.isBan()) {
+        if (apiPlayerTarget.get().isBan()) {
             TextComponentBuilder.createTextComponent("Erreur, le joueur est déjà ban.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
@@ -134,7 +134,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        banPlayer(apiPlayerTarget, timeArgs, APIPlayerModAuthor, reason);
+        banPlayer(apiPlayerTarget.get(), timeArgs, apiPlayerModerator.get(), reason);
     }
 
     @Override

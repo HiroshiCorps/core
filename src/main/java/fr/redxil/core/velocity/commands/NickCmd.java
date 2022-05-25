@@ -21,6 +21,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class NickCmd extends BrigadierAPI<CommandSource> {
@@ -36,17 +37,20 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
 
     @Override
     public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
 
-        if (!apiPlayer.isNick()) {
+        if (apiPlayer.isEmpty())
+            return;
+
+        if (!apiPlayer.get().isNick()) {
 
             TextComponentBuilder.createTextComponent("Syntax: /nick <nick>").setColor(Color.RED)
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
 
         } else {
 
-            apiPlayer.setName(apiPlayer.getRealName());
-            TextComponentBuilder.createTextComponent("Vous avez retrouvé votre Pseudo: " + apiPlayer.getName())
+            apiPlayer.get().setName(apiPlayer.get().getRealName());
+            TextComponentBuilder.createTextComponent("Vous avez retrouvé votre Pseudo: " + apiPlayer.get().getName())
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
 
         }
@@ -65,13 +69,15 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
 
         String nick = commandContext.getArgument("nick", String.class);
         Rank nickRank = Rank.JOUEUR;
 
-        if (apiPlayer.setName(nick)) {
-            apiPlayer.setRank(nickRank);
+        if (apiPlayer.get().setName(nick)) {
+            apiPlayer.get().setRank(nickRank);
             TextComponentBuilder.createTextComponent("Nick changé")
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
         } else {
@@ -83,7 +89,9 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
     public void executeSR(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
 
         String nick = commandContext.getArgument("nick", String.class);
         Rank nickRank = Rank.JOUEUR;
@@ -102,19 +110,19 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
         }
 
         if (nickRank == null) {
-            TextComponentBuilder.createTextComponent("Erreur, " + argRank + " doit être un power de grade" + apiPlayer.getName()).setColor(Color.RED)
+            TextComponentBuilder.createTextComponent("Erreur, " + argRank + " doit être un power de grade" + apiPlayer.get().getName()).setColor(Color.RED)
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
             return;
         }
 
-        if (nickRank.getRankPower() > apiPlayer.getRealRankPower()) {
+        if (nickRank.getRankPower() > apiPlayer.get().getRealRankPower()) {
             TextComponentBuilder.createTextComponent("Erreur, " + argRank + " vous ne pouvez pas vous nick en " + nickRank.getRankName()).setColor(Color.RED)
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
             return;
         }
 
-        if (apiPlayer.setName(nick)) {
-            apiPlayer.setRank(nickRank);
+        if (apiPlayer.get().setName(nick)) {
+            apiPlayer.get().setRank(nickRank);
             TextComponentBuilder.createTextComponent("Nick changé")
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
         } else {

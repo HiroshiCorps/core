@@ -22,6 +22,7 @@ import fr.redxil.api.common.utils.SanctionType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class PlayerListener {
 
@@ -33,8 +34,8 @@ public class PlayerListener {
     @Subscribe
     public void playerMessage(PlayerChatEvent chatEvent) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(chatEvent.getPlayer().getUniqueId());
-        if (apiPlayer == null) return;
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(chatEvent.getPlayer().getUniqueId());
+        if (apiPlayer.isEmpty()) return;
 
         String[] message = chatEvent.getMessage().split(" ");
 
@@ -45,20 +46,20 @@ public class PlayerListener {
             return;
         }
 
-        APIPlayerModerator APIPlayerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
 
-        if (APIPlayerModerator != null && message[0].startsWith("!s")) {
+        if (apiPlayerModerator.isPresent() && message[0].startsWith("!s")) {
             String newMessage = chatEvent.getMessage().replace("!s", "");
             chatEvent.getPlayer().spoofChatInput("/staff " + newMessage);
             chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
             return;
         }
 
-        SanctionInfo model = apiPlayer.getLastSanction(SanctionType.MUTE);
+        Optional<SanctionInfo> model = apiPlayer.get().getLastSanction(SanctionType.MUTE);
 
-        if (model != null && model.isEffective()) {
+        if (model.isPresent() && model.get().isEffective()) {
 
-            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.getSanctionEndTS()))).getFinalTextComponent());
+            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.get().getSanctionEndTS()))).getFinalTextComponent());
             chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
 
         }

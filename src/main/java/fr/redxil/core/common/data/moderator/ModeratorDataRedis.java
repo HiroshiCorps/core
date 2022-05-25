@@ -17,7 +17,8 @@ import org.redisson.api.RedissonClient;
 
 public enum ModeratorDataRedis {
 
-    LIST_MODERATOR(DataBaseType.REDIS, DataType.GLOBAL, "moderator/list", false),
+    MAP_MODERATOR_NAME(DataBaseType.REDIS, DataType.GLOBAL, "moderator/name_map", false),
+    MAP_MODERATOR_UUID(DataBaseType.REDIS, DataType.GLOBAL, "moderator/uuid_map", false),
 
     MODERATOR_NAME_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_name", true),
     MODERATOR_MOD_REDIS(DataBaseType.REDIS, DataType.PLAYER, "moderator/<memberID>/moderator_mod", true),

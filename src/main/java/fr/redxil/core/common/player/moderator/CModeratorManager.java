@@ -21,22 +21,17 @@ import java.util.*;
 
 public class CModeratorManager implements ModeratorManager {
 
-    DataReminder<List<Long>> loadedModerator = DataReminder.generateReminder(ModeratorDataRedis.LIST_MODERATOR.getString(), new ArrayList<>());
-    HashMap<Long, CPlayerModerator> moderatorHashMap;
-
-    public CModeratorManager() {
-        if (!API.getInstance().isOnlineMod())
-            moderatorHashMap = new HashMap<>();
-    }
+    DataReminder<Map<String, Long>> nameToLong = DataReminder.generateReminder(ModeratorDataRedis.MAP_MODERATOR_NAME.getString(), new HashMap<>());
+    DataReminder<Map<String, Long>> uuidToLong = DataReminder.generateReminder(ModeratorDataRedis.MAP_MODERATOR_UUID.getString(), new HashMap<>());
+    Map<Long, CPlayerModerator> map = new HashMap<>();
 
     @Override
-    public APIPlayerModerator loadModerator(long id, UUID uuid, String name) {
-        APIPlayerModerator pm = getModerator(id);
-        if (pm != null) return pm;
+    public Optional<APIPlayerModerator> loadModerator(long id, UUID uuid, String name) {
+        if (isLoaded(id)) return Optional.empty();
         if (isModerator(uuid)) {
-            return new CPlayerModerator(id, uuid, name);
+            return Optional.of(new CPlayerModerator(id, uuid, name));
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -47,25 +42,28 @@ public class CModeratorManager implements ModeratorManager {
      */
 
     @Override
-    public APIPlayerModerator getModerator(String s) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(s);
-        if (apiPlayer == null) return null;
-        return getModerator(apiPlayer.getMemberID());
+    public Optional<APIPlayerModerator> getModerator(String s) {
+        Long result = uuidToLong.getData().get(s);
+        if (result == null) return Optional.empty();
+        if (API.getInstance().isOnlineMod())
+            return Optional.of(new CPlayerModerator(result));
+        return Optional.ofNullable(getMap().get(result));
     }
 
     /**
      * Get the moderator with the MemberID
      *
-     * @param l this need to be the MemberID of the APIPlayer
+     * @param result this need to be the MemberID of the APIPlayer
      * @return APIPlayerModerator or null if player is not loaded or not a moderator
      */
 
     @Override
-    public APIPlayerModerator getModerator(long l) {
-        if (!isLoaded(l)) return null;
-        if (!API.getInstance().isOnlineMod())
-            return moderatorHashMap.get(l);
-        return new CPlayerModerator(l);
+    public Optional<APIPlayerModerator> getModerator(long result) {
+        if (isLoaded(result))
+            return Optional.empty();
+        if (API.getInstance().isOnlineMod())
+            return Optional.of(new CPlayerModerator(result));
+        return Optional.ofNullable(getMap().get(result));
     }
 
     /**
@@ -76,10 +74,12 @@ public class CModeratorManager implements ModeratorManager {
      */
 
     @Override
-    public APIPlayerModerator getModerator(UUID uuid) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
-        if (apiPlayer == null) return null;
-        return getModerator(apiPlayer.getMemberID());
+    public Optional<APIPlayerModerator> getModerator(UUID uuid) {
+        Long result = uuidToLong.getData().get(uuid.toString());
+        if (result == null) return Optional.empty();
+        if (API.getInstance().isOnlineMod())
+            return Optional.of(new CPlayerModerator(result));
+        return Optional.ofNullable(getMap().get(result));
     }
 
     /**
@@ -90,7 +90,17 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Collection<Long> getLoadedModerator() {
-        return loadedModerator.getData();
+        return uuidToLong.getData().values();
+    }
+
+    @Override
+    public Map<String, Long> getStringToLongModerator() {
+        return nameToLong.getData();
+    }
+
+    @Override
+    public Map<String, Long> getUUIDToLongModerator() {
+        return uuidToLong.getData();
     }
 
     @Override
@@ -109,9 +119,9 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(UUID uuid) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
-        if (apiPlayer == null) return false;
-        return apiPlayer.getRank().isModeratorRank();
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
+        if (apiPlayer.isEmpty()) return false;
+        else return apiPlayer.get().getRank().isModeratorRank();
     }
 
     /**
@@ -123,9 +133,9 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(long memberID) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberID);
-        if (apiPlayer == null) return false;
-        return apiPlayer.getRank().isModeratorRank();
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberID);
+        if (apiPlayer.isEmpty()) return false;
+        else return apiPlayer.get().getRank().isModeratorRank();
     }
 
     /**
@@ -137,18 +147,28 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(String name) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(name);
-        if (apiPlayer == null) return false;
-        return apiPlayer.getRank().isModeratorRank();
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(name);
+        if (apiPlayer.isEmpty()) return false;
+        else return apiPlayer.get().getRank().isModeratorRank();
     }
 
     @Override
     public boolean isLoaded(long memberID) {
-        return getLoadedModerator().contains(memberID);
+        return getStringToLongModerator().containsValue(memberID);
+    }
+
+    @Override
+    public boolean isLoaded(UUID uuid) {
+        return getUUIDToLongModerator().containsKey(uuid.toString());
+    }
+
+    @Override
+    public boolean isLoaded(String s) {
+        return getStringToLongModerator().containsKey(s);
     }
 
     public Map<Long, CPlayerModerator> getMap() {
-        return moderatorHashMap;
+        return map;
     }
 
 }

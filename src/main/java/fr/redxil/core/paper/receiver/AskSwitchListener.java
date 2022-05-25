@@ -20,7 +20,8 @@ import java.util.Optional;
 public class AskSwitchListener implements PMReceiver {
 
     public AskSwitchListener() {
-        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", String.class, this);
+        if (API.getInstance().isOnlineMod())
+            RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", String.class, this);
     }
 
     @Override

@@ -53,10 +53,10 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
 
         if (durationTime != -2L) {
 
-            SanctionInfo sm = apiPlayerTarget.mutePlayer(reason, end, APIPlayerModAuthor);
+            Optional<SanctionInfo> sm = apiPlayerTarget.mutePlayer(reason, end, APIPlayerModAuthor);
 
-            if (sm != null) {
-                CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((onlinePlayer) -> onlinePlayer.sendMessage(((TextComponentBuilderVelocity) sm.getSancMessage()).getFinalTextComponent()));
+            if (sm.isPresent()) {
+                CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((onlinePlayer) -> onlinePlayer.sendMessage(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
 
                 TextComponentBuilder muteMessage = TextComponentBuilder.createTextComponent(
                         "Le modérateur §d" +
@@ -93,29 +93,29 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
-        if (APIPlayerModAuthor == null) {
+        if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        APIOfflinePlayer apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
-        if (apiPlayerTarget == null) {
+        Optional<APIOfflinePlayer> apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
+        if (apiPlayerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.getRank().isModeratorRank()) {
+        if (apiPlayerTarget.get().getRank().isModeratorRank()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
         }
 
-        if (apiPlayerTarget.isMute()) {
+        if (apiPlayerTarget.get().isMute()) {
             TextComponentBuilder.createTextComponent("Erreur, le joueur est déjà mute.").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
             return;
@@ -132,7 +132,7 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        mutePlayer(apiPlayerTarget, timeArgs, APIPlayerModAuthor, reason);
+        mutePlayer(apiPlayerTarget.get(), timeArgs, apiPlayerModerator.get(), reason);
 
     }
 

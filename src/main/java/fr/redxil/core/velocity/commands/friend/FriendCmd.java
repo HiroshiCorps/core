@@ -29,6 +29,7 @@ import net.kyori.adventure.text.TextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class FriendCmd extends BrigadierAPI<CommandSource> {
@@ -107,106 +108,118 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
 
     public void inviteCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
+        Optional<APIOfflinePlayer> target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
+        if (target.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        if (apiPlayer.hasLinkWith(LinkUsage.BOTH, target, "friend", "friendInvite")) {
-            TextComponentBuilder.createTextComponent("Une ou un semblant de relation existe déjà entre vous").sendTo(apiPlayer);
+        if (apiPlayer.get().hasLinkWith(LinkUsage.BOTH, target.get(), "friend", "friendInvite")) {
+            TextComponentBuilder.createTextComponent("Une ou un semblant de relation existe déjà entre vous").sendTo(apiPlayer.get());
             return;
         }
-        apiPlayer.createLink(target, "friendInvite");
-        TextComponentBuilder.createTextComponent("Demande d'amis envoyée").setColor(Color.GREEN).sendTo(apiPlayer);
+        apiPlayer.get().createLink(target.get(), "friendInvite");
+        TextComponentBuilder.createTextComponent("Demande d'amis envoyée").setColor(Color.GREEN).sendTo(apiPlayer.get());
 
     }
 
     public void acceptCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
+        Optional<APIOfflinePlayer> target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
+        if (target.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        LinkData linkData = apiPlayer.getLink(LinkUsage.FROM, target, "friendInvite");
-        if (linkData == null) {
-            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friendInvite");
+        if (linkData.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
-        linkData.setLinkType("friend");
-        TextComponentBuilder.createTextComponent("Sa demande d'amis à été accepté").setColor(Color.GREEN).sendTo(apiPlayer);
+        linkData.get().setLinkType("friend");
+        TextComponentBuilder.createTextComponent("Sa demande d'amis à été accepté").setColor(Color.GREEN).sendTo(apiPlayer.get());
 
     }
 
     public void refuseCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
+        Optional<APIOfflinePlayer> target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
+        if (target.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        LinkData linkData = apiPlayer.getLink(LinkUsage.FROM, target, "friendInvite");
-        if (linkData == null) {
-            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friendInvite");
+        if (linkData.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
-        linkData.setLinkType("friendRefused");
-        TextComponentBuilder.createTextComponent("Sa demande d'amis à été refusée").setColor(Color.GREEN).sendTo(apiPlayer);
+        linkData.get().setLinkType("friendRefused");
+        TextComponentBuilder.createTextComponent("Sa demande d'amis à été refusée").setColor(Color.GREEN).sendTo(apiPlayer.get());
 
     }
 
     public void revokeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
+        Optional<APIOfflinePlayer> target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
+        if (target.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        LinkData linkData = apiPlayer.getLink(LinkUsage.TO, target, "friendInvite");
-        if (linkData == null) {
-            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.TO, target.get(), "friendInvite");
+        if (linkData.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        linkData.setLinkType("friendRevoke");
-        TextComponentBuilder.createTextComponent("Votre demande d'amis à été retiré").setColor(Color.GREEN).sendTo(apiPlayer);
+        linkData.get().setLinkType("friendRevoke");
+        TextComponentBuilder.createTextComponent("Votre demande d'amis à été retiré").setColor(Color.GREEN).sendTo(apiPlayer.get());
 
     }
 
     public void removeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        APIOfflinePlayer target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
+        Optional<APIOfflinePlayer> target = API.getInstance().getPlayerManager().getOfflinePlayer(argument);
+        if (target.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        LinkData linkData = apiPlayer.getLink(LinkUsage.FROM, target, "friend");
-        if (linkData == null) {
-            TextComponentBuilder.createTextComponent("Cette personne n'est pas dans vos amis").setColor(Color.RED).sendTo(apiPlayer);
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friend");
+        if (linkData.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Cette personne n'est pas dans vos amis").setColor(Color.RED).sendTo(apiPlayer.get());
             return;
         }
 
-        linkData.setLinkType("friendRemove");
-        TextComponentBuilder.createTextComponent("Joueur retiré de vos Amis").setColor(Color.GREEN).sendTo(apiPlayer);
+        linkData.get().setLinkType("friendRemove");
+        TextComponentBuilder.createTextComponent("Joueur retiré de vos Amis").setColor(Color.GREEN).sendTo(apiPlayer.get());
 
     }
 
     public void listCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
-        List<LinkData> amisList = apiPlayer.getLinks(LinkUsage.BOTH, null, "friend");
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
+        List<LinkData> amisList = apiPlayer.get().getLinks(LinkUsage.BOTH, null, "friend");
 
         if (amisList.size() == 0) {
-            TextComponentBuilder.createTextComponent("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").setColor(Color.GREEN).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").setColor(Color.GREEN).sendTo(apiPlayer.get());
             return;
         }
 
@@ -214,16 +227,18 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
 
         for (LinkData ami : amisList) {
             String connect = "Déconnecté";
-            long amis = ami.getFromPlayer() == apiPlayer.getMemberID() ? ami.getToPlayer() : ami.getFromPlayer();
             Color bc = Color.RED;
-            if (API.getInstance().getPlayerManager().isLoadedPlayer(amis)) {
-                connect = "Connecté";
-                bc = Color.GREEN;
+            Optional<APIOfflinePlayer> amis = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(ami.getFromPlayer() == apiPlayer.get().getMemberID() ? ami.getToPlayer() : ami.getFromPlayer());
+            if (amis.isPresent()) {
+                if (amis.get() instanceof Player) {
+                    connect = "Connecté";
+                    bc = Color.GREEN;
+                }
+                tcb.appendNewComponentBuilder("\n" + amis.get().getName() + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
             }
-            tcb.appendNewComponentBuilder("\n" + CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(amis).getName() + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
         }
 
-        tcb.sendTo(apiPlayer);
+        tcb.sendTo(apiPlayer.get());
 
     }
 

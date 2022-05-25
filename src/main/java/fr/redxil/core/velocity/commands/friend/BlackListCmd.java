@@ -27,6 +27,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class BlackListCmd extends BrigadierAPI<CommandSource> {
@@ -56,33 +57,36 @@ public class BlackListCmd extends BrigadierAPI<CommandSource> {
 
         if (cmd.equalsIgnoreCase("add") || cmd.equalsIgnoreCase("remove")) {
 
-            APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(target);
-            APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
+            Optional<APIOfflinePlayer> osp = API.getInstance().getPlayerManager().getOfflinePlayer(target);
+            Optional<APIPlayer> sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
 
-            if (osp == null) {
+            if (osp.isEmpty()) {
                 TextComponentBuilder.createTextComponent("Erreur, le joueur: " + target + " est inconnue").setColor(Color.RED).sendTo(playerUUID);
                 return;
             }
 
+            if (sp.isEmpty())
+                return;
+
             boolean remove = cmd.equalsIgnoreCase("remove");
             if (remove) {
 
-                LinkData linkData = sp.getLink(LinkUsage.TO, osp, "blacklist");
-                if (linkData == null) {
+                Optional<LinkData> linkData = sp.get().getLink(LinkUsage.TO, osp.get(), "blacklist");
+                if (linkData.isEmpty()) {
                     TextComponentBuilder.createTextComponent("Erreur, le joueur: " + target + " n'est pas BlackList").setColor(Color.RED).sendTo(playerUUID);
                     return;
                 }
 
-                linkData.setLinkType("blacklistRevoked");
+                linkData.get().setLinkType("blacklistRevoked");
 
             } else {
 
-                if (sp.hasLinkWith(LinkUsage.TO, osp, "blacklist")) {
+                if (sp.get().hasLinkWith(LinkUsage.TO, osp.get(), "blacklist")) {
                     TextComponentBuilder.createTextComponent("Erreur, le joueur: " + target + " est déjà BlackList").setColor(Color.RED).sendTo(playerUUID);
                     return;
                 }
 
-                sp.createLink(osp, "blacklist");
+                sp.get().createLink(osp.get(), "blacklist");
 
             }
 

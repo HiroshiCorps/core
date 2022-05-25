@@ -21,6 +21,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class ShutdownCmd extends BrigadierAPI<CommandSource> {
@@ -42,19 +43,21 @@ public class ShutdownCmd extends BrigadierAPI<CommandSource> {
 
     public int execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
-        if (!apiPlayer.hasPermission(Rank.DEVELOPPEUR.getRankPower())) {
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        if (apiPlayer.isEmpty())
+            return 1;
+        if (!apiPlayer.get().hasPermission(Rank.DEVELOPPEUR.getRankPower())) {
             return 1;
         }
 
         Server server = API.getInstance().getServerManager().getServer(commandContext.getArgument("server", String.class));
         if (server == null) {
-            TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer);
+            TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer.get());
             return 1;
         }
 
         ///server.sendShutdownOrder();
-        TextComponentBuilder.createTextComponent("L'ordre de shutdown est désactivé").setColor(Color.GREEN).sendTo(apiPlayer);
+        TextComponentBuilder.createTextComponent("L'ordre de shutdown est désactivé").setColor(Color.GREEN).sendTo(apiPlayer.get());
         return 1;
     }
 

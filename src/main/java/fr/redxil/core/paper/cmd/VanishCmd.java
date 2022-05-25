@@ -17,20 +17,23 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class VanishCmd implements CommandExecutor {
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!(commandSender instanceof Player)) return false;
 
-        APIPlayerModerator mod = API.getInstance().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
-        if (mod == null)
+        Optional<APIPlayerModerator> mod = API.getInstance().getModeratorManager().getModerator(((Player) commandSender).getUniqueId());
+        if (mod.isEmpty())
             return false;
         String message;
 
-        boolean newState = !mod.isVanish();
-        CorePlugin.getInstance().getVanish().setVanish(mod, newState);
+        boolean newState = !mod.get().isVanish();
+        CorePlugin.getInstance().getVanish().setVanish(mod.get(), newState);
 
         if (!newState)
             message = ChatColor.RED + "Vous n'êtes plus vanish";

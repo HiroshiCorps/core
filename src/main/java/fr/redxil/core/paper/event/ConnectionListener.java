@@ -9,19 +9,22 @@
 
 package fr.redxil.core.paper.event;
 
+import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.Optional;
 
 public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
@@ -30,8 +33,8 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         Player p = event.getPlayer();
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
-        if (apiPlayer == null) {
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
+        if (apiPlayer.isPresent() && API.getInstance().isOnlineMod()) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
         }
 
@@ -40,24 +43,40 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
     @EventHandler
     public void playerJoin(PlayerJoinEvent event) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        APIPlayerManager apiPlayerManager = API.getInstance().getPlayerManager();
         Player player = event.getPlayer();
 
-        if (event.getJoinMessage() != null) {
-            sendJoinMessage(apiPlayer);
-            event.setJoinMessage(null);
+        Optional<APIPlayer> apiPlayer;
+        if (API.getInstance().isOnlineMod())
+            apiPlayer = apiPlayerManager.getPlayer(player.getUniqueId());
+        else {
+            if (player.getAddress() == null) {
+                player.kickPlayer("No ip data");
+                return;
+            }
+            apiPlayer = apiPlayerManager.loadPlayer(player.getDisplayName(), player.getUniqueId(), new IpInfo(player.getAddress().getHostName(), player.getAddress().getPort()));
+            apiPlayer.ifPresent(apiPlayer1 -> API.getInstance().getModeratorManager().loadModerator(apiPlayer1.getMemberID(), apiPlayer1.getUUID(), apiPlayer1.getRealName()));
         }
 
-        Nick.applyNick(player, apiPlayer);
+        if (apiPlayer.isEmpty()) {
+            player.kickPlayer("No data");
+            return;
+        }
+
+        if (event.getJoinMessage() != null) {
+            event.setJoinMessage(getJoinMessage(apiPlayer.get()));
+        }
+
+        Nick.applyNick(player, apiPlayer.get());
         corePlugin.getVanish().applyVanish(player);
 
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
-        apiPlayer.setServerName(API.getInstance().getServerName());
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
+        apiPlayer.get().setServerName(API.getInstance().getServerName());
+        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
 
-        if (playerModerator != null) {
-            corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
-            corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
+        if (playerModerator.isPresent()) {
+            corePlugin.getModeratorMain().setModerator(playerModerator.get(), playerModerator.get().isModeratorMod(), true);
+            corePlugin.getVanish().setVanish(playerModerator.get(), playerModerator.get().isVanish());
         }
 
     }
@@ -66,7 +85,6 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
     public void playerQuitEvent(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
-        APIOfflinePlayer osp = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId());
 
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
 
@@ -74,28 +92,22 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         corePlugin.getFreezeGestion().stopFreezeMessage(player.getUniqueId());
 
         if (!API.getInstance().isOnlineMod()) {
-            APIPlayerModerator moderator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
-            if (moderator != null)
-                moderator.disconnectModerator();
+            API.getInstance().getModeratorManager().getModerator(player.getUniqueId()).ifPresent(APIPlayerModerator::disconnectModerator);
         }
 
-        event.setQuitMessage(null);
-        sendQuitMessage(osp);
+        API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> event.setQuitMessage(getQuitMessage(apiOfflinePlayer)));
 
     }
 
-    public void sendJoinMessage(APIPlayer apiPlayer) {
+    public String getJoinMessage(APIPlayer apiPlayer) {
 
-        String message = "§fLe joueur " + apiPlayer.getRank().getChatRankString() + apiPlayer.getName() + " §fà rejoint le serveur";
-
-        Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
+        return "§fLe joueur " + apiPlayer.getRank().getChatRankString() + apiPlayer.getName() + " §fà rejoint le serveur";
 
     }
 
-    public void sendQuitMessage(APIOfflinePlayer apiPlayer) {
+    public String getQuitMessage(APIOfflinePlayer apiPlayer) {
 
-        String message = "§fLe joueur " + apiPlayer.getRank().getChatRankString() + " " + apiPlayer.getName() + " §fà quitté le serveur";
-        Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
+        return "§fLe joueur " + apiPlayer.getRank().getChatRankString() + " " + apiPlayer.getName() + " §fà quitté le serveur";
 
     }
 

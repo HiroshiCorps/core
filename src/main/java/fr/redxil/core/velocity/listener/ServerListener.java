@@ -19,10 +19,14 @@ public class ServerListener {
     @Subscribe
     public void serverConnect(ServerPreConnectEvent event) {
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        if (apiPlayer.isEmpty()) {
+            event.setResult(ServerPreConnectEvent.ServerResult.denied());
+            return;
+        }
         Server server = API.getInstance().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
-        if (apiPlayer.getServer() == null) {
-            Server serverFinalTarget = API.getInstance().getServerManager().getConnectableServer(apiPlayer, ServerType.HUB);
+        if (apiPlayer.get().getServer() == null) {
+            Server serverFinalTarget = API.getInstance().getServerManager().getConnectableServer(apiPlayer.get(), ServerType.HUB);
             if (serverFinalTarget == null) {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());
                 return;
@@ -55,12 +59,12 @@ public class ServerListener {
 
         }
 
-        if (!server.getServerAccess().canAccess(server, apiPlayer)) {
+        if (!server.getServerAccess().canAccess(server, apiPlayer.get())) {
             event.setResult(ServerPreConnectEvent.ServerResult.denied());
             return;
         }
 
-        if (apiPlayer.isFreeze() || !apiPlayer.isLogin())
+        if (apiPlayer.get().isFreeze())
             event.setResult(ServerPreConnectEvent.ServerResult.denied());
 
     }

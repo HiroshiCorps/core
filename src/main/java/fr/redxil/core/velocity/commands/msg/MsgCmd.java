@@ -26,6 +26,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class MsgCmd extends BrigadierAPI<CommandSource> {
@@ -49,32 +50,34 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player)) return;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        APIPlayer sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
+        Optional<APIPlayer> sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
+        if (sp.isEmpty())
+            return;
 
-        APIPlayer target = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
-        if (target == null) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + commandContext.getArgument("target", String.class) + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
+        Optional<APIPlayer> target = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target.get()", String.class));
+        if (target.isEmpty()) {
+            TextComponentBuilder.createTextComponent("Le joueur: " + commandContext.getArgument("target.get()", String.class) + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
-        if (sp.hasLinkWith(LinkUsage.TO, target, "blacklist")) {
+        if (sp.get().hasLinkWith(LinkUsage.TO, target.get(), "blacklist")) {
             TextComponentBuilder.createTextComponent("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
         String message = commandContext.getArgument("message", String.class);
 
-        if (!target.hasLinkWith(LinkUsage.TO, sp, "blacklist"))
-            TextComponentBuilder.createTextComponent(sp.getName()).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
+        if (!target.get().hasLinkWith(LinkUsage.TO, sp.get(), "blacklist"))
+            TextComponentBuilder.createTextComponent(sp.get().getName()).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
                     .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                    .appendNewComponentBuilder(message).sendTo(target.getUUID());
+                    .appendNewComponentBuilder(message).sendTo(target.get().getUUID());
 
-        TextComponentBuilder.createTextComponent(target.getName()).setColor(Color.RED)
+        TextComponentBuilder.createTextComponent(target.get().getName()).setColor(Color.RED)
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(message).sendTo(sp.getUUID());
+                .appendNewComponentBuilder(message).sendTo(sp.get().getUUID());
 
-        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(sp), target.getName());
-        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(target), sp.getName());
+        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(sp.get()), target.get().getName());
+        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(target.get()), sp.get().getName());
     }
 
     @Override
@@ -85,7 +88,7 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
             playerName.add(player.getUsername());
         }
 
-        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
+        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target.get()", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
         this.addArgumentCommand(target, "message", StringArgumentType.string(), this::execute);
     }
 }

@@ -21,6 +21,8 @@ import java.util.Optional;
 public class MessageListener implements PMReceiver {
 
     public MessageListener() {
+        if (!API.getInstance().isOnlineMod())
+            return;
         RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "playerMessage", String.class, this);
     }
 

@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class InfoCmd extends BrigadierAPI<CommandSource> {
@@ -39,13 +40,13 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
-        if (playerModerator == null) {
+        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        if (playerModerator.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
             return;
         }
 
-        APIOfflinePlayer target;
+        Optional<APIOfflinePlayer> target;
         String targetName = commandContext.getArgument("target", String.class);
         Long targetID = null;
         try {
@@ -58,12 +59,12 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
             target = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
         else target = API.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
-        if (target == null) {
+        if (target.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
             return;
         }
 
-        playerModerator.printInfo(target);
+        playerModerator.get().printInfo(target.get());
     }
 
     @Override
@@ -76,13 +77,13 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
-        if (playerModerator == null) {
+        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        if (playerModerator.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
             return;
         }
 
-        APIOfflinePlayer target;
+        Optional<APIOfflinePlayer> target;
         String targetName = commandContext.getArgument("target", String.class);
         Long targetID = null;
         try {
@@ -95,7 +96,7 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
             target = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
         else target = API.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
-        if (target == null) {
+        if (target.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
             return;
         }
@@ -104,11 +105,11 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
 
         SanctionType sanctionType = SanctionType.getSanctionType(sanc);
         if (sanctionType == null || sanc.equalsIgnoreCase("info")) {
-            playerModerator.printInfo(target);
+            playerModerator.get().printInfo(target.get());
             return;
         }
 
-        playerModerator.printSanction(target, sanctionType);
+        playerModerator.get().printSanction(target.get(), sanctionType);
 
     }
 

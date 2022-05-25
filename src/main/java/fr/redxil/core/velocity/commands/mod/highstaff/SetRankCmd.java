@@ -28,6 +28,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class SetRankCmd extends BrigadierAPI<CommandSource> {
@@ -59,25 +60,25 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
-        if (apiPlayer == null) return;
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        if (apiPlayer.isEmpty()) return;
 
-        if (!apiPlayer.hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
+        if (!apiPlayer.get().hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Seulement un adminnistrateur peut executer cette commande"
             ).setColor(Color.RED)).getFinalTextComponent());
             return;
         }
 
-        APIOfflinePlayer offlineTarget = API.getInstance().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
-        if (offlineTarget == null) {
+        Optional<APIOfflinePlayer> offlineTarget = API.getInstance().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
+        if (offlineTarget.isEmpty()) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Le joueur: " + commandContext.getArgument("target", String.class) + " ne s'est jamais connecté").setColor(Color.RED)
             ).getFinalTextComponent());
             return;
         }
 
-        if (offlineTarget.hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
+        if (offlineTarget.get().hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
             commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                     "Impossible d'affecter un nouveau rank à ce joueur"
             ).setColor(Color.RED)).getFinalTextComponent());
@@ -109,21 +110,18 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(offlineTarget.getMemberID());
-        if (playerModerator != null)
-            playerModerator.disconnectModerator();
+        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(offlineTarget.get().getMemberID());
+        playerModerator.ifPresent(APIPlayerModerator::disconnectModerator);
 
-        if (offlineTarget instanceof APIPlayer)
-            ((APIPlayer) offlineTarget).setRealRank(newRank);
-        else
-            offlineTarget.setRank(newRank);
-
-        if (offlineTarget instanceof APIPlayer)
-            API.getInstance().getModeratorManager().loadModerator(offlineTarget.getMemberID(), offlineTarget.getUUID(), offlineTarget.getName());
+        if (offlineTarget.get() instanceof APIPlayer) {
+            ((APIPlayer) offlineTarget.get()).setRealRank(newRank);
+            API.getInstance().getModeratorManager().loadModerator(offlineTarget.get().getMemberID(), offlineTarget.get().getUUID(), offlineTarget.get().getName());
+        } else
+            offlineTarget.get().setRank(newRank);
 
         commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
                         "La personne §d" +
-                                offlineTarget.getName() +
+                                offlineTarget.get().getName() +
                                 " §7à été rank: §a" +
                                 newRank.getRankName()
                 )).getFinalTextComponent()

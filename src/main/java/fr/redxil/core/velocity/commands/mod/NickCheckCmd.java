@@ -23,6 +23,7 @@ import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class NickCheckCmd extends BrigadierAPI<CommandSource> {
@@ -46,14 +47,14 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
-        if (!apiPlayer.getRank().isModeratorRank())
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        if (apiPlayer.isEmpty() || !apiPlayer.get().getRank().isModeratorRank())
             return;
 
-        APIPlayer targetPlayer = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
+        Optional<APIPlayer> targetPlayer = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
         TextComponentBuilder tcb;
-        if (targetPlayer != null && targetPlayer.isNick())
-            tcb = TextComponentBuilder.createTextComponent("Le vrai pseudo de cette personne: " + targetPlayer.getRealName());
+        if (targetPlayer.isPresent() && targetPlayer.get().isNick())
+            tcb = TextComponentBuilder.createTextComponent("Le vrai pseudo de cette personne: " + targetPlayer.get().getRealName());
         else
             tcb = TextComponentBuilder.createTextComponent("Ceci n'est pas un nick").setColor(Color.RED);
 

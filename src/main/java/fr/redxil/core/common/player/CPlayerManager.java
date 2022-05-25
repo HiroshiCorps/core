@@ -33,7 +33,7 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public boolean dataExist(String s) {
-        return isLoadedPlayer(s) || getOfflinePlayer(s) != null;
+        return isLoadedPlayer(s) || getOfflinePlayer(s).isPresent();
     }
 
     /**
@@ -43,11 +43,11 @@ public class CPlayerManager implements APIPlayerManager {
      * @return APIPlayer or null if the player is not loaded
      */
     @Override
-    public APIPlayer getPlayer(String name) {
+    public Optional<APIPlayer> getPlayer(String name) {
         Long value = nameToID.get(name);
         if (value == null)
-            return null;
-        return new CPlayer(value);
+            return Optional.empty();
+        return Optional.of(new CPlayer(value));
     }
 
     /**
@@ -58,11 +58,11 @@ public class CPlayerManager implements APIPlayerManager {
      */
 
     @Override
-    public APIPlayer getPlayer(UUID uuid) {
+    public Optional<APIPlayer> getPlayer(UUID uuid) {
         Long value = uuidToID.get(uuid.toString());
         if (value == null)
-            return null;
-        return new CPlayer(value);
+            return Optional.empty();
+        return Optional.of(new CPlayer(value));
     }
 
     /**
@@ -73,11 +73,11 @@ public class CPlayerManager implements APIPlayerManager {
      */
 
     @Override
-    public APIPlayer getPlayer(long id) {
+    public Optional<APIPlayer> getPlayer(long id) {
         if (!isLoadedPlayer(id)) {
-            return null;
+            return Optional.empty();
         }
-        return new CPlayer(id);
+        return Optional.of(new CPlayer(id));
     }
 
     /**
@@ -88,18 +88,21 @@ public class CPlayerManager implements APIPlayerManager {
      */
 
     @Override
-    public APIOfflinePlayer getOfflinePlayer(UUID uuid) {
+    public Optional<APIOfflinePlayer> getOfflinePlayer(UUID uuid) {
 
-        APIPlayer apiPlayer = getPlayer(uuid);
-        if (apiPlayer != null) return apiPlayer;
+        Optional<APIPlayer> apiPlayer = getPlayer(uuid);
+        if (apiPlayer.isPresent()) return Optional.of(apiPlayer.get());
+
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
 
         if (playerModel != null) {
-            return new CPlayerOffline(playerModel);
+            return Optional.of(new CPlayerOffline(playerModel));
         }
 
-        return null;
+        return Optional.empty();
 
     }
 
@@ -111,18 +114,20 @@ public class CPlayerManager implements APIPlayerManager {
      */
 
     @Override
-    public APIOfflinePlayer getOfflinePlayer(String name) {
+    public Optional<APIOfflinePlayer> getOfflinePlayer(String name) {
 
-        APIPlayer apiPlayer = getPlayer(name);
-        if (apiPlayer != null) return apiPlayer;
+        Optional<APIPlayer> apiPlayer = getPlayer(name);
+        if (apiPlayer.isPresent()) return Optional.of(apiPlayer.get());
+
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
 
         if (playerModel != null) {
-            return new CPlayerOffline(playerModel);
+            return Optional.of(new CPlayerOffline(playerModel));
         }
-        return null;
-
+        return Optional.empty();
     }
 
     /**
@@ -133,20 +138,23 @@ public class CPlayerManager implements APIPlayerManager {
      */
 
     @Override
-    public APIOfflinePlayer getOfflinePlayer(long memberID) {
-        APIPlayer apiPlayer = getPlayer(memberID);
-        if (apiPlayer != null) return apiPlayer;
+    public Optional<APIOfflinePlayer> getOfflinePlayer(long memberID) {
+        Optional<APIPlayer> apiPlayer = getPlayer(memberID);
+        if (apiPlayer.isPresent()) return Optional.of(apiPlayer.get());
 
-        if (new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID) == null)
-            return null;
-        return new CPlayerOffline(memberID);
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
+
+        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
+        if (playerModel == null)
+            return Optional.empty();
+        return Optional.of(new CPlayerOffline(playerModel));
     }
 
     @Override
-    public APIPlayer loadPlayer(String p, UUID uuid, IpInfo ipInfo) {
-        APIPlayer apiPlayer = getPlayer(uuid);
-        if (apiPlayer != null) return apiPlayer;
-        return new CPlayer(p, uuid, ipInfo);
+    public Optional<APIPlayer> loadPlayer(String p, UUID uuid, IpInfo ipInfo) {
+        if (isLoadedPlayer(uuid)) return Optional.empty();
+        return Optional.of(new CPlayer(p, uuid, ipInfo));
     }
 
     @Override
@@ -197,8 +205,8 @@ public class CPlayerManager implements APIPlayerManager {
     }
 
     @Override
-    public LinkData getLink(int i) {
-        return new SQLModels<>(PlayerLinkModel.class).get(i);
+    public Optional<LinkData> getLink(int i) {
+        return Optional.ofNullable(new SQLModels<>(PlayerLinkModel.class).get(i));
     }
 
     @Override

@@ -20,6 +20,7 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class StaffCmd extends BrigadierAPI<CommandSource> {
@@ -42,9 +43,9 @@ public class StaffCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        APIPlayerModerator APIPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
 
-        if (APIPlayerModAuthor == null) {
+        if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent(
                     Color.RED + "Vous n'avez pas la permission d'effectuer cette commande."
             ).sendTo(player.getUniqueId());

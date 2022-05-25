@@ -17,12 +17,15 @@ import fr.redxil.core.paper.utils.Nick;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class Receiver implements PMReceiver {
 
     public Receiver() {
 
+        if (!API.getInstance().isOnlineMod())
+            return;
         RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", String.class, this);
         RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", String.class, this);
 
@@ -30,11 +33,14 @@ public class Receiver implements PMReceiver {
 
     @Override
     public void redisPluginMessageReceived(String s, Object s1) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(UUID.fromString((String) s1));
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(UUID.fromString((String) s1));
 
-        Player player = Bukkit.getPlayer(apiPlayer.getUUID());
+        if (apiPlayer.isEmpty())
+            return;
+
+        Player player = Bukkit.getPlayer(apiPlayer.get().getUUID());
         if (player == null) return;
 
-        Nick.applyNick(player, apiPlayer);
+        Nick.applyNick(player, apiPlayer.get());
     }
 }

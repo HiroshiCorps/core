@@ -97,7 +97,8 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
         this.setEnabled(true);
 
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID());
+        if (API.getInstance().isOnlineMod())
+            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID());
     }
 
     @Override
@@ -110,7 +111,8 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         Objects.requireNonNull(this.getCommand("vanish")).setExecutor(new VanishCmd());
         Objects.requireNonNull(this.getCommand("fly")).setExecutor(new FlyCmd());
 
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID());
+        if (API.getInstance().isOnlineMod())
+            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID());
 
     }
 
@@ -200,21 +202,17 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         if (player != null)
             player.sendMessage(s1);
         else {
-            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(s);
-            if (apiPlayer != null)
-                apiPlayer.sendMessage(s1);
+            API.getInstance().getPlayerManager().getPlayer(s).ifPresent(player2 -> player2.sendMessage(s1));
         }
     }
 
     @Override
-    public void sendMessage(UUID uuid, String s) {
+    public void sendMessage(UUID uuid, String s1) {
         Player player = Bukkit.getPlayer(uuid);
         if (player != null)
-            player.sendMessage(s);
+            player.sendMessage(s1);
         else {
-            APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
-            if (apiPlayer != null)
-                apiPlayer.sendMessage(s);
+            API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player2 -> player2.sendMessage(s1));
         }
     }
 

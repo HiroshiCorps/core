@@ -16,10 +16,7 @@ import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
+import java.util.*;
 
 public class FreezeMessageGestion {
 
@@ -52,21 +49,23 @@ public class FreezeMessageGestion {
     }
 
     public void sendMessage(Player player, APIPlayerModerator APIPlayerModerator) {
-        APIPlayer apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayer.isEmpty())
+            return;
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                APIPlayer apiPlayerMod = API.getInstance().getPlayerManager().getPlayer(APIPlayerModerator.getMemberID());
-                if (apiPlayerMod.isConnected() && apiPlayerMod.getServer().getServerName().equals(apiPlayer.getServer().getServerName()))
+                Optional<APIPlayer> apiPlayerMod = API.getInstance().getPlayerManager().getPlayer(APIPlayerModerator.getMemberID());
+                if (apiPlayerMod.isPresent() && apiPlayerMod.get().getServer().getServerName().equals(apiPlayer.get().getServer().getServerName()))
                     player.sendTitle("§bAttention", "§8Vous êtes actuellement en inspection", 20, 40, 20);
                 else
-                    setFreeze(false, apiPlayer, null);
+                    setFreeze(false, apiPlayer.get(), null);
             }
         };
 
         timer.schedule(timerTask, 0L, 5000L);
-        map.put(apiPlayer.getUUID(), timer);
+        map.put(apiPlayer.get().getUUID(), timer);
     }
 
 }

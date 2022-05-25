@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -57,12 +58,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     private void initPlayerModel() {
-        if (this.playerModel == null)
+        if (this.playerModel == null && API.getInstance().isOnlineMod())
             this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
     private void initMoneyModel() {
-        if (this.moneyModel == null)
+        if (this.moneyModel == null && API.getInstance().isOnlineMod())
             this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
@@ -80,7 +81,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void addSolde(long i) {
-        getMoneyModel().set(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), getMoneyModel().getSolde() + i);
+        setSolde(getSolde() + i);
     }
 
     @Override
@@ -89,8 +90,9 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
-
-        getMoneyModel().set(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), i);
+        MoneyModel moneyModel1 = getMoneyModel();
+        if (moneyModel1 != null)
+            moneyModel1.set(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), i);
 
         return true;
 
@@ -98,8 +100,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void addCoins(long i) {
-
-        getMoneyModel().set(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), getMoneyModel().getCoins() + i);
+        setCoins(getCoins() + i);
     }
 
     @Override
@@ -107,35 +108,50 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (i <= 0)
             return false;
 
-
-        getMoneyModel().set(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), getMoneyModel().getCoins() + i);
+        MoneyModel moneyModel1 = getMoneyModel();
+        if (moneyModel1 != null)
+            moneyModel1.set(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), i);
         return true;
     }
 
     @Override
     public Rank getRank() {
-        return getPlayerModel().getRank();
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null)
+            return playerModel1.getRank();
+        return Rank.JOUEUR;
     }
 
     @Override
     public void setRank(Rank Rank) {
-        getPlayerModel().set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), Rank.getRankPower().intValue());
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null)
+            playerModel1.set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), Rank.getRankPower().intValue());
     }
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
-        getPlayerModel().set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), getRankPower().intValue());
-        getPlayerModel().set(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns(), timestamp);
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null) {
+            playerModel1.set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), getRankPower().intValue());
+            playerModel1.set(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns(), timestamp);
+        }
     }
 
     @Override
     public Timestamp getRankTimeStamp() {
-        return (Timestamp) getPlayerModel().get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns());
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null)
+            return (Timestamp) playerModel1.get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns());
+        else return null;
     }
 
     @Override
     public Long getRankPower() {
-        return getRank().getRankPower();
+        Rank rank = getRank();
+        if (rank == null)
+            return Rank.JOUEUR.getRankPower();
+        return rank.getRankPower();
     }
 
     @Override
@@ -145,12 +161,18 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public long getSolde() {
-        return getMoneyModel().getSolde();
+        MoneyModel moneyModel1 = getMoneyModel();
+        if (moneyModel1 != null)
+            return moneyModel1.getSolde();
+        return 0L;
     }
 
     @Override
     public long getCoins() {
-        return getMoneyModel().getCoins();
+        MoneyModel moneyModel1 = getMoneyModel();
+        if (moneyModel1 != null)
+            return moneyModel1.getCoins();
+        return 0L;
     }
 
     @Override
@@ -161,7 +183,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean setName(String s) {
         if (s != null) {
-            getPlayerModel().set(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), s);
+            PlayerModel playerModel1 = getPlayerModel();
+            if (playerModel1 != null)
+                playerModel1.set(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), s);
+            else return false;
             return true;
         }
         return false;
@@ -169,13 +194,19 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public UUID getUUID() {
-        return getPlayerModel().getUUID();
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null)
+            return playerModel1.getUUID();
+        return null;
     }
 
     @Override
     public void setUUID(UUID uuid) {
-        if (uuid != null)
-            getPlayerModel().set(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns(), uuid.toString());
+        if (uuid == null)
+            return;
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null)
+            playerModel1.set(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns(), uuid.toString());
     }
 
     @Override
@@ -191,7 +222,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public void loadSettings() {
         this.settingsModelList = new ArrayList<>();
-        this.settingsModelList.addAll(new SQLModels<>(SettingsModel.class).get("WHERE member_id = ? ORDER BY settings_name ASC", getMemberID()));
+        if (API.getInstance().isOnlineMod())
+            this.settingsModelList.addAll(new SQLModels<>(SettingsModel.class).get("WHERE member_id = ? ORDER BY settings_name ASC", getMemberID()));
     }
 
     @Override
@@ -202,16 +234,20 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void removeSetting(String settingName) {
-        new SQLModels<>(SettingsModel.class).delete("WHERE settings_name = ? AND player_id = ?", settingName, getMemberID());
+        if (API.getInstance().isOnlineMod())
+            new SQLModels<>(SettingsModel.class).delete("WHERE settings_name = ? AND player_id = ?", settingName, getMemberID());
         loadSettings();
     }
 
     @Override
-    public Setting createSetting(String settingName, String settingValue) {
+    public Optional<Setting> createSetting(String settingName, String settingValue) {
 
-        Setting base = getSetting(settingName);
-        if (base != null) {
-            base.setValue(settingValue);
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
+
+        Optional<Setting> base = getSetting(settingName);
+        if (base.isPresent()) {
+            base.get().setValue(settingValue);
             return base;
         }
 
@@ -230,17 +266,17 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public Setting getSetting(String settingsName) {
+    public Optional<Setting> getSetting(String settingsName) {
         for (Setting sm : getSettings())
             if (settingsName.equals(sm.getName()))
-                return sm;
-        return null;
+                return Optional.of(sm);
+        return Optional.empty();
     }
 
 
     @Override
     public boolean hasLinkWith(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... strings) {
-        return getLink(linkUsage, apiOfflinePlayer, strings) != null;
+        return getLink(linkUsage, apiOfflinePlayer, strings).isPresent();
     }
 
     @Override
@@ -253,12 +289,18 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public LinkData getLink(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
-        return getLinks(linkUsage, apiOfflinePlayer, s).get(0);
+    public Optional<LinkData> getLink(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
+        List<LinkData> linkList = getLinks(linkUsage, apiOfflinePlayer, s);
+        if (linkList.isEmpty())
+            return Optional.empty();
+        return Optional.of(linkList.get(0));
     }
 
     @Override
-    public LinkData createLink(APIOfflinePlayer apiOfflinePlayer, String s) {
+    public Optional<LinkData> createLink(APIOfflinePlayer apiOfflinePlayer, String s) {
+
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
 
         PlayerLinkModel linkData = new PlayerLinkModel(this, apiOfflinePlayer, s);
 
@@ -275,20 +317,24 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void setIP(IpInfo ipInfo) {
-        getPlayerModel().set(PlayerDataSql.PLAYER_IP_SQL.getSQLColumns(), ipInfo.getIp());
+        PlayerModel playerModel1 = getPlayerModel();
+        if (playerModel1 != null)
+            playerModel1.set(PlayerDataSql.PLAYER_IP_SQL.getSQLColumns(), ipInfo.getIp());
     }
 
     @Override
     public void loadSanction() {
         this.sanctionModelList = new ArrayList<>();
+        if (!API.getInstance().isOnlineMod())
+            return;
         this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberID()));
         API.getInstance().getPluginEnabler().printLog(Level.INFO, "Sanction: " + this.sanctionModelList.size());
     }
 
     @Override
-    public SanctionInfo banPlayer(String reason, long time, APIPlayerModerator author) {
+    public Optional<SanctionInfo> banPlayer(String reason, long time, APIPlayerModerator author) {
 
-        if (isBan()) return null;
+        if (isBan() || !API.getInstance().isOnlineMod()) return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
                 getMemberID(),
@@ -307,9 +353,9 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public SanctionInfo mutePlayer(String reason, long time, APIPlayerModerator author) {
+    public Optional<SanctionInfo> mutePlayer(String reason, long time, APIPlayerModerator author) {
 
-        if (isMute()) return null;
+        if (isMute() || !API.getInstance().isOnlineMod()) return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
                 getMemberID(),
@@ -328,7 +374,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public SanctionInfo warnPlayer(String reason, APIPlayerModerator author) {
+    public Optional<SanctionInfo> warnPlayer(String reason, APIPlayerModerator author) {
+
+        if (!API.getInstance().isOnlineMod())
+            return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
                 getMemberID(),
@@ -363,35 +412,35 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public boolean isMute() {
-        SanctionInfo sm = getLastSanction(SanctionType.MUTE);
-        if (sm == null) return false;
-        return sm.isEffective();
+        Optional<SanctionInfo> sm = getLastSanction(SanctionType.MUTE);
+        if (sm.isEmpty()) return false;
+        return sm.get().isEffective();
     }
 
     @Override
     public boolean isBan() {
-        SanctionInfo sm = getLastSanction(SanctionType.BAN);
-        if (sm == null) return false;
-        return sm.isEffective();
+        Optional<SanctionInfo> sm = getLastSanction(SanctionType.BAN);
+        if (sm.isEmpty()) return false;
+        return sm.get().isEffective();
     }
 
     @Override
-    public SanctionInfo getLastSanction(SanctionType sanctionType) {
+    public Optional<SanctionInfo> getLastSanction(SanctionType sanctionType) {
         List<SanctionInfo> sanctionList = getSanction(sanctionType);
         if (sanctionList.isEmpty()) {
             API.getInstance().getPluginEnabler().printLog(Level.INFO, "Pas de sanction");
-            return null;
+            return Optional.empty();
         }
 
-        return sanctionList.get(0);
+        return Optional.of(sanctionList.get(0));
     }
 
     @Override
     public boolean unBan(APIPlayerModerator mod) {
 
-        SanctionInfo sm = getLastSanction(SanctionType.BAN);
-        if (sm != null && sm.isEffective()) {
-            sm.setCanceller(mod.getMemberID());
+        Optional<SanctionInfo> sm = getLastSanction(SanctionType.BAN);
+        if (sm.isPresent() && sm.get().isEffective()) {
+            sm.get().setCanceller(mod.getMemberID());
             return true;
         }
 
@@ -402,14 +451,13 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean unMute(APIPlayerModerator mod) {
 
-        SanctionInfo sm = getLastSanction(SanctionType.MUTE);
-        if (sm != null && sm.isEffective()) {
-            sm.setCanceller(mod.getMemberID());
+        Optional<SanctionInfo> sm = getLastSanction(SanctionType.MUTE);
+        if (sm.isPresent() && sm.get().isEffective()) {
+            sm.get().setCanceller(mod.getMemberID());
             return true;
         }
 
         return false;
-
     }
 
     public Pair<String, List<Object>> getWhereString(LinkUsage linkUsage, @Nullable APIOfflinePlayer player2) {
@@ -455,7 +503,6 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     public String getStringSQL(SQLColumns s, int size) {
-
         if (size == 1)
             return s.toSQL() + " = ?";
         StringBuilder stringBuilder = new StringBuilder("(" + s.toSQL() + " = ?");
