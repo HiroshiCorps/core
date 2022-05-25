@@ -56,8 +56,8 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
 
         if (playerModerator != null) {
-                corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
-                corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
+            corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
+            corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
         }
 
     }

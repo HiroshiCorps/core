@@ -27,11 +27,11 @@ import java.util.logging.Level;
 
 public class CoreAPI extends API {
 
+    private static CoreAPI instance;
     private final String serverName;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
-    private static CoreAPI instance;
     private final CSQLConnection sqlConnection;
     private Server server;
     private CRedisManager manager;
@@ -133,13 +133,13 @@ public class CoreAPI extends API {
 
     }
 
+    public static CoreAPI getInstance() {
+        return instance;
+    }
+
     @Override
     public CRedisManager getRedisManager() {
         return this.manager;
-    }
-
-    public static CoreAPI getInstance() {
-        return instance;
     }
 
     @Override
