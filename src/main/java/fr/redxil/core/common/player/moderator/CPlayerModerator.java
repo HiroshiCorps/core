@@ -37,16 +37,15 @@ public class CPlayerModerator implements APIPlayerModerator {
      * fully done offline purpose
      */
     private final long memberID;
-    private DataReminder<String> uuidReminder;
-    private DataReminder<String> nameReminder;
-    private DataReminder<String> modReminder;
-    private DataReminder<String> vanishReminder;
-    private DataReminder<String> cibleReminder;
+    private DataReminder<String> uuidReminder = null;
+    private DataReminder<String> nameReminder = null;
+    private DataReminder<String> modReminder = null;
+    private DataReminder<String> vanishReminder = null;
+    private DataReminder<String> cibleReminder = null;
 
 
     public CPlayerModerator(long memberID) {
         this.memberID = memberID;
-        initDataReminder();
     }
 
     public CPlayerModerator(Long memberID, UUID uuid, String name) {
@@ -64,21 +63,19 @@ public class CPlayerModerator implements APIPlayerModerator {
                 this.put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
             }}, "WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID.intValue());
 
-            modReminder.setData(model.getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns()));
-            vanishReminder.setData(model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns()));
-            cibleReminder.setData(model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
+            setModeratorMod(Boolean.parseBoolean(model.getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns())));
+            setVanish(Boolean.parseBoolean(model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns())));
+            setCible(model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
 
-        }
+        } else
+            CoreAPI.getInstance().getModeratorManager().getMap().put(memberID, this);
 
         API.getInstance().getModeratorManager().getLoadedModerator().add(memberID);
     }
 
     public void initDataReminder() {
-        this.uuidReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(memberID), "none");
-        this.nameReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(memberID), "none");
-        this.modReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(memberID), Boolean.FALSE.toString());
-        this.vanishReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(memberID), Boolean.FALSE.toString());
-        this.cibleReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(memberID), null);
+        initUUID();
+        initName();
     }
 
     @Override
@@ -104,18 +101,36 @@ public class CPlayerModerator implements APIPlayerModerator {
         API.getInstance().getModeratorManager().getLoadedModerator().remove(memberID);
     }
 
+    public void initUUID() {
+        if (this.uuidReminder == null)
+            this.uuidReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_UUID_REDIS.getString(memberID), "none");
+    }
+
     @Override
     public UUID getUUID() {
+        initUUID();
         return UUID.fromString(this.uuidReminder.getData());
+    }
+
+    public void initName() {
+        if (this.nameReminder == null)
+            this.nameReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_NAME_REDIS.getString(memberID), "none");
     }
 
     @Override
     public String getName() {
+        initName();
         return this.nameReminder.getData();
+    }
+
+    public void initModReminder() {
+        if (this.modReminder == null)
+            this.modReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_MOD_REDIS.getString(memberID), Boolean.FALSE.toString());
     }
 
     @Override
     public boolean isModeratorMod() {
+        initModReminder();
         String bool = this.modReminder.getData();
         if (bool == null)
             return false;
@@ -125,11 +140,18 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public void setModeratorMod(boolean value) {
+        initModReminder();
         this.modReminder.setData(Boolean.valueOf(value).toString());
+    }
+
+    public void initVanishReminder() {
+        if (this.vanishReminder == null)
+            this.vanishReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_VANISH_REDIS.getString(memberID), Boolean.FALSE.toString());
     }
 
     @Override
     public boolean isVanish() {
+        initVanishReminder();
         String bool = this.vanishReminder.getData();
         if (bool == null)
             return false;
@@ -139,7 +161,13 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public void setVanish(boolean b) {
+        initVanishReminder();
         this.vanishReminder.setData(Boolean.valueOf(b).toString());
+    }
+
+    public void initCibleReminder() {
+        if (this.cibleReminder == null)
+            this.cibleReminder = DataReminder.generateReminder(ModeratorDataRedis.MODERATOR_CIBLE_REDIS.getString(memberID), null);
     }
 
     @Override
@@ -150,11 +178,13 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public String getCible() {
+        initCibleReminder();
         return this.cibleReminder.getData();
     }
 
     @Override
     public void setCible(String s) {
+        initCibleReminder();
         this.cibleReminder.setData(s);
     }
 

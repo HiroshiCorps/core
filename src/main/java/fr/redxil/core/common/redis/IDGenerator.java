@@ -12,14 +12,29 @@ package fr.redxil.core.common.redis;
 import fr.redxil.api.common.API;
 import fr.redxil.core.common.data.IDDataValue;
 
+import java.util.HashMap;
+
 public class IDGenerator {
 
+    public static HashMap<String, Long> idMap = new HashMap<>();
+
     public static int generateINTID(IDDataValue idv) {
-        return (int) API.getInstance().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
+        return Long.valueOf(generateLONGID(idv)).intValue();
     }
 
     public static long generateLONGID(IDDataValue idv) {
-        return API.getInstance().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
+        if (API.getInstance().isOnlineMod())
+            return API.getInstance().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
+        else {
+            if (idMap.containsKey(idv.getLocation())) {
+                long newID = idMap.get(idv.getLocation()) + 1;
+                idMap.replace(idv.getLocation(), newID);
+                return newID;
+            } else {
+                idMap.put(idv.getLocation(), 1L);
+                return 1L;
+            }
+        }
     }
 
     public static void resetID(IDDataValue idv) {

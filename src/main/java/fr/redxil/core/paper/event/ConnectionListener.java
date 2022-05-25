@@ -52,13 +52,12 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         corePlugin.getVanish().applyVanish(player);
 
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
+        apiPlayer.setServerName(API.getInstance().getServerName());
         APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
 
         if (playerModerator != null) {
-            if (apiPlayer.isLogin()) {
                 corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
                 corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
-            }
         }
 
     }

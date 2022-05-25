@@ -146,7 +146,7 @@ public class CPlayerManager implements APIPlayerManager {
     public APIPlayer loadPlayer(String p, UUID uuid, IpInfo ipInfo) {
         APIPlayer apiPlayer = getPlayer(uuid);
         if (apiPlayer != null) return apiPlayer;
-        return CPlayer.loadPlayer(p, uuid, ipInfo);
+        return new CPlayer(p, uuid, ipInfo);
     }
 
     @Override

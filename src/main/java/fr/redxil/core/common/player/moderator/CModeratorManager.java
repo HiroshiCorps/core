@@ -34,9 +34,7 @@ public class CModeratorManager implements ModeratorManager {
         APIPlayerModerator pm = getModerator(id);
         if (pm != null) return pm;
         if (isModerator(uuid)) {
-            CPlayerModerator newMod = new CPlayerModerator(id, uuid, name);
-            moderatorHashMap.put(id, newMod);
-            return newMod;
+            return new CPlayerModerator(id, uuid, name);
         }
         return null;
     }

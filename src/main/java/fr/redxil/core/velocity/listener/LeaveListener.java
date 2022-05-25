@@ -25,7 +25,7 @@ public class LeaveListener {
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
         apiPlayer.unloadPlayer();
 
-        if (moderatorID != null) {
+        if (moderatorID != null && moderatorID != 0L) {
             APIPlayerModerator playerModerator = API.getInstance().getModeratorManager().getModerator(moderatorID);
             if (playerModerator != null)
                 BanCmd.banPlayer(API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername()), "perm", playerModerator, "{Core} Déconnexion en inspection");
