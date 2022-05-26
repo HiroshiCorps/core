@@ -28,70 +28,48 @@ import java.util.logging.Level;
 
 public class CServer implements Server {
 
-    private final long serverID;
+    private long serverID;
 
     public CServer(long serverID) {
         this.serverID = serverID;
     }
 
-    public static Server initServer(ServerType serverType, String name, IpInfo serverIp) {
-
-        int maxPlayer = API.getInstance().getPluginEnabler().getMaxPlayer();
-
-        ServerModel model = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<>() {{
-            put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), name);
+    public CServer(ServerType serverType, String serverName, IpInfo ipInfo, int maxPlayer) {
+        ServerModel serverModel = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<>() {{
+            put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), serverName);
             put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), maxPlayer);
             put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.ONLINE.toString());
             put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverType.toString());
             put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), serverType.getRelatedServerAccess().toString());
             put(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns(), Rank.JOUEUR.getRankPower().intValue());
-            put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), serverIp.getIp());
-            put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverIp.getPort().toString());
-        }}, "WHERE " + ServerDataSql.SERVER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
+            put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), ipInfo.getIp());
+            put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), ipInfo.getPort().toString());
+        }}, "WHERE " + ServerDataSql.SERVER_NAME_SQL.getSQLColumns().toSQL() + " = ?", serverName);
 
-        return initServer(model, Integer.valueOf(model.getServerID()).longValue(), name, serverType, serverIp);
-
-    }
-
-    public static Server initServer(ServerType serverType, Long serverID, IpInfo serverIP) {
-
-        ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID.intValue());
-
-        return initServer(model, serverID, model.getServerName(), serverType, serverIP);
+        initServer(serverModel, serverType, serverID, serverName, ipInfo, maxPlayer);
 
     }
 
-    private static CServer initServer(ServerModel serverModel, long serverID, String serverName, ServerType serverType, IpInfo serverIP) {
+    public CServer(ServerType serverType, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {
+        ServerModel serverModel = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID);
+        initServer(serverModel, serverType, serverID, serverName, ipInfo, maxPlayer);
+    }
 
-        if (serverModel == null)
-            return null;
-        serverModel.set(new HashMap<>() {{
-            put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), API.getInstance().getPluginEnabler().getMaxPlayer());
-            put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), serverIP.getIp());
-            put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverIP.getPort().toString());
-            put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.ONLINE.toString());
-            put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverType.toString());
-        }});
+    public void initServer(ServerModel serverModel, ServerType serverType, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {
+        this.serverID = serverModel.getServerID();
 
         ServerDataRedis.clearRedisData(DataType.SERVER, serverID);
-        RedisManager redisManager = API.getInstance().getRedisManager();
 
-        API.getInstance().getServerManager().getNameToLongMap().put(serverName, serverID);
-        redisManager.setRedisString(ServerDataRedis.SERVER_NAME_REDIS.getString(serverID), serverName);
-        redisManager.setRedisString(ServerDataRedis.SERVER_TYPE_REDIS.getString(serverID), serverModel.getString(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns()));
+        setServerName(serverName);
+        setServerType(serverType);
 
-        redisManager.setRedisLong(ServerDataRedis.SERVER_MAXP_REDIS.getString(serverID), API.getInstance().getPluginEnabler().getMaxPlayer());
-        redisManager.setRedisString(ServerDataRedis.SERVER_STATUS_REDIS.getString(serverID), serverModel.getString(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns()));
+        setMaxPlayers(maxPlayer);
+        setServerStatus(ServerStatus.ONLINE);
 
-        redisManager.setRedisString(ServerDataRedis.SERVER_TYPE_REDIS.getString(serverID), serverModel.getString(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns()));
-        redisManager.setRedisString(ServerDataRedis.SERVER_ACCESS_REDIS.getString(serverID), serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns()));
-        redisManager.setRedisLong(ServerDataRedis.SERVER_NEEDRANK_REDIS.getString(serverID), serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns()));
+        setServerAccess(ServerAccess.getServerAccess(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())));
+        setReservedRank(Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())));
 
-        redisManager.setRedisString(ServerDataRedis.SERVER_IP_REDIS.getString(serverID), serverModel.getString(ServerDataSql.SERVER_IP_SQL.getSQLColumns()));
-        redisManager.setRedisLong(ServerDataRedis.SERVER_PORT_REDIS.getString(serverID), Long.parseLong(serverModel.getString(ServerDataSql.SERVER_PORT_SQL.getSQLColumns())));
-
-        return new CServer(serverID);
-
+        setServerIP(ipInfo);
     }
 
     @Override
@@ -219,6 +197,11 @@ public class CServer implements Server {
     }
 
     @Override
+    public void setServerType(ServerType serverType) {
+        API.getInstance().getRedisManager().setRedisString(ServerDataRedis.SERVER_TYPE_REDIS.getString(serverID), serverType.toString());
+    }
+
+    @Override
     public long getServerID() {
         return serverID;
     }
@@ -247,6 +230,12 @@ public class CServer implements Server {
     @Override
     public boolean getAllowedConnect(UUID uuid) {
         return API.getInstance().getRedisManager().getRedissonClient().getList(ServerDataRedis.SERVER_ALLOW_PLAYER_REDIS.getString(this)).contains(uuid.toString());
+    }
+
+    @Override
+    public void setServerIP(IpInfo ipInfo) {
+        API.getInstance().getRedisManager().setRedisString(ServerDataRedis.SERVER_IP_REDIS.getString(this), ipInfo.getIp());
+        API.getInstance().getRedisManager().setRedisLong(ServerDataRedis.SERVER_PORT_REDIS.getString(this), ipInfo.getPort());
     }
 
 }

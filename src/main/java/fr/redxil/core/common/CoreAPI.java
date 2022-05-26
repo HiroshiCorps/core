@@ -23,6 +23,7 @@ import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.CSQLConnection;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.logging.Level;
 
 public class CoreAPI extends API {
@@ -107,26 +108,17 @@ public class CoreAPI extends API {
         }
 
         ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
+        Long serverLong = serverID != null ? Long.parseLong(serverID) : null;
 
-        if (serverID == null) {
-            plugin.printLog(Level.FINE, "Generating new Server on db");
-            this.server = this.serverManager.createServer(serverType, serverName, plugin.getServerIp(), plugin.getMaxPlayer());
-            if (this.server == null) {
-                plugin.printLog(Level.FINE, "Error on generating server");
-                plugin.onAPILoadFail();
-                return;
-            }
-            GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
-        } else {
-            plugin.printLog(Level.FINE, "Loading server with ID: " + serverID);
-            this.server = getServerManager().loadServer(serverType, Long.parseLong(serverID), plugin.getServerIp());
-            if (this.server == null) {
-                plugin.printLog(Level.FINE, "Error on generating server");
-                plugin.onAPILoadFail();
-                return;
-            }
-            this.server.setServerName(serverName);
+        Optional<Server> server = this.serverManager.createServer(serverType, serverLong, serverName, plugin.getServerIp(), plugin.getMaxPlayer());
+
+        if (server.isEmpty()) {
+            plugin.onAPILoadFail();
+            return;
         }
+
+        this.server = server.get();
+        GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
 
         plugin.printLog(Level.INFO, "Server id: " + this.server.getServerID());
         plugin.onAPIEnabled();

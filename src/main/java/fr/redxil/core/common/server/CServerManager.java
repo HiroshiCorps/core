@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 
 public class CServerManager implements ServerManager {
 
@@ -41,7 +40,7 @@ public class CServerManager implements ServerManager {
     public Collection<Server> getListServer() {
         return new ArrayList<>() {{
             for (long serverID : getListServerID()) {
-                add(getServer(serverID));
+                getServer(serverID).ifPresent(this::add);
             }
         }};
     }
@@ -71,49 +70,42 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Server getServer(String s) {
+    public Optional<Server> getServer(String s) {
         Map<String, Long> serverMap = getNameToLongMap();
         Long result = serverMap.get(s);
-        if (result == null) return null;
-        return new CServer(result);
+        if (result == null) return Optional.empty();
+        return Optional.of(new CServer(result));
     }
 
     @Override
-    public Server getServer(long l) {
-        if (!isServerExist(l)) return null;
-        return new CServer(l);
+    public Optional<Server> getServer(long l) {
+        if (!isServerExist(l)) return Optional.empty();
+        return Optional.of(new CServer(l));
     }
 
 
     @Override
-    public Server createServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
-        ///Temporaire
-        return initServer(serverType, name, ipInfo, maxPlayer);
+    public Optional<Server> createServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
+        if (name == null || ipInfo == null) return Optional.empty();
+        if (isServerExist(name))
+            return Optional.empty();
+
+        return Optional.of(new CServer(serverType, name, ipInfo, maxPlayer));
     }
 
     @Override
-    public Server initServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
-        Map<String, Long> serverMap = getNameToLongMap();
-        Long id = serverMap.get(name);
-        if (id != null)
-            return new CServer(id);
+    public Optional<Server> createServer(ServerType serverType, Long serverID, String name, IpInfo ipInfo, int maxPlayer) {
+        if (serverID == null)
+            return createServer(serverType, name, ipInfo, maxPlayer);
+        if (name == null || ipInfo == null) return Optional.empty();
+        if (isServerExist(name))
+            return Optional.empty();
 
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with name: " + name);
-        return CServer.initServer(serverType, name, ipInfo);
+        return Optional.of(new CServer(serverType, serverID, name, ipInfo, maxPlayer));
     }
 
     @Override
-    public Server loadServer(ServerType serverType, Long serverID, IpInfo ipInfo) {
-        if (serverID == null || ipInfo == null) return null;
-        if (isServerExist(serverID))
-            return new CServer(serverID);
-
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "Server init with id: " + serverID);
-        return CServer.initServer(serverType, serverID, ipInfo);
-    }
-
-    @Override
-    public Server getConnectableServer(APIPlayer apiPlayer, ServerType serverType) {
+    public Optional<Server> getConnectableServer(APIPlayer apiPlayer, ServerType serverType) {
 
         Collection<Server> availableServer = getListServer(serverType);
         Server server = null;
@@ -134,7 +126,7 @@ public class CServerManager implements ServerManager {
             }
         }
 
-        return server;
+        return Optional.ofNullable(server);
 
     }
 
