@@ -16,15 +16,14 @@ import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.core.common.data.server.ServerDataRedis;
+import fr.redxil.core.common.data.utils.DataReminder;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class CServerManager implements ServerManager {
 
-    Map<String, Long> serverMap = API.getInstance().getRedisManager().getRedissonClient().getMap(ServerDataRedis.MAP_SERVER_REDIS.getString());
+    DataReminder<Map<String, Long>> serverMap = DataReminder.generateReminder(ServerDataRedis.MAP_SERVER_REDIS.getString(), new HashMap<>());
+    Map<Long, CServer> server = new HashMap<>();
 
     @Override
     public Collection<String> getListServerName() {
@@ -74,13 +73,13 @@ public class CServerManager implements ServerManager {
         Map<String, Long> serverMap = getNameToLongMap();
         Long result = serverMap.get(s);
         if (result == null) return Optional.empty();
-        return Optional.of(new CServer(result));
+        return Optional.ofNullable(API.getInstance().isOnlineMod() ? new CServer(result) : server.get(result));
     }
 
     @Override
     public Optional<Server> getServer(long l) {
         if (!isServerExist(l)) return Optional.empty();
-        return Optional.of(new CServer(l));
+        return Optional.ofNullable(API.getInstance().isOnlineMod() ? new CServer(l) : server.get(l));
     }
 
 
@@ -90,7 +89,11 @@ public class CServerManager implements ServerManager {
         if (isServerExist(name))
             return Optional.empty();
 
-        return Optional.of(new CServer(serverType, name, ipInfo, maxPlayer));
+        CServer cServer = new CServer(serverType, name, ipInfo, maxPlayer);
+
+        if (!API.getInstance().isOnlineMod())
+            server.put(cServer.getServerID(), cServer);
+        return Optional.of(cServer);
     }
 
     @Override
@@ -101,7 +104,12 @@ public class CServerManager implements ServerManager {
         if (isServerExist(name))
             return Optional.empty();
 
-        return Optional.of(new CServer(serverType, serverID, name, ipInfo, maxPlayer));
+        CServer cServer = new CServer(serverType, serverID, name, ipInfo, maxPlayer);
+
+        if (!API.getInstance().isOnlineMod())
+            server.put(cServer.getServerID(), cServer);
+        return Optional.of(cServer);
+
     }
 
     @Override
@@ -132,7 +140,11 @@ public class CServerManager implements ServerManager {
 
     @Override
     public Map<String, Long> getNameToLongMap() {
-        return serverMap;
+        return serverMap.getData();
+    }
+
+    public Map<Long, CServer> getMap() {
+        return server;
     }
 
 }
