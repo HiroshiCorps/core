@@ -19,6 +19,7 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.api.common.utils.id.IDGenerator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.link.LinkDataSql;
@@ -31,7 +32,6 @@ import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
-import fr.redxil.core.common.redis.IDGenerator;
 import fr.redxil.core.common.sql.SQLModels;
 
 import java.sql.Timestamp;
@@ -63,7 +63,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     public CPlayer(String name, UUID uuid, IpInfo ipInfo) {
-        super(IDGenerator.generateLONGID(IDDataValue.PLAYERID));
+        super(IDGenerator.generateLONGID(IDDataValue.PLAYERID.getLocation()));
 
         initNameReminder();
         nameReminder.setData(name);

@@ -17,12 +17,12 @@ import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.server.type.ServerType;
 import fr.redxil.api.common.utils.DataReminder;
+import fr.redxil.api.common.utils.id.IDGenerator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.server.ServerDataRedis;
 import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.data.utils.DataType;
-import fr.redxil.core.common.redis.IDGenerator;
 import fr.redxil.core.common.sql.SQLModels;
 
 import java.util.*;
@@ -78,7 +78,7 @@ public class CServer implements Server {
             this.serverID = serverID;
         else {
             if (serverModel == null)
-                this.serverID = IDGenerator.generateLONGID(IDDataValue.SERVERID);
+                this.serverID = IDGenerator.generateLONGID(IDDataValue.SERVERID.getLocation());
             else this.serverID = serverModel.getServerID();
         }
 
