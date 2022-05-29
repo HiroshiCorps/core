@@ -17,7 +17,7 @@ import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
-import fr.redxil.api.common.redis.RedisManager;
+import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
@@ -26,7 +26,6 @@ import fr.redxil.core.common.data.money.MoneyDataRedis;
 import fr.redxil.core.common.data.money.MoneyDataSql;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
-import fr.redxil.core.common.data.utils.DataReminder;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
@@ -43,6 +42,7 @@ import java.util.logging.Level;
 public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     DataReminder<String> serverNameReminder = null;
+    DataReminder<String> lastMSGReminder = null;
     DataReminder<Long> bungeeReminder = null;
     DataReminder<Long> soldeReminder = null;
     DataReminder<Long> coinsReminder = null;
@@ -164,14 +164,13 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         String playerServer = this.getServerName();
         if (playerServer.equals(API.getInstance().getServerName()))
             API.getInstance().getPluginEnabler().sendMessage(getUUID(), s);
-        else if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "playerMessage", Long.valueOf(getMemberID()).toString() + "<msp>" + s);
+        else
+            API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "playerMessage", Long.valueOf(getMemberID()).toString() + "<msp>" + s));
     }
 
     @Override
     public void switchServer(long server) {
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
+        API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "askSwitchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString()));
     }
 
     @Override
@@ -194,8 +193,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         if (API.getInstance().isOnlineMod()) {
 
-            RedisManager rm = API.getInstance().getRedisManager();
-
             getMoneyModel().set(new HashMap<>() {{
                 put(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), getSolde());
                 put(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), getCoins());
@@ -205,7 +202,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
             MoneyDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
 
-            rm.getRedisList("ip/" + getIP().getIp()).remove(getRealName());
+            API.getInstance().getRedisManager().ifPresent(rm -> rm.getRedisList("ip/" + getIP().getIp()).remove(getRealName()));
 
             PlayerDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
 
@@ -388,7 +385,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public Timestamp getRankTimeStamp() {
         initRankTimeReminder();
-        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataRedis.PLAYER_RANK_TIME_REDIS.getString(this));
+        String timeStamp = rankTimerReminder.getData();
         if (timeStamp != null)
             return Timestamp.valueOf(timeStamp);
         return null;
@@ -397,7 +394,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public Timestamp getRealRankTimeStamp() {
         initRealRankTimeReminder();
-        String timeStamp = API.getInstance().getRedisManager().getRedisString(PlayerDataRedis.PLAYER_REAL_RANK_TIME_REDIS.getString(this));
+        String timeStamp = realRankTimerReminder.getData();
         if (timeStamp != null)
             return Timestamp.valueOf(timeStamp);
         return null;
@@ -410,8 +407,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         initRankReminder();
         rankReminder.setData(rank.getRankPower());
         rankTimerReminder.setData(timeStampString);
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", this.getUUID().toString());
+        API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "rankChange", this.getUUID().toString()));
     }
 
     @Override
@@ -473,20 +469,23 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public boolean setName(String s) {
         if (s != null && (getRealName().equals(s) || !API.getInstance().getPlayerManager().dataExist(s))) {
             String oldName = getName();
-            API.getInstance().getRedisManager().getRedisMap(PlayerDataRedis.MAP_PLAYER_NAME.getString(this)).remove(getName());
+            API.getInstance().getPlayerManager().getNameToLongMap().remove(oldName);
             initNameReminder();
             nameReminder.setData(s);
-            API.getInstance().getRedisManager().getRedisMap(PlayerDataRedis.MAP_PLAYER_NAME.getString(this)).put(getName(), getMemberID());
+            API.getInstance().getPlayerManager().getNameToLongMap().put(s, getMemberID());
 
-            IpInfo ipInfo = getIP();
-            if (ipInfo != null) {
-                if (oldName != null)
-                    API.getInstance().getRedisManager().getRedisList("ip/" + ipInfo).remove(getName());
-                API.getInstance().getRedisManager().getRedisList("ip/" + ipInfo).add(getName());
+            if (API.getInstance().isOnlineMod()) {
+                API.getInstance().getRedisManager().ifPresent(redis -> {
+                    RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "nameChange", this.getUUID().toString());
+                    IpInfo ipInfo = getIP();
+                    if (ipInfo != null) {
+                        if (oldName != null)
+                            redis.getRedisList("ip/" + ipInfo).remove(oldName);
+                        redis.getRedisList("ip/" + ipInfo).add(getName());
+                    }
+                });
             }
 
-            if (API.getInstance().isOnlineMod())
-                RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "nameChange", this.getUUID().toString());
             return true;
         }
         return false;
@@ -505,10 +504,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public void setUUID(UUID uuid) {
         if (uuid != null) {
-            API.getInstance().getRedisManager().getRedisMap(PlayerDataRedis.MAP_PLAYER_UUID.getString(this)).remove(getUUID().toString());
+            API.getInstance().getPlayerManager().getUUIDToLongMap().remove(getUUID().toString());
             initUUIDReminder();
             uuidReminder.setData(uuid.toString());
-            API.getInstance().getRedisManager().getRedisMap(PlayerDataRedis.MAP_PLAYER_UUID.getString(this)).put(uuid.toString(), getMemberID());
+            API.getInstance().getPlayerManager().getUUIDToLongMap().put(uuid.toString(), getMemberID());
         }
     }
 
@@ -525,13 +524,15 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void setIP(IpInfo ipInfo) {
-        IpInfo lastIP = getIP();
-        if (lastIP != null) {
-            API.getInstance().getRedisManager().getRedisList("ip/" + lastIP).remove(getName());
-        }
+        API.getInstance().getRedisManager().ifPresent(redis -> {
+            IpInfo lastIP = getIP();
+            if (lastIP != null) {
+                redis.getRedisList("ip/" + lastIP).remove(getName());
+            }
+            redis.getRedisList("ip/" + ipInfo).add(getName());
+        });
         initIpReminder();
         ipReminder.setData(ipInfo.getIp());
-        API.getInstance().getRedisManager().getRedisList("ip/" + ipInfo).add(getName());
         super.setIP(ipInfo);
     }
 
@@ -541,7 +542,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public long getFreeze() {
+    public Long getFreeze() {
         initFreezeReminder();
         return freezeReminder.getData();
     }
@@ -552,7 +553,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public void setFreeze(long s) {
+    public void setFreeze(Long s) {
         initFreezeReminder();
         freezeReminder.setData(s);
     }
@@ -587,6 +588,23 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
             initTempDataReminder();
             this.addAll(tempDataReminder.getData().keySet());
         }};
+    }
+
+    public void initLastMSG() {
+        if (this.lastMSGReminder == null)
+            this.lastMSGReminder = DataReminder.generateReminder(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(this), null);
+    }
+
+    @Override
+    public String getLastMSGPlayer() {
+        initLastMSG();
+        return lastMSGReminder.getData();
+    }
+
+    @Override
+    public void setLastMSGPlayer(String s) {
+        initLastMSG();
+        lastMSGReminder.setData(s);
     }
 
     @Override

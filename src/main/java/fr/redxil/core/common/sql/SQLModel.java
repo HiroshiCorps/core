@@ -157,7 +157,7 @@ public abstract class SQLModel {
     public void set(HashMap<SQLColumns, Object> map) {
         Pair<String, Collection<Object>> pair = this.setSQL(map);
         if (pair != null)
-            API.getInstance().getSQLConnection().asyncExecute(pair.getOne(), pair.getTwo().toArray());
+            API.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.asyncExecute(pair.getOne(), pair.getTwo().toArray()));
     }
 
     public boolean exists() {
@@ -167,7 +167,7 @@ public abstract class SQLModel {
     public void setSync(HashMap<SQLColumns, Object> map) {
         Pair<String, Collection<Object>> pair = this.setSQL(map);
         if (pair != null)
-            API.getInstance().getSQLConnection().execute(pair.getOne(), pair.getTwo().toArray());
+            API.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.execute(pair.getOne(), pair.getTwo().toArray()));
     }
 
     private Pair<String, Collection<Object>> setSQL(Map<SQLColumns, Object> values) {

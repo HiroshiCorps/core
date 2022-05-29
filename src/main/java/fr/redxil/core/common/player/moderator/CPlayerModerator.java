@@ -15,12 +15,13 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import fr.redxil.core.common.data.moderator.ModeratorDataSql;
-import fr.redxil.core.common.data.utils.DataReminder;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -276,8 +277,10 @@ public class CPlayerModerator implements APIPlayerModerator {
             tcb.appendNewComponentBuilder("§7→ §rServeur§7・§a" + server + "§r\n");
 
         String ip = "Déconnecté";
-        if (apiOfflinePlayer instanceof APIPlayer)
-            ip = String.valueOf(API.getInstance().getRedisManager().getRedissonClient().getList("ip/" + apiOfflinePlayer.getIP().getIp()).size() - 1);
+        if (apiOfflinePlayer instanceof APIPlayer) {
+            Optional<RedisManager> redis = API.getInstance().getRedisManager();
+            ip = redis.map(redisManager -> String.valueOf(redisManager.getRedissonClient().getList("ip/" + apiOfflinePlayer.getIP().getIp()).size() - 1)).orElse("Error: Redis disconnected");
+        }
 
         tcb.appendNewComponentBuilder("§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n");
 

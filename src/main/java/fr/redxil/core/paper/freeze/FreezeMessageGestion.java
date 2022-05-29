@@ -57,7 +57,7 @@ public class FreezeMessageGestion {
             @Override
             public void run() {
                 Optional<APIPlayer> apiPlayerMod = API.getInstance().getPlayerManager().getPlayer(APIPlayerModerator.getMemberID());
-                if (apiPlayerMod.isPresent() && apiPlayerMod.get().getServer().getServerName().equals(apiPlayer.get().getServer().getServerName()))
+                if (apiPlayerMod.isPresent() && apiPlayerMod.get().getServerName().equals(apiPlayer.get().getServerName()))
                     player.sendTitle("§bAttention", "§8Vous êtes actuellement en inspection", 20, 40, 20);
                 else
                     setFreeze(false, apiPlayer.get(), null);

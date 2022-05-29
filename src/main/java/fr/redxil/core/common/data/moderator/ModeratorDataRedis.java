@@ -40,12 +40,13 @@ public enum ModeratorDataRedis {
 
     public static void clearRedisData(DataType dataType, Long playerID) {
 
-        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
-
-        for (ModeratorDataRedis mdv : values())
-            if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
-                if (mdv.hasNeedInfo(playerID))
-                    redissonClient.getBucket(mdv.getString(playerID)).delete();
+        API.getInstance().getRedisManager().ifPresent(redis -> {
+            RedissonClient redissonClient = redis.getRedissonClient();
+            for (ModeratorDataRedis mdv : values())
+                if ((dataType == null || mdv.isDataType(dataType)) && mdv.isDataBase(DataBaseType.REDIS))
+                    if (mdv.hasNeedInfo(playerID))
+                        redissonClient.getBucket(mdv.getString(playerID)).delete();
+        });
 
     }
 

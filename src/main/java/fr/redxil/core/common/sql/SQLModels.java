@@ -50,7 +50,7 @@ public class SQLModels<T extends SQLModel> {
         if (SQLJoin != null)
             query.append(" ").append(SQLJoin.toSQL());
 
-        API.getInstance().getSQLConnection().query(query.toString(), resultSet -> {
+        API.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query.toString(), resultSet -> {
             try {
                 if (resultSet.first()) {
                     model.populate(resultSet);
@@ -59,7 +59,7 @@ public class SQLModels<T extends SQLModel> {
                 exception.printStackTrace();
                 this.logs.severe("Error SQL get() = " + exception.getMessage());
             }
-        });
+        }));
     }
 
     public T getFirst(String query, Object... vars) {
@@ -83,7 +83,7 @@ public class SQLModels<T extends SQLModel> {
             if (SQLJoin != null)
                 query2.append(" ").append(SQLJoin.toSQL());
 
-            API.getInstance().getSQLConnection().query(query2.toString(),
+            API.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query2.toString(),
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
@@ -96,7 +96,7 @@ public class SQLModels<T extends SQLModel> {
                             exception.printStackTrace();
                         }
                     }, vars
-            );
+            ));
         } catch (Exception exception) {
             exception.printStackTrace();
             this.logs.severe("Error SQL get() #2 = " + exception.getMessage());
@@ -168,7 +168,7 @@ public class SQLModels<T extends SQLModel> {
             return;
         String queryString = "DELETE FROM " + model.getTable() + " " + query;
         this.logs.info(queryString);
-        API.getInstance().getSQLConnection().execute(queryString, vars);
+        API.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(queryString, vars));
     }
 
     private String listCreator(Collection<Object> collection, boolean value) {
@@ -239,7 +239,7 @@ public class SQLModels<T extends SQLModel> {
 
         this.logs.info(query);
 
-        API.getInstance().getSQLConnection().execute(query, objectList.toArray());
+        API.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(query, objectList.toArray()));
 
     }
 

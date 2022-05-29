@@ -10,9 +10,11 @@
 package fr.redxil.core.common.redis;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.core.common.data.IDDataValue;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 public class IDGenerator {
 
@@ -23,9 +25,10 @@ public class IDGenerator {
     }
 
     public static long generateLONGID(IDDataValue idv) {
-        if (API.getInstance().isOnlineMod())
-            return API.getInstance().getRedisManager().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
-        else {
+        Optional<RedisManager> rm = API.getInstance().getRedisManager();
+        if (rm.isPresent()) {
+            return rm.get().getRedissonClient().getIdGenerator(idv.getLocation()).nextId();
+        } else {
             if (idMap.containsKey(idv.getLocation())) {
                 long newID = idMap.get(idv.getLocation()) + 1;
                 idMap.replace(idv.getLocation(), newID);
@@ -38,7 +41,7 @@ public class IDGenerator {
     }
 
     public static void resetID(IDDataValue idv) {
-        API.getInstance().getRedisManager().getRedissonClient().getBucket(idv.getLocation()).delete();
+        API.getInstance().getRedisManager().ifPresent(redis -> redis.getRedissonClient().getBucket(idv.getLocation()).delete());
     }
 
 }

@@ -15,8 +15,8 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.type.ServerType;
+import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.server.ServerDataRedis;
-import fr.redxil.core.common.data.utils.DataReminder;
 
 import java.util.*;
 

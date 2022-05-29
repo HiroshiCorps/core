@@ -87,8 +87,8 @@ public class CoreVelocity implements PluginEnabler {
         registerEvents();
         assert getProxyServer() != null;
         getProxyServer().getEventManager().fire(new CoreEnabledEvent(this));
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID());
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID()));
     }
 
     @Override
@@ -118,8 +118,8 @@ public class CoreVelocity implements PluginEnabler {
         cm.unregister(new RCmd().getName());
         cm.unregister(new MsgCmd().getName());
 
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID());
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID()));
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.Optional;
 public class PlayerSwitchListener implements PMReceiver {
 
     public PlayerSwitchListener() {
-        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", String.class, this);
+        API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "switchServer", String.class, this));
     }
 
     @Override
@@ -39,13 +39,13 @@ public class PlayerSwitchListener implements PMReceiver {
 
         Player player = playerO.get();
 
-        Server server = API.getInstance().getServerManager().getServer(Long.parseLong(dataList[1]));
-        if (server == null) {
+        Optional<Server> server = API.getInstance().getServerManager().getServer(Long.parseLong(dataList[1]));
+        if (server.isEmpty()) {
             player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
             return;
         }
 
-        Optional<String> serverName = server.getServerName();
+        Optional<String> serverName = server.get().getServerName();
         if (serverName.isEmpty()) {
             player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
             return;

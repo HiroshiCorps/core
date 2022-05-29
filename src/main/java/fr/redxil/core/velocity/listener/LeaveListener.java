@@ -7,7 +7,6 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.velocity.commands.mod.action.punish.BanCmd;
 
 import java.util.Optional;
@@ -24,7 +23,7 @@ public class LeaveListener {
 
         if (apiPlayer.isEmpty()) return;
 
-        Long moderatorID = (Long) API.getInstance().getRedisManager().getRedisObject(PlayerDataRedis.PLAYER_FREEZE_REDIS.getString(apiPlayer.get()));
+        Long moderatorID = apiPlayer.get().getFreeze();
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
         apiPlayer.get().unloadPlayer();
 

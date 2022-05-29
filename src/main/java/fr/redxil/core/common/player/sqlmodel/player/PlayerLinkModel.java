@@ -31,12 +31,12 @@ public class PlayerLinkModel extends SQLModel implements LinkData {
 
     @Override
     public long getFromPlayer() {
-        return Integer.valueOf(getInt(LinkDataSql.FROM_ID_SQL.getSQLColumns())).longValue();
+        return getInt(LinkDataSql.FROM_ID_SQL.getSQLColumns()).longValue();
     }
 
     @Override
     public long getToPlayer() {
-        return Integer.valueOf(getInt(LinkDataSql.TO_ID_SQL.getSQLColumns())).longValue();
+        return getInt(LinkDataSql.TO_ID_SQL.getSQLColumns()).longValue();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class PlayerLinkModel extends SQLModel implements LinkData {
 
     @Override
     public void deleteLink() {
-        CoreAPI.getInstance().getSQLConnection().asyncExecute("DELETE * FROM link WHERE " + LinkDataSql.LINK_ID_SQL.getSQLColumns() + " = ?", getLinkID());
+        CoreAPI.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.asyncExecute("DELETE * FROM link WHERE " + LinkDataSql.LINK_ID_SQL.getSQLColumns() + " = ?", getLinkID()));
     }
 
 }

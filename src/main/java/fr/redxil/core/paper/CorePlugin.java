@@ -97,8 +97,8 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
 
         this.setEnabled(true);
 
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID());
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID()));
     }
 
     @Override
@@ -111,8 +111,8 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         Objects.requireNonNull(this.getCommand("vanish")).setExecutor(new VanishCmd());
         Objects.requireNonNull(this.getCommand("fly")).setExecutor(new FlyCmd());
 
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID());
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID()));
 
     }
 

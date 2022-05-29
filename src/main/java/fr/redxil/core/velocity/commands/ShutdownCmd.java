@@ -50,8 +50,8 @@ public class ShutdownCmd extends BrigadierAPI<CommandSource> {
             return 1;
         }
 
-        Server server = API.getInstance().getServerManager().getServer(commandContext.getArgument("server", String.class));
-        if (server == null) {
+        Optional<Server> server = API.getInstance().getServerManager().getServer(commandContext.getArgument("server", String.class));
+        if (server.isEmpty()) {
             TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer.get());
             return 1;
         }

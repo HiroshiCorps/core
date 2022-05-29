@@ -42,12 +42,13 @@ public enum ServerDataRedis {
 
     public static void clearRedisData(DataType dataType, Long playerID) {
 
-        RedissonClient redissonClient = API.getInstance().getRedisManager().getRedissonClient();
-
-        for (ServerDataRedis mdv : values())
-            if ((dataType == null || mdv.isDataType(dataType)))
-                if (mdv.hasNeedInfo(playerID))
-                    redissonClient.getBucket(mdv.getString(playerID)).delete();
+        API.getInstance().getRedisManager().ifPresent(redis -> {
+            RedissonClient redissonClient = redis.getRedissonClient();
+            for (ServerDataRedis mdv : values())
+                if (dataType == null || mdv.isDataType(dataType))
+                    if (mdv.hasNeedInfo(playerID))
+                        redissonClient.getBucket(mdv.getString(playerID)).delete();
+        });
 
     }
 

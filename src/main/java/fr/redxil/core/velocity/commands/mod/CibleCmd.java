@@ -21,10 +21,7 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class CibleCmd extends BrigadierAPI<CommandSource> {
 
@@ -108,7 +105,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
     public void registerArgs(LiteralCommandNode<CommandSource> command) {
 
         List<String> playerName = new ArrayList<>();
-        List<Long> availablePlayer = API.getInstance().getPlayerManager().getLoadedPlayer();
+        Collection<Long> availablePlayer = new ArrayList<>(API.getInstance().getPlayerManager().getLoadedPlayer());
         availablePlayer.removeAll(API.getInstance().getModeratorManager().getLoadedModerator());
         for (Long id : availablePlayer)
             API.getInstance().getPlayerManager().getPlayer(id).ifPresent(player -> playerName.add(player.getName()));

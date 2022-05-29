@@ -20,7 +20,6 @@ import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkUsage;
-import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -76,8 +75,8 @@ public class MsgCmd extends BrigadierAPI<CommandSource> {
                 .appendNewComponentBuilder(": ").setColor(Color.WHITE)
                 .appendNewComponentBuilder(message).sendTo(sp.get().getUUID());
 
-        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(sp.get()), target.get().getName());
-        API.getInstance().getRedisManager().setRedisString(PlayerDataRedis.PLAYER_LASTMSG_REDIS.getString(target.get()), sp.get().getName());
+        sp.get().setLastMSGPlayer(target.get().getName());
+        target.get().setLastMSGPlayer(sp.get().getName());
     }
 
     @Override

@@ -12,7 +12,6 @@ package fr.redxil.core.paper.cmd;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -21,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class FreezeCmd implements CommandExecutor {
@@ -44,11 +44,11 @@ public class FreezeCmd implements CommandExecutor {
             return true;
         }
 
-        Server server = target.get().getServer();
+        String server = target.get().getServerName();
 
-        if (server.getServerID() != API.getInstance().getServerID()) {
+        if (!Objects.equals(server, API.getInstance().getServerName())) {
 
-            commandSender.sendMessage(ChatColor.RED + "Impossible d'interargir avec la cible, server different: " + server.getServerName());
+            commandSender.sendMessage(ChatColor.RED + "Impossible d'interargir avec la cible, server different: " + server);
             return true;
 
         }

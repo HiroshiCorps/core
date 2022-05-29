@@ -14,8 +14,8 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
+import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
-import fr.redxil.core.common.data.utils.DataReminder;
 
 import java.util.*;
 

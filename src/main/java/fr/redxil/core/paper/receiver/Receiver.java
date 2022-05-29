@@ -24,10 +24,11 @@ public class Receiver implements PMReceiver {
 
     public Receiver() {
 
-        if (!API.getInstance().isOnlineMod())
-            return;
-        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "nickChange", String.class, this);
-        RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "rankChange", String.class, this);
+        API.getInstance().getRedisManager().ifPresent(redis -> {
+                    RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "nickChange", String.class, this);
+                    RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "rankChange", String.class, this);
+                }
+        );
 
     }
 

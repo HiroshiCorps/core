@@ -20,8 +20,8 @@ import java.util.Optional;
 public class AskSwitchListener implements PMReceiver {
 
     public AskSwitchListener() {
-        if (API.getInstance().isOnlineMod())
-            RedisPMManager.addRedissonPMListener(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", String.class, this);
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "askSwitchServer", String.class, this));
     }
 
     @Override
@@ -40,7 +40,8 @@ public class AskSwitchListener implements PMReceiver {
             return;
         }
 
-        RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "switchServer", player.getUsername() + "<switchSplit>" + Long.valueOf(API.getInstance().getServerID()).toString());
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "switchServer", player.getUsername() + "<switchSplit>" + Long.valueOf(API.getInstance().getServerID()).toString()));
 
     }
 
