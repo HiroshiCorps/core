@@ -146,7 +146,7 @@ public class CServer implements Server {
 
     public void initPlayerList() {
         if (playerListReminder == null)
-            playerListReminder = DataReminder.generateReminder(ServerDataRedis.SERVER_PLAYER_REDIS.getString(this), new ArrayList<>());
+            playerListReminder = DataReminder.generateListReminder(ServerDataRedis.SERVER_PLAYER_REDIS.getString(this));
     }
 
     @Override
@@ -313,7 +313,7 @@ public class CServer implements Server {
 
     public void initAllowReminder() {
         if (allowReminder == null)
-            allowReminder = DataReminder.generateReminder(ServerDataRedis.SERVER_ALLOW_PLAYER_REDIS.getString(this), new ArrayList<>());
+            allowReminder = DataReminder.generateListReminder(ServerDataRedis.SERVER_ALLOW_PLAYER_REDIS.getString(this));
     }
 
     @Override

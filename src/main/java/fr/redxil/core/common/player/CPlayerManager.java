@@ -28,8 +28,8 @@ import java.util.function.BiConsumer;
 public class CPlayerManager implements APIPlayerManager {
 
     HashMap<String, BiConsumer<APIPlayer, LinkData>> linkMap = new HashMap<>();
-    DataReminder<Map<String, Long>> nameToID = DataReminder.generateReminder(PlayerDataRedis.MAP_PLAYER_NAME.getString(), new HashMap<>());
-    DataReminder<Map<String, Long>> uuidToID = DataReminder.generateReminder(PlayerDataRedis.MAP_PLAYER_UUID.getString(), new HashMap<>());
+    DataReminder<Map<String, Long>> nameToID = DataReminder.generateMapReminder(PlayerDataRedis.MAP_PLAYER_NAME.getString());
+    DataReminder<Map<String, Long>> uuidToID = DataReminder.generateMapReminder(PlayerDataRedis.MAP_PLAYER_UUID.getString());
     Map<Long, CPlayer> playerMap = new HashMap<>();
 
     @Override

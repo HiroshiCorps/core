@@ -22,7 +22,7 @@ import java.util.*;
 
 public class CServerManager implements ServerManager {
 
-    DataReminder<Map<String, Long>> serverMap = DataReminder.generateReminder(ServerDataRedis.MAP_SERVER_REDIS.getString(), new HashMap<>());
+    DataReminder<Map<String, Long>> serverMap = DataReminder.generateMapReminder(ServerDataRedis.MAP_SERVER_REDIS.getString());
     Map<Long, CServer> server = new HashMap<>();
 
     @Override

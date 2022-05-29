@@ -18,7 +18,6 @@ import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.redis.RedisManager;
-import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
@@ -170,13 +169,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public Server getServer() {
-        String serverName = getServerName();
-        if (serverName == null) return null;
-        return API.getInstance().getServerManager().getServer(serverName);
-    }
-
-    @Override
     public void switchServer(long server) {
         if (API.getInstance().isOnlineMod())
             RedisPMManager.sendRedissonPluginMessage(API.getInstance().getRedisManager().getRedissonClient(), "askSwitchServer", getName() + "<switchSplit>" + Long.valueOf(server).toString());
@@ -255,11 +247,6 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public long getBungeeServerID() {
         initBungeeReminder();
         return this.bungeeReminder.getData();
-    }
-
-    @Override
-    public Server getBungeeServer() {
-        return API.getInstance().getServerManager().getServer(getBungeeServerID());
     }
 
     public void initSoldeReminder() {
@@ -572,7 +559,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     public void initTempDataReminder() {
         if (this.tempDataReminder == null)
-            this.tempDataReminder = DataReminder.generateReminder(PlayerDataRedis.PLAYER_MAP_REDIS.getString(this), new HashMap<>());
+            this.tempDataReminder = DataReminder.generateMapReminder(PlayerDataRedis.PLAYER_MAP_REDIS.getString(this));
     }
 
 

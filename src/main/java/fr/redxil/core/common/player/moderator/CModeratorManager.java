@@ -21,8 +21,8 @@ import java.util.*;
 
 public class CModeratorManager implements ModeratorManager {
 
-    DataReminder<Map<String, Long>> nameToLong = DataReminder.generateReminder(ModeratorDataRedis.MAP_MODERATOR_NAME.getString(), new HashMap<>());
-    DataReminder<Map<String, Long>> uuidToLong = DataReminder.generateReminder(ModeratorDataRedis.MAP_MODERATOR_UUID.getString(), new HashMap<>());
+    DataReminder<Map<String, Long>> nameToLong = DataReminder.generateMapReminder(ModeratorDataRedis.MAP_MODERATOR_NAME.getString());
+    DataReminder<Map<String, Long>> uuidToLong = DataReminder.generateMapReminder(ModeratorDataRedis.MAP_MODERATOR_UUID.getString());
     Map<Long, CPlayerModerator> map = new HashMap<>();
 
     @Override
