@@ -67,6 +67,7 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
         String nameArg = commandContext.getArgument("target", String.class);
 
         switch (usedCmd) {
+            case INVITE -> this.inviteCmd(commandContext, player, nameArg);
             case REMOVE -> this.removeCmd(commandContext, player, nameArg);
             case REVOKE -> this.revokeCmd(commandContext, player, nameArg);
             case REFUSE -> this.refuseCmd(commandContext, player, nameArg);
