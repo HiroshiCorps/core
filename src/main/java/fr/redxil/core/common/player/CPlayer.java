@@ -297,7 +297,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public void restoreRealData() {
         setName(getRealName());
-        setRank(getRealRank(), getRealRankTimeStamp());
+        setRank(getRealRank(), getRealRankTimeStamp().orElse(null));
     }
 
     @Override
@@ -361,6 +361,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void setRealRank(Rank rank, Timestamp timestamp) {
+        if(rank == Rank.SERVER)
+            return;
         String timeStampString = timestamp == null ? null : timestamp.toString();
         super.setRank(rank, timestamp);
         initRealRankReminder();
@@ -372,36 +374,36 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public Long getRealRankPower() {
 
-        Timestamp timeStamp = getRealRankTimeStamp();
-        if (timeStamp != null) {
-            if (timeStamp.before(Timestamp.from(Instant.now()))) {
-                setRank(Rank.JOUEUR);
-            }
-        }
+        getRealRankTimeStamp().ifPresent(stamp -> {
+            if (stamp.before(Timestamp.from(Instant.now()))) {
+                setRealRank(Rank.JOUEUR);
+            }});
         initRealRankReminder();
         return realRankReminder.getData();
     }
 
     @Override
-    public Timestamp getRankTimeStamp() {
+    public Optional<Timestamp> getRankTimeStamp() {
         initRankTimeReminder();
         String timeStamp = rankTimerReminder.getData();
         if (timeStamp != null)
-            return Timestamp.valueOf(timeStamp);
-        return null;
+            return Optional.of(Timestamp.valueOf(timeStamp));
+        return Optional.empty();
     }
 
     @Override
-    public Timestamp getRealRankTimeStamp() {
+    public Optional<Timestamp> getRealRankTimeStamp() {
         initRealRankTimeReminder();
         String timeStamp = realRankTimerReminder.getData();
         if (timeStamp != null)
-            return Timestamp.valueOf(timeStamp);
-        return null;
+            return Optional.of(Timestamp.valueOf(timeStamp));
+        return Optional.empty();
     }
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
+        if(rank == Rank.SERVER)
+            return;
         String timeStampString = timestamp == null ? null : timestamp.toString();
         initRankTimeReminder();
         initRankReminder();
@@ -412,12 +414,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Long getRankPower() {
-        Timestamp timeStamp = getRankTimeStamp();
-        if (timeStamp != null) {
-            if (timeStamp.before(Timestamp.from(Instant.now()))) {
-                setRank(Rank.JOUEUR);
-            }
-        }
+        getRankTimeStamp().ifPresent(stamp -> {
+        if (stamp.before(Timestamp.from(Instant.now()))) {
+            setRank(Rank.JOUEUR);
+        }});
         initRankReminder();
         return rankReminder.getData();
     }
@@ -467,6 +467,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public boolean setName(String s) {
+        if(s.contains(";"))
+            return false;
         if (s != null && (getRealName().equals(s) || !API.getInstance().getPlayerManager().dataExist(s))) {
             String oldName = getName();
             API.getInstance().getPlayerManager().getNameToLongMap().remove(oldName);
@@ -492,7 +494,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     public void initUUIDReminder() {
-
+        if(uuidReminder == null)
+            uuidReminder = DataReminder.generateReminder(PlayerDataRedis.PLAYER_UUID_REDIS.getString(this), null);
     }
 
     @Override
@@ -542,14 +545,14 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public Long getFreeze() {
+    public Optional<Long> getFreeze() {
         initFreezeReminder();
-        return freezeReminder.getData();
+        return Optional.of(freezeReminder.getData());
     }
 
     @Override
     public boolean isFreeze() {
-        return getFreeze() != 0L;
+        return getFreeze().isPresent();
     }
 
     @Override
@@ -571,15 +574,15 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public Object removeTempData(String s) {
+    public Optional<Object> removeTempData(String s) {
         initTempDataReminder();
-        return tempDataReminder.getData().remove(s);
+        return Optional.ofNullable(tempDataReminder.getData().remove(s));
     }
 
     @Override
-    public Object getTempData(String s) {
+    public Optional<Object> getTempData(String s) {
         initTempDataReminder();
-        return tempDataReminder.getData().get(s);
+        return Optional.ofNullable(tempDataReminder.getData().get(s));
     }
 
     @Override
@@ -596,9 +599,9 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     @Override
-    public String getLastMSGPlayer() {
+    public Optional<String> getLastMSGPlayer() {
         initLastMSG();
-        return lastMSGReminder.getData();
+        return Optional.ofNullable(lastMSGReminder.getData());
     }
 
     @Override

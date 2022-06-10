@@ -76,9 +76,10 @@ public class VanishGestion {
 
                         } else {
 
-                            String targetName = mod.getCible();
-                            if (targetName != null) {
+                            Optional<String> targetNameOpt = mod.getCible();
+                            if (targetNameOpt.isPresent()) {
 
+                                String targetName = targetNameOpt.get();
                                 Optional<APIPlayer> target = API.getInstance().getPlayerManager().getPlayer(targetName);
 
                                 if (target.isPresent()) {

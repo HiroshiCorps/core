@@ -182,9 +182,9 @@ public class CPlayerModerator implements APIPlayerModerator {
 
 
     @Override
-    public String getCible() {
+    public Optional<String> getCible() {
         initCibleReminder();
-        return this.cibleReminder.getData();
+        return Optional.ofNullable(this.cibleReminder.getData());
     }
 
     @Override

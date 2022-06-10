@@ -32,6 +32,7 @@ import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.utils.SQLColumns;
 
 import javax.annotation.Nullable;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,27 +124,27 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public void setRank(Rank Rank) {
-        PlayerModel playerModel1 = getPlayerModel();
-        if (playerModel1 != null)
-            playerModel1.set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), Rank.getRankPower().intValue());
+    public void setRank(Rank rank) {
+        setRank(rank, null);
     }
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
+        if(rank == Rank.SERVER)
+            return;
         PlayerModel playerModel1 = getPlayerModel();
         if (playerModel1 != null) {
-            playerModel1.set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), getRankPower().intValue());
+            playerModel1.set(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), rank.getRankPower().intValue());
             playerModel1.set(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns(), timestamp);
         }
     }
 
     @Override
-    public Timestamp getRankTimeStamp() {
+    public Optional<Timestamp> getRankTimeStamp() {
         PlayerModel playerModel1 = getPlayerModel();
         if (playerModel1 != null)
-            return (Timestamp) playerModel1.get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns());
-        else return null;
+            return Optional.of((Timestamp) playerModel1.get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns()));
+        else return Optional.empty();
     }
 
     @Override
@@ -183,6 +184,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean setName(String s) {
         if (s != null) {
+            if(s.contains(";"))
+                return false;
             PlayerModel playerModel1 = getPlayerModel();
             if (playerModel1 != null)
                 playerModel1.set(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), s);

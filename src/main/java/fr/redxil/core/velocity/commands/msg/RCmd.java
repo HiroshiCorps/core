@@ -49,14 +49,14 @@ public class RCmd extends BrigadierAPI<CommandSource> {
         if (sp.isEmpty())
             return;
 
-        String targetName = sp.get().getLastMSGPlayer();
+        Optional<String> targetName = sp.get().getLastMSGPlayer();
 
-        if (targetName == null) {
+        if (targetName.isEmpty()) {
             TextComponentBuilder.createTextComponent("Erreur, vous avez jusque la pas envoyé de message").setColor(Color.RED).sendTo(playerUUID);
             return;
         }
 
-        CoreVelocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName + " " + commandContext.getArgument("message", String.class));
+        CoreVelocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName.get() + " " + commandContext.getArgument("message", String.class));
 
     }
 

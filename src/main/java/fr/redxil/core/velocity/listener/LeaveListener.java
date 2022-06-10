@@ -23,12 +23,12 @@ public class LeaveListener {
 
         if (apiPlayer.isEmpty()) return;
 
-        Long moderatorID = apiPlayer.get().getFreeze();
+        Optional<Long> moderatorIDOpt = apiPlayer.get().getFreeze();
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
         apiPlayer.get().unloadPlayer();
 
-        if (moderatorID != null && moderatorID != 0L) {
-            Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(moderatorID);
+        if (moderatorIDOpt.isPresent()) {
+            Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(moderatorIDOpt.get());
             if (playerModerator.isPresent()) {
                 Optional<APIOfflinePlayer> target = API.getInstance().getPlayerManager().getOfflinePlayer(player.getUsername());
                 target.ifPresent(apiOfflinePlayer -> BanCmd.banPlayer(apiOfflinePlayer, "perm", playerModerator.get(), "{Core} Déconnexion en inspection"));

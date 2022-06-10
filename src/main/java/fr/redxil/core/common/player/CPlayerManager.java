@@ -230,4 +230,9 @@ public class CPlayerManager implements APIPlayerManager {
         return playerMap;
     }
 
+    @Override
+    public CServerPlayer getServerPlayer(){
+        return new CServerPlayer();
+    }
+
 }

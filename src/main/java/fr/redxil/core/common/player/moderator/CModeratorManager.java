@@ -15,7 +15,9 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.common.utils.DataReminder;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
+import fr.redxil.core.common.player.CServerPlayer;
 
 import java.util.*;
 
@@ -27,6 +29,8 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> loadModerator(long id, UUID uuid, String name) {
+        if(CoreAPI.getInstance().getPlayerManager().getServerPlayer().getMemberID() == id)
+            return Optional.empty();
         if (isLoaded(id)) return Optional.empty();
         if (isModerator(uuid)) {
             return Optional.of(new CPlayerModerator(id, uuid, name));
@@ -43,11 +47,27 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(String s) {
+        if(API.getInstance().getPlayerManager().getServerPlayer().getName() == s)
+            return Optional.of(new CServerModerator());
         Long result = uuidToLong.getData().get(s);
         if (result == null) return Optional.empty();
         if (API.getInstance().isOnlineMod())
             return Optional.of(new CPlayerModerator(result));
         return Optional.ofNullable(getMap().get(result));
+    }
+
+    /**
+     * Get the moderator with this APIPlayer
+     *
+     * @param s This need to be the name of the player / nick supported but take more query on redis
+     * @return APIPlayerModerator or null if player is not loaded or not a moderator
+     */
+
+    @Override
+    public Optional<APIPlayerModerator> getModerator(APIPlayer s) {
+        if(s instanceof CServerPlayer)
+            return Optional.of(getServerModerator());
+        return getModerator(s.getMemberID());
     }
 
     /**
@@ -59,6 +79,8 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(long result) {
+        if(API.getInstance().getPlayerManager().getServerPlayer().getMemberID() == result)
+            return Optional.of(new CServerModerator());
         if (isLoaded(result))
             return Optional.empty();
         if (API.getInstance().isOnlineMod())
@@ -75,6 +97,8 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(UUID uuid) {
+        if(API.getInstance().getPlayerManager().getServerPlayer().getUUID() == uuid)
+            return Optional.of(new CServerModerator());
         Long result = uuidToLong.getData().get(uuid.toString());
         if (result == null) return Optional.empty();
         if (API.getInstance().isOnlineMod())
@@ -171,4 +195,11 @@ public class CModeratorManager implements ModeratorManager {
         return map;
     }
 
+    @Override
+    public APIPlayerModerator getServerModerator() {
+        return new CServerModerator();
+    }
+
+
+    
 }
