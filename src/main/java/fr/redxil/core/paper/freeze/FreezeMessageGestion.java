@@ -34,7 +34,7 @@ public class FreezeMessageGestion {
             apiPlayer.setFreeze(moderator.getMemberID());
             sendMessage(player, moderator);
         } else {
-            apiPlayer.setFreeze(0L);
+            apiPlayer.setFreeze(null);
             stopFreezeMessage(apiPlayer.getUUID());
         }
     }
