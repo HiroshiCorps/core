@@ -15,7 +15,7 @@ import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.redxil.api.common.server.type.ServerType;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.id.IDGenerator;
 import fr.redxil.core.common.CoreAPI;
@@ -56,7 +56,7 @@ public class CServer implements Server {
                 put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), maxPlayer);
                 put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.ONLINE.toString());
                 put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverType.toString());
-                put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), serverType.getRelatedServerAccess().toString());
+                put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), ServerAccess.getAccessRelated(serverType).toString());
                 put(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns(), Rank.JOUEUR.getRankPower().intValue());
                 put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), ipInfo.getIp());
                 put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), ipInfo.getPort().toString());
@@ -91,7 +91,7 @@ public class CServer implements Server {
         setServerStatus(ServerStatus.ONLINE);
 
         if (serverModel != null) {
-            setServerAccess(ServerAccess.getServerAccess(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())));
+            setServerAccess(ServerAccess.valueOf(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())));
             setReservedRank(Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())));
         }
 
@@ -242,7 +242,7 @@ public class CServer implements Server {
     @Override
     public ServerStatus getServerStatus() {
         initStatusReminder();
-        return ServerStatus.getServerStatus(statusReminder.getData());
+        return ServerStatus.valueOf(statusReminder.getData());
     }
 
     @Override
@@ -259,7 +259,7 @@ public class CServer implements Server {
     @Override
     public ServerAccess getServerAccess() {
         initAccessReminder();
-        return ServerAccess.getServerAccess(accessReminder.getData());
+        return ServerAccess.valueOf(accessReminder.getData());
     }
 
     @Override
@@ -281,7 +281,7 @@ public class CServer implements Server {
     @Override
     public ServerType getServerType() {
         initTypeReminder();
-        return ServerType.getServerType(typeReminder.getData());
+        return ServerType.valueOf(typeReminder.getData());
     }
 
     @Override

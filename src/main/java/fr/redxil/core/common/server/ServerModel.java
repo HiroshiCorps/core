@@ -9,7 +9,7 @@
 
 package fr.redxil.core.common.server;
 
-import fr.redxil.api.common.server.type.ServerType;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.sql.SQLModel;
 

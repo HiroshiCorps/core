@@ -15,7 +15,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.server.type.ServerType;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;

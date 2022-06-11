@@ -14,7 +14,7 @@ import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
-import fr.redxil.api.common.server.type.ServerType;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.server.ServerDataRedis;
 
