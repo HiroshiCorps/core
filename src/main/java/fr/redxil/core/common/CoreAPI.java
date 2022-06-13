@@ -13,8 +13,12 @@ import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
+import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.server.ServerCreator;
+import fr.redxil.api.common.server.type.ServerAccess;
+import fr.redxil.api.common.server.type.ServerStatus;
 import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.player.CPlayerManager;
@@ -31,6 +35,7 @@ public class CoreAPI extends API {
 
     private static CoreAPI instance;
     private final String serverName;
+    private Long serverID;
     private final Boolean onlineMod;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
@@ -63,7 +68,7 @@ public class CoreAPI extends API {
 
         this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         this.onlineMod = GSONSaver.loadGSON(onlineModFile, Boolean.class);
-        String serverID = GSONSaver.loadGSON(serverIDFile, String.class);
+        this.serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
 
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
@@ -115,7 +120,9 @@ public class CoreAPI extends API {
 
             plugin.printLog(Level.INFO, "Connecting to db");
 
+            assert sqlIp != null;
             this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
+            assert redisIp != null && redisPass != null;
             this.manager = new CRedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
 
             if (!dataConnected()) {
@@ -129,21 +136,67 @@ public class CoreAPI extends API {
             this.manager = null;
         }
 
-        ServerType serverType = plugin.isVelocity() ? ServerType.VELOCITY : ServerType.HUB;
-        Long serverLong = serverID != null ? Long.parseLong(serverID) : null;
-
         Optional<Server> server;
         if (isOnlineMod() && serverID != null)
-            server = this.serverManager.getServer(serverID);
-        else
-            server = this.serverManager.createServer(serverType, serverLong, serverName, plugin.getServerIp(), plugin.getMaxPlayer());
+            server = this.serverManager.loadServer(serverID, serverName);
+        else{
+            server = this.serverManager.createServer(new ServerCreator() {
+                @Override
+                public ServerType getServerType() {
+                    return null;
+                }
+
+                @Override
+                public String getServerName() {
+                    return serverName;
+                }
+
+                @Override
+                public String getServerMap() {
+                    return null;
+                }
+
+                @Override
+                public IpInfo getIpInfo() {
+                    return null;
+                }
+
+                @Override
+                public Integer getMaxPlayer() {
+                    return null;
+                }
+
+                @Override
+                public ServerStatus getServerStatus() {
+                    return null;
+                }
+
+                @Override
+                public boolean needGenerate() {
+                    return false;
+                }
+
+                @Override
+                public ServerAccess getServerAccess() {
+                    return null;
+                }
+
+                @Override
+                public Rank getRankAccess() {
+                    return Rank.JOUEUR;
+                }
+            });
+
+        }
 
         if (server.isEmpty()) {
             plugin.onAPILoadFail();
             return;
+        }else{
+            this.server = server.get();
+            this.serverID = this.server.getServerID();
         }
 
-        this.server = server.get();
         GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
 
         plugin.printLog(Level.INFO, "Server id: " + this.server.getServerID());
@@ -203,7 +256,7 @@ public class CoreAPI extends API {
 
     @Override
     public long getServerID() {
-        return this.server.getServerID();
+        return this.serverID;
     }
 
     @Override

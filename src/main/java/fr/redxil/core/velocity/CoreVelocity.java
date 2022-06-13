@@ -45,6 +45,7 @@ import fr.redxil.core.velocity.listener.PlayerListener;
 import fr.redxil.core.velocity.listener.ServerListener;
 import fr.redxil.core.velocity.receiver.MessageListener;
 import fr.redxil.core.velocity.receiver.PlayerSwitchListener;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
@@ -243,6 +244,11 @@ public class CoreVelocity implements PluginEnabler {
                 player -> player.sendMessage(Component.text(s)),
                 () -> API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.sendMessage(s))
         );
+    }
+
+    @Override
+    public ServerType getServerType() {
+        return ServerType.VELOCITY;
     }
 
 }

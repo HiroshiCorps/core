@@ -25,6 +25,7 @@ import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.AskSwitchListener;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.vanish.VanishGestion;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -214,6 +215,11 @@ public class CorePlugin extends JavaPlugin implements PluginEnabler {
         else {
             API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player2 -> player2.sendMessage(s1));
         }
+    }
+
+    @Override
+    public ServerType getServerType() {
+        return ServerType.HUB;
     }
 
 }

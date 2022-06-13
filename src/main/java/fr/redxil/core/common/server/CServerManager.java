@@ -13,6 +13,7 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.server.ServerCreator;
 import fr.redxil.api.common.server.ServerManager;
 import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.utils.DataReminder;
@@ -84,12 +85,11 @@ public class CServerManager implements ServerManager {
 
 
     @Override
-    public Optional<Server> createServer(ServerType serverType, String name, IpInfo ipInfo, int maxPlayer) {
-        if (name == null || ipInfo == null) return Optional.empty();
-        if (isServerExist(name))
+    public Optional<Server> createServer(ServerCreator serverCreator) {
+        if (isServerExist(serverCreator.getServerName()))
             return Optional.empty();
 
-        CServer cServer = new CServer(serverType, name, ipInfo, maxPlayer);
+        CServer cServer = new CServer(serverCreator);
 
         if (!API.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);
@@ -97,14 +97,15 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Optional<Server> createServer(ServerType serverType, Long serverID, String name, IpInfo ipInfo, int maxPlayer) {
+    public Optional<Server> loadServer(Long serverID, String serverName) {
+
         if (serverID == null)
-            return createServer(serverType, name, ipInfo, maxPlayer);
-        if (name == null || ipInfo == null) return Optional.empty();
-        if (isServerExist(name))
             return Optional.empty();
 
-        CServer cServer = new CServer(serverType, serverID, name, ipInfo, maxPlayer);
+        if(!API.getInstance().isOnlineMod())
+            return Optional.empty();
+
+        CServer cServer = new CServer(serverID, serverName);
 
         if (!API.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);

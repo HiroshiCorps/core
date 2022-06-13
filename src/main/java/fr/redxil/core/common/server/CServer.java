@@ -13,6 +13,7 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.server.ServerCreator;
 import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.xilitra.hiroshisav.enums.ServerType;
@@ -47,53 +48,49 @@ public class CServer implements Server {
     DataReminder<Long> reservedReminder = null;
     DataReminder<List<String>> allowReminder = null;
 
-    public CServer(ServerType serverType, String serverName, IpInfo ipInfo, int maxPlayer) {
+    public CServer(ServerCreator serverCreator) {
         ServerModel serverModel = null;
 
         if (API.getInstance().isOnlineMod())
             serverModel = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<>() {{
-                put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), serverName);
-                put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), maxPlayer);
-                put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.ONLINE.toString());
-                put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverType.toString());
-                put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), ServerAccess.getAccessRelated(serverType).toString());
-                put(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns(), Rank.JOUEUR.getRankPower().intValue());
-                put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), ipInfo.getIp());
-                put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), ipInfo.getPort().toString());
-            }}, "WHERE " + ServerDataSql.SERVER_NAME_SQL.getSQLColumns().toSQL() + " = ?", serverName);
+                put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), serverCreator.getServerName());
+                put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), serverCreator.getMaxPlayer());
+                put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), serverCreator.getServerStatus().toString());
+                put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), serverCreator.getServerType().toString());
+                put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), serverCreator.getServerAccess().toString());
+                put(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns(), serverCreator.getRankAccess().getRankPower().intValue());
+                put(ServerDataSql.SERVER_IP_SQL.getSQLColumns(), serverCreator.getIpInfo().getIp());
+                put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverCreator.getIpInfo().getPort().toString());
+            }}, "WHERE " + ServerDataSql.SERVER_NAME_SQL.getSQLColumns().toSQL() + " = ?", serverCreator.getServerName());
 
-        initServer(serverModel, serverType, serverID, serverName, ipInfo, maxPlayer);
+        initServer(serverCreator.getServerType(), serverCreator.getServerAccess(), serverCreator.getRankAccess(), (serverModel == null ? null : Integer.valueOf(serverModel.getServerID()).longValue()), serverCreator.getServerName(), serverCreator.getIpInfo(), serverCreator.getMaxPlayer());
 
     }
 
-    public CServer(ServerType serverType, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {
-        ServerModel serverModel = null;
-        if (API.getInstance().isOnlineMod())
-            serverModel = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID);
-        initServer(serverModel, serverType, serverID, serverName, ipInfo, maxPlayer);
+    public CServer(Long serverID, String serverName) {
+        ServerModel serverModel = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID);
+        initServer(serverModel.getServerType(), ServerAccess.valueOf(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())), Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())), serverID, serverName, new IpInfo(serverModel.getString(ServerDataSql.SERVER_IP_SQL.getSQLColumns()), Integer.valueOf(serverModel.getString(ServerDataSql.SERVER_PORT_SQL.getSQLColumns()))), serverModel.getMaxPlayers());
     }
 
-    private void initServer(ServerModel serverModel, ServerType serverType, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {
-        if (serverID != null)
-            this.serverID = serverID;
-        else {
-            if (serverModel == null)
-                this.serverID = IDGenerator.generateLONGID(IDDataValue.SERVERID.getLocation());
-            else this.serverID = serverModel.getServerID();
-        }
+    private void initServer(ServerType serverType, ServerAccess serverAccess, Rank rank, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {
+        this.serverID = Objects.requireNonNullElseGet(serverID, () -> IDGenerator.generateLONGID(IDDataValue.SERVERID.getLocation()));
 
         ServerDataRedis.clearRedisData(DataType.SERVER, serverID);
 
-        setServerName(serverName);
-        setServerType(serverType);
+        initServerName();
+        API.getInstance().getServerManager().getNameToLongMap().put(serverName, serverID);
+        serverNameReminder.setData(serverName);
 
-        setMaxPlayers(maxPlayer);
+        initTypeReminder();
+        typeReminder.setData(serverType.toString());
+
+        initMaxPlayer();
+        maxPlayerReminder.setData(Integer.valueOf(maxPlayer).longValue());
+
         setServerStatus(ServerStatus.ONLINE);
 
-        if (serverModel != null) {
-            setServerAccess(ServerAccess.valueOf(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())));
-            setReservedRank(Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())));
-        }
+        setServerAccess(serverAccess);
+        setReservedRank(rank);
 
         setServerIP(ipInfo);
     }
@@ -115,12 +112,6 @@ public class CServer implements Server {
         return API.getInstance().getServerManager().isServerExist(serverID);
     }
 
-    @Override
-    public void setMaxPlayers(int i) {
-        initMaxPlayer();
-        maxPlayerReminder.setData(Integer.valueOf(i).longValue());
-    }
-
     public void initServerName() {
         if (serverNameReminder == null)
             serverNameReminder = DataReminder.generateReminder(ServerDataRedis.SERVER_NAME_REDIS.getString(this), null);
@@ -130,18 +121,6 @@ public class CServer implements Server {
     public Optional<String> getServerName() {
         initServerName();
         return Optional.ofNullable(serverNameReminder.getData());
-    }
-
-    @Override
-    public void setServerName(String s) {
-        Optional<String> currentName = getServerName();
-
-        currentName.ifPresent((serverName) ->
-                API.getInstance().getServerManager().getNameToLongMap().remove(serverName, serverID)
-        );
-
-        API.getInstance().getServerManager().getNameToLongMap().put(s, serverID);
-        serverNameReminder.setData(s);
     }
 
     public void initPlayerList() {
@@ -282,12 +261,6 @@ public class CServer implements Server {
     public ServerType getServerType() {
         initTypeReminder();
         return ServerType.valueOf(typeReminder.getData());
-    }
-
-    @Override
-    public void setServerType(ServerType serverType) {
-        initTypeReminder();
-        typeReminder.setData(serverType.toString());
     }
 
     public void initReservedReminder() {
