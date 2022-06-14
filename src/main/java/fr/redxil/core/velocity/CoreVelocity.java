@@ -18,10 +18,10 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.APIStarter;
-import fr.redxil.api.common.PluginEnabler;
+import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.common.event.CoreEnabledEvent;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
 import fr.redxil.core.velocity.commands.ShutdownCmd;
@@ -46,7 +46,6 @@ import fr.redxil.core.velocity.listener.PlayerListener;
 import fr.redxil.core.velocity.listener.ServerListener;
 import fr.redxil.core.velocity.receiver.MessageListener;
 import fr.redxil.core.velocity.receiver.PlayerSwitchListener;
-import fr.xilitra.hiroshisav.enums.ServerType;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
@@ -55,7 +54,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CoreVelocity implements PluginEnabler {
+public class CoreVelocity implements APIEnabler {
 
     static CoreVelocity instance;
     final ProxyServer proxyServer;
@@ -75,7 +74,7 @@ public class CoreVelocity implements PluginEnabler {
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
 
-        APIStarter.startAPI(this);
+        new CoreAPI(this);
 
     }
 
@@ -187,23 +186,8 @@ public class CoreVelocity implements PluginEnabler {
     }
 
     @Override
-    public IpInfo getServerIp() {
-        return ipInfo;
-    }
-
-    @Override
-    public boolean isVelocity() {
-        return true;
-    }
-
-    @Override
     public String getPluginVersion() {
         return getProxyServer().getVersion().getVersion();
-    }
-
-    @Override
-    public int getMaxPlayer() {
-        return 0;
     }
 
     @Override
@@ -248,13 +232,8 @@ public class CoreVelocity implements PluginEnabler {
     }
 
     @Override
-    public ServerType getServerType() {
-        return ServerType.VELOCITY;
-    }
-
-    @Override
-    public Optional<String> getServerMap() {
-        return Optional.empty();
+    public ServerInfo getServerInfo() {
+        return null;
     }
 
 }

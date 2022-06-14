@@ -13,10 +13,9 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.server.ServerCreator;
+import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.id.IDGenerator;
 import fr.redxil.core.common.CoreAPI;
@@ -25,6 +24,7 @@ import fr.redxil.core.common.data.server.ServerDataRedis;
 import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModels;
+import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -48,7 +48,7 @@ public class CServer implements Server {
     DataReminder<Long> reservedReminder = null;
     DataReminder<List<String>> allowReminder = null;
 
-    public CServer(ServerCreator serverCreator) {
+    public CServer(ServerInfo serverCreator) {
         ServerModel serverModel = null;
 
         if (API.getInstance().isOnlineMod())
@@ -178,7 +178,7 @@ public class CServer implements Server {
 
         long id = serverID;
 
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
+        API.getInstance().getAPIEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
 
         if (API.getInstance().isOnlineMod()) {
 

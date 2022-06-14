@@ -134,7 +134,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         loadLink(this);
 
-        API.getInstance().getPluginEnabler().printLog(Level.FINE, "Player Data creation finished");
+        API.getInstance().getAPIEnabler().printLog(Level.FINE, "Player Data creation finished");
     }
 
     static void loadLink(CPlayer cPlayer) {
@@ -163,7 +163,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public void sendMessage(String s) {
         String playerServer = this.getServerName();
         if (playerServer.equals(API.getInstance().getServerName()))
-            API.getInstance().getPluginEnabler().sendMessage(getUUID(), s);
+            API.getInstance().getAPIEnabler().sendMessage(getUUID(), s);
         else
             API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "playerMessage", Long.valueOf(getMemberID()).toString() + "<msp>" + s));
     }
@@ -469,7 +469,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     public boolean setName(String s) {
         if(s.contains(";"))
             return false;
-        if (s != null && (getRealName().equals(s) || !API.getInstance().getPlayerManager().dataExist(s))) {
+        if (getRealName().equals(s) || !API.getInstance().getPlayerManager().dataExist(s)) {
             String oldName = getName();
             API.getInstance().getPlayerManager().getNameToLongMap().remove(oldName);
             initNameReminder();

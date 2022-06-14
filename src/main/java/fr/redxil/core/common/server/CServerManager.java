@@ -9,15 +9,14 @@
 
 package fr.redxil.core.common.server;
 
-import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.server.ServerCreator;
 import fr.redxil.api.common.server.ServerManager;
-import fr.xilitra.hiroshisav.enums.ServerType;
+import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.server.ServerDataRedis;
+import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.util.*;
 
@@ -85,7 +84,7 @@ public class CServerManager implements ServerManager {
 
 
     @Override
-    public Optional<Server> createServer(ServerCreator serverCreator) {
+    public Optional<Server> createServer(ServerInfo serverCreator) {
         if (isServerExist(serverCreator.getServerName()))
             return Optional.empty();
 

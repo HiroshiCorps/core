@@ -45,8 +45,8 @@ public class VanishGestion {
         ModeratorManager modManager = API.getInstance().getModeratorManager();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!modManager.isModerator(player.getUniqueId())) {
-                if (b) player.hidePlayer(corePlugin, modPlayer);
-                else player.showPlayer(corePlugin, modPlayer);
+                if (b) player.hidePlayer(corePlugin.getJavaStarter(), modPlayer);
+                else player.showPlayer(corePlugin.getJavaStarter(), modPlayer);
             }
         }
 
@@ -191,7 +191,7 @@ public class VanishGestion {
             Optional<APIPlayerModerator> moderator = API.getInstance().getModeratorManager().getModerator(mod);
             if (moderator.isPresent() && moderator.get().isVanish()) {
                 Player modPlayer = Bukkit.getPlayer(moderator.get().getUUID());
-                if (modPlayer != null) p.hidePlayer(corePlugin, modPlayer);
+                if (modPlayer != null) p.hidePlayer(corePlugin.getJavaStarter(), modPlayer);
             }
         }
     }

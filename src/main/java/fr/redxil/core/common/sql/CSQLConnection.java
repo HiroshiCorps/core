@@ -13,8 +13,9 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.Callback;
 import fr.redxil.api.common.sql.SQLConnection;
+import fr.redxil.api.common.sql.SQLRowSet;
+import fr.redxil.api.common.utils.Callback;
 import fr.redxil.api.common.utils.Scheduler;
 
 import java.sql.Connection;
@@ -86,17 +87,17 @@ public class CSQLConnection implements SQLConnection {
     public PreparedStatement prepareStatement(Connection conn, String query, Object... vars) {
         try {
             PreparedStatement ps = conn.prepareStatement(query);
-            API.getInstance().getPluginEnabler().printLog(Level.INFO, "Preparing statement for query: " + query);
+            API.getInstance().getAPIEnabler().printLog(Level.INFO, "Preparing statement for query: " + query);
             int num = Math.toIntExact(query.chars().filter(ch -> ch == '?').count());
             if (num == vars.length) {
                 int i = 0;
                 for (Object obj : vars) {
                     i++;
                     ps.setObject(i, obj);
-                    API.getInstance().getPluginEnabler().printLog(Level.INFO, "Set object: " + i + " object: " + obj);
+                    API.getInstance().getAPIEnabler().printLog(Level.INFO, "Set object: " + i + " object: " + obj);
                 }
             } else {
-                API.getInstance().getPluginEnabler().printLog(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
+                API.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
                 return null;
             }
             return ps;
@@ -109,7 +110,7 @@ public class CSQLConnection implements SQLConnection {
     }
 
     @Override
-    public void asyncQuery(final String query, final Callback<fr.redxil.api.common.sql.SQLRowSet> callback, final Object... vars) {
+    public void asyncQuery(final String query, final Callback<SQLRowSet> callback, final Object... vars) {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
                 try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {

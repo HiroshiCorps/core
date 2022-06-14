@@ -47,7 +47,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
         long end = DateUtility.addToCurrentTimeStamp(durationTime);
 
-        API.getInstance().getPluginEnabler().printLog(Level.INFO, "End: " + end);
+        API.getInstance().getAPIEnabler().printLog(Level.INFO, "End: " + end);
 
         String format = DateUtility.getMessage(end);
 

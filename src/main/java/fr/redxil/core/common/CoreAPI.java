@@ -13,20 +13,17 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.PluginEnabler;
-import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.server.ServerCreator;
-import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
 import fr.redxil.core.common.redis.CRedisManager;
 import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.CSQLConnection;
+import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.io.File;
 import java.util.Optional;
@@ -43,17 +40,17 @@ public class CoreAPI extends API {
     private final CModeratorManager moderatorManager;
     private CSQLConnection sqlConnection;
     private Server server;
-    private final PluginEnabler pluginEnabler;
+    private final APIEnabler APIEnabler;
 
     private final boolean velocity;
     private CRedisManager manager;
 
-    public CoreAPI(PluginEnabler plugin) {
+    public CoreAPI(APIEnabler plugin) {
         CoreAPI.instance = this;
 
-        this.pluginEnabler = plugin;
+        this.APIEnabler = plugin;
 
-        this.velocity = plugin.getServerType() == ServerType.VELOCITY;
+        this.velocity = plugin.getServerInfo().getServerType() == ServerType.VELOCITY;
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
@@ -89,7 +86,7 @@ public class CoreAPI extends API {
         IpInfo ipInfo;
         String gsonIP = GSONSaver.loadGSON(serverAccessIP, String.class);
         if(gsonIP == null)
-            ipInfo = plugin.getServerIp();
+            ipInfo = plugin.getServerInfo().getIpInfo();
         else ipInfo = new IpInfo(gsonIP);
 
         if (ipInfo == null || onlineMod == null || serverName == null || sqlUser == null || sqlPass == null || redisPass == null || sqlIp == null || redisIp == null) {
@@ -151,59 +148,11 @@ public class CoreAPI extends API {
         }
 
         Optional<Server> server;
-        if (isOnlineMod() && serverID != null)
+        if (isOnlineMod() && serverID != null) {
             server = this.serverManager.loadServer(serverID, serverName);
-        else{
-            server = this.serverManager.createServer(new ServerCreator() {
-                @Override
-                public ServerType getServerType() {
-                    return plugin.getServerType();
-                }
-
-                @Override
-                public String getServerName() {
-                    return serverName;
-                }
-
-                @Override
-                public String getServerMap() {
-                    return plugin.getServerMap().orElse(null);
-                }
-
-                @Override
-                public IpInfo getIpInfo() {
-                    return ipInfo;
-                }
-
-                @Override
-                public Integer getMaxPlayer() {
-                    return plugin.getMaxPlayer();
-                }
-
-                @Override
-                public ServerStatus getServerStatus() {
-                    return ServerStatus.ONLINE;
-                }
-
-                @Override
-                public boolean needGenerate() {
-                    return false;
-                }
-
-                @Override
-                public ServerAccess getServerAccess() {
-                    if(plugin.getServerType() == ServerType.VELOCITY || plugin.getServerType() == ServerType.HUB)
-                        return ServerAccess.OPEN;
-                    else return ServerAccess.LIMITED;
-                }
-
-                @Override
-                public Rank getRankAccess() {
-                    return Rank.JOUEUR;
-                }
-            });
-
-        }
+            server.ifPresent(apiServer -> apiServer.setServerStatus(ServerStatus.ONLINE));
+        }else
+            server = this.serverManager.createServer(plugin.getServerInfo());
 
         if (server.isEmpty()) {
             plugin.onAPILoadFail();
@@ -218,6 +167,9 @@ public class CoreAPI extends API {
         plugin.printLog(Level.INFO, "Server id: " + this.server.getServerID());
         API.instance = this;
         plugin.onAPIEnabled();
+
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", this.getServerID()));
 
     }
 
@@ -251,17 +203,17 @@ public class CoreAPI extends API {
     }
 
     @Override
-    public PluginEnabler getPluginEnabler() {
-        return pluginEnabler;
+    public APIEnabler getAPIEnabler() {
+        return APIEnabler;
     }
 
     @Override
     public void shutdown() {
 
-        if (!getPluginEnabler().isPluginEnabled())
+        if (!getAPIEnabler().isPluginEnabled())
             return;
 
-        getPluginEnabler().onAPIDisabled();
+        getAPIEnabler().onAPIDisabled();
 
         API.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID()));
@@ -294,11 +246,6 @@ public class CoreAPI extends API {
     @Override
     public CModeratorManager getModeratorManager() {
         return this.moderatorManager;
-    }
-
-    @Override
-    public ServerType getServerType() {
-        return this.getServer().getServerType();
     }
 
     @Override

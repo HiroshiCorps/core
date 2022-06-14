@@ -13,7 +13,7 @@ import fr.redline.invinteract.event.EventInventory;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.PluginEnabler;
+import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.paper.PaperAPI;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.*;
@@ -26,7 +26,6 @@ import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -37,25 +36,25 @@ public class CorePlugin extends PaperAPI {
     public static CorePlugin getInstance() {
         return instance;
     }
-    private final JavaPlugin javaPlugin;
+    private final JavaStarter javaPlugin;
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
 
-    public CorePlugin(JavaPlugin javaPlugin) {
+    public CorePlugin(JavaStarter javaPlugin) {
         CorePlugin.instance = this;
         this.javaPlugin = javaPlugin;
     }
 
     @Override
-    public void startAPI(PluginEnabler pluginEnabler) {
+    public void startAPI(APIEnabler APIEnabler) {
         Bukkit.getLogger().log(Level.FINE,
                 SystemColor.WHITE + "#==========[WELCOME TO SERVER CORE]===========#\n"
-                        + SystemColor.YELLOW + "# SERVERCORE is now loading with enabler: "+pluginEnabler.getClass().getName()+"#\n"
+                        + SystemColor.YELLOW + "# SERVERCORE is now loading with enabler: "+APIEnabler.getClass().getName()+"#\n"
                         + "# carefully all outputs coming from it.        #\n"
                         + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
         );
-        new CoreAPI(pluginEnabler);
+        new CoreAPI(APIEnabler);
         if(API.isAPIEnabled())
             onLoad();
     }
@@ -103,6 +102,10 @@ public class CorePlugin extends PaperAPI {
 
     public ModeratorMain getModeratorMain() {
         return moderatorMain;
+    }
+
+    public JavaStarter getJavaStarter(){
+        return javaPlugin;
     }
 
 }
