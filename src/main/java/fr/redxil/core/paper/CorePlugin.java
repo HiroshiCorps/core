@@ -33,29 +33,29 @@ import java.util.logging.Level;
 public class CorePlugin extends PaperAPI {
 
     private static CorePlugin instance;
-    public static CorePlugin getInstance() {
-        return instance;
-    }
     private final JavaStarter javaPlugin;
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
-
     public CorePlugin(JavaStarter javaPlugin) {
         CorePlugin.instance = this;
         this.javaPlugin = javaPlugin;
+    }
+
+    public static CorePlugin getInstance() {
+        return instance;
     }
 
     @Override
     public void startAPI(APIEnabler APIEnabler) {
         Bukkit.getLogger().log(Level.FINE,
                 SystemColor.WHITE + "#==========[WELCOME TO SERVER CORE]===========#\n"
-                        + SystemColor.YELLOW + "# SERVERCORE is now loading with enabler: "+APIEnabler.getClass().getName()+"#\n"
+                        + SystemColor.YELLOW + "# SERVERCORE is now loading with enabler: " + APIEnabler.getClass().getName() + "#\n"
                         + "# carefully all outputs coming from it.        #\n"
                         + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
         );
         new CoreAPI(APIEnabler);
-        if(API.isAPIEnabled())
+        if (API.isAPIEnabled())
             onLoad();
     }
 
@@ -104,7 +104,7 @@ public class CorePlugin extends PaperAPI {
         return moderatorMain;
     }
 
-    public JavaStarter getJavaStarter(){
+    public JavaStarter getJavaStarter() {
         return javaPlugin;
     }
 

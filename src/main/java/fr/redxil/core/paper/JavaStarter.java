@@ -4,7 +4,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class JavaStarter extends JavaPlugin {
     @Override
-    public void onEnable(){
+    public void onEnable() {
         new CorePlugin(this);
     }
 }

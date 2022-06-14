@@ -9,9 +9,9 @@
 
 package fr.redxil.core.common.server;
 
-import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.sql.SQLModel;
+import fr.xilitra.hiroshisav.enums.ServerType;
 
 public class ServerModel extends SQLModel {
 

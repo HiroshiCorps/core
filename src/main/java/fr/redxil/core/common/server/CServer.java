@@ -31,12 +31,6 @@ import java.util.logging.Level;
 
 public class CServer implements Server {
 
-    private long serverID;
-
-    public CServer(long serverID) {
-        this.serverID = serverID;
-    }
-
     DataReminder<Long> maxPlayerReminder = null;
     DataReminder<String> serverNameReminder = null;
     DataReminder<List<String>> playerListReminder = null;
@@ -47,6 +41,10 @@ public class CServer implements Server {
     DataReminder<String> typeReminder = null;
     DataReminder<Long> reservedReminder = null;
     DataReminder<List<String>> allowReminder = null;
+    private long serverID;
+    public CServer(long serverID) {
+        this.serverID = serverID;
+    }
 
     public CServer(ServerInfo serverCreator) {
         ServerModel serverModel = null;

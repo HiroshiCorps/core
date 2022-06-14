@@ -101,7 +101,7 @@ public class CServerManager implements ServerManager {
         if (serverID == null)
             return Optional.empty();
 
-        if(!API.getInstance().isOnlineMod())
+        if (!API.getInstance().isOnlineMod())
             return Optional.empty();
 
         CServer cServer = new CServer(serverID, serverName);

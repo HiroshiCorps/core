@@ -29,7 +29,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> loadModerator(long id, UUID uuid, String name) {
-        if(CoreAPI.getInstance().getPlayerManager().getServerPlayer().getMemberID() == id)
+        if (CoreAPI.getInstance().getPlayerManager().getServerPlayer().getMemberID() == id)
             return Optional.empty();
         if (isLoaded(id)) return Optional.empty();
         if (isModerator(uuid)) {
@@ -47,7 +47,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(String s) {
-        if(API.getInstance().getPlayerManager().getServerPlayer().getName() == s)
+        if (Objects.equals(API.getInstance().getPlayerManager().getServerPlayer().getName(), s))
             return Optional.of(new CServerModerator());
         Long result = uuidToLong.getData().get(s);
         if (result == null) return Optional.empty();
@@ -65,7 +65,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(APIPlayer s) {
-        if(s instanceof CServerPlayer)
+        if (s instanceof CServerPlayer)
             return Optional.of(getServerModerator());
         return getModerator(s.getMemberID());
     }
@@ -79,7 +79,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(long result) {
-        if(API.getInstance().getPlayerManager().getServerPlayer().getMemberID() == result)
+        if (API.getInstance().getPlayerManager().getServerPlayer().getMemberID() == result)
             return Optional.of(new CServerModerator());
         if (isLoaded(result))
             return Optional.empty();
@@ -97,7 +97,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(UUID uuid) {
-        if(API.getInstance().getPlayerManager().getServerPlayer().getUUID() == uuid)
+        if (API.getInstance().getPlayerManager().getServerPlayer().getUUID() == uuid)
             return Optional.of(new CServerModerator());
         Long result = uuidToLong.getData().get(uuid.toString());
         if (result == null) return Optional.empty();
@@ -201,5 +201,4 @@ public class CModeratorManager implements ModeratorManager {
     }
 
 
-    
 }

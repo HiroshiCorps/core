@@ -8,8 +8,8 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
-import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.redxil.core.velocity.CoreVelocity;
+import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;

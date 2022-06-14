@@ -361,7 +361,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void setRealRank(Rank rank, Timestamp timestamp) {
-        if(rank == Rank.SERVER)
+        if (rank == Rank.SERVER)
             return;
         String timeStampString = timestamp == null ? null : timestamp.toString();
         super.setRank(rank, timestamp);
@@ -377,7 +377,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         getRealRankTimeStamp().ifPresent(stamp -> {
             if (stamp.before(Timestamp.from(Instant.now()))) {
                 setRealRank(Rank.JOUEUR);
-            }});
+            }
+        });
         initRealRankReminder();
         return realRankReminder.getData();
     }
@@ -402,7 +403,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
-        if(rank == Rank.SERVER)
+        if (rank == Rank.SERVER)
             return;
         String timeStampString = timestamp == null ? null : timestamp.toString();
         initRankTimeReminder();
@@ -415,9 +416,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     @Override
     public Long getRankPower() {
         getRankTimeStamp().ifPresent(stamp -> {
-        if (stamp.before(Timestamp.from(Instant.now()))) {
-            setRank(Rank.JOUEUR);
-        }});
+            if (stamp.before(Timestamp.from(Instant.now()))) {
+                setRank(Rank.JOUEUR);
+            }
+        });
         initRankReminder();
         return rankReminder.getData();
     }
@@ -467,7 +469,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public boolean setName(String s) {
-        if(s.contains(";"))
+        if (s.contains(";"))
             return false;
         if (getRealName().equals(s) || !API.getInstance().getPlayerManager().dataExist(s)) {
             String oldName = getName();
@@ -494,7 +496,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     }
 
     public void initUUIDReminder() {
-        if(uuidReminder == null)
+        if (uuidReminder == null)
             uuidReminder = DataReminder.generateReminder(PlayerDataRedis.PLAYER_UUID_REDIS.getString(this), null);
     }
 

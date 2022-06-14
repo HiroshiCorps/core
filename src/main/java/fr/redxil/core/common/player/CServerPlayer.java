@@ -1,11 +1,5 @@
 package fr.redxil.core.common.player;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
@@ -18,6 +12,12 @@ import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 public class CServerPlayer implements APIPlayer {
 
     @Override
@@ -26,16 +26,20 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public void switchServer(long server) {}
+    public void switchServer(long server) {
+    }
 
     @Override
-    public void addSolde(long value) {}
+    public void addSolde(long value) {
+    }
 
     @Override
-    public void unloadPlayer() {}
+    public void unloadPlayer() {
+    }
 
     @Override
-    public void addCoins(long value) {}
+    public void addCoins(long value) {
+    }
 
     @Override
     public String getServerName() {
@@ -45,13 +49,18 @@ public class CServerPlayer implements APIPlayer {
     /// <!-------------------- Rank part --------------------!>
 
     @Override
-    public void setServerName(String name) {}
+    public void setServerName(String name) {
+    }
 
     @Override
-    public long getBungeeServerID() {return 0L;}
+    public long getBungeeServerID() {
+        return 0L;
+    }
 
     @Override
-    public boolean setSolde(long value) {return true;}
+    public boolean setSolde(long value) {
+        return true;
+    }
 
     @Override
     public long getSolde() {
@@ -64,13 +73,17 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public void setRealRank(Rank rank) {}
+    public void setRealRank(Rank rank) {
+    }
 
     @Override
-    public boolean setCoins(long value) {return true;}
+    public boolean setCoins(long value) {
+        return true;
+    }
 
     @Override
-    public void restoreRealData() {}
+    public void restoreRealData() {
+    }
 
     @Override
     public long getCoins() {
@@ -111,7 +124,7 @@ public class CServerPlayer implements APIPlayer {
 
     @Override
     public void setRealRank(Rank rank, Timestamp timestamp) {
-}
+    }
 
     @Override
     public Long getRealRankPower() {
@@ -129,7 +142,8 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public void setRank(Rank rank, Timestamp timestamp) {}
+    public void setRank(Rank rank, Timestamp timestamp) {
+    }
 
     @Override
     public Long getRankPower() {
@@ -215,7 +229,7 @@ public class CServerPlayer implements APIPlayer {
 
     @Override
     public List<String> getTempDataKeyList() {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     @Override

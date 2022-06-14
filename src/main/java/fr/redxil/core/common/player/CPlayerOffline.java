@@ -32,7 +32,6 @@ import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.sql.utils.SQLColumns;
 
 import javax.annotation.Nullable;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +42,10 @@ import java.util.logging.Level;
 public class CPlayerOffline implements APIOfflinePlayer {
 
     protected long memberID;
-    List<SanctionInfo> sanctionModelList = null;
-    List<Setting> settingsModelList = null;
     protected PlayerModel playerModel = null;
     protected MoneyModel moneyModel = null;
+    List<SanctionInfo> sanctionModelList = null;
+    List<Setting> settingsModelList = null;
 
     public CPlayerOffline(PlayerModel playerModel) {
         this.playerModel = playerModel;
@@ -130,7 +129,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void setRank(Rank rank, Timestamp timestamp) {
-        if(rank == Rank.SERVER)
+        if (rank == Rank.SERVER)
             return;
         PlayerModel playerModel1 = getPlayerModel();
         if (playerModel1 != null) {
@@ -184,7 +183,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public boolean setName(String s) {
         if (s != null) {
-            if(s.contains(";"))
+            if (s.contains(";"))
                 return false;
             PlayerModel playerModel1 = getPlayerModel();
             if (playerModel1 != null)

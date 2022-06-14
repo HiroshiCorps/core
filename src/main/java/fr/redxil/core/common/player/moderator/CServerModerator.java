@@ -1,9 +1,5 @@
 package fr.redxil.core.common.player.moderator;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
@@ -15,16 +11,25 @@ import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 
-public class CServerModerator implements APIPlayerModerator{
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public class CServerModerator implements APIPlayerModerator {
 
     @Override
     public void disconnectModerator() {
-        
+
     }
 
     @Override
     public Optional<String> getCible() {
         return Optional.empty();
+    }
+
+    @Override
+    public void setCible(String arg0) {
+
     }
 
     @Override
@@ -53,8 +58,18 @@ public class CServerModerator implements APIPlayerModerator{
     }
 
     @Override
+    public void setModeratorMod(boolean arg0) {
+
+    }
+
+    @Override
     public boolean isVanish() {
         return false;
+    }
+
+    @Override
+    public void setVanish(boolean arg0) {
+
     }
 
     @Override
@@ -150,19 +165,4 @@ public class CServerModerator implements APIPlayerModerator{
 
     }
 
-    @Override
-    public void setCible(String arg0) {
-        
-    }
-
-    @Override
-    public void setModeratorMod(boolean arg0) {
-        
-    }
-
-    @Override
-    public void setVanish(boolean arg0) {
-        
-    }
-    
 }

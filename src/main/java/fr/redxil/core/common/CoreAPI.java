@@ -33,16 +33,15 @@ public class CoreAPI extends API {
 
     private static CoreAPI instance;
     private final String serverName;
-    private Long serverID;
     private final Boolean onlineMod;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
+    private final APIEnabler APIEnabler;
+    private final boolean velocity;
+    private Long serverID;
     private CSQLConnection sqlConnection;
     private Server server;
-    private final APIEnabler APIEnabler;
-
-    private final boolean velocity;
     private CRedisManager manager;
 
     public CoreAPI(APIEnabler plugin) {
@@ -85,7 +84,7 @@ public class CoreAPI extends API {
 
         IpInfo ipInfo;
         String gsonIP = GSONSaver.loadGSON(serverAccessIP, String.class);
-        if(gsonIP == null)
+        if (gsonIP == null)
             ipInfo = plugin.getServerInfo().getIpInfo();
         else ipInfo = new IpInfo(gsonIP);
 
@@ -151,13 +150,13 @@ public class CoreAPI extends API {
         if (isOnlineMod() && serverID != null) {
             server = this.serverManager.loadServer(serverID, serverName);
             server.ifPresent(apiServer -> apiServer.setServerStatus(ServerStatus.ONLINE));
-        }else
+        } else
             server = this.serverManager.createServer(plugin.getServerInfo());
 
         if (server.isEmpty()) {
             plugin.onAPILoadFail();
             return;
-        }else{
+        } else {
             this.server = server.get();
             this.serverID = this.server.getServerID();
         }

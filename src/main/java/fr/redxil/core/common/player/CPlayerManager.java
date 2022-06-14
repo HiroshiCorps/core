@@ -231,7 +231,7 @@ public class CPlayerManager implements APIPlayerManager {
     }
 
     @Override
-    public CServerPlayer getServerPlayer(){
+    public CServerPlayer getServerPlayer() {
         return new CServerPlayer();
     }
 
