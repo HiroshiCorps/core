@@ -18,6 +18,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.APIStarter;
 import fr.redxil.api.common.PluginEnabler;
 import fr.redxil.api.common.event.CoreEnabledEvent;
 import fr.redxil.api.common.player.APIPlayer;
@@ -74,7 +75,7 @@ public class CoreVelocity implements PluginEnabler {
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
 
-        new CoreAPI(this);
+        APIStarter.startAPI(this);
 
     }
 
@@ -249,6 +250,11 @@ public class CoreVelocity implements PluginEnabler {
     @Override
     public ServerType getServerType() {
         return ServerType.VELOCITY;
+    }
+
+    @Override
+    public Optional<String> getServerMap() {
+        return Optional.empty();
     }
 
 }

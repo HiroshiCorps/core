@@ -9,6 +9,7 @@
 
 package fr.redxil.core.common;
 
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
@@ -42,12 +43,14 @@ public class CoreAPI extends API {
     private final CModeratorManager moderatorManager;
     private CSQLConnection sqlConnection;
     private Server server;
+    private final PluginEnabler pluginEnabler;
     private CRedisManager manager;
 
     public CoreAPI(PluginEnabler plugin) {
-        super(plugin);
-
+        API.instance = this;
         CoreAPI.instance = this;
+
+        this.pluginEnabler = plugin;
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
@@ -66,6 +69,8 @@ public class CoreAPI extends API {
         File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
         File redisIpFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
 
+        File serverAccessIP = new File(plugin.getPluginDataFolder() + File.separator + "serverip.json");
+
         this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         this.onlineMod = GSONSaver.loadGSON(onlineModFile, Boolean.class);
         this.serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
@@ -78,7 +83,13 @@ public class CoreAPI extends API {
         String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
         String redisIp = GSONSaver.loadGSON(redisIpFile, String.class);
 
-        if (onlineMod == null || serverName == null || sqlUser == null || sqlPass == null || redisPass == null || sqlIp == null || redisIp == null) {
+        IpInfo ipInfo;
+        String gsonIP = GSONSaver.loadGSON(serverAccessIP, String.class);
+        if(gsonIP == null)
+            ipInfo = plugin.getServerIp();
+        else ipInfo = new IpInfo(gsonIP);
+
+        if (ipInfo == null || onlineMod == null || serverName == null || sqlUser == null || sqlPass == null || redisPass == null || sqlIp == null || redisIp == null) {
 
             if (serverName == null) {
                 GSONSaver.writeGSON(serverNameFile, "servername");
@@ -143,7 +154,7 @@ public class CoreAPI extends API {
             server = this.serverManager.createServer(new ServerCreator() {
                 @Override
                 public ServerType getServerType() {
-                    return null;
+                    return plugin.getServerType();
                 }
 
                 @Override
@@ -153,22 +164,22 @@ public class CoreAPI extends API {
 
                 @Override
                 public String getServerMap() {
-                    return null;
+                    return plugin.getServerMap().orElse(null);
                 }
 
                 @Override
                 public IpInfo getIpInfo() {
-                    return null;
+                    return ipInfo;
                 }
 
                 @Override
                 public Integer getMaxPlayer() {
-                    return null;
+                    return plugin.getMaxPlayer();
                 }
 
                 @Override
                 public ServerStatus getServerStatus() {
-                    return null;
+                    return ServerStatus.ONLINE;
                 }
 
                 @Override
@@ -178,7 +189,9 @@ public class CoreAPI extends API {
 
                 @Override
                 public ServerAccess getServerAccess() {
-                    return null;
+                    if(plugin.getServerType() == ServerType.VELOCITY || plugin.getServerType() == ServerType.HUB)
+                        return ServerAccess.OPEN;
+                    else return ServerAccess.LIMITED;
                 }
 
                 @Override
@@ -234,6 +247,11 @@ public class CoreAPI extends API {
     }
 
     @Override
+    public PluginEnabler getPluginEnabler() {
+        return pluginEnabler;
+    }
+
+    @Override
     public void shutdown() {
 
         if (!getPluginEnabler().isPluginEnabled())
@@ -241,8 +259,8 @@ public class CoreAPI extends API {
 
         getPluginEnabler().onAPIDisabled();
 
-        if (getPluginEnabler().isPluginEnabled())
-            return;
+        API.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID()));
 
         Server server = getServer();
         if (server != null)
@@ -282,6 +300,11 @@ public class CoreAPI extends API {
     @Override
     public boolean isOnlineMod() {
         return onlineMod;
+    }
+
+    @Override
+    public boolean isVelocity() {
+        return getPluginEnabler().isVelocity();
     }
 
     @Override
