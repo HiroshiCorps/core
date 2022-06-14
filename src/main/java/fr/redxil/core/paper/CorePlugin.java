@@ -14,6 +14,8 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.PluginEnabler;
+import fr.redxil.api.paper.PaperAPI;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.*;
 import fr.redxil.core.paper.event.ConnectionListener;
 import fr.redxil.core.paper.event.PlayerInteractEvent;
@@ -22,42 +24,44 @@ import fr.redxil.core.paper.moderatormode.ModeratorMain;
 import fr.redxil.core.paper.receiver.AskSwitchListener;
 import fr.redxil.core.paper.receiver.Receiver;
 import fr.redxil.core.paper.vanish.VanishGestion;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
 import java.util.logging.Level;
 
-public class CorePlugin {
+public class CorePlugin extends PaperAPI {
 
     private static CorePlugin instance;
-    private final PluginEnabler pluginEnabler;
+    public static CorePlugin getInstance() {
+        return instance;
+    }
     private final JavaPlugin javaPlugin;
-
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
 
-    public static CorePlugin getInstance() {
-        return instance;
+    public CorePlugin(JavaPlugin javaPlugin) {
+        CorePlugin.instance = this;
+        this.javaPlugin = javaPlugin;
     }
 
-    public CorePlugin(PluginEnabler pluginEnabler, JavaPlugin javaPlugin) {
-        instance = this;
-        this.pluginEnabler = pluginEnabler;
-        this.javaPlugin = javaPlugin;
-        this.pluginEnabler.printLog(Level.FINE,
+    @Override
+    public void startAPI(PluginEnabler pluginEnabler) {
+        Bukkit.getLogger().log(Level.FINE,
                 SystemColor.WHITE + "#==========[WELCOME TO SERVER CORE]===========#\n"
-                        + SystemColor.YELLOW + "# SERVERCORE is now loading. Please read      #\n"
+                        + SystemColor.YELLOW + "# SERVERCORE is now loading with enabler: "+pluginEnabler.getClass().getName()+"#\n"
                         + "# carefully all outputs coming from it.        #\n"
                         + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
         );
-
-        onLoad();
+        new CoreAPI(pluginEnabler);
+        if(API.isAPIEnabled())
+            onLoad();
     }
 
     public void onLoad() {
-        this.pluginEnabler.printLog(Level.FINE, SystemColor.GREEN + "API Started" + SystemColor.RESET);
+        Bukkit.getLogger().log(Level.FINE, SystemColor.GREEN + "API Started" + SystemColor.RESET);
 
         this.vanish = new VanishGestion(this);
         this.freezeGestion = new FreezeMessageGestion(this);
@@ -74,7 +78,7 @@ public class CorePlugin {
         p.registerEvents(new ConnectionListener(this), this.javaPlugin);
         p.registerEvents(new PlayerInteractEvent(), this.javaPlugin);
 
-        this.pluginEnabler.printLog(Level.INFO, SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
+        Bukkit.getLogger().log(Level.INFO, SystemColor.GREEN + "EventListener Started" + SystemColor.RESET);
 
         Objects.requireNonNull(this.javaPlugin.getCommand("mod")).setExecutor(new ModCmd());
         Objects.requireNonNull(this.javaPlugin.getCommand("freeze")).setExecutor(new FreezeCmd());
@@ -83,7 +87,7 @@ public class CorePlugin {
         Objects.requireNonNull(this.javaPlugin.getCommand("speed")).setExecutor(new SpeedCmd());
         Objects.requireNonNull(this.javaPlugin.getCommand("flyspeed")).setExecutor(new SpeedCmd());
 
-        this.pluginEnabler.printLog(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
+        Bukkit.getLogger().log(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
         API.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID()));

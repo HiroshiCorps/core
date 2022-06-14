@@ -1,4 +1,4 @@
-main: "fr.redxil.core.paper.CorePlugin"
+main: "fr.redxil.core.paper.JavaStarter"
 version: "1.0"
 name: "core"
 commands:

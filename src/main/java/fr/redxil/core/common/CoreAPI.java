@@ -44,13 +44,16 @@ public class CoreAPI extends API {
     private CSQLConnection sqlConnection;
     private Server server;
     private final PluginEnabler pluginEnabler;
+
+    private final boolean velocity;
     private CRedisManager manager;
 
     public CoreAPI(PluginEnabler plugin) {
-        API.instance = this;
         CoreAPI.instance = this;
 
         this.pluginEnabler = plugin;
+
+        this.velocity = plugin.getServerType() == ServerType.VELOCITY;
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
@@ -213,6 +216,7 @@ public class CoreAPI extends API {
         GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
 
         plugin.printLog(Level.INFO, "Server id: " + this.server.getServerID());
+        API.instance = this;
         plugin.onAPIEnabled();
 
     }
@@ -304,7 +308,7 @@ public class CoreAPI extends API {
 
     @Override
     public boolean isVelocity() {
-        return getPluginEnabler().isVelocity();
+        return velocity;
     }
 
     @Override
