@@ -12,6 +12,7 @@ package fr.redxil.core.velocity;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -24,6 +25,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
+import fr.redxil.core.velocity.commands.PartyCMD;
 import fr.redxil.core.velocity.commands.ShutdownCmd;
 import fr.redxil.core.velocity.commands.friend.BlackListCmd;
 import fr.redxil.core.velocity.commands.friend.FriendCmd;
@@ -174,6 +176,8 @@ public class CoreVelocity implements APIEnabler {
         cm.register(new BrigadierCommand(new RCmd().buildCommands()));
         cm.register(new BrigadierCommand(new MsgCmd().buildCommands()));
 
+        cm.register(new PartyCMD().buildCommand());
+
     }
 
     public ProxyServer getProxyServer() {
@@ -234,6 +238,11 @@ public class CoreVelocity implements APIEnabler {
     @Override
     public ServerInfo getServerInfo() {
         return null;
+    }
+
+    @Subscribe
+    public void playerQuit(DisconnectEvent de) {
+        API.getInstance().getPartyManager().getPlayerParty(de.getPlayer().getUniqueId()).ifPresent(party -> party.quitParty(de.getPlayer().getUniqueId()));
     }
 
 }

@@ -14,10 +14,16 @@ import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
+import fr.redxil.api.common.game.Game;
+import fr.redxil.api.common.game.GameManager;
+import fr.redxil.api.common.game.Host;
+import fr.redxil.api.common.group.party.PartyManager;
+import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.sql.SQLConnection;
+import fr.redxil.core.common.group.team.CTeamManager;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
 import fr.redxil.core.common.redis.CRedisManager;
@@ -26,6 +32,7 @@ import fr.redxil.core.common.sql.CSQLConnection;
 import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -168,7 +175,7 @@ public class CoreAPI extends API {
         plugin.onAPIEnabled();
 
         API.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", this.getServerID()));
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", this.getServerID()));
 
     }
 
@@ -255,6 +262,54 @@ public class CoreAPI extends API {
     @Override
     public boolean isVelocity() {
         return velocity;
+    }
+
+    @Override
+    public PartyManager getPartyManager() {
+        return null;
+    }
+
+    @Override
+    public GameManager getGameManager() {
+        return null;
+    }
+
+    @Override
+    public Optional<Host> getHost() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean isHostServer() {
+        return getHost().isPresent();
+    }
+
+    @Override
+    public Optional<Game> getGame() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean isGameServer() {
+        return getGame().isPresent();
+    }
+
+    private HashMap<Long, TeamManager> mapManager = new HashMap<>();
+
+    @Override
+    public TeamManager getTeamManager(Long aLong) {
+        if(isOnlineMod())
+        return new CTeamManager(aLong);
+        else {
+            if(mapManager.containsKey(aLong))
+                return mapManager.get(aLong);
+            else {
+                TeamManager teamManager = new CTeamManager(aLong);
+                mapManager.put(aLong, teamManager);
+                mapManager.put(aLong, teamManager);
+                return teamManager;
+            }
+        }
     }
 
     @Override

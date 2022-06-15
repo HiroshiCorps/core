@@ -11,10 +11,13 @@ package fr.redxil.core.paper.event;
 
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.Game;
+import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
 import org.bukkit.entity.Player;
@@ -79,6 +82,15 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
             corePlugin.getVanish().setVanish(playerModerator.get(), playerModerator.get().isVanish());
         }
 
+        if (GameBuilder.getGameBuilder().isEmpty())
+            return;
+
+        API.getInstance().getGame().ifPresent(game -> {
+            if (!game.isSpectator(player.getUniqueId()) && !game.isGameState(GameState.WAITING)) {
+                game.setSpectator(player.getUniqueId(), true);
+            }
+        });
+
     }
 
     @EventHandler
@@ -96,6 +108,30 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         }
 
         API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> event.setQuitMessage(getQuitMessage(apiOfflinePlayer)));
+
+        Optional<GameBuilder> gameBuilderOptional = GameBuilder.getGameBuilder();
+
+        if (gameBuilderOptional.isEmpty())
+            return;
+
+        GameBuilder gameBuilder = gameBuilderOptional.get();
+
+        Optional<Game> gameOptional = API.getInstance().getGame();
+        if (gameOptional.isEmpty())
+            return;
+
+        Game game = gameOptional.get();
+
+        boolean spectator = game.isSpectator(player.getUniqueId());
+
+        if (!spectator) {
+            game.getConnectedPlayers().remove(player.getUniqueId());
+            gameBuilder.broadcastActionBar("§a" + player.getName() + "§7 à quitté la partie §8(§a" + game.getConnectedPlayers() + "§8/§e" + game.getMaxPlayer() + "§8)");
+            gameBuilder.onPlayerLeave(player);
+        } else {
+            game.getPlayerSpectators().remove(player.getUniqueId());
+            gameBuilder.onSpectatorLeave(player);
+        }
 
     }
 

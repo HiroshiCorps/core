@@ -15,7 +15,8 @@ public enum IDDataValue {
     GAME("id/game"),
     PLAYERID("id/player"),
     SERVERID("id/server"),
-    TEAM("id/team");
+    TEAM("id/team"),
+    HOST("id/host");
 
     public final String location;
 

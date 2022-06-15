@@ -10,13 +10,18 @@
 package fr.redxil.core.common.server;
 
 import fr.redxil.api.common.API;
+import fr.redxil.api.common.game.error.GameCreateError;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.ServerManager;
+import fr.redxil.api.common.server.creator.GameServerInfo;
+import fr.redxil.api.common.server.creator.HostServerInfo;
 import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.server.ServerDataRedis;
+import fr.xilitra.hiroshisav.RequestObject;
 import fr.xilitra.hiroshisav.enums.ServerType;
+import fr.xilitra.hiroshisav.enums.TypeGame;
 
 import java.util.*;
 
@@ -92,6 +97,26 @@ public class CServerManager implements ServerManager {
 
         if (!API.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);
+        else if(serverCreator.needGenerate()){
+
+            TypeGame typeGame = null;
+
+            if(serverCreator instanceof HostServerInfo hostServerInfo){
+                typeGame = hostServerInfo.getTypeGame();
+                API.getInstance().getGameManager().createHost(cServer.getServerID(), hostServerInfo.getHost(), hostServerInfo.getTypeGame());
+            }else if(serverCreator instanceof GameServerInfo gameServerInfo){
+                typeGame = gameServerInfo.getTypeGame();
+                try {
+                    API.getInstance().getGameManager().createGame(cServer.getServerID(), gameServerInfo.getTypeGame());
+                } catch (GameCreateError e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            new RequestObject(cServer.getServerID(), serverCreator.getServerName(), serverCreator.getServerType(), typeGame, serverCreator.getServerMap(), serverCreator.getIpInfo().getPort());
+
+        }
+
         return Optional.of(cServer);
     }
 
