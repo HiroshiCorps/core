@@ -39,7 +39,7 @@ public class PMListen implements PMReceiver {
                     GameBuilder.getGameBuilder().ifPresent(gameBuilder -> gameBuilder.forceEnd(((String) o).split("<split>")[1]));
             case "forceWIN" -> {
                 String[] splitted = ((String) o).split("<split>");
-                Optional<Game> game = API.getInstance().getGame();
+                Optional<Game> game = API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID());
                 if (game.isEmpty())
                     return;
                 Optional<Team> team = API.getInstance().getTeamManager(game.get().getGameID()).getTeam(splitted[1]);

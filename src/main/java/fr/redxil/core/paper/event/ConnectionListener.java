@@ -85,7 +85,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         if (GameBuilder.getGameBuilder().isEmpty())
             return;
 
-        API.getInstance().getGame().ifPresent(game -> {
+        API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID()).ifPresent(game -> {
             if (!game.isSpectator(player.getUniqueId()) && !game.isGameState(GameState.WAITING)) {
                 game.setSpectator(player.getUniqueId(), true);
             }
@@ -116,7 +116,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         GameBuilder gameBuilder = gameBuilderOptional.get();
 
-        Optional<Game> gameOptional = API.getInstance().getGame();
+        Optional<Game> gameOptional = API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID());
         if (gameOptional.isEmpty())
             return;
 

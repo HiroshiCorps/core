@@ -14,15 +14,15 @@ import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
-import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameManager;
-import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.group.party.PartyManager;
 import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.sql.SQLConnection;
+import fr.redxil.core.common.game.CGameManager;
+import fr.redxil.core.common.group.party.CPartyManager;
 import fr.redxil.core.common.group.team.CTeamManager;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
@@ -44,6 +44,8 @@ public class CoreAPI extends API {
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
     private final CModeratorManager moderatorManager;
+    private final PartyManager partyManager;
+    private final GameManager gameManager;
     private final APIEnabler APIEnabler;
     private final boolean velocity;
     private Long serverID;
@@ -62,6 +64,8 @@ public class CoreAPI extends API {
         this.apiPlayerManager = new CPlayerManager();
         this.moderatorManager = new CModeratorManager();
         this.sqlConnection = new CSQLConnection();
+        this.partyManager = new CPartyManager();
+        this.gameManager = new CGameManager();
 
         File onlineModFile = new File(plugin.getPluginDataFolder() + File.separator + "onlinemod.json");
         File serverIDFile = new File(plugin.getPluginDataFolder() + File.separator + "serverid.json");
@@ -266,35 +270,15 @@ public class CoreAPI extends API {
 
     @Override
     public PartyManager getPartyManager() {
-        return null;
+        return partyManager;
     }
 
     @Override
     public GameManager getGameManager() {
-        return null;
+        return gameManager;
     }
 
-    @Override
-    public Optional<Host> getHost() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean isHostServer() {
-        return getHost().isPresent();
-    }
-
-    @Override
-    public Optional<Game> getGame() {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean isGameServer() {
-        return getGame().isPresent();
-    }
-
-    private HashMap<Long, TeamManager> mapManager = new HashMap<>();
+    private final HashMap<Long, TeamManager> mapManager = new HashMap<>();
 
     @Override
     public TeamManager getTeamManager(Long aLong) {
@@ -305,7 +289,6 @@ public class CoreAPI extends API {
                 return mapManager.get(aLong);
             else {
                 TeamManager teamManager = new CTeamManager(aLong);
-                mapManager.put(aLong, teamManager);
                 mapManager.put(aLong, teamManager);
                 return teamManager;
             }
