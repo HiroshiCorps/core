@@ -41,7 +41,7 @@ import java.util.logging.Level;
 
 public class CPlayer extends CPlayerOffline implements APIPlayer {
 
-    DataReminder<String> serverNameReminder = null;
+    DataReminder<Long> serverNameReminder = null;
     DataReminder<String> lastMSGReminder = null;
     DataReminder<Long> bungeeReminder = null;
     DataReminder<Long> soldeReminder = null;
@@ -161,8 +161,8 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void sendMessage(String s) {
-        String playerServer = this.getServerName();
-        if (playerServer.equals(API.getInstance().getServerName()))
+        Long playerServer = this.getServerID();
+        if (playerServer.equals(API.getInstance().getServerID()))
             API.getInstance().getAPIEnabler().sendMessage(getUUID(), s);
         else
             API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "playerMessage", Long.valueOf(getMemberID()).toString() + "<msp>" + s));
@@ -218,11 +218,11 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     public void initSNReminder() {
         if (this.serverNameReminder == null)
-            this.serverNameReminder = DataReminder.generateReminder(PlayerDataRedis.PLAYER_SPIGOT_REDIS.getString(this), "null");
+            this.serverNameReminder = DataReminder.generateReminder(PlayerDataRedis.PLAYER_SPIGOT_REDIS.getString(this), null);
     }
 
     @Override
-    public String getServerName() {
+    public Long getServerID() {
         initSNReminder();
         return this.serverNameReminder.getData();
     }
@@ -230,7 +230,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
     /// <!-------------------- Rank part --------------------!>
 
     @Override
-    public void setServerName(String name) {
+    public void setServerID(long name) {
         initSNReminder();
         this.serverNameReminder.setData(name);
     }

@@ -15,26 +15,26 @@ import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.server.PlayerState;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.id.IDGenerator;
-import fr.redxil.core.common.data.game.GameDataRedis;
 import fr.redxil.core.common.data.IDDataValue;
+import fr.redxil.core.common.data.game.GameDataRedis;
 import fr.redxil.core.common.data.game.TeamDataValue;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.xilitra.hiroshisav.enums.TypeGame;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.logging.Level;
 
 public class CGame implements Game {
 
     final long gameID;
-    DataReminder<List<UUID>> plReminder = null;
     private DataReminder<Long> serverReminder = null, maxPlayerReminder = null, maxPlayerSpecReminder = null, minPlayerReminder = null;
-    private DataReminder<List<UUID>> specListReminder = null, inCoReminder = null, coReminder = null;
+    private DataReminder<List<UUID>> specListReminder = null, inCoReminder = null, coReminder = null, modSpecReminder = null;
+    private DataReminder<Map<UUID, String>> playerStateReminder = null;
     private DataReminder<Map<String, Object>> settingsReminder = null;
     private DataReminder<String> gameStateReminder = null, gameReminder = null, worldNameReminder;
 
@@ -94,7 +94,7 @@ public class CGame implements Game {
             if (!getGame().isAllowPlSpec())
                 return false;
 
-            return getMaxPlayerSpec() > getPlayerSpectators().size();
+            return getMaxPlayerSpec() > getPlayerList(PlayerState.MODSPECTATE, PlayerState.SPECTATE).size();
 
         }
 
@@ -107,24 +107,32 @@ public class CGame implements Game {
 
     @Override
     public boolean joinGame(UUID uuid, boolean b) {
-        if (!b) {
-            initListReminder();
-            plReminder.lockData();
-        }
+        if(isRegistered(uuid))
+            return false;
         if (!canAccess(uuid, b)) return false;
-
-        if (b) {
-            getPlayerSpectators().add(uuid);
-        } else {
-            getPlayerList().add(uuid);
-            getInConnectPlayer().add(uuid);
-        }
-        if (!b)
-            plReminder.unlockData();
+        setPlayerState(uuid, b ? PlayerState.SPECTATE : PlayerState.INCONNECT);
         long serverID = getServerID();
         API.getInstance().getServerManager().getServer(serverID).ifPresent(server -> server.setAllowedConnect(uuid, true));
         API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.switchServer(serverID));
         return true;
+    }
+
+    @Override
+    public boolean quitGame(UUID uuid){
+        if(!isRegistered(uuid))
+            return false;
+
+        setPlayerState(uuid, null);
+
+        API.getInstance().getServerManager().getServer(getServerID()).ifPresent(server -> server.setAllowedConnect(uuid, false));
+        API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> {
+            if(player.getServerID() == getServerID()) {
+                API.getInstance().getServerManager().getConnectableServer(player, ServerType.HUB).ifPresent(targetServer -> player.switchServer(targetServer.getServerID()));
+            }
+        });
+
+        return true;
+
     }
 
     public void initServerReminder() {
@@ -194,21 +202,9 @@ public class CGame implements Game {
             this.coReminder = DataReminder.generateListReminder(GameDataRedis.GAME_INPLAYER_REDIS.getString(this));
     }
 
-    public void initListReminder() {
-        if (plReminder == null)
-            this.plReminder = DataReminder.generateListReminder(GameDataRedis.GAME_PLAYER_REDIS.getString(this));
-    }
-
-    @Override
-    public List<UUID> getPlayerList() {
-        initListReminder();
-        return this.plReminder.getData();
-    }
-
-    @Override
-    public List<UUID> getConnectedPlayers() {
-        initCoListReminder();
-        return this.coReminder.getData();
+    public void initModSpecReminder() {
+        if (modSpecReminder == null)
+            this.modSpecReminder = DataReminder.generateListReminder(GameDataRedis.GAME_SPEC_MODERATOR_REDIS.getString(this));
     }
 
     public void initSpecReminder() {
@@ -216,38 +212,95 @@ public class CGame implements Game {
             this.specListReminder = DataReminder.generateListReminder(GameDataRedis.GAME_SPEC_PLAYER_REDIS.getString(this));
     }
 
-    @Override
-    public List<UUID> getPlayerSpectators() {
-        initSpecReminder();
-        return specListReminder.getData();
-    }
-
     public void initInCoListReminder() {
         if (inCoReminder == null)
             this.inCoReminder = DataReminder.generateListReminder(GameDataRedis.GAME_INCOPLAYER_REDIS.getString(this));
     }
 
+
     @Override
-    public List<UUID> getInConnectPlayer() {
-        initInCoListReminder();
-        return inCoReminder.getData();
+    public List<UUID> getPlayerList(PlayerState... playerStates) {
+        List<UUID> playerList = new ArrayList<>();
+        for(PlayerState playerState : playerStates){
+            switch (playerState){
+                case SPECTATE -> {
+                    initSpecReminder();
+                    playerList.addAll(this.specListReminder.getData());
+                }
+                case CONNECTED -> {
+                    initCoListReminder();
+                    playerList.addAll(coReminder.getData());
+                }
+                case INCONNECT -> {
+                    initInCoListReminder();
+                    playerList.addAll(inCoReminder.getData());
+                }
+                case MODSPECTATE -> {
+                    initModSpecReminder();
+                    playerList.addAll(modSpecReminder.getData());
+                }
+            }
+        }
+        return playerList;
+    }
+
+    public void initPlStateReminder() {
+        if (this.playerStateReminder == null)
+            this.playerStateReminder = DataReminder.generateMapReminder(GameDataRedis.MAP_STATE_REDIS.getString(this));
     }
 
     @Override
-    public boolean setSpectator(UUID s, boolean b) {
-        if (b == isSpectator(s)) return false;
-        if (b && !getConnectedPlayers().contains(s))
-            return false;
-        if (b) {
-            getConnectedPlayers().remove(s);
-            getPlayerList().remove(s);
-            getPlayerSpectators().add(s);
-        } else {
-            getConnectedPlayers().add(s);
-            getPlayerList().remove(s);
-            getPlayerSpectators().remove(s);
+    public PlayerState getPlayerState(UUID player){
+        initPlStateReminder();
+        return PlayerState.valueOf(this.playerStateReminder.getData().get(player));
+    }
+
+    @Override
+    public void setPlayerState(UUID player, @Nullable PlayerState playerState){
+        PlayerState oldState = getPlayerState(player);
+        if(oldState != null){
+            switch (oldState){
+                case SPECTATE -> {
+                    initSpecReminder();
+                    this.specListReminder.getData().remove(player);
+                }
+                case CONNECTED -> {
+                    initCoListReminder();
+                    coReminder.getData().remove(player);
+                }
+                case INCONNECT -> {
+                    initInCoListReminder();
+                    inCoReminder.getData().remove(player);
+                }
+                case MODSPECTATE -> {
+                    initModSpecReminder();
+                    modSpecReminder.getData().remove(player);
+                }
+            }
         }
-        return true;
+
+        initPlStateReminder();
+        if(playerState != null){
+            playerStateReminder.getData().put(player, playerState.name());
+            switch (playerState){
+                case SPECTATE -> {
+                    initSpecReminder();
+                    this.specListReminder.getData().add(player);
+                }
+                case CONNECTED -> {
+                    initCoListReminder();
+                    coReminder.getData().add(player);
+                }
+                case INCONNECT -> {
+                    initInCoListReminder();
+                    inCoReminder.getData().add(player);
+                }
+                case MODSPECTATE -> {
+                    initModSpecReminder();
+                    modSpecReminder.getData().add(player);
+                }
+            }
+        }else playerStateReminder.getData().remove(player);
     }
 
     @Override
@@ -358,11 +411,6 @@ public class CGame implements Game {
     }
 
     @Override
-    public boolean isInConnectPlayer(UUID playerName) {
-        return getInConnectPlayer().contains(playerName);
-    }
-
-    @Override
     public Object getSettings(String key) {
         return getSettingsMap().get(key);
     }
@@ -373,13 +421,24 @@ public class CGame implements Game {
     }
 
     @Override
+    public boolean isRegistered(UUID playerName) {
+        return getPlayerState(playerName) != null;
+    }
+
+    @Override
     public boolean isPlayer(UUID playerName) {
-        return getConnectedPlayers().contains(playerName);
+        PlayerState playerState = getPlayerState(playerName);
+        if(playerState == null)
+            return false;
+        return playerState == PlayerState.CONNECTED || playerState == PlayerState.INCONNECT;
     }
 
     @Override
     public boolean isSpectator(UUID playerName) {
-        return getPlayerSpectators().contains(playerName);
+        PlayerState playerState = getPlayerState(playerName);
+        if(playerState == null)
+            return false;
+        return playerState == PlayerState.SPECTATE || playerState == PlayerState.MODSPECTATE;
     }
 
 }

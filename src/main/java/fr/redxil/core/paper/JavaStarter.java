@@ -12,8 +12,10 @@ public class JavaStarter extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if(API.isAPIEnabled())
+        if(API.isAPIEnabled()) {
             API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID()).ifPresent(Game::clearData);
+            API.getInstance().getServer().shutdown();
+        }
     }
 
 }

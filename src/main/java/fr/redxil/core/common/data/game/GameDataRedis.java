@@ -28,11 +28,11 @@ public enum GameDataRedis {
 
     GAME_INCOPLAYER_REDIS(DataType.SERVER, "game/<gameID>/incopllist", true),
     GAME_INPLAYER_REDIS(DataType.SERVER, "game/<gameID>/inpllist", true),
-    GAME_PLAYER_REDIS(DataType.SERVER, "game/<gameID>/pllist", true),
 
     GAME_MAXPLSPEC_REDIS(DataType.SERVER, "game/<gameID>/specmax", true),
     GAME_SPEC_PLAYER_REDIS(DataType.SERVER, "game/<gameID>/specingame", true),
     GAME_SPEC_MODERATOR_REDIS(DataType.SERVER, "game/<gameID>/specoutgame", true),
+    MAP_STATE_REDIS(DataType.SERVER, "game/<gameID>/statemap", true),
 
     HOST_AUTHOR_REDIS(DataType.SERVER, "host/<gameID>/author", true),
     HOST_ACCESS_REDIS(DataType.SERVER, "host/<gameID>/access", true),
