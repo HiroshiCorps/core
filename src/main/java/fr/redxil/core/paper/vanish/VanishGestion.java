@@ -109,7 +109,7 @@ public class VanishGestion {
                                         switch (lastMSG.get()) {
                                             case 0 -> message = "§cVous êtes actuellement invisible !";
                                             case 1 -> message = "Cible: §a§l" + targetName;
-                                            case 2 -> message = "Serveur: §a§l" + target.get().getServerName();
+                                            case 2 -> message = "Serveur: §a§l" + target.get().getServerID().toString();
                                             case 3 -> {
                                                 String freezeString = "§c§lNON";
                                                 if (target.get().isFreeze()) freezeString = "§a§lOUI";

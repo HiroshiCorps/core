@@ -132,7 +132,6 @@ public class CGame implements Game {
         });
 
         return true;
-
     }
 
     public void initServerReminder() {

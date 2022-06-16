@@ -11,11 +11,11 @@ repositories {
     mavenCentral()
 
     flatDir {
-        dirs "../../api/hiroshi-api/libs/"
+        dirs "../hiroshi-api/libs/"
     }
 
     flatDir {
-        dirs "../../api/hiroshi-api/build/libs/"
+        dirs "../hiroshi-api/build/libs/"
     }
 
     maven {

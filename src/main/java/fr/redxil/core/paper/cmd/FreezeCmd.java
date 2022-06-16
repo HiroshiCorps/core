@@ -44,7 +44,7 @@ public class FreezeCmd implements CommandExecutor {
             return true;
         }
 
-        String server = target.get().getServerName();
+        String server = target.get().getServerID().toString();
 
         if (!Objects.equals(server, API.getInstance().getServerName())) {
 

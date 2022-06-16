@@ -177,7 +177,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public boolean hasCible() {
-        return getCible() != null;
+        return getCible().isPresent();
     }
 
 
@@ -266,7 +266,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
             Optional<APIPlayer> player = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID());
             if (player.isPresent())
-                server = player.get().getServerName();
+                server = player.get().getServerID().toString();
         }
 
         tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");

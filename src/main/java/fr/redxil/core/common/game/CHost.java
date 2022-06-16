@@ -14,6 +14,7 @@ import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.game.utils.HostAccess;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.server.PlayerState;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.game.GameDataRedis;
 import fr.xilitra.hiroshisav.enums.TypeGame;
@@ -85,11 +86,11 @@ public class CHost extends CGame implements Host {
             if (!isAllowSpectator(uuid))
                 return false;
 
-            return getMaxPlayerSpec() > getPlayerSpectators().size();
+            return getMaxPlayerSpec() > getPlayerList(PlayerState.MODSPECTATE, PlayerState.SPECTATE).size();
 
         }
 
-        return isGameState(GameState.WAITING) && isAllowPlayer(uuid) && getPlayerList().size() < getMaxPlayer();
+        return isGameState(GameState.WAITING) && isAllowPlayer(uuid) && getPlayerList(PlayerState.INCONNECT, PlayerState.CONNECTED).size() < getMaxPlayer();
     }
 
     @Override

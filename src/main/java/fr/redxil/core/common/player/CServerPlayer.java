@@ -42,14 +42,14 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public String getServerName() {
-        return CoreAPI.getInstance().getServerName();
+    public Long getServerID() {
+        return CoreAPI.getInstance().getServerID();
     }
 
     /// <!-------------------- Rank part --------------------!>
 
     @Override
-    public void setServerName(String name) {
+    public void setServerID(long serverID) {
     }
 
     @Override

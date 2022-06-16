@@ -17,6 +17,7 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.server.PlayerState;
 import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
@@ -74,7 +75,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         corePlugin.getVanish().applyVanish(player);
 
         API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
-        apiPlayer.get().setServerName(API.getInstance().getServerName());
+        apiPlayer.get().setServerID(API.getInstance().getServerID());
         Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
 
         if (playerModerator.isPresent()) {
@@ -82,12 +83,26 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
             corePlugin.getVanish().setVanish(playerModerator.get(), playerModerator.get().isVanish());
         }
 
-        if (GameBuilder.getGameBuilder().isEmpty())
+        Optional<GameBuilder> gameBuilderOptional = GameBuilder.getGameBuilder();
+        if (gameBuilderOptional.isEmpty())
             return;
 
         API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID()).ifPresent(game -> {
-            if (!game.isSpectator(player.getUniqueId()) && !game.isGameState(GameState.WAITING)) {
-                game.setSpectator(player.getUniqueId(), true);
+
+            PlayerState playerState = game.getPlayerState(player.getUniqueId());
+            GameState gameState = game.getGameState();
+
+            if(playerState == PlayerState.INCONNECT){
+                if(gameState == GameState.START || gameState == GameState.WAITING)
+                    gameBuilderOptional.get().onPlayerJoin(player);
+                else{
+                    game.setPlayerState(player.getUniqueId(), PlayerState.SPECTATE);
+                    gameBuilderOptional.get().onSpectatorJoin(player);
+                }
+            } else {
+                if(playerState == null)
+                    game.setPlayerState(player.getUniqueId(), PlayerState.MODSPECTATE);
+                gameBuilderOptional.get().onSpectatorJoin(player);
             }
         });
 
@@ -109,13 +124,6 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> event.setQuitMessage(getQuitMessage(apiOfflinePlayer)));
 
-        Optional<GameBuilder> gameBuilderOptional = GameBuilder.getGameBuilder();
-
-        if (gameBuilderOptional.isEmpty())
-            return;
-
-        GameBuilder gameBuilder = gameBuilderOptional.get();
-
         Optional<Game> gameOptional = API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID());
         if (gameOptional.isEmpty())
             return;
@@ -124,14 +132,20 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         boolean spectator = game.isSpectator(player.getUniqueId());
 
+        game.setPlayerState(player.getUniqueId(), PlayerState.DISCONNECTED);
+
+        Optional<GameBuilder> gameBuilderOptional = GameBuilder.getGameBuilder();
+
+        if (gameBuilderOptional.isEmpty())
+            return;
+
+        GameBuilder gameBuilder = gameBuilderOptional.get();
+
         if (!spectator) {
-            game.getConnectedPlayers().remove(player.getUniqueId());
-            gameBuilder.broadcastActionBar("§a" + player.getName() + "§7 à quitté la partie §8(§a" + game.getConnectedPlayers() + "§8/§e" + game.getMaxPlayer() + "§8)");
+            gameBuilder.broadcastActionBar("§a" + player.getName() + "§7 à quitté la partie §8(§a" + game.getPlayerList(PlayerState.CONNECTED) + "§8/§e" + game.getMaxPlayer() + "§8)");
             gameBuilder.onPlayerLeave(player);
-        } else {
-            game.getPlayerSpectators().remove(player.getUniqueId());
+        } else
             gameBuilder.onSpectatorLeave(player);
-        }
 
     }
 

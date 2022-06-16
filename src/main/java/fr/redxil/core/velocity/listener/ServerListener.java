@@ -25,7 +25,7 @@ public class ServerListener {
             return;
         }
 
-        if (apiPlayer.get().getServerName() == null) {
+        if (apiPlayer.get().getServerID() == null) {
             Optional<Server> serverFinalTarget = API.getInstance().getServerManager().getConnectableServer(apiPlayer.get(), ServerType.HUB);
             if (serverFinalTarget.isEmpty()) {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());
