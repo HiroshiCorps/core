@@ -38,6 +38,7 @@ public class CorePlugin extends PaperAPI {
     private VanishGestion vanish;
     private ModeratorMain moderatorMain;
     private FreezeMessageGestion freezeGestion;
+
     public CorePlugin(JavaStarter javaPlugin) {
         CorePlugin.instance = this;
         this.javaPlugin = javaPlugin;

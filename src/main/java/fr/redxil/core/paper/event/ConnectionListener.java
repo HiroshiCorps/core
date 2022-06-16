@@ -13,11 +13,11 @@ import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.utils.GameState;
+import fr.redxil.api.common.game.utils.PlayerState;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.server.PlayerState;
 import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
@@ -92,15 +92,15 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
             PlayerState playerState = game.getPlayerState(player.getUniqueId());
             GameState gameState = game.getGameState();
 
-            if(playerState == PlayerState.INCONNECT){
-                if(gameState == GameState.START || gameState == GameState.WAITING)
+            if (playerState == PlayerState.INCONNECT) {
+                if (gameState == GameState.START || gameState == GameState.WAITING)
                     gameBuilderOptional.get().onPlayerJoin(player);
-                else{
+                else {
                     game.setPlayerState(player.getUniqueId(), PlayerState.SPECTATE);
                     gameBuilderOptional.get().onSpectatorJoin(player);
                 }
             } else {
-                if(playerState == null)
+                if (playerState == null)
                     game.setPlayerState(player.getUniqueId(), PlayerState.MODSPECTATE);
                 gameBuilderOptional.get().onSpectatorJoin(player);
             }

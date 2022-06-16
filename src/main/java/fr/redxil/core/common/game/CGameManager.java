@@ -16,7 +16,10 @@ import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.game.GameDataRedis;
 import fr.xilitra.hiroshisav.enums.TypeGame;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class CGameManager implements GameManager {
 

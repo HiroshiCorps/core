@@ -13,9 +13,9 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.utils.GameState;
+import fr.redxil.api.common.game.utils.PlayerState;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.server.PlayerState;
 import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.id.IDGenerator;
 import fr.redxil.core.common.data.IDDataValue;
@@ -107,7 +107,7 @@ public class CGame implements Game {
 
     @Override
     public boolean joinGame(UUID uuid, boolean b) {
-        if(isRegistered(uuid))
+        if (isRegistered(uuid))
             return false;
         if (!canAccess(uuid, b)) return false;
         setPlayerState(uuid, b ? PlayerState.SPECTATE : PlayerState.INCONNECT);
@@ -118,15 +118,15 @@ public class CGame implements Game {
     }
 
     @Override
-    public boolean quitGame(UUID uuid){
-        if(!isRegistered(uuid))
+    public boolean quitGame(UUID uuid) {
+        if (!isRegistered(uuid))
             return false;
 
         setPlayerState(uuid, null);
 
         API.getInstance().getServerManager().getServer(getServerID()).ifPresent(server -> server.setAllowedConnect(uuid, false));
         API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> {
-            if(player.getServerID() == getServerID()) {
+            if (player.getServerID() == getServerID()) {
                 API.getInstance().getServerManager().getConnectableServer(player, ServerType.HUB).ifPresent(targetServer -> player.switchServer(targetServer.getServerID()));
             }
         });
@@ -220,8 +220,8 @@ public class CGame implements Game {
     @Override
     public List<UUID> getPlayerList(PlayerState... playerStates) {
         List<UUID> playerList = new ArrayList<>();
-        for(PlayerState playerState : playerStates){
-            switch (playerState){
+        for (PlayerState playerState : playerStates) {
+            switch (playerState) {
                 case SPECTATE -> {
                     initSpecReminder();
                     playerList.addAll(this.specListReminder.getData());
@@ -249,16 +249,16 @@ public class CGame implements Game {
     }
 
     @Override
-    public PlayerState getPlayerState(UUID player){
+    public PlayerState getPlayerState(UUID player) {
         initPlStateReminder();
         return PlayerState.valueOf(this.playerStateReminder.getData().get(player));
     }
 
     @Override
-    public void setPlayerState(UUID player, @Nullable PlayerState playerState){
+    public void setPlayerState(UUID player, @Nullable PlayerState playerState) {
         PlayerState oldState = getPlayerState(player);
-        if(oldState != null){
-            switch (oldState){
+        if (oldState != null) {
+            switch (oldState) {
                 case SPECTATE -> {
                     initSpecReminder();
                     this.specListReminder.getData().remove(player);
@@ -279,9 +279,9 @@ public class CGame implements Game {
         }
 
         initPlStateReminder();
-        if(playerState != null){
+        if (playerState != null) {
             playerStateReminder.getData().put(player, playerState.name());
-            switch (playerState){
+            switch (playerState) {
                 case SPECTATE -> {
                     initSpecReminder();
                     this.specListReminder.getData().add(player);
@@ -299,7 +299,7 @@ public class CGame implements Game {
                     modSpecReminder.getData().add(player);
                 }
             }
-        }else playerStateReminder.getData().remove(player);
+        } else playerStateReminder.getData().remove(player);
     }
 
     @Override
@@ -427,7 +427,7 @@ public class CGame implements Game {
     @Override
     public boolean isPlayer(UUID playerName) {
         PlayerState playerState = getPlayerState(playerName);
-        if(playerState == null)
+        if (playerState == null)
             return false;
         return playerState == PlayerState.CONNECTED || playerState == PlayerState.INCONNECT;
     }
@@ -435,7 +435,7 @@ public class CGame implements Game {
     @Override
     public boolean isSpectator(UUID playerName) {
         PlayerState playerState = getPlayerState(playerName);
-        if(playerState == null)
+        if (playerState == null)
             return false;
         return playerState == PlayerState.SPECTATE || playerState == PlayerState.MODSPECTATE;
     }

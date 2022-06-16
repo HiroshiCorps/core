@@ -4,9 +4,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.party.Party;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
 

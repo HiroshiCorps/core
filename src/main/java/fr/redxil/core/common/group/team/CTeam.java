@@ -10,9 +10,9 @@
 package fr.redxil.core.common.group.team;
 
 import fr.redxil.api.common.API;
-import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.group.team.TeamManager;
+import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.game.TeamDataValue;
 import fr.redxil.core.common.data.utils.DataType;
 

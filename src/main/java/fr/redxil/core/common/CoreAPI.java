@@ -48,6 +48,7 @@ public class CoreAPI extends API {
     private final GameManager gameManager;
     private final APIEnabler APIEnabler;
     private final boolean velocity;
+    private final HashMap<Long, TeamManager> mapManager = new HashMap<>();
     private Long serverID;
     private CSQLConnection sqlConnection;
     private Server server;
@@ -278,14 +279,12 @@ public class CoreAPI extends API {
         return gameManager;
     }
 
-    private final HashMap<Long, TeamManager> mapManager = new HashMap<>();
-
     @Override
     public TeamManager getTeamManager(Long aLong) {
-        if(isOnlineMod())
-        return new CTeamManager(aLong);
+        if (isOnlineMod())
+            return new CTeamManager(aLong);
         else {
-            if(mapManager.containsKey(aLong))
+            if (mapManager.containsKey(aLong))
                 return mapManager.get(aLong);
             else {
                 TeamManager teamManager = new CTeamManager(aLong);

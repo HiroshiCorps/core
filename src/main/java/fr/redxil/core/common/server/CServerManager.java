@@ -97,14 +97,14 @@ public class CServerManager implements ServerManager {
 
         if (!API.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);
-        else if(serverCreator.needGenerate()){
+        else if (serverCreator.needGenerate()) {
 
             TypeGame typeGame = null;
 
-            if(serverCreator instanceof HostServerInfo hostServerInfo){
+            if (serverCreator instanceof HostServerInfo hostServerInfo) {
                 typeGame = hostServerInfo.getTypeGame();
                 API.getInstance().getGameManager().createHost(cServer.getServerID(), hostServerInfo.getHost(), hostServerInfo.getTypeGame());
-            }else if(serverCreator instanceof GameServerInfo gameServerInfo){
+            } else if (serverCreator instanceof GameServerInfo gameServerInfo) {
                 typeGame = gameServerInfo.getTypeGame();
                 try {
                     API.getInstance().getGameManager().createGame(cServer.getServerID(), gameServerInfo.getTypeGame());

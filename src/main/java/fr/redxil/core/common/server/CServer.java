@@ -42,6 +42,7 @@ public class CServer implements Server {
     DataReminder<Long> reservedReminder = null;
     DataReminder<List<String>> allowReminder = null;
     private long serverID;
+
     public CServer(long serverID) {
         this.serverID = serverID;
     }
