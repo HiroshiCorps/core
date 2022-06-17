@@ -49,32 +49,32 @@ public enum TeamDataValue {
         this.needTeam = needTeam;
     }
 
-    public static void clearRedisData(DataType dataType, long gameID, String teamName) {
+    public static void clearRedisData(DataType dataType, long serverID, String teamName) {
 
         API.getInstance().getRedisManager().ifPresent(redis -> {
             RedissonClient redissonClient = redis.getRedissonClient();
             for (TeamDataValue mdv : values())
                 if ((dataType == null || mdv.isDataType(dataType)))
-                    if (mdv.hasNeedInfo(gameID, teamName))
-                        redissonClient.getBucket(mdv.getString(gameID, teamName)).delete();
+                    if (mdv.hasNeedInfo(serverID, teamName))
+                        redissonClient.getBucket(mdv.getString(serverID, teamName)).delete();
         });
 
     }
 
     public static void clearRedisData(DataType dataType, Game game) {
 
-        for (String team : API.getInstance().getTeamManager(game.getGameID()).getTeamList())
-            clearRedisData(dataType, game.getGameID(), team);
+        for (String team : API.getInstance().getTeamManager(game.getServerID()).getTeamList())
+            clearRedisData(dataType, game.getServerID(), team);
 
     }
 
-    public boolean hasNeedInfo(Long gameID, String teamName) {
-        if (isNeedGame() && gameID == null)
+    public boolean hasNeedInfo(Long serverID, String teamName) {
+        if (isNeedGame() && serverID == null)
             return false;
         return !isNeedTeam() || teamName != null;
     }
 
-    public String getString(Long gameID, String teamName) {
+    public String getString(Long serverID, String teamName) {
         String location = this.location;
         if (needTeam) {
             if (teamName == null) return null;
@@ -82,8 +82,8 @@ public enum TeamDataValue {
         }
 
         if (needGame) {
-            if (gameID == null) return null;
-            location = location.replace("<serverID>", gameID.toString());
+            if (serverID == null) return null;
+            location = location.replace("<serverID>", serverID.toString());
         }
 
         return location;
@@ -98,8 +98,8 @@ public enum TeamDataValue {
         }
 
         if (needGame) {
-            long gameID = team.getGameID();
-            location = location.replace("<serverID>", Long.valueOf(gameID).toString());
+            long serverID = team.getServerID();
+            location = location.replace("<serverID>", Long.valueOf(serverID).toString());
         }
 
         return location;

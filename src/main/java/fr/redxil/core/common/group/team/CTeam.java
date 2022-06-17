@@ -24,7 +24,7 @@ import java.util.UUID;
 public class CTeam implements Team {
 
     private final String teamName;
-    private final long gameID;
+    private final long serverID;
     DataReminder<String> csavReminder = null;
     DataReminder<String> hoReminder = null;
     DataReminder<String> coReminder = null;
@@ -42,14 +42,14 @@ public class CTeam implements Team {
     DataReminder<Long> mpReminder = null;
     DataReminder<Map<String, Object>> attachMapReminder = null;
 
-    protected CTeam(long gameID, String teamName) {
-        this.gameID = gameID;
+    protected CTeam(long serverID, String teamName) {
+        this.serverID = serverID;
         this.teamName = teamName;
     }
 
-    public CTeam(Long gameID, String teamName, int maxPlayers) {
+    public CTeam(Long serverID, String teamName, int maxPlayers) {
 
-        this.gameID = gameID;
+        this.serverID = serverID;
         this.teamName = teamName;
 
         setDisplayName(teamName);
@@ -63,7 +63,7 @@ public class CTeam implements Team {
         setFriendlyFire(false);
         setCollide(false);
 
-        API.getInstance().getTeamManager(gameID).getTeamList().add(teamName);
+        API.getInstance().getTeamManager(serverID).getTeamList().add(teamName);
 
     }
 
@@ -72,8 +72,8 @@ public class CTeam implements Team {
         setClientSideAvailable(false);
         for (UUID uuid : getListPlayerUUID())
             removePlayer(uuid);
-        API.getInstance().getTeamManager(gameID).getTeamList().remove(getTeamName());
-        TeamDataValue.clearRedisData(DataType.TEAM, getGameID(), getTeamName());
+        API.getInstance().getTeamManager(getServerID()).getTeamList().remove(getTeamName());
+        TeamDataValue.clearRedisData(DataType.TEAM, getServerID(), getTeamName());
     }
 
     public DataReminder<String> initCSAVReminder() {
@@ -132,8 +132,8 @@ public class CTeam implements Team {
      *
      */
     @Override
-    public long getGameID() {
-        return gameID;
+    public long getServerID() {
+        return serverID;
     }
 
     @Override
@@ -222,7 +222,7 @@ public class CTeam implements Team {
         if (getRemainingPlace() == 0 || getListPlayerUUID().contains(player))
             return false;
 
-        TeamManager teamManager = API.getInstance().getTeamManager(getGameID());
+        TeamManager teamManager = API.getInstance().getTeamManager(getServerID());
 
         Optional<Team> beforeTeam = teamManager.getPlayerTeam(player);
         if (beforeTeam.isPresent() && !beforeTeam.get().removePlayer(player))
@@ -238,7 +238,7 @@ public class CTeam implements Team {
     public boolean removePlayer(UUID player) {
 
         getListPlayerUUID().remove(player);
-        API.getInstance().getTeamManager(getGameID()).getUUIDToTeamMap().remove(player, getTeamName());
+        API.getInstance().getTeamManager(getServerID()).getUUIDToTeamMap().remove(player, getTeamName());
 
         return true;
 
