@@ -19,6 +19,7 @@ import fr.redxil.api.common.group.party.PartyManager;
 import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.game.CGameManager;
@@ -47,19 +48,16 @@ public class CoreAPI extends API {
     private final PartyManager partyManager;
     private final GameManager gameManager;
     private final APIEnabler APIEnabler;
-    private final boolean velocity;
     private final HashMap<Long, TeamManager> mapManager = new HashMap<>();
     private Long serverID;
-    private CSQLConnection sqlConnection;
+    private CSQLConnection sqlConnection = null;
     private Server server;
-    private CRedisManager manager;
+    private CRedisManager manager = null;
 
     public CoreAPI(APIEnabler plugin) {
         CoreAPI.instance = this;
 
         this.APIEnabler = plugin;
-
-        this.velocity = plugin.getServerInfo().getServerType() == ServerType.VELOCITY;
 
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
@@ -153,9 +151,6 @@ public class CoreAPI extends API {
                 return;
             }
 
-        } else {
-            this.sqlConnection = null;
-            this.manager = null;
         }
 
         Optional<Server> server;
@@ -266,7 +261,7 @@ public class CoreAPI extends API {
 
     @Override
     public boolean isVelocity() {
-        return velocity;
+        return getAPIEnabler().getServerInfo().getServerType() == ServerType.VELOCITY;
     }
 
     @Override

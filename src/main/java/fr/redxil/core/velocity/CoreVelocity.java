@@ -23,6 +23,7 @@ import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.common.event.CoreEnabledEvent;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.creator.ServerInfo;
+import fr.redxil.api.common.server.creator.VelocityServerInfo;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
 import fr.redxil.core.velocity.commands.PartyCMD;
@@ -63,6 +64,7 @@ public class CoreVelocity implements APIEnabler {
     final Logger logger;
     final File folder;
     final CommandManager commandManager;
+    final ServerInfo serverInfo;
     final IpInfo ipInfo;
     boolean enabled = false;
 
@@ -75,6 +77,8 @@ public class CoreVelocity implements APIEnabler {
 
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
+
+        this.serverInfo = new VelocityServerInfo();
 
         new CoreAPI(this);
 
