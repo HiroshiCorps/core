@@ -9,6 +9,7 @@
 
 package fr.redxil.core.common.server;
 
+import fr.redline.pms.pm.RedisPMManager;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.error.GameCreateError;
 import fr.redxil.api.common.player.APIPlayer;
@@ -113,7 +114,8 @@ public class CServerManager implements ServerManager {
                 }
             }
 
-            new RequestObject(cServer.getServerID(), serverCreator.getServerName(), serverCreator.getServerType(), typeGame, serverCreator.getServerMap(), serverCreator.getIpInfo().getPort());
+            TypeGame finalTypeGame = typeGame;
+            API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "createServer", new RequestObject(cServer.getServerID(), serverCreator.getServerName(), serverCreator.getServerType(), finalTypeGame, serverCreator.getServerMap(), serverCreator.getIpInfo().getPort())));
 
         }
 
