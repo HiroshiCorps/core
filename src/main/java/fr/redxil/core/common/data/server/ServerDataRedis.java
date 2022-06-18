@@ -9,8 +9,8 @@
 
 package fr.redxil.core.common.data.server;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
@@ -42,7 +42,7 @@ public enum ServerDataRedis {
 
     public static void clearRedisData(DataType dataType, Long playerID) {
 
-        API.getInstance().getRedisManager().ifPresent(redis -> {
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis -> {
             RedissonClient redissonClient = redis.getRedissonClient();
             for (ServerDataRedis mdv : values())
                 if (dataType == null || mdv.isDataType(dataType))

@@ -9,22 +9,21 @@
 
 package fr.redxil.core.common.player.moderator;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.time.DateUtility;
-import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import fr.redxil.core.common.data.moderator.ModeratorDataSql;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.redis.RedisManager;
 import fr.redxil.core.common.sql.SQLModel;
 import fr.redxil.core.common.sql.SQLModels;
+import fr.redxil.core.common.utils.DataReminder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +54,7 @@ public class CPlayerModerator implements APIPlayerModerator {
         uuidReminder.setData(uuid.toString());
         nameReminder.setData(name);
 
-        if (API.getInstance().isOnlineMod()) {
+        if (CoreAPI.getInstance().isOnlineMod()) {
             ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<>() {{
                 this.put(ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns(), memberID.intValue());
                 this.put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
@@ -69,8 +68,8 @@ public class CPlayerModerator implements APIPlayerModerator {
         } else
             CoreAPI.getInstance().getModeratorManager().getMap().put(memberID, this);
 
-        API.getInstance().getModeratorManager().getStringToLongModerator().put(name, memberID);
-        API.getInstance().getModeratorManager().getUUIDToLongModerator().put(uuid.toString(), memberID);
+        CoreAPI.getInstance().getModeratorManager().getStringToLongModerator().put(name, memberID);
+        CoreAPI.getInstance().getModeratorManager().getUUIDToLongModerator().put(uuid.toString(), memberID);
     }
 
     public void initDataReminder() {
@@ -80,12 +79,12 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public void disconnectModerator() {
-        if (!API.getInstance().isVelocity() && API.getInstance().isOnlineMod()) return;
+        if (!CoreAPI.getInstance().isVelocity() && CoreAPI.getInstance().isOnlineMod()) return;
 
         String name = getName();
         UUID uuid = getUUID();
 
-        if (API.getInstance().isOnlineMod()) {
+        if (CoreAPI.getInstance().isOnlineMod()) {
 
             ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
 
@@ -101,9 +100,9 @@ public class CPlayerModerator implements APIPlayerModerator {
             CoreAPI.getInstance().getModeratorManager().getMap().remove(this.getMemberID());
         }
 
-        API.getInstance().getModeratorManager().getLoadedModerator().remove(memberID);
-        API.getInstance().getModeratorManager().getStringToLongModerator().remove(name);
-        API.getInstance().getModeratorManager().getUUIDToLongModerator().remove(uuid.toString());
+        CoreAPI.getInstance().getModeratorManager().getLoadedModerator().remove(memberID);
+        CoreAPI.getInstance().getModeratorManager().getStringToLongModerator().remove(name);
+        CoreAPI.getInstance().getModeratorManager().getUUIDToLongModerator().remove(uuid.toString());
     }
 
     public void initUUID() {
@@ -205,7 +204,7 @@ public class CPlayerModerator implements APIPlayerModerator {
     @Override
     public void printSanction(APIOfflinePlayer apiOfflinePlayer, SanctionType sanctionType) {
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(getMemberID());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(getMemberID());
 
         if (apiPlayer.isEmpty())
             return;
@@ -247,7 +246,7 @@ public class CPlayerModerator implements APIPlayerModerator {
     @Override
     public void printInfo(APIOfflinePlayer apiOfflinePlayer) {
 
-        Optional<APIPlayer> moderator = API.getInstance().getPlayerManager().getPlayer(getMemberID());
+        Optional<APIPlayer> moderator = CoreAPI.getInstance().getPlayerManager().getPlayer(getMemberID());
         if (moderator.isEmpty())
             return;
 
@@ -264,7 +263,7 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (apiOfflinePlayer.isConnected()) {
             connectedMsg = "§a✓";
 
-            Optional<APIPlayer> player = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID());
+            Optional<APIPlayer> player = CoreAPI.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID());
             if (player.isPresent())
                 server = player.get().getServerID().toString();
         }
@@ -278,7 +277,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         String ip = "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer) {
-            Optional<RedisManager> redis = API.getInstance().getRedisManager();
+            Optional<RedisManager> redis = CoreAPI.getInstance().getRedisManager();
             ip = redis.map(redisManager -> String.valueOf(redisManager.getRedissonClient().getList("ip/" + apiOfflinePlayer.getIP().getIp()).size() - 1)).orElse("Error: Redis disconnected");
         }
 

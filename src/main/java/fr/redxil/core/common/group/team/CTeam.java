@@ -9,12 +9,12 @@
 
 package fr.redxil.core.common.group.team;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.group.team.TeamManager;
-import fr.redxil.api.common.utils.DataReminder;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.game.TeamDataValue;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.utils.DataReminder;
 
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,7 @@ public class CTeam implements Team {
         setFriendlyFire(false);
         setCollide(false);
 
-        API.getInstance().getTeamManager(serverID).getTeamList().add(teamName);
+        CoreAPI.getInstance().getTeamManager(serverID).getTeamList().add(teamName);
 
     }
 
@@ -72,7 +72,7 @@ public class CTeam implements Team {
         setClientSideAvailable(false);
         for (UUID uuid : getListPlayerUUID())
             removePlayer(uuid);
-        API.getInstance().getTeamManager(getServerID()).getTeamList().remove(getTeamName());
+        CoreAPI.getInstance().getTeamManager(getServerID()).getTeamList().remove(getTeamName());
         TeamDataValue.clearRedisData(DataType.TEAM, getServerID(), getTeamName());
     }
 
@@ -222,7 +222,7 @@ public class CTeam implements Team {
         if (getRemainingPlace() == 0 || getListPlayerUUID().contains(player))
             return false;
 
-        TeamManager teamManager = API.getInstance().getTeamManager(getServerID());
+        TeamManager teamManager = CoreAPI.getInstance().getTeamManager(getServerID());
 
         Optional<Team> beforeTeam = teamManager.getPlayerTeam(player);
         if (beforeTeam.isPresent() && !beforeTeam.get().removePlayer(player))
@@ -238,7 +238,7 @@ public class CTeam implements Team {
     public boolean removePlayer(UUID player) {
 
         getListPlayerUUID().remove(player);
-        API.getInstance().getTeamManager(getServerID()).getUUIDToTeamMap().remove(player, getTeamName());
+        CoreAPI.getInstance().getTeamManager(getServerID()).getUUIDToTeamMap().remove(player, getTeamName());
 
         return true;
 

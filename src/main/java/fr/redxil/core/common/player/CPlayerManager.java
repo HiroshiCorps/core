@@ -10,17 +10,17 @@
 package fr.redxil.core.common.player;
 
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.api.common.utils.DataReminder;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
+import fr.redxil.core.common.utils.DataReminder;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -48,7 +48,7 @@ public class CPlayerManager implements APIPlayerManager {
         Long value = getNameToLongMap().get(name);
         if (value == null)
             return Optional.empty();
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.ofNullable(playerMap.get(value));
         return Optional.of(new CPlayer(value));
     }
@@ -65,7 +65,7 @@ public class CPlayerManager implements APIPlayerManager {
         Long value = getUUIDToLongMap().get(uuid.toString());
         if (value == null)
             return Optional.empty();
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.ofNullable(playerMap.get(value));
         return Optional.of(new CPlayer(value));
     }
@@ -82,7 +82,7 @@ public class CPlayerManager implements APIPlayerManager {
         if (!isLoadedPlayer(id)) {
             return Optional.empty();
         }
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.ofNullable(playerMap.get(id));
         return Optional.of(new CPlayer(id));
     }
@@ -100,7 +100,7 @@ public class CPlayerManager implements APIPlayerManager {
         Optional<APIPlayer> apiPlayer = getPlayer(uuid);
         if (apiPlayer.isPresent()) return Optional.of(apiPlayer.get());
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
@@ -126,7 +126,7 @@ public class CPlayerManager implements APIPlayerManager {
         Optional<APIPlayer> apiPlayer = getPlayer(name);
         if (apiPlayer.isPresent()) return Optional.of(apiPlayer.get());
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
@@ -149,7 +149,7 @@ public class CPlayerManager implements APIPlayerManager {
         Optional<APIPlayer> apiPlayer = getPlayer(memberID);
         if (apiPlayer.isPresent()) return Optional.of(apiPlayer.get());
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);

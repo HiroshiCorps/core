@@ -15,7 +15,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
@@ -23,6 +22,7 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -47,7 +47,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
 
         long end = DateUtility.addToCurrentTimeStamp(durationTime);
 
-        API.getInstance().getAPIEnabler().printLog(Level.INFO, "End: " + end);
+        CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "End: " + end);
 
         String format = DateUtility.getMessage(end);
 
@@ -64,7 +64,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
                                 format + " pour raison: "
                                 + reason + ".");
 
-                API.getInstance().getModeratorManager().sendToModerators(banMessage);
+                CoreAPI.getInstance().getModeratorManager().sendToModerators(banMessage);
 
                 Optional<Player> onlinePlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
 
@@ -94,7 +94,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
 
         if (apiPlayerModerator.isEmpty()) {
@@ -104,7 +104,7 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
-        Optional<APIOfflinePlayer> apiPlayerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
+        Optional<APIOfflinePlayer> apiPlayerTarget = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)

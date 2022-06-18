@@ -9,12 +9,12 @@
 
 package fr.redxil.core.paper.vanish;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
 import fr.redxil.api.paper.utils.ActionBar;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.CorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -42,7 +42,7 @@ public class VanishGestion {
 
         modPlayer.setGameMode(GameMode.SURVIVAL);
 
-        ModeratorManager modManager = API.getInstance().getModeratorManager();
+        ModeratorManager modManager = CoreAPI.getInstance().getModeratorManager();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!modManager.isModerator(player.getUniqueId())) {
                 if (b) player.hidePlayer(corePlugin.getJavaStarter(), modPlayer);
@@ -80,7 +80,7 @@ public class VanishGestion {
                             if (targetNameOpt.isPresent()) {
 
                                 String targetName = targetNameOpt.get();
-                                Optional<APIPlayer> target = API.getInstance().getPlayerManager().getPlayer(targetName);
+                                Optional<APIPlayer> target = CoreAPI.getInstance().getPlayerManager().getPlayer(targetName);
 
                                 if (target.isPresent()) {
 
@@ -130,7 +130,7 @@ public class VanishGestion {
                                         case 1 -> message = "Cible: §a§l" + targetName;
                                         case 2 -> {
                                             String msg2 = "§c§lDéconnecté";
-                                            Optional<APIOfflinePlayer> offTarget = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
+                                            Optional<APIOfflinePlayer> offTarget = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetName);
                                             if (offTarget.isPresent() && offTarget.get().isBan())
                                                 msg2 = "§4§lBANNIS";
                                             message = "Etat: " + msg2;
@@ -180,14 +180,14 @@ public class VanishGestion {
     }
 
     public void applyVanish(Player p) {
-        if (API.getInstance().getModeratorManager().isModerator(p.getUniqueId())) return;
+        if (CoreAPI.getInstance().getModeratorManager().isModerator(p.getUniqueId())) return;
 
-        Collection<Long> mods = API.getInstance().getModeratorManager().getLoadedModerator();
+        Collection<Long> mods = CoreAPI.getInstance().getModeratorManager().getLoadedModerator();
 
         if (mods.isEmpty()) return;
 
         for (Long mod : mods) {
-            Optional<APIPlayerModerator> moderator = API.getInstance().getModeratorManager().getModerator(mod);
+            Optional<APIPlayerModerator> moderator = CoreAPI.getInstance().getModeratorManager().getModerator(mod);
             if (moderator.isPresent() && moderator.get().isVanish()) {
                 Player modPlayer = Bukkit.getPlayer(moderator.get().getUUID());
                 if (modPlayer != null) p.hidePlayer(corePlugin.getJavaStarter(), modPlayer);

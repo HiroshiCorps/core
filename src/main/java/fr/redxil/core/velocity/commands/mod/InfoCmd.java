@@ -15,12 +15,12 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 import net.kyori.adventure.text.Component;
@@ -40,7 +40,7 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
-        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
         if (playerModerator.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
             return;
@@ -56,8 +56,8 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         }
 
         if (targetID == null)
-            target = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
-        else target = API.getInstance().getPlayerManager().getOfflinePlayer(targetID);
+            target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetName);
+        else target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
         if (target.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
@@ -77,7 +77,7 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
-        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
         if (playerModerator.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
             return;
@@ -93,8 +93,8 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         }
 
         if (targetID == null)
-            target = API.getInstance().getPlayerManager().getOfflinePlayer(targetName);
-        else target = API.getInstance().getPlayerManager().getOfflinePlayer(targetID);
+            target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetName);
+        else target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
         if (target.isEmpty()) {
             commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());

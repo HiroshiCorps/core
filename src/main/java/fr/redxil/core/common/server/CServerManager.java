@@ -10,7 +10,6 @@
 package fr.redxil.core.common.server;
 
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.error.GameCreateError;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
@@ -18,8 +17,9 @@ import fr.redxil.api.common.server.ServerManager;
 import fr.redxil.api.common.server.creator.GameServerInfo;
 import fr.redxil.api.common.server.creator.HostServerInfo;
 import fr.redxil.api.common.server.creator.ServerInfo;
-import fr.redxil.api.common.utils.DataReminder;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.server.ServerDataRedis;
+import fr.redxil.core.common.utils.DataReminder;
 import fr.xilitra.hiroshisav.RequestObject;
 import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.xilitra.hiroshisav.enums.TypeGame;
@@ -79,13 +79,13 @@ public class CServerManager implements ServerManager {
         Map<String, Long> serverMap = getNameToLongMap();
         Long result = serverMap.get(s);
         if (result == null) return Optional.empty();
-        return Optional.ofNullable(API.getInstance().isOnlineMod() ? new CServer(result) : server.get(result));
+        return Optional.ofNullable(CoreAPI.getInstance().isOnlineMod() ? new CServer(result) : server.get(result));
     }
 
     @Override
     public Optional<Server> getServer(long l) {
         if (!isServerExist(l)) return Optional.empty();
-        return Optional.ofNullable(API.getInstance().isOnlineMod() ? new CServer(l) : server.get(l));
+        return Optional.ofNullable(CoreAPI.getInstance().isOnlineMod() ? new CServer(l) : server.get(l));
     }
 
 
@@ -96,7 +96,7 @@ public class CServerManager implements ServerManager {
 
         CServer cServer = new CServer(serverCreator);
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);
         else if (serverCreator.needGenerate()) {
 
@@ -104,18 +104,18 @@ public class CServerManager implements ServerManager {
 
             if (serverCreator instanceof HostServerInfo hostServerInfo) {
                 typeGame = hostServerInfo.getTypeGame();
-                API.getInstance().getGameManager().createHost(cServer.getServerID(), hostServerInfo.getHost(), hostServerInfo.getTypeGame());
+                CoreAPI.getInstance().getGameManager().createHost(cServer.getServerID(), hostServerInfo.getHost(), hostServerInfo.getTypeGame());
             } else if (serverCreator instanceof GameServerInfo gameServerInfo) {
                 typeGame = gameServerInfo.getTypeGame();
                 try {
-                    API.getInstance().getGameManager().createGame(cServer.getServerID(), gameServerInfo.getTypeGame());
+                    CoreAPI.getInstance().getGameManager().createGame(cServer.getServerID(), gameServerInfo.getTypeGame());
                 } catch (GameCreateError e) {
                     throw new RuntimeException(e);
                 }
             }
 
             TypeGame finalTypeGame = typeGame;
-            API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "createServer", new RequestObject(cServer.getServerID(), serverCreator.getServerName(), serverCreator.getServerType(), finalTypeGame, serverCreator.getServerMap(), serverCreator.getIpInfo().getPort())));
+            CoreAPI.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "createServer", new RequestObject(cServer.getServerID(), serverCreator.getServerName(), serverCreator.getServerType(), finalTypeGame, serverCreator.getServerMap(), serverCreator.getIpInfo().getPort())));
 
         }
 
@@ -128,12 +128,12 @@ public class CServerManager implements ServerManager {
         if (serverID == null)
             return Optional.empty();
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         CServer cServer = new CServer(serverID);
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);
 
         return Optional.of(cServer);

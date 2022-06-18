@@ -10,18 +10,18 @@
 package fr.redxil.core.common.game;
 
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.game.utils.PlayerState;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.utils.DataReminder;
-import fr.redxil.api.common.utils.id.IDGenerator;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.game.GameDataRedis;
 import fr.redxil.core.common.data.game.TeamDataValue;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.utils.DataReminder;
+import fr.redxil.core.common.utils.IDGenerator;
 import fr.xilitra.hiroshisav.enums.ServerType;
 import fr.xilitra.hiroshisav.enums.TypeGame;
 
@@ -60,14 +60,14 @@ public class CGame implements Game {
 
         GameDataRedis.clearRedisData(DataType.SERVER, this.gameID);
 
-        API.getInstance().getGameManager().getServerToGameIDMap().put(serverID, this.gameID);
+        CoreAPI.getInstance().getGameManager().getServerToGameIDMap().put(serverID, this.gameID);
 
     }
 
     @Override
     public void clearData() {
 
-        API.getInstance().getAPIEnabler().printLog(Level.FINE, "[Host] Clearing redis data");
+        CoreAPI.getInstance().getAPIEnabler().printLog(Level.FINE, "[Host] Clearing redis data");
 
         TeamDataValue.clearRedisData(DataType.TEAM, this);
 
@@ -76,7 +76,7 @@ public class CGame implements Game {
 
         GameDataRedis.clearRedisData(DataType.SERVER, gameID);
 
-        API.getInstance().getGameManager().getServerToGameIDMap().remove(serverID);
+        CoreAPI.getInstance().getGameManager().getServerToGameIDMap().remove(serverID);
 
     }
 
@@ -84,7 +84,7 @@ public class CGame implements Game {
     public boolean canAccess(UUID uuid, boolean b) {
         if (b) {
 
-            Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
+            Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(uuid);
             if (apiPlayer.isEmpty())
                 return false;
 
@@ -112,8 +112,8 @@ public class CGame implements Game {
         if (!canAccess(uuid, b)) return false;
         setPlayerState(uuid, b ? PlayerState.SPECTATE : PlayerState.INCONNECT);
         long serverID = getServerID();
-        API.getInstance().getServerManager().getServer(serverID).ifPresent(server -> server.setAllowedConnect(uuid, true));
-        API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.switchServer(serverID));
+        CoreAPI.getInstance().getServerManager().getServer(serverID).ifPresent(server -> server.setAllowedConnect(uuid, true));
+        CoreAPI.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.switchServer(serverID));
         return true;
     }
 
@@ -124,10 +124,10 @@ public class CGame implements Game {
 
         setPlayerState(uuid, null);
 
-        API.getInstance().getServerManager().getServer(getServerID()).ifPresent(server -> server.setAllowedConnect(uuid, false));
-        API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> {
+        CoreAPI.getInstance().getServerManager().getServer(getServerID()).ifPresent(server -> server.setAllowedConnect(uuid, false));
+        CoreAPI.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> {
             if (player.getServerID() == getServerID()) {
-                API.getInstance().getServerManager().getConnectableServer(player, ServerType.HUB).ifPresent(targetServer -> player.switchServer(targetServer.getServerID()));
+                CoreAPI.getInstance().getServerManager().getConnectableServer(player, ServerType.HUB).ifPresent(targetServer -> player.switchServer(targetServer.getServerID()));
             }
         });
 
@@ -386,7 +386,7 @@ public class CGame implements Game {
 
     @Override
     public void forceStart(UUID uuid) {
-        API.getInstance().getRedisManager().ifPresent(
+        CoreAPI.getInstance().getRedisManager().ifPresent(
                 redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "forceSTART", uuid.toString())
         );
     }
@@ -394,7 +394,7 @@ public class CGame implements Game {
     @Override
     public boolean forceEnd(UUID uuid, String reason) {
         if (reason.contains("<split>")) return false;
-        API.getInstance().getRedisManager().ifPresent(
+        CoreAPI.getInstance().getRedisManager().ifPresent(
                 redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "forceEND", uuid.toString() + "<split>" + reason)
         );
         return true;
@@ -403,7 +403,7 @@ public class CGame implements Game {
     @Override
     public boolean forceWin(UUID uuid, Team team, String reason) {
         if (reason.contains("<split>")) return false;
-        API.getInstance().getRedisManager().ifPresent(
+        CoreAPI.getInstance().getRedisManager().ifPresent(
                 redis -> RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "forceWIN", uuid.toString() + "<split>" + team.getTeamName() + "<split>" + reason)
         );
         return true;

@@ -12,7 +12,7 @@ package fr.redxil.core.paper.receiver;
 import com.velocitypowered.api.proxy.Player;
 import fr.redline.pms.pm.PMReceiver;
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.API;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 
 import java.util.Optional;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class AskSwitchListener implements PMReceiver {
 
     public AskSwitchListener() {
-        API.getInstance().getRedisManager().ifPresent(redis ->
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "askSwitchServer", String.class, this));
     }
 
@@ -36,12 +36,12 @@ public class AskSwitchListener implements PMReceiver {
 
         Player player = playerO.get();
 
-        if (API.getInstance().getServerID() != Long.parseLong(dataList[1])) {
+        if (CoreAPI.getInstance().getServerID() != Long.parseLong(dataList[1])) {
             return;
         }
 
-        API.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "switchServer", player.getUsername() + "<switchSplit>" + Long.valueOf(API.getInstance().getServerID()).toString()));
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "switchServer", player.getUsername() + "<switchSplit>" + Long.valueOf(CoreAPI.getInstance().getServerID()).toString()));
 
     }
 

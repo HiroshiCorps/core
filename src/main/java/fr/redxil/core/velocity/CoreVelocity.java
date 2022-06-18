@@ -18,7 +18,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.common.APILoadError;
 import fr.redxil.api.common.event.CoreEnabledEvent;
@@ -91,8 +90,8 @@ public class CoreVelocity implements APIEnabler {
         registerEvents();
         assert getProxyServer() != null;
         getProxyServer().getEventManager().fire(new CoreEnabledEvent(this));
-        API.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID()));
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", CoreAPI.getInstance().getServerID()));
     }
 
     @Override
@@ -122,8 +121,8 @@ public class CoreVelocity implements APIEnabler {
         cm.unregister(new RCmd().getName());
         cm.unregister(new MsgCmd().getName());
 
-        API.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID()));
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", CoreAPI.getInstance().getServerID()));
     }
 
     @Override
@@ -187,7 +186,7 @@ public class CoreVelocity implements APIEnabler {
 
     @Subscribe
     public void proxyShutdown(ProxyShutdownEvent event) {
-        API.getInstance().shutdown();
+        CoreAPI.getInstance().shutdown();
     }
 
     @Override
@@ -224,7 +223,7 @@ public class CoreVelocity implements APIEnabler {
     public void sendMessage(String s, String s1) {
         this.getProxyServer().getPlayer(s).ifPresentOrElse(
                 player -> player.sendMessage(Component.text(s)),
-                () -> API.getInstance().getPlayerManager().getPlayer(s).ifPresent(player -> player.sendMessage(s1))
+                () -> CoreAPI.getInstance().getPlayerManager().getPlayer(s).ifPresent(player -> player.sendMessage(s1))
         );
     }
 
@@ -232,7 +231,7 @@ public class CoreVelocity implements APIEnabler {
     public void sendMessage(UUID uuid, String s) {
         this.getProxyServer().getPlayer(uuid).ifPresentOrElse(
                 player -> player.sendMessage(Component.text(s)),
-                () -> API.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.sendMessage(s))
+                () -> CoreAPI.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.sendMessage(s))
         );
     }
 
@@ -243,7 +242,7 @@ public class CoreVelocity implements APIEnabler {
 
     @Subscribe
     public void playerQuit(DisconnectEvent de) {
-        API.getInstance().getPartyManager().getPlayerParty(de.getPlayer().getUniqueId()).ifPresent(party -> party.quitParty(de.getPlayer().getUniqueId()));
+        CoreAPI.getInstance().getPartyManager().getPlayerParty(de.getPlayer().getUniqueId()).ifPresent(party -> party.quitParty(de.getPlayer().getUniqueId()));
     }
 
 }

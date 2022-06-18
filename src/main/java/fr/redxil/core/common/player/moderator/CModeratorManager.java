@@ -9,15 +9,14 @@
 
 package fr.redxil.core.common.player.moderator;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
-import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.moderator.ModeratorDataRedis;
 import fr.redxil.core.common.player.CServerPlayer;
+import fr.redxil.core.common.utils.DataReminder;
 
 import java.util.*;
 
@@ -47,11 +46,11 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(String s) {
-        if (Objects.equals(API.getInstance().getPlayerManager().getServerPlayer().getName(), s))
+        if (Objects.equals(CoreAPI.getInstance().getPlayerManager().getServerPlayer().getName(), s))
             return Optional.of(new CServerModerator());
         Long result = uuidToLong.getData().get(s);
         if (result == null) return Optional.empty();
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             return Optional.of(new CPlayerModerator(result));
         return Optional.ofNullable(getMap().get(result));
     }
@@ -79,11 +78,11 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(long result) {
-        if (API.getInstance().getPlayerManager().getServerPlayer().getMemberID() == result)
+        if (CoreAPI.getInstance().getPlayerManager().getServerPlayer().getMemberID() == result)
             return Optional.of(new CServerModerator());
         if (isLoaded(result))
             return Optional.empty();
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             return Optional.of(new CPlayerModerator(result));
         return Optional.ofNullable(getMap().get(result));
     }
@@ -97,11 +96,11 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(UUID uuid) {
-        if (API.getInstance().getPlayerManager().getServerPlayer().getUUID() == uuid)
+        if (CoreAPI.getInstance().getPlayerManager().getServerPlayer().getUUID() == uuid)
             return Optional.of(new CServerModerator());
         Long result = uuidToLong.getData().get(uuid.toString());
         if (result == null) return Optional.empty();
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             return Optional.of(new CPlayerModerator(result));
         return Optional.ofNullable(getMap().get(result));
     }
@@ -143,7 +142,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(UUID uuid) {
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(uuid);
         if (apiPlayer.isEmpty()) return false;
         else return apiPlayer.get().getRank().isModeratorRank();
     }
@@ -157,7 +156,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(long memberID) {
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(memberID);
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(memberID);
         if (apiPlayer.isEmpty()) return false;
         else return apiPlayer.get().getRank().isModeratorRank();
     }
@@ -171,7 +170,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public boolean isModerator(String name) {
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(name);
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(name);
         if (apiPlayer.isEmpty()) return false;
         else return apiPlayer.get().getRank().isModeratorRank();
     }

@@ -15,7 +15,6 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
@@ -70,7 +69,7 @@ public class JoinListener {
     public void onPlayerJoin(LoginEvent e) {
 
         Player player = e.getPlayer();
-        if (API.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
+        if (CoreAPI.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
             e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
                     """
                                     §4§lSERVER NETWORK§r

@@ -10,20 +10,19 @@
 package fr.redxil.core.common.server;
 
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.server.type.ServerAccess;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.redxil.api.common.utils.DataReminder;
-import fr.redxil.api.common.utils.id.IDGenerator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.server.ServerDataRedis;
 import fr.redxil.core.common.data.server.ServerDataSql;
 import fr.redxil.core.common.data.utils.DataType;
 import fr.redxil.core.common.sql.SQLModels;
+import fr.redxil.core.common.utils.DataReminder;
+import fr.redxil.core.common.utils.IDGenerator;
 import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.util.*;
@@ -50,7 +49,7 @@ public class CServer implements Server {
     public CServer(ServerInfo serverCreator) {
         ServerModel serverModel = null;
 
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             serverModel = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<>() {{
                 put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), serverCreator.getServerName());
                 put(ServerDataSql.SERVER_MAXP_SQL.getSQLColumns(), serverCreator.getMaxPlayer());
@@ -77,7 +76,7 @@ public class CServer implements Server {
         ServerDataRedis.clearRedisData(DataType.SERVER, serverID);
 
         initServerName();
-        API.getInstance().getServerManager().getNameToLongMap().put(serverName, serverID);
+        CoreAPI.getInstance().getServerManager().getNameToLongMap().put(serverName, serverID);
         serverNameReminder.setData(serverName);
 
         initTypeReminder();
@@ -108,7 +107,7 @@ public class CServer implements Server {
 
     @Override
     public boolean isOnline() {
-        return API.getInstance().getServerManager().isServerExist(serverID);
+        return CoreAPI.getInstance().getServerManager().isServerExist(serverID);
     }
 
     public void initServerName() {
@@ -173,13 +172,13 @@ public class CServer implements Server {
     public void shutdown() {
 
         Optional<String> serverName = getServerName();
-        if (API.getInstance().getServerID() != serverID) return;
+        if (CoreAPI.getInstance().getServerID() != serverID) return;
 
         long id = serverID;
 
-        API.getInstance().getAPIEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
+        CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
 
-        if (API.getInstance().isOnlineMod()) {
+        if (CoreAPI.getInstance().isOnlineMod()) {
 
             ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", id);
 
@@ -197,7 +196,7 @@ public class CServer implements Server {
 
         } else CoreAPI.getInstance().getServerManager().getMap().remove(id);
 
-        serverName.ifPresent(s -> API.getInstance().getServerManager().getNameToLongMap().remove(s));
+        serverName.ifPresent(s -> CoreAPI.getInstance().getServerManager().getNameToLongMap().remove(s));
 
     }
 

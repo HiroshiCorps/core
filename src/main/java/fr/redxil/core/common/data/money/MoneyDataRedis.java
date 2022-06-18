@@ -9,8 +9,8 @@
 
 package fr.redxil.core.common.data.money;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
@@ -31,7 +31,7 @@ public enum MoneyDataRedis {
 
     public static void clearRedisData(DataType dataType, Long playerID) {
 
-        API.getInstance().getRedisManager().ifPresent(redis -> {
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis -> {
             RedissonClient redissonClient = redis.getRedissonClient();
             for (MoneyDataRedis mdv : values())
                 if (dataType == null || mdv.isDataType(dataType))

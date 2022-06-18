@@ -10,7 +10,6 @@
 package fr.redxil.core.common.player;
 
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.LinkUsage;
@@ -20,6 +19,7 @@ import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.Pair;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.data.money.MoneyDataSql;
 import fr.redxil.core.common.data.player.PlayerDataSql;
@@ -58,12 +58,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     private void initPlayerModel() {
-        if (this.playerModel == null && API.getInstance().isOnlineMod())
+        if (this.playerModel == null && CoreAPI.getInstance().isOnlineMod())
             this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
     private void initMoneyModel() {
-        if (this.moneyModel == null && API.getInstance().isOnlineMod())
+        if (this.moneyModel == null && CoreAPI.getInstance().isOnlineMod())
             this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
     }
 
@@ -218,13 +218,13 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public boolean isConnected() {
-        return API.getInstance().getPlayerManager().getLoadedPlayer().contains(getMemberID());
+        return CoreAPI.getInstance().getPlayerManager().getLoadedPlayer().contains(getMemberID());
     }
 
     @Override
     public void loadSettings() {
         this.settingsModelList = new ArrayList<>();
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             this.settingsModelList.addAll(new SQLModels<>(SettingsModel.class).get("WHERE member_id = ? ORDER BY settings_name ASC", getMemberID()));
     }
 
@@ -236,7 +236,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     @Override
     public void removeSetting(String settingName) {
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             new SQLModels<>(SettingsModel.class).delete("WHERE settings_name = ? AND player_id = ?", settingName, getMemberID());
         loadSettings();
     }
@@ -244,7 +244,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public Optional<Setting> createSetting(String settingName, String settingValue) {
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         Optional<Setting> base = getSetting(settingName);
@@ -301,7 +301,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public Optional<LinkData> createLink(APIOfflinePlayer apiOfflinePlayer, String s) {
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         PlayerLinkModel linkData = new PlayerLinkModel(this, apiOfflinePlayer, s);
@@ -327,16 +327,16 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public void loadSanction() {
         this.sanctionModelList = new ArrayList<>();
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return;
         this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberID()));
-        API.getInstance().getAPIEnabler().printLog(Level.INFO, "Sanction: " + this.sanctionModelList.size());
+        CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Sanction: " + this.sanctionModelList.size());
     }
 
     @Override
     public Optional<SanctionInfo> banPlayer(String reason, long time, APIPlayerModerator author) {
 
-        if (isBan() || !API.getInstance().isOnlineMod()) return Optional.empty();
+        if (isBan() || !CoreAPI.getInstance().isOnlineMod()) return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
                 getMemberID(),
@@ -357,7 +357,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public Optional<SanctionInfo> mutePlayer(String reason, long time, APIPlayerModerator author) {
 
-        if (isMute() || !API.getInstance().isOnlineMod()) return Optional.empty();
+        if (isMute() || !CoreAPI.getInstance().isOnlineMod()) return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
                 getMemberID(),
@@ -378,7 +378,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     @Override
     public Optional<SanctionInfo> warnPlayer(String reason, APIPlayerModerator author) {
 
-        if (!API.getInstance().isOnlineMod())
+        if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
         SanctionModel sm = new SanctionModel(
@@ -430,7 +430,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public Optional<SanctionInfo> getLastSanction(SanctionType sanctionType) {
         List<SanctionInfo> sanctionList = getSanction(sanctionType);
         if (sanctionList.isEmpty()) {
-            API.getInstance().getAPIEnabler().printLog(Level.INFO, "Pas de sanction");
+            CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Pas de sanction");
             return Optional.empty();
         }
 

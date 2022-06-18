@@ -15,13 +15,13 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -57,8 +57,8 @@ public class BlackListCmd extends BrigadierAPI<CommandSource> {
 
         if (cmd.equalsIgnoreCase("add") || cmd.equalsIgnoreCase("remove")) {
 
-            Optional<APIOfflinePlayer> osp = API.getInstance().getPlayerManager().getOfflinePlayer(target);
-            Optional<APIPlayer> sp = API.getInstance().getPlayerManager().getPlayer(playerUUID);
+            Optional<APIOfflinePlayer> osp = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(target);
+            Optional<APIPlayer> sp = CoreAPI.getInstance().getPlayerManager().getPlayer(playerUUID);
 
             if (osp.isEmpty()) {
                 TextComponentBuilder.createTextComponent("Erreur, le joueur: " + target + " est inconnue").setColor(Color.RED).sendTo(playerUUID);

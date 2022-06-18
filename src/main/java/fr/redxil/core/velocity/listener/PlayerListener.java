@@ -11,7 +11,6 @@ package fr.redxil.core.velocity.listener;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
@@ -19,6 +18,7 @@ import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.core.common.CoreAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class PlayerListener {
     @Subscribe
     public void playerMessage(PlayerChatEvent chatEvent) {
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(chatEvent.getPlayer().getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(chatEvent.getPlayer().getUniqueId());
         if (apiPlayer.isEmpty()) return;
 
         String[] message = chatEvent.getMessage().split(" ");
@@ -46,7 +46,7 @@ public class PlayerListener {
             return;
         }
 
-        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
+        Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
 
         if (apiPlayerModerator.isPresent() && message[0].startsWith("!s")) {
             String newMessage = chatEvent.getMessage().replace("!s", "");

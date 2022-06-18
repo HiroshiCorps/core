@@ -5,9 +5,9 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.xilitra.hiroshisav.enums.ServerType;
 
@@ -19,14 +19,14 @@ public class ServerListener {
     @Subscribe
     public void serverConnect(ServerPreConnectEvent event) {
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         if (apiPlayer.isEmpty()) {
             event.setResult(ServerPreConnectEvent.ServerResult.denied());
             return;
         }
 
         if (apiPlayer.get().getServerID() == null) {
-            Optional<Server> serverFinalTarget = API.getInstance().getServerManager().getConnectableServer(apiPlayer.get(), ServerType.HUB);
+            Optional<Server> serverFinalTarget = CoreAPI.getInstance().getServerManager().getConnectableServer(apiPlayer.get(), ServerType.HUB);
             if (serverFinalTarget.isEmpty()) {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());
                 return;
@@ -59,7 +59,7 @@ public class ServerListener {
 
         }
 
-        Optional<Server> server = API.getInstance().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
+        Optional<Server> server = CoreAPI.getInstance().getServerManager().getServer(event.getOriginalServer().getServerInfo().getName());
         if (server.isPresent()) {
             if (!server.get().getServerAccess().canAccess(server.get(), apiPlayer.get())) {
                 event.setResult(ServerPreConnectEvent.ServerResult.denied());

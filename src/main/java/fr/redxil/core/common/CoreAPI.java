@@ -18,18 +18,16 @@ import fr.redxil.api.common.APILoadError;
 import fr.redxil.api.common.game.GameManager;
 import fr.redxil.api.common.group.party.PartyManager;
 import fr.redxil.api.common.group.team.TeamManager;
-import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
 import fr.redxil.api.common.server.type.ServerStatus;
-import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.game.CGameManager;
 import fr.redxil.core.common.group.party.CPartyManager;
 import fr.redxil.core.common.group.team.CTeamManager;
 import fr.redxil.core.common.player.CPlayerManager;
 import fr.redxil.core.common.player.moderator.CModeratorManager;
-import fr.redxil.core.common.redis.CRedisManager;
+import fr.redxil.core.common.redis.RedisManager;
 import fr.redxil.core.common.server.CServerManager;
-import fr.redxil.core.common.sql.CSQLConnection;
+import fr.redxil.core.common.sql.SQLConnection;
 import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.io.File;
@@ -51,9 +49,9 @@ public class CoreAPI extends API {
     private final APIEnabler APIEnabler;
     private final HashMap<Long, TeamManager> mapManager = new HashMap<>();
     private Long serverID;
-    private CSQLConnection sqlConnection = null;
+    private SQLConnection sqlConnection = null;
     private Server server;
-    private CRedisManager manager = null;
+    private RedisManager manager = null;
 
     public CoreAPI(APIEnabler plugin) {
 
@@ -161,7 +159,7 @@ public class CoreAPI extends API {
 
         getAPIEnabler().printLog(Level.INFO, "Connecting to db");
 
-        this.sqlConnection = new CSQLConnection();
+        this.sqlConnection = new SQLConnection();
         this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
         if(!this.sqlConnection.isConnected()){
             this.sqlConnection = null;
@@ -169,7 +167,7 @@ public class CoreAPI extends API {
             return;
         }
 
-        this.manager = new CRedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
+        this.manager = new RedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
         if(this.manager.getRedissonClient().isShutdown() || this.manager.getRedissonClient().isShuttingDown()){
             this.manager = null;
             this.sqlConnection.closeConnection();
@@ -201,7 +199,7 @@ public class CoreAPI extends API {
 
         getAPIEnabler().printLog(Level.INFO, "Server id: " + this.server.getServerID());
 
-        API.getInstance().getRedisManager().ifPresent(redis ->
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", this.getServerID()));
 
     }
@@ -215,7 +213,6 @@ public class CoreAPI extends API {
         return instance;
     }
 
-    @Override
     public Optional<RedisManager> getRedisManager() {
         return Optional.ofNullable(this.manager);
     }
@@ -253,7 +250,7 @@ public class CoreAPI extends API {
 
         getAPIEnabler().onAPIDisabled();
 
-        API.getInstance().getRedisManager().ifPresent(redis ->
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", API.getInstance().getServerID()));
 
         Server server = getServer();
@@ -311,7 +308,6 @@ public class CoreAPI extends API {
         }
     }
 
-    @Override
     public Optional<SQLConnection> getSQLConnection() {
         return Optional.ofNullable(this.sqlConnection);
     }

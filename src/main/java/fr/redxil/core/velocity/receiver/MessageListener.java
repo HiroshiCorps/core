@@ -12,7 +12,7 @@ package fr.redxil.core.velocity.receiver;
 import com.velocitypowered.api.proxy.Player;
 import fr.redline.pms.pm.PMReceiver;
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.API;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
 
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class MessageListener implements PMReceiver {
 
     public MessageListener() {
-        API.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "playerMessage", String.class, this));
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis -> RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "playerMessage", String.class, this));
     }
 
     @Override

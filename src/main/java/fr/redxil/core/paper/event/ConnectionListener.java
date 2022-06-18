@@ -10,7 +10,6 @@
 package fr.redxil.core.paper.event;
 
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.game.utils.PlayerState;
@@ -19,6 +18,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.paper.game.GameBuilder;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
 import org.bukkit.entity.Player;
@@ -37,8 +37,8 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         Player p = event.getPlayer();
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
-        if (apiPlayer.isPresent() && API.getInstance().isOnlineMod()) {
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
+        if (apiPlayer.isPresent() && CoreAPI.getInstance().isOnlineMod()) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
         }
 
@@ -47,11 +47,11 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
     @EventHandler
     public void playerJoin(PlayerJoinEvent event) {
 
-        APIPlayerManager apiPlayerManager = API.getInstance().getPlayerManager();
+        APIPlayerManager apiPlayerManager = CoreAPI.getInstance().getPlayerManager();
         Player player = event.getPlayer();
 
         Optional<APIPlayer> apiPlayer;
-        if (API.getInstance().isOnlineMod())
+        if (CoreAPI.getInstance().isOnlineMod())
             apiPlayer = apiPlayerManager.getPlayer(player.getUniqueId());
         else {
             if (player.getAddress() == null) {
@@ -59,7 +59,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
                 return;
             }
             apiPlayer = apiPlayerManager.loadPlayer(player.getDisplayName(), player.getUniqueId(), new IpInfo(player.getAddress().getHostName(), player.getAddress().getPort()));
-            apiPlayer.ifPresent(apiPlayer1 -> API.getInstance().getModeratorManager().loadModerator(apiPlayer1.getMemberID(), apiPlayer1.getUUID(), apiPlayer1.getRealName()));
+            apiPlayer.ifPresent(apiPlayer1 -> CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer1.getMemberID(), apiPlayer1.getUUID(), apiPlayer1.getRealName()));
         }
 
         if (apiPlayer.isEmpty()) {
@@ -74,9 +74,9 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         Nick.applyNick(player, apiPlayer.get());
         corePlugin.getVanish().applyVanish(player);
 
-        API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
-        apiPlayer.get().setServerID(API.getInstance().getServerID());
-        Optional<APIPlayerModerator> playerModerator = API.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
+        CoreAPI.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
+        apiPlayer.get().setServerID(CoreAPI.getInstance().getServerID());
+        Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
 
         if (playerModerator.isPresent()) {
             corePlugin.getModeratorMain().setModerator(playerModerator.get(), playerModerator.get().isModeratorMod(), true);
@@ -87,7 +87,7 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         if (gameBuilderOptional.isEmpty())
             return;
 
-        API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID()).ifPresent(game -> {
+        CoreAPI.getInstance().getGameManager().getGameByServerID(CoreAPI.getInstance().getServerID()).ifPresent(game -> {
 
             PlayerState playerState = game.getPlayerState(player.getUniqueId());
             GameState gameState = game.getGameState();
@@ -113,18 +113,18 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
 
         Player player = event.getPlayer();
 
-        API.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
+        CoreAPI.getInstance().getServer().setPlayerConnected(player.getUniqueId(), false);
 
         corePlugin.getVanish().playerDisconnect(player);
         corePlugin.getFreezeGestion().stopFreezeMessage(player.getUniqueId());
 
-        if (!API.getInstance().isOnlineMod()) {
-            API.getInstance().getModeratorManager().getModerator(player.getUniqueId()).ifPresent(APIPlayerModerator::disconnectModerator);
+        if (!CoreAPI.getInstance().isOnlineMod()) {
+            CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId()).ifPresent(APIPlayerModerator::disconnectModerator);
         }
 
-        API.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> event.setQuitMessage(getQuitMessage(apiOfflinePlayer)));
+        CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> event.setQuitMessage(getQuitMessage(apiOfflinePlayer)));
 
-        Optional<Game> gameOptional = API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID());
+        Optional<Game> gameOptional = CoreAPI.getInstance().getGameManager().getGameByServerID(CoreAPI.getInstance().getServerID());
         if (gameOptional.isEmpty())
             return;
 

@@ -10,10 +10,10 @@ package fr.redxil.core.paper.receiver;
 
 import fr.redline.pms.pm.PMReceiver;
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.group.team.Team;
 import fr.redxil.api.paper.game.GameBuilder;
+import fr.redxil.core.common.CoreAPI;
 import org.redisson.api.RedissonClient;
 
 import java.util.Optional;
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class PMListen implements PMReceiver {
 
     public PMListen() {
-        API.getInstance().getRedisManager().ifPresent(redis -> {
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis -> {
             RedissonClient rc = redis.getRedissonClient();
             RedisPMManager.addRedissonPMListener(rc, "forceSTART", String.class, this);
             RedisPMManager.addRedissonPMListener(rc, "forceSTOPSTART", String.class, this);
@@ -39,10 +39,10 @@ public class PMListen implements PMReceiver {
                     GameBuilder.getGameBuilder().ifPresent(gameBuilder -> gameBuilder.forceEnd(((String) o).split("<split>")[1]));
             case "forceWIN" -> {
                 String[] splitted = ((String) o).split("<split>");
-                Optional<Game> game = API.getInstance().getGameManager().getGameByServerID(API.getInstance().getServerID());
+                Optional<Game> game = CoreAPI.getInstance().getGameManager().getGameByServerID(CoreAPI.getInstance().getServerID());
                 if (game.isEmpty())
                     return;
-                Optional<Team> team = API.getInstance().getTeamManager(API.getInstance().getServerID()).getTeam(splitted[1]);
+                Optional<Team> team = CoreAPI.getInstance().getTeamManager(CoreAPI.getInstance().getServerID()).getTeam(splitted[1]);
                 if (team.isEmpty())
                     return;
                 GameBuilder.getGameBuilder().ifPresent(gameBuilder -> gameBuilder.forceWin(team.get(), splitted[2]));

@@ -9,14 +9,14 @@
 
 package fr.redxil.core.common.game;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Host;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.game.utils.HostAccess;
 import fr.redxil.api.common.game.utils.PlayerState;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.utils.DataReminder;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.game.GameDataRedis;
+import fr.redxil.core.common.utils.DataReminder;
 import fr.xilitra.hiroshisav.enums.TypeGame;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class CHost extends CGame implements Host {
         initAuthorReminder();
         authorReminder.setData(author);
         setHostAccess(HostAccess.CLOSE);
-        API.getInstance().getGameManager().getServerToHostIDMap().put(serverID, gameID);
+        CoreAPI.getInstance().getGameManager().getServerToHostIDMap().put(serverID, gameID);
 
     }
 
@@ -76,7 +76,7 @@ public class CHost extends CGame implements Host {
     public boolean canAccess(UUID uuid, boolean spec) {
         if (spec) {
 
-            Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(uuid);
+            Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(uuid);
             if (apiPlayer.isEmpty())
                 return false;
 
@@ -121,7 +121,7 @@ public class CHost extends CGame implements Host {
     public void clearData() {
         long serverID = getServerID();
 
-        API.getInstance().getGameManager().getServerToHostIDMap().remove(serverID);
+        CoreAPI.getInstance().getGameManager().getServerToHostIDMap().remove(serverID);
 
         super.clearData();
     }

@@ -1,8 +1,8 @@
 package fr.redxil.core.paper.event;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.core.common.CoreAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +19,7 @@ public class PlayerInteractEvent implements Listener {
     @EventHandler
     public void playerDrop(PlayerDropItemEvent event) {
 
-        Optional<APIPlayerModerator> spm = API.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
+        Optional<APIPlayerModerator> spm = CoreAPI.getInstance().getModeratorManager().getModerator(event.getPlayer().getUniqueId());
         if (spm.isPresent())
             if (spm.get().isModeratorMod()) event.setCancelled(true);
 
@@ -31,7 +31,7 @@ public class PlayerInteractEvent implements Listener {
         if (!(event.getEntity() instanceof Player))
             return;
 
-        Optional<APIPlayerModerator> spm = API.getInstance().getModeratorManager().getModerator(event.getEntity().getUniqueId());
+        Optional<APIPlayerModerator> spm = CoreAPI.getInstance().getModeratorManager().getModerator(event.getEntity().getUniqueId());
         if (spm.isPresent())
             if (spm.get().isModeratorMod()) event.setCancelled(true);
 
@@ -40,13 +40,13 @@ public class PlayerInteractEvent implements Listener {
     @EventHandler
     public void playerChat(AsyncPlayerChatEvent asyncPlayerChatEvent) {
 
-        API.getInstance().getPlayerManager().getPlayer(asyncPlayerChatEvent.getPlayer().getUniqueId()).ifPresent(apiPlayer -> asyncPlayerChatEvent.setFormat(apiPlayer.getChatString() + asyncPlayerChatEvent.getMessage()));
+        CoreAPI.getInstance().getPlayerManager().getPlayer(asyncPlayerChatEvent.getPlayer().getUniqueId()).ifPresent(apiPlayer -> asyncPlayerChatEvent.setFormat(apiPlayer.getChatString() + asyncPlayerChatEvent.getMessage()));
 
     }
 
     @EventHandler
     public void playerMove(PlayerMoveEvent event) {
-        Optional<APIPlayer> player = API.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
+        Optional<APIPlayer> player = CoreAPI.getInstance().getPlayerManager().getPlayer(event.getPlayer().getUniqueId());
         if (player.isPresent() && player.get().isFreeze())
             event.setCancelled(true);
     }
@@ -56,14 +56,14 @@ public class PlayerInteractEvent implements Listener {
 
         if (!(event.getEntity() instanceof Player player)) return;
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
         if (apiPlayer.isPresent() && apiPlayer.get().isFreeze())
             event.setCancelled(true);
 
         if (apiPlayer.isEmpty())
             return;
 
-        Optional<APIPlayerModerator> spm = API.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
+        Optional<APIPlayerModerator> spm = CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
         if (spm.isPresent() && spm.get().isModeratorMod()) event.setCancelled(true);
 
     }

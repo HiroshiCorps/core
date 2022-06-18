@@ -9,8 +9,8 @@
 
 package fr.redxil.core.common.sql;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.utils.Pair;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.sql.utils.SQLColumns;
 import fr.redxil.core.common.sql.utils.SQLJoin;
 
@@ -79,7 +79,7 @@ public abstract class SQLModel {
             for (Map.Entry<String, Object> value : columns.entrySet()) {
                 SQLColumns converted = SQLColumns.fromSQL(value.getKey());
                 if (converted == null) {
-                    API.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Error on convert String to SQLColumns with String: " + value.getKey());
+                    CoreAPI.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Error on convert String to SQLColumns with String: " + value.getKey());
                     continue;
                 }
                 if (converted.getTable().equalsIgnoreCase(table)) {
@@ -157,7 +157,7 @@ public abstract class SQLModel {
     public void set(HashMap<SQLColumns, Object> map) {
         Pair<String, Collection<Object>> pair = this.setSQL(map);
         if (pair != null)
-            API.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.asyncExecute(pair.getOne(), pair.getTwo().toArray()));
+            CoreAPI.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.asyncExecute(pair.getOne(), pair.getTwo().toArray()));
     }
 
     public boolean exists() {
@@ -167,7 +167,7 @@ public abstract class SQLModel {
     public void setSync(HashMap<SQLColumns, Object> map) {
         Pair<String, Collection<Object>> pair = this.setSQL(map);
         if (pair != null)
-            API.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.execute(pair.getOne(), pair.getTwo().toArray()));
+            CoreAPI.getInstance().getSQLConnection().ifPresent(sqlConnection -> sqlConnection.execute(pair.getOne(), pair.getTwo().toArray()));
     }
 
     private Pair<String, Collection<Object>> setSQL(Map<SQLColumns, Object> values) {

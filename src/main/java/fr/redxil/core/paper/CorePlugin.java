@@ -12,7 +12,6 @@ package fr.redxil.core.paper;
 import fr.redline.invinteract.event.EventInventory;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.SystemColor;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.paper.PaperAPI;
 import fr.redxil.core.common.CoreAPI;
@@ -57,7 +56,7 @@ public class CorePlugin extends PaperAPI {
                         + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
         );
         new CoreAPI(APIEnabler);
-        if (API.isAPIEnabled())
+        if (CoreAPI.isAPIEnabled())
             onLoad();
     }
 
@@ -91,8 +90,8 @@ public class CorePlugin extends PaperAPI {
 
         Bukkit.getLogger().log(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
-        API.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", API.getInstance().getServerID()));
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
+                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", CoreAPI.getInstance().getServerID()));
     }
 
     public VanishGestion getVanish() {

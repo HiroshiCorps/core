@@ -4,9 +4,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.party.Party;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
 
@@ -20,7 +20,7 @@ public class PartyCMD {
     }
 
     public Optional<Party> getParty(UUID uuid) {
-        return API.getInstance().getPartyManager().getPlayerParty(uuid);
+        return CoreAPI.getInstance().getPartyManager().getPlayerParty(uuid);
     }
 
     public Optional<Player> getPlayer(CommandSource source) {
@@ -135,7 +135,7 @@ public class PartyCMD {
         Optional<Player> opPlayer = getPlayer(command.getSource());
         if (opPlayer.isEmpty())
             return;
-        API.getInstance().getPartyManager().createParty(opPlayer.get().getUniqueId()).ifPresentOrElse(party -> opPlayer.get().sendMessage(Component.text("Tu es maintenant dans une partie")), () -> opPlayer.get().sendMessage(Component.text("Impossible, tu es déjà dans une partie")));
+        CoreAPI.getInstance().getPartyManager().createParty(opPlayer.get().getUniqueId()).ifPresentOrElse(party -> opPlayer.get().sendMessage(Component.text("Tu es maintenant dans une partie")), () -> opPlayer.get().sendMessage(Component.text("Impossible, tu es déjà dans une partie")));
     }
 
     public void leaveCommand(CommandContext<CommandSource> command, String args) {

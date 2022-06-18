@@ -1,15 +1,14 @@
 package fr.redxil.core.common.player.moderator;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
-import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.redis.RedisManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +74,7 @@ public class CServerModerator implements APIPlayerModerator {
     @Override
     public void printSanction(APIOfflinePlayer apiOfflinePlayer, SanctionType sanctionType) {
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(getMemberID());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(getMemberID());
 
         if (apiPlayer.isEmpty())
             return;
@@ -130,7 +129,7 @@ public class CServerModerator implements APIPlayerModerator {
         if (apiOfflinePlayer.isConnected()) {
             connectedMsg = "§a✓";
 
-            Optional<APIPlayer> player = API.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID());
+            Optional<APIPlayer> player = CoreAPI.getInstance().getPlayerManager().getPlayer(apiOfflinePlayer.getMemberID());
             if (player.isPresent())
                 server = player.get().getServerID().toString();
         }
@@ -144,7 +143,7 @@ public class CServerModerator implements APIPlayerModerator {
 
         String ip = "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer) {
-            Optional<RedisManager> redis = API.getInstance().getRedisManager();
+            Optional<RedisManager> redis = CoreAPI.getInstance().getRedisManager();
             ip = redis.map(redisManager -> String.valueOf(redisManager.getRedissonClient().getList("ip/" + apiOfflinePlayer.getIP().getIp()).size() - 1)).orElse("Error: Redis disconnected");
         }
 

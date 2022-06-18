@@ -12,8 +12,8 @@ package fr.redxil.core.common.game;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.GameManager;
 import fr.redxil.api.common.game.Host;
-import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.game.GameDataRedis;
+import fr.redxil.core.common.utils.DataReminder;
 import fr.xilitra.hiroshisav.enums.TypeGame;
 
 import java.util.ArrayList;

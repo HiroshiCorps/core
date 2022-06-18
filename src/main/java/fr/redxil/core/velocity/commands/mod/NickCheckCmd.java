@@ -14,10 +14,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
@@ -47,11 +47,11 @@ public class NickCheckCmd extends BrigadierAPI<CommandSource> {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer.isEmpty() || !apiPlayer.get().getRank().isModeratorRank())
             return;
 
-        Optional<APIPlayer> targetPlayer = API.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
+        Optional<APIPlayer> targetPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target", String.class));
         TextComponentBuilder tcb;
         if (targetPlayer.isPresent() && targetPlayer.get().isNick())
             tcb = TextComponentBuilder.createTextComponent("Le vrai pseudo de cette personne: " + targetPlayer.get().getRealName());

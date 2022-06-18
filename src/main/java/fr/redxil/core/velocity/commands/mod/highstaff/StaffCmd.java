@@ -14,10 +14,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class StaffCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
-        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
 
         if (apiPlayerModerator.isEmpty()) {
             TextComponentBuilder.createTextComponent(
@@ -52,7 +52,7 @@ public class StaffCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        API.getInstance().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("§4{StaffChat} §r" + player.getUsername() + ": " + commandContext.getArgument("message", String.class)));
+        CoreAPI.getInstance().getModeratorManager().sendToModerators(TextComponentBuilder.createTextComponent("§4{StaffChat} §r" + player.getUsername() + ": " + commandContext.getArgument("message", String.class)));
 
     }
 

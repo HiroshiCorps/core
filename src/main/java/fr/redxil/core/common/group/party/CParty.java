@@ -9,15 +9,15 @@
 
 package fr.redxil.core.common.group.party;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.group.party.Party;
 import fr.redxil.api.common.group.party.PartyAccess;
 import fr.redxil.api.common.group.party.PartyRank;
-import fr.redxil.api.common.utils.DataReminder;
-import fr.redxil.api.common.utils.id.IDGenerator;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.IDDataValue;
 import fr.redxil.core.common.data.game.PartyDataRedis;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.utils.DataReminder;
+import fr.redxil.core.common.utils.IDGenerator;
 
 import java.util.*;
 
@@ -39,12 +39,12 @@ public class CParty implements Party {
         initOwnerReminder();
         ownerReminder.setData(owner);
         setPartyRank(owner, PartyRank.OWNER);
-        API.getInstance().getPartyManager().getUUIDToPartyIDMap().put(owner.toString(), getPartyID());
+        CoreAPI.getInstance().getPartyManager().getUUIDToPartyIDMap().put(owner.toString(), getPartyID());
     }
 
     @Override
     public boolean joinParty(UUID apiPlayer) {
-        if (API.getInstance().getPartyManager().hasParty(apiPlayer)) return false;
+        if (CoreAPI.getInstance().getPartyManager().hasParty(apiPlayer)) return false;
         switch (getPartyAccess()) {
             case CLOSE: {
                 return false;
@@ -60,7 +60,7 @@ public class CParty implements Party {
 
         revokeInvite(apiPlayer);
         setPartyRank(apiPlayer, PartyRank.PLAYER);
-        API.getInstance().getPartyManager().getUUIDToPartyIDMap().put(apiPlayer.toString(), getPartyID());
+        CoreAPI.getInstance().getPartyManager().getUUIDToPartyIDMap().put(apiPlayer.toString(), getPartyID());
         return true;
     }
 
@@ -71,7 +71,7 @@ public class CParty implements Party {
         if (isPartyOwner(apiPlayer))
             return deleteParty(apiPlayer);
         revokeInvite(apiPlayer);
-        API.getInstance().getPartyManager().getUUIDToPartyIDMap().remove(apiPlayer.toString());
+        CoreAPI.getInstance().getPartyManager().getUUIDToPartyIDMap().remove(apiPlayer.toString());
         return true;
     }
 
@@ -88,7 +88,7 @@ public class CParty implements Party {
             return false;
         initRankMapReminder();
         rankMapReminder.getData().remove(apiPlayer1);
-        API.getInstance().getPartyManager().getUUIDToPartyIDMap().remove(apiPlayer1.toString());
+        CoreAPI.getInstance().getPartyManager().getUUIDToPartyIDMap().remove(apiPlayer1.toString());
 
         return true;
     }

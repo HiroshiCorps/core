@@ -9,9 +9,9 @@
 
 package fr.redxil.core.common.data.game;
 
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.group.team.Team;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.utils.DataType;
 import org.redisson.api.RedissonClient;
 
@@ -51,7 +51,7 @@ public enum TeamDataValue {
 
     public static void clearRedisData(DataType dataType, long serverID, String teamName) {
 
-        API.getInstance().getRedisManager().ifPresent(redis -> {
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis -> {
             RedissonClient redissonClient = redis.getRedissonClient();
             for (TeamDataValue mdv : values())
                 if ((dataType == null || mdv.isDataType(dataType)))
@@ -63,7 +63,7 @@ public enum TeamDataValue {
 
     public static void clearRedisData(DataType dataType, Game game) {
 
-        for (String team : API.getInstance().getTeamManager(game.getServerID()).getTeamList())
+        for (String team : CoreAPI.getInstance().getTeamManager(game.getServerID()).getTeamList())
             clearRedisData(dataType, game.getServerID(), team);
 
     }

@@ -11,8 +11,8 @@ package fr.redxil.core.common.group.party;
 
 import fr.redxil.api.common.group.party.Party;
 import fr.redxil.api.common.group.party.PartyManager;
-import fr.redxil.api.common.utils.DataReminder;
 import fr.redxil.core.common.data.game.PartyDataRedis;
+import fr.redxil.core.common.utils.DataReminder;
 
 import java.util.Map;
 import java.util.Optional;

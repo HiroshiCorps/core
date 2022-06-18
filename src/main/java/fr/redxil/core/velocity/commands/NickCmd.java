@@ -15,11 +15,11 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.core.common.CoreAPI;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +37,7 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
 
     @Override
     public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
 
         if (apiPlayer.isEmpty())
             return;
@@ -69,7 +69,7 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
     public void execute(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer.isEmpty())
             return;
 
@@ -89,7 +89,7 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
     public void executeSR(CommandContext<CommandSource> commandContext) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer.isEmpty())
             return;
 

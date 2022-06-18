@@ -10,10 +10,9 @@
 package fr.redxil.core.common.sql;
 
 
-import fr.redxil.api.common.sql.ResultSetElement;
-import fr.redxil.api.common.sql.ResultSetMetaData;
-import fr.redxil.api.common.sql.ResultSetRow;
-import fr.redxil.api.common.sql.SQLRowSet;
+import fr.redxil.core.common.sql.result.ResultSetElement;
+import fr.redxil.core.common.sql.result.ResultSetMetaData;
+import fr.redxil.core.common.sql.result.ResultSetRow;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,14 +20,14 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CSQLRowSet implements SQLRowSet {
+public class SQLRowSet {
 
     private final HashMap<Integer, ResultSetRow> rows = new HashMap<>();
     private int index = -1;
     private int size;
     private ResultSetMetaData metadata;
 
-    public CSQLRowSet(ResultSet req) {
+    public SQLRowSet(ResultSet req) {
         try {
             java.sql.ResultSetMetaData meta = req.getMetaData();
             int columnCount = meta.getColumnCount();
@@ -58,7 +57,7 @@ public class CSQLRowSet implements SQLRowSet {
         }
     }
 
-    @Override
+
     public boolean first() {
         if (this.index == -42) {
             return false;
@@ -67,7 +66,7 @@ public class CSQLRowSet implements SQLRowSet {
         return true;
     }
 
-    @Override
+
     public boolean last() {
         if (this.index == -42) {
             return false;
@@ -76,12 +75,12 @@ public class CSQLRowSet implements SQLRowSet {
         return true;
     }
 
-    @Override
+
     public int getRow() {
         return this.index + 1;
     }
 
-    @Override
+
     public boolean beforeFirst() {
         if (this.index == -42) {
             return false;
@@ -90,18 +89,18 @@ public class CSQLRowSet implements SQLRowSet {
         return true;
     }
 
-    @Override
+
     public boolean next() {
         this.index++;
         return this.rows.containsKey(this.index);
     }
 
-    @Override
+
     public HashMap<String, ResultSetElement> getColumns() {
         return this.rows.containsKey(this.index) ? this.rows.get(this.index).getColumns() : null;
     }
 
-    @Override
+
     public HashMap<String, Object> getColumnsObjects() {
         HashMap<String, Object> objects = new HashMap<>();
         for (Map.Entry<String, ResultSetElement> entry : this.rows.get(this.index).getColumns().entrySet()) {
@@ -110,7 +109,7 @@ public class CSQLRowSet implements SQLRowSet {
         return objects;
     }
 
-    @Override
+
     public Object getObject(String columnName) {
         if (this.isInvalidColumn(columnName, false)) {
             return null;
@@ -118,7 +117,7 @@ public class CSQLRowSet implements SQLRowSet {
         return this.rows.get(this.index).getColumns().get(columnName);
     }
 
-    @Override
+
     public String getString(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return null;
@@ -126,7 +125,7 @@ public class CSQLRowSet implements SQLRowSet {
         return this.rows.get(this.index).getColumns().get(columnName).getValue().toString();
     }
 
-    @Override
+
     public Timestamp getTimestamp(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return null;
@@ -139,7 +138,7 @@ public class CSQLRowSet implements SQLRowSet {
         }
     }
 
-    @Override
+
     public int getInt(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return -1;
@@ -152,7 +151,7 @@ public class CSQLRowSet implements SQLRowSet {
         }
     }
 
-    @Override
+
     public long getLong(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return -1L;
@@ -165,7 +164,7 @@ public class CSQLRowSet implements SQLRowSet {
         }
     }
 
-    @Override
+
     public double getDouble(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return -1;
@@ -178,7 +177,7 @@ public class CSQLRowSet implements SQLRowSet {
         }
     }
 
-    @Override
+
     public byte getByte(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return (byte) -1;
@@ -191,7 +190,7 @@ public class CSQLRowSet implements SQLRowSet {
         }
     }
 
-    @Override
+
     public byte[] getBytes(String columnName) {
         if (this.isInvalidColumn(columnName, true)) {
             return new byte[0];
@@ -199,7 +198,7 @@ public class CSQLRowSet implements SQLRowSet {
         return (byte[]) this.rows.get(this.index).getColumns().get(columnName).getValue();
     }
 
-    @Override
+
     public boolean isSigned(String columnName) {
         if (this.isInvalidColumn(columnName, false)) {
             return false;
@@ -207,7 +206,7 @@ public class CSQLRowSet implements SQLRowSet {
         return this.rows.get(this.index).getColumns().get(columnName).isSigned();
     }
 
-    @Override
+
     public boolean isInvalidColumn(String columnName, boolean checkNotNull) {
         if (!this.rows.containsKey(this.index)) {
             return true;
@@ -218,7 +217,7 @@ public class CSQLRowSet implements SQLRowSet {
         return checkNotNull && this.rows.get(this.index).getColumns().get(columnName).getValue() == null;
     }
 
-    @Override
+
     public ResultSetMetaData getMetaData() {
         return this.metadata;
     }

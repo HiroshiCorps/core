@@ -12,11 +12,9 @@ package fr.redxil.core.common.sql;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.API;
-import fr.redxil.api.common.sql.SQLConnection;
-import fr.redxil.api.common.sql.SQLRowSet;
 import fr.redxil.api.common.utils.Callback;
 import fr.redxil.api.common.utils.Scheduler;
+import fr.redxil.core.common.CoreAPI;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,12 +23,12 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CSQLConnection implements SQLConnection {
+public class SQLConnection {
 
-    private final Logger logs = Logger.getLogger(CSQLConnection.class.getName());
+    private final Logger logs = Logger.getLogger(SQLConnection.class.getName());
     private HikariDataSource pool = null;
 
-    @Override
+
     public void connect(IpInfo ipInfo, String database, String username, String password) {
         try {
             Class.forName("org.mariadb.jdbc.MariaDbDataSource");
@@ -55,12 +53,12 @@ public class CSQLConnection implements SQLConnection {
         this.pool = new HikariDataSource(config);
     }
 
-    @Override
+
     public boolean isConnected() {
         return this.pool != null && this.pool.isRunning();
     }
 
-    @Override
+
     public void closeConnection() {
         this.pool.close();
         this.pool = null;
@@ -83,21 +81,21 @@ public class CSQLConnection implements SQLConnection {
         }
     }
 
-    @Override
+
     public PreparedStatement prepareStatement(Connection conn, String query, Object... vars) {
         try {
             PreparedStatement ps = conn.prepareStatement(query);
-            API.getInstance().getAPIEnabler().printLog(Level.INFO, "Preparing statement for query: " + query);
+            CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Preparing statement for query: " + query);
             int num = Math.toIntExact(query.chars().filter(ch -> ch == '?').count());
             if (num == vars.length) {
                 int i = 0;
                 for (Object obj : vars) {
                     i++;
                     ps.setObject(i, obj);
-                    API.getInstance().getAPIEnabler().printLog(Level.INFO, "Set object: " + i + " object: " + obj);
+                    CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Set object: " + i + " object: " + obj);
                 }
             } else {
-                API.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
+                CoreAPI.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
                 return null;
             }
             return ps;
@@ -109,17 +107,17 @@ public class CSQLConnection implements SQLConnection {
         return null;
     }
 
-    @Override
+
     public void asyncQuery(final String query, final Callback<SQLRowSet> callback, final Object... vars) {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
                 try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
                     if (ps == null) return;
                     try (ResultSet rs = ps.executeQuery()) {
-                        CSQLRowSet CSQLRowSet = new CSQLRowSet(rs);
+                        SQLRowSet SQLRowSet = new SQLRowSet(rs);
                         this.closeRessources(rs, ps);
                         if (callback != null) {
-                            callback.run(CSQLRowSet);
+                            callback.run(SQLRowSet);
                         }
                     }
                 } catch (SQLException e) {
@@ -134,15 +132,14 @@ public class CSQLConnection implements SQLConnection {
     }
 
 
-    @Override
-    public CSQLRowSet query(final String query, final Object... vars) {
+    public SQLRowSet query(final String query, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
             try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
                 if (ps == null) return null;
                 try (ResultSet rs = ps.executeQuery()) {
-                    CSQLRowSet CSQLRowSet = new CSQLRowSet(rs);
+                    SQLRowSet SQLRowSet = new SQLRowSet(rs);
                     this.closeRessources(rs, ps);
-                    return CSQLRowSet;
+                    return SQLRowSet;
                 }
             } catch (SQLException e) {
                 this.logs.severe("MySQL error: " + e.getMessage());
@@ -155,7 +152,7 @@ public class CSQLConnection implements SQLConnection {
         return null;
     }
 
-    @Override
+
     public void query(final String query, final Callback<ResultSet> callback, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
             try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
@@ -174,7 +171,7 @@ public class CSQLConnection implements SQLConnection {
         }
     }
 
-    @Override
+
     public void asyncExecuteCallback(final String query, final Callback<Integer> callback, final Object... vars) {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
@@ -199,12 +196,12 @@ public class CSQLConnection implements SQLConnection {
         });
     }
 
-    @Override
+
     public void asyncExecute(final String query, final Object... vars) {
         this.asyncExecuteCallback(query, null, vars);
     }
 
-    @Override
+
     public ResultSet execute(final String query, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
             try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {

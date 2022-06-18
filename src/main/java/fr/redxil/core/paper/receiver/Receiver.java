@@ -11,8 +11,8 @@ package fr.redxil.core.paper.receiver;
 
 import fr.redline.pms.pm.PMReceiver;
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.utils.Nick;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,7 +24,7 @@ public class Receiver implements PMReceiver {
 
     public Receiver() {
 
-        API.getInstance().getRedisManager().ifPresent(redis -> {
+        CoreAPI.getInstance().getRedisManager().ifPresent(redis -> {
                     RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "nickChange", String.class, this);
                     RedisPMManager.addRedissonPMListener(redis.getRedissonClient(), "rankChange", String.class, this);
                 }
@@ -34,7 +34,7 @@ public class Receiver implements PMReceiver {
 
     @Override
     public void redisPluginMessageReceived(String s, Object s1) {
-        Optional<APIPlayer> apiPlayer = API.getInstance().getPlayerManager().getPlayer(UUID.fromString((String) s1));
+        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(UUID.fromString((String) s1));
 
         if (apiPlayer.isEmpty())
             return;

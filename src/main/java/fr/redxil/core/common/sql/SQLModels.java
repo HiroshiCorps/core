@@ -9,7 +9,7 @@
 
 package fr.redxil.core.common.sql;
 
-import fr.redxil.api.common.API;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.sql.utils.SQLColumns;
 import fr.redxil.core.common.sql.utils.SQLJoin;
 import fr.redxil.core.common.utils.TripletData;
@@ -50,7 +50,7 @@ public class SQLModels<T extends SQLModel> {
         if (SQLJoin != null)
             query.append(" ").append(SQLJoin.toSQL());
 
-        API.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query.toString(), resultSet -> {
+        CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query.toString(), resultSet -> {
             try {
                 if (resultSet.first()) {
                     model.populate(resultSet);
@@ -83,7 +83,7 @@ public class SQLModels<T extends SQLModel> {
             if (SQLJoin != null)
                 query2.append(" ").append(SQLJoin.toSQL());
 
-            API.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query2.toString(),
+            CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query2.toString(),
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
@@ -168,7 +168,7 @@ public class SQLModels<T extends SQLModel> {
             return;
         String queryString = "DELETE FROM " + model.getTable() + " " + query;
         this.logs.info(queryString);
-        API.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(queryString, vars));
+        CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(queryString, vars));
     }
 
     private String listCreator(Collection<Object> collection, boolean value) {
@@ -239,7 +239,7 @@ public class SQLModels<T extends SQLModel> {
 
         this.logs.info(query);
 
-        API.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(query, objectList.toArray()));
+        CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(query, objectList.toArray()));
 
     }
 

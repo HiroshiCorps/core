@@ -14,11 +14,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.API;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.*;
@@ -41,7 +41,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
 
         if (!(sender instanceof Player player)) return;
 
-        Optional<APIPlayerModerator> apiPlayerModAuthor = API.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModAuthor = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
 
         if (apiPlayerModAuthor.isEmpty()) {
             TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
@@ -67,7 +67,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
 
         if (!(sender instanceof Player player)) return;
 
-        Optional<APIPlayerModerator> apiPlayerModerator = API.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) sender).getUniqueId());
 
         if (apiPlayerModerator.isEmpty() || !apiPlayerModerator.get().isModeratorMod()) {
 
@@ -78,7 +78,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
         }
 
         String target = commandContext.getArgument("player", String.class);
-        Optional<APIOfflinePlayer> playerTarget = API.getInstance().getPlayerManager().getOfflinePlayer(target);
+        Optional<APIOfflinePlayer> playerTarget = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(target);
 
         if (playerTarget.isEmpty()) {
             TextComponentBuilder.createTextComponent(
@@ -105,10 +105,10 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
     public void registerArgs(LiteralCommandNode<CommandSource> command) {
 
         List<String> playerName = new ArrayList<>();
-        Collection<Long> availablePlayer = new ArrayList<>(API.getInstance().getPlayerManager().getLoadedPlayer());
-        availablePlayer.removeAll(API.getInstance().getModeratorManager().getLoadedModerator());
+        Collection<Long> availablePlayer = new ArrayList<>(CoreAPI.getInstance().getPlayerManager().getLoadedPlayer());
+        availablePlayer.removeAll(CoreAPI.getInstance().getModeratorManager().getLoadedModerator());
         for (Long id : availablePlayer)
-            API.getInstance().getPlayerManager().getPlayer(id).ifPresent(player -> playerName.add(player.getName()));
+            CoreAPI.getInstance().getPlayerManager().getPlayer(id).ifPresent(player -> playerName.add(player.getName()));
 
         this.addArgumentCommand(command, "player", StringArgumentType.word(), this::execute, playerName.toArray(new String[0]));
 

@@ -10,7 +10,6 @@
 package fr.redxil.core.common.redis;
 
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.redis.RedisManager;
 import org.redisson.Redisson;
 import org.redisson.api.RList;
 import org.redisson.api.RMap;
@@ -22,14 +21,14 @@ import org.redisson.config.SingleServerConfig;
 import java.util.List;
 import java.util.Map;
 
-public class CRedisManager implements RedisManager {
+public class RedisManager {
 
     private final IpInfo ipInfo;
     private final String user, password;
     private final int database;
     private RedissonClient connection;
 
-    public CRedisManager(IpInfo ipInfo, int database, String user, String password) {
+    public RedisManager(IpInfo ipInfo, int database, String user, String password) {
         this.ipInfo = ipInfo;
         this.database = database;
         this.user = user;
@@ -37,67 +36,67 @@ public class CRedisManager implements RedisManager {
         initConnection();
     }
 
-    @Override
+
     public String getRedisString(String key) {
         return (String) getRedissonClient().getBucket(key).get();
     }
 
-    @Override
+
     public void setRedisString(String key, String value) {
         getRedissonClient().getBucket(key).set(value);
     }
 
-    @Override
+
     public Long getRedisLong(String key) {
         return getRedissonClient().getAtomicLong(key).get();
     }
 
-    @Override
+
     public void setRedisLong(String key, long value) {
         getRedissonClient().getAtomicLong(key).set(value);
     }
 
-    @Override
+
     public Object getRedisObject(String key) {
         return getRedissonClient().getBucket(key).get();
     }
 
-    @Override
+
     public void setRedisObject(String key, Object s) {
         getRedissonClient().getBucket(key).set(s);
     }
 
-    @Override
+
     public void setRedisDouble(String key, double v) {
         getRedissonClient().getAtomicDouble(key).set(v);
     }
 
-    @Override
+
     public Double getRedisDouble(String key) {
         return getRedissonClient().getAtomicDouble(key).get();
     }
 
-    @Override
+
     public Boolean getRedisBoolean(String s) {
         return Boolean.parseBoolean(getRedisString(s));
     }
 
-    @Override
+
     public void setRedisBoolean(String s, boolean b) {
         setRedisString(s, Boolean.toString(b));
     }
 
-    @Override
+
     public boolean containsKey(String s) {
         return getRedissonClient().getBucket(s).get() != null;
     }
 
-    @Override
+
     public <V> RList<V> getRedisList(String s) {
         return getRedissonClient().getList(s);
     }
 
-    @Override
+
     public <V> void setRedisList(String s, List<V> list) {
         if (list instanceof RList)
             if (((RList<V>) list).getName().equals(s)) return;
@@ -106,12 +105,12 @@ public class CRedisManager implements RedisManager {
         rList.addAll(list);
     }
 
-    @Override
+
     public <K, V> RMap<K, V> getRedisMap(String s) {
         return getRedissonClient().getMap(s);
     }
 
-    @Override
+
     public <K, V> void setRedisMap(String s, Map<K, V> map) {
         if (map instanceof RMap)
             if (((RMap<K, V>) map).getName().equals(s)) return;
@@ -120,12 +119,12 @@ public class CRedisManager implements RedisManager {
         rMap.putAll(map);
     }
 
-    @Override
+
     public void clone(String from, String to) {
         getRedissonClient().getBucket(to).set(getRedissonClient().getBucket(from).get());
     }
 
-    @Override
+
     public void initConnection() {
 
         Config config = new Config();
@@ -147,12 +146,12 @@ public class CRedisManager implements RedisManager {
 
     }
 
-    @Override
+
     public void closeConnection() {
         getRedissonClient().shutdown();
     }
 
-    @Override
+
     public RedissonClient getRedissonClient() {
         return connection;
     }
