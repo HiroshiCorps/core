@@ -66,9 +66,9 @@ public class CServer implements Server {
 
     }
 
-    public CServer(Long serverID, String serverName) {
+    public CServer(Long serverID) {
         ServerModel serverModel = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID);
-        initServer(serverModel.getServerType(), ServerAccess.valueOf(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())), Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())), serverID, serverName, new IpInfo(serverModel.getString(ServerDataSql.SERVER_IP_SQL.getSQLColumns()), Integer.valueOf(serverModel.getString(ServerDataSql.SERVER_PORT_SQL.getSQLColumns()))), serverModel.getMaxPlayers());
+        initServer(serverModel.getServerType(), ServerAccess.valueOf(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())), Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())), serverID, serverModel.getServerName(), new IpInfo(serverModel.getString(ServerDataSql.SERVER_IP_SQL.getSQLColumns()), Integer.valueOf(serverModel.getString(ServerDataSql.SERVER_PORT_SQL.getSQLColumns()))), serverModel.getMaxPlayers());
     }
 
     private void initServer(ServerType serverType, ServerAccess serverAccess, Rank rank, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {

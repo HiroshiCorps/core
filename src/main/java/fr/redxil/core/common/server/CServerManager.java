@@ -121,7 +121,7 @@ public class CServerManager implements ServerManager {
     }
 
     @Override
-    public Optional<Server> loadServer(Long serverID, String serverName) {
+    public Optional<Server> loadServer(Long serverID) {
 
         if (serverID == null)
             return Optional.empty();
@@ -129,10 +129,11 @@ public class CServerManager implements ServerManager {
         if (!API.getInstance().isOnlineMod())
             return Optional.empty();
 
-        CServer cServer = new CServer(serverID, serverName);
+        CServer cServer = new CServer(serverID);
 
         if (!API.getInstance().isOnlineMod())
             server.put(cServer.getServerID(), cServer);
+
         return Optional.of(cServer);
 
     }

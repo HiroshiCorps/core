@@ -145,17 +145,14 @@ public class CoreAPI extends API {
 
         if (redisPass == null || redisIp == null || redisUser == null) {
 
-            if (redisPass == null) {
+            if (redisPass == null)
                 GSONSaver.writeGSON(redisPassFile, "passhere");
-            }
 
-            if (redisUser == null) {
+            if (redisUser == null)
                 GSONSaver.writeGSON(redisUserFile, "userhere");
-            }
 
-            if (redisIp == null) {
+            if (redisIp == null)
                 GSONSaver.writeGSON(redisIpFile, "127.0.0.1:6379");
-            }
 
             getAPIEnabler().onAPILoadFail(APILoadError.REDIS_INFO_MISSING);
             return;
@@ -182,8 +179,11 @@ public class CoreAPI extends API {
 
         Optional<Server> server;
         if (serverID != null) {
-            server = this.serverManager.loadServer(serverID, serverName);
-            server.ifPresent(apiServer -> apiServer.setServerStatus(ServerStatus.ONLINE));
+            server = this.serverManager.loadServer(serverID);
+            server.ifPresent(apiServer -> {
+                apiServer.setServerStatus(ServerStatus.ONLINE);
+                apiServer.setServerIP(getConnectIpInfo());
+            });
         } else
             server = this.serverManager.createServer(getAPIEnabler().getServerInfo());
 
