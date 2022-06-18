@@ -14,12 +14,12 @@ import fr.redline.pms.utils.GSONSaver;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
+import fr.redxil.api.common.APILoadError;
 import fr.redxil.api.common.game.GameManager;
 import fr.redxil.api.common.group.party.PartyManager;
 import fr.redxil.api.common.group.team.TeamManager;
 import fr.redxil.api.common.redis.RedisManager;
 import fr.redxil.api.common.server.Server;
-import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.api.common.sql.SQLConnection;
 import fr.redxil.core.common.game.CGameManager;
@@ -41,6 +41,7 @@ public class CoreAPI extends API {
 
     private static CoreAPI instance;
     private final String serverName;
+    private final IpInfo connectIpInfo;
     private final Boolean onlineMod;
     private final CServerManager serverManager;
     private final CPlayerManager apiPlayerManager;
@@ -55,6 +56,7 @@ public class CoreAPI extends API {
     private CRedisManager manager = null;
 
     public CoreAPI(APIEnabler plugin) {
+
         CoreAPI.instance = this;
 
         this.APIEnabler = plugin;
@@ -62,7 +64,6 @@ public class CoreAPI extends API {
         this.serverManager = new CServerManager();
         this.apiPlayerManager = new CPlayerManager();
         this.moderatorManager = new CModeratorManager();
-        this.sqlConnection = new CSQLConnection();
         this.partyManager = new CPartyManager();
         this.gameManager = new CGameManager();
 
@@ -70,19 +71,50 @@ public class CoreAPI extends API {
         File serverIDFile = new File(plugin.getPluginDataFolder() + File.separator + "serverid.json");
         File serverNameFile = new File(plugin.getPluginDataFolder() + File.separator + "servername.json");
 
-        File sqlUserFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "user.json");
-        File sqlPassFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "pass.json");
-        File sqlIpFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "ip.json");
-
-        File redisPassFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "pass.json");
-        File redisUserFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
-        File redisIpFile = new File(plugin.getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
-
         File serverAccessIP = new File(plugin.getPluginDataFolder() + File.separator + "serverip.json");
 
         this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         this.onlineMod = GSONSaver.loadGSON(onlineModFile, Boolean.class);
         this.serverID = GSONSaver.loadGSON(serverIDFile, Long.class);
+
+        String gsonIP = GSONSaver.loadGSON(serverAccessIP, String.class);
+        if (gsonIP != null)
+            this.connectIpInfo = new IpInfo(gsonIP);
+        else this.connectIpInfo = null;
+
+        if (connectIpInfo == null || onlineMod == null || serverName == null) {
+
+            if(connectIpInfo == null)
+                GSONSaver.writeGSON(serverAccessIP, "127.0.0.1:25565");
+
+            if (serverName == null)
+                GSONSaver.writeGSON(serverNameFile, "servername");
+
+            if (onlineMod == null)
+                GSONSaver.writeGSON(onlineModFile, false);
+
+            plugin.onAPILoadFail(APILoadError.SERVER_INFO_MISSING);
+            return;
+
+        }
+
+        API.instance = this;
+        plugin.onAPIEnabled();
+
+    }
+
+    @Override
+    public void loadDB(){
+        if(!isOnlineMod())
+            return;
+
+        File sqlUserFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "user.json");
+        File sqlPassFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "pass.json");
+        File sqlIpFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "ip.json");
+
+        File redisPassFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "pass.json");
+        File redisUserFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
+        File redisIpFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
 
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
@@ -92,91 +124,91 @@ public class CoreAPI extends API {
         String redisUser = GSONSaver.loadGSON(redisUserFile, String.class);
         String redisIp = GSONSaver.loadGSON(redisIpFile, String.class);
 
-        IpInfo ipInfo;
-        String gsonIP = GSONSaver.loadGSON(serverAccessIP, String.class);
-        if (gsonIP == null)
-            ipInfo = plugin.getServerInfo().getIpInfo();
-        else ipInfo = new IpInfo(gsonIP);
+        if(sqlUser == null || sqlPass == null || sqlIp == null) {
 
-        if (ipInfo == null || onlineMod == null || serverName == null || sqlUser == null || sqlPass == null || redisPass == null || sqlIp == null || redisIp == null) {
-
-            if (serverName == null) {
-                GSONSaver.writeGSON(serverNameFile, "servername");
-                return;
+            if (sqlUser == null) {
+                GSONSaver.writeGSON(sqlUserFile, "userhere");
             }
 
-            if (onlineMod == null) {
-                GSONSaver.writeGSON(onlineModFile, false);
-                return;
+            if (sqlPass == null) {
+                GSONSaver.writeGSON(sqlPassFile, "passhere");
             }
 
-            if (isOnlineMod()) {
-
-                if (sqlUser == null)
-                    GSONSaver.writeGSON(sqlUserFile, "userhere");
-
-                if (sqlPass == null)
-                    GSONSaver.writeGSON(sqlPassFile, "passhere");
-
-                if (redisPass == null)
-                    GSONSaver.writeGSON(redisPassFile, "passhere");
-
-                if (redisUser == null)
-                    GSONSaver.writeGSON(redisUserFile, "userhere");
-
-                if (redisIp == null)
-                    GSONSaver.writeGSON(redisIpFile, "127.0.0.1:6379");
-
-                if (sqlIp == null)
-                    GSONSaver.writeGSON(sqlIpFile, "127.0.0.1:3306");
-
-                return;
-
+            if (sqlIp == null) {
+                GSONSaver.writeGSON(sqlIpFile, "127.0.0.1:3306");
             }
+
+            getAPIEnabler().onAPILoadFail(APILoadError.SQL_INFO_MISSING);
+            return;
 
         }
 
-        if (isOnlineMod()) {
+        if (redisPass == null || redisIp == null || redisUser == null) {
 
-            plugin.printLog(Level.INFO, "Connecting to db");
-
-            assert sqlIp != null;
-            this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
-            assert redisIp != null && redisPass != null;
-            this.manager = new CRedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
-
-            if (!dataConnected()) {
-                plugin.printLog(Level.SEVERE, "DataBase not connected");
-                plugin.onAPILoadFail();
-                return;
+            if (redisPass == null) {
+                GSONSaver.writeGSON(redisPassFile, "passhere");
             }
 
+            if (redisUser == null) {
+                GSONSaver.writeGSON(redisUserFile, "userhere");
+            }
+
+            if (redisIp == null) {
+                GSONSaver.writeGSON(redisIpFile, "127.0.0.1:6379");
+            }
+
+            getAPIEnabler().onAPILoadFail(APILoadError.REDIS_INFO_MISSING);
+            return;
+
+        }
+
+        getAPIEnabler().printLog(Level.INFO, "Connecting to db");
+
+        this.sqlConnection = new CSQLConnection();
+        this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
+        if(!this.sqlConnection.isConnected()){
+            this.sqlConnection = null;
+            getAPIEnabler().onAPILoadFail(APILoadError.SQL_CONNECT_ERROR);
+            return;
+        }
+
+        this.manager = new CRedisManager(new IpInfo(redisIp), 0, redisUser.equals("null") ? null : redisUser, redisPass.equals("null") ? null : redisPass);
+        if(this.manager.getRedissonClient().isShutdown() || this.manager.getRedissonClient().isShuttingDown()){
+            this.manager = null;
+            this.sqlConnection.closeConnection();
+            getAPIEnabler().onAPILoadFail(APILoadError.REDIS_CONNECT_ERROR);
+            return;
         }
 
         Optional<Server> server;
-        if (isOnlineMod() && serverID != null) {
+        if (serverID != null) {
             server = this.serverManager.loadServer(serverID, serverName);
             server.ifPresent(apiServer -> apiServer.setServerStatus(ServerStatus.ONLINE));
         } else
-            server = this.serverManager.createServer(plugin.getServerInfo());
+            server = this.serverManager.createServer(getAPIEnabler().getServerInfo());
 
         if (server.isEmpty()) {
-            plugin.onAPILoadFail();
+            if(serverID == null)
+                getAPIEnabler().onAPILoadFail(APILoadError.CREATE_SERVER_ERROR);
+            else getAPIEnabler().onAPILoadFail(APILoadError.LOAD_SERVER_ERROR);
             return;
         } else {
             this.server = server.get();
             this.serverID = this.server.getServerID();
         }
 
-        GSONSaver.writeGSON(serverIDFile, Long.valueOf(this.server.getServerID()).toString());
+        GSONSaver.writeGSON(new File(getAPIEnabler().getPluginDataFolder() + File.separator + "serverid.json"), Long.valueOf(this.server.getServerID()).toString());
 
-        plugin.printLog(Level.INFO, "Server id: " + this.server.getServerID());
-        API.instance = this;
-        plugin.onAPIEnabled();
+        getAPIEnabler().printLog(Level.INFO, "Server id: " + this.server.getServerID());
 
         API.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", this.getServerID()));
 
+    }
+
+    @Override
+    public IpInfo getConnectIpInfo() {
+        return connectIpInfo;
     }
 
     public static CoreAPI getInstance() {
@@ -237,16 +269,6 @@ public class CoreAPI extends API {
     @Override
     public long getServerID() {
         return this.serverID;
-    }
-
-    @Override
-    public boolean dataConnected() {
-        Optional<SQLConnection> sql = getSQLConnection();
-        if (sql.isPresent())
-            if (!sql.get().isConnected())
-                return false;
-        Optional<RedisManager> redis = getRedisManager();
-        return redis.map(redisManager -> !redisManager.getRedissonClient().isShutdown() && !redisManager.getRedissonClient().isShuttingDown()).orElse(true);
     }
 
     @Override
