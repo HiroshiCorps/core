@@ -18,8 +18,10 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.common.APILoadError;
+import fr.redxil.api.common.APIPhaseInit;
 import fr.redxil.api.common.event.CoreEnabledEvent;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.creator.ServerInfo;
@@ -76,7 +78,7 @@ public class CoreVelocity implements APIEnabler {
         String[] ipString = getProxyServer().getBoundAddress().toString().split(":");
         this.ipInfo = new IpInfo(ipString[0], Integer.valueOf(ipString[1]));
 
-        new CoreAPI(this);
+        new CoreAPI().initPhase(APIPhaseInit.PART_1, this);
 
     }
 
@@ -126,7 +128,13 @@ public class CoreVelocity implements APIEnabler {
     }
 
     @Override
-    public void onAPILoadFail(APILoadError apiLoadError) {
+    public void onAPIInitPhaseEnded(APIPhaseInit apiPhaseInit) {
+        if (apiPhaseInit == APIPhaseInit.PART_1)
+            API.getInstance().initPhase(APIPhaseInit.PART_2, this);
+    }
+
+    @Override
+    public void onAPILoadFail(APIPhaseInit apiPhaseInit, APILoadError apiLoadError) {
 
     }
 

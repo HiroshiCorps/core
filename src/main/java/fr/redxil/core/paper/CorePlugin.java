@@ -12,7 +12,6 @@ package fr.redxil.core.paper;
 import fr.redline.invinteract.event.EventInventory;
 import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.SystemColor;
-import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.paper.PaperAPI;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.cmd.*;
@@ -41,23 +40,11 @@ public class CorePlugin extends PaperAPI {
     public CorePlugin(JavaStarter javaPlugin) {
         CorePlugin.instance = this;
         this.javaPlugin = javaPlugin;
+        new CoreAPI();
     }
 
     public static CorePlugin getInstance() {
         return instance;
-    }
-
-    @Override
-    public void startAPI(APIEnabler APIEnabler) {
-        Bukkit.getLogger().log(Level.FINE,
-                SystemColor.WHITE + "#==========[WELCOME TO SERVER CORE]===========#\n"
-                        + SystemColor.YELLOW + "# SERVERCORE is now loading with enabler: " + APIEnabler.getClass().getName() + "#\n"
-                        + "# carefully all outputs coming from it.        #\n"
-                        + SystemColor.WHITE + "#==============================================#" + SystemColor.RESET
-        );
-        new CoreAPI(APIEnabler);
-        if (CoreAPI.isAPIEnabled())
-            onLoad();
     }
 
     public void onLoad() {
