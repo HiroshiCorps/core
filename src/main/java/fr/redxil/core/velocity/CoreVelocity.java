@@ -215,7 +215,6 @@ public class CoreVelocity implements APIEnabler {
     @Override
     public void printLog(Level level, String msg) {
         this.logger.log(level, msg);
-        //System.out.println("[" + level.getName() + "] " + msg);
     }
 
     @Override
