@@ -26,6 +26,7 @@ import fr.redxil.core.paper.vanish.VanishGestion;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 
+import java.io.File;
 import java.util.Objects;
 import java.util.logging.Level;
 
@@ -45,6 +46,11 @@ public class CorePlugin extends PaperAPI {
 
     public static CorePlugin getInstance() {
         return instance;
+    }
+
+    @Override
+    public File getCoreFile() {
+        return javaPlugin.getDataFolder();
     }
 
     public void onLoad() {

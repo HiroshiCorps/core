@@ -79,7 +79,7 @@ public class CPlayerModerator implements APIPlayerModerator {
 
     @Override
     public void disconnectModerator() {
-        if (!CoreAPI.getInstance().isVelocity() && CoreAPI.getInstance().isOnlineMod()) return;
+        if (!CoreAPI.getInstance().getAPIEnabler().isVelocity() && CoreAPI.getInstance().isOnlineMod()) return;
 
         String name = getName();
         UUID uuid = getUUID();

@@ -29,9 +29,11 @@ import fr.redxil.core.common.player.moderator.CModeratorManager;
 import fr.redxil.core.common.redis.RedisManager;
 import fr.redxil.core.common.server.CServerManager;
 import fr.redxil.core.common.sql.SQLConnection;
-import fr.xilitra.hiroshisav.enums.ServerType;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -138,11 +140,6 @@ public class CoreAPI extends API {
     }
 
     @Override
-    public boolean isVelocity() {
-        return getAPIEnabler().getServerInfo().getServerType() == ServerType.VELOCITY;
-    }
-
-    @Override
     public PartyManager getPartyManager() {
         return partyManager;
     }
@@ -185,8 +182,15 @@ public class CoreAPI extends API {
 
         if (connectIpInfo == null || onlineMod == null || serverName == null) {
 
-            if (connectIpInfo == null)
-                GSONSaver.writeGSON(serverAccessIP, "127.0.0.1:25565");
+            if (connectIpInfo == null) {
+                String address = "127.0.0.1";
+                try {
+                    address = Arrays.toString(InetAddress.getLocalHost().getAddress());
+                } catch (UnknownHostException ignored) {
+
+                }
+                GSONSaver.writeGSON(serverAccessIP, address + ":25565");
+            }
 
             if (serverName == null)
                 GSONSaver.writeGSON(serverNameFile, "servername");
@@ -256,7 +260,7 @@ public class CoreAPI extends API {
 
         }
 
-        getAPIEnabler().printLog(Level.INFO, "Connecting to db");
+        getAPIEnabler().getLogger().log(Level.INFO, "Connecting to db");
 
         this.sqlConnection = new SQLConnection();
         this.sqlConnection.connect(new IpInfo(sqlIp), "hiroshi", sqlUser, sqlPass);
@@ -302,7 +306,7 @@ public class CoreAPI extends API {
 
         GSONSaver.writeGSON(new File(getAPIEnabler().getPluginDataFolder() + File.separator + "serverid.json"), Long.valueOf(this.server.getServerID()).toString());
 
-        getAPIEnabler().printLog(Level.INFO, "Server id: " + this.server.getServerID());
+        getAPIEnabler().getLogger().log(Level.INFO, "Server id: " + this.server.getServerID());
 
         CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
                 RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", this.getServerID()));

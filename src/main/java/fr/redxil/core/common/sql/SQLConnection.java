@@ -85,17 +85,17 @@ public class SQLConnection {
     public PreparedStatement prepareStatement(Connection conn, String query, Object... vars) {
         try {
             PreparedStatement ps = conn.prepareStatement(query);
-            CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Preparing statement for query: " + query);
+            CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.INFO, "Preparing statement for query: " + query);
             int num = Math.toIntExact(query.chars().filter(ch -> ch == '?').count());
             if (num == vars.length) {
                 int i = 0;
                 for (Object obj : vars) {
                     i++;
                     ps.setObject(i, obj);
-                    CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Set object: " + i + " object: " + obj);
+                    CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.INFO, "Set object: " + i + " object: " + obj);
                 }
             } else {
-                CoreAPI.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
+                CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
                 return null;
             }
             return ps;

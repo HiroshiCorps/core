@@ -330,7 +330,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (!CoreAPI.getInstance().isOnlineMod())
             return;
         this.sanctionModelList.addAll(new SQLModels<>(SanctionModel.class).get("WHERE targetID = ? ORDER BY sanctionTS DESC", getMemberID()));
-        CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Sanction: " + this.sanctionModelList.size());
+        CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.INFO, "Sanction: " + this.sanctionModelList.size());
     }
 
     @Override
@@ -430,7 +430,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     public Optional<SanctionInfo> getLastSanction(SanctionType sanctionType) {
         List<SanctionInfo> sanctionList = getSanction(sanctionType);
         if (sanctionList.isEmpty()) {
-            CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "Pas de sanction");
+            CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.INFO, "Pas de sanction");
             return Optional.empty();
         }
 

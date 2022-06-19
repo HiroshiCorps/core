@@ -176,7 +176,7 @@ public class CServer implements Server {
 
         long id = serverID;
 
-        CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "[Core] Clearing redis data");
+        CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.INFO, "[Core] Clearing redis data");
 
         if (CoreAPI.getInstance().isOnlineMod()) {
 

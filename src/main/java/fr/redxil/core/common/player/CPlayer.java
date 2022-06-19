@@ -133,7 +133,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         loadLink(this);
 
-        CoreAPI.getInstance().getAPIEnabler().printLog(Level.FINE, "Player Data creation finished");
+        CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.FINE, "Player Data creation finished");
     }
 
     static void loadLink(CPlayer cPlayer) {
@@ -179,7 +179,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public void unloadPlayer() {
-        if (!CoreAPI.getInstance().isVelocity()) return;
+        if (!CoreAPI.getInstance().getAPIEnabler().isVelocity()) return;
 
         CoreAPI.getInstance().getModeratorManager().getModerator(getMemberID()).ifPresent(APIPlayerModerator::disconnectModerator);
 

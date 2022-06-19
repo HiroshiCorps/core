@@ -67,7 +67,7 @@ public class CGame implements Game {
     @Override
     public void clearData() {
 
-        CoreAPI.getInstance().getAPIEnabler().printLog(Level.FINE, "[Host] Clearing redis data");
+        CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.FINE, "[Host] Clearing redis data");
 
         TeamDataValue.clearRedisData(DataType.TEAM, this);
 

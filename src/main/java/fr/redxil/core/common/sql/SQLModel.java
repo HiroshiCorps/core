@@ -79,7 +79,7 @@ public abstract class SQLModel {
             for (Map.Entry<String, Object> value : columns.entrySet()) {
                 SQLColumns converted = SQLColumns.fromSQL(value.getKey());
                 if (converted == null) {
-                    CoreAPI.getInstance().getAPIEnabler().printLog(Level.SEVERE, "Error on convert String to SQLColumns with String: " + value.getKey());
+                    CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.SEVERE, "Error on convert String to SQLColumns with String: " + value.getKey());
                     continue;
                 }
                 if (converted.getTable().equalsIgnoreCase(table)) {

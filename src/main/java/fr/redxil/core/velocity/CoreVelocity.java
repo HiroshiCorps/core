@@ -55,7 +55,6 @@ import net.kyori.adventure.text.Component;
 import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CoreVelocity implements APIEnabler {
@@ -213,8 +212,8 @@ public class CoreVelocity implements APIEnabler {
     }
 
     @Override
-    public void printLog(Level level, String msg) {
-        this.logger.log(level, msg);
+    public Logger getLogger() {
+        return this.logger;
     }
 
     @Override
@@ -250,6 +249,11 @@ public class CoreVelocity implements APIEnabler {
     @Subscribe
     public void playerQuit(DisconnectEvent de) {
         CoreAPI.getInstance().getPartyManager().getPlayerParty(de.getPlayer().getUniqueId()).ifPresent(party -> party.quitParty(de.getPlayer().getUniqueId()));
+    }
+
+    @Override
+    public boolean isVelocity() {
+        return true;
     }
 
 }
