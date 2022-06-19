@@ -59,7 +59,7 @@ public class PlayerListener {
 
         if (model.isPresent() && model.get().isEffective()) {
 
-            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.get().getSanctionEndTS()))).getFinalTextComponent());
+            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.get().getSanctionEndTS().orElse(null)))).getFinalTextComponent());
             chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
 
         }

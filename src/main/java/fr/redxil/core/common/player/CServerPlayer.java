@@ -249,7 +249,7 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public Optional<SanctionInfo> banPlayer(String arg0, long arg1, APIPlayerModerator arg2) {
+    public Optional<SanctionInfo> banPlayer(String arg0, Timestamp arg1, APIPlayerModerator arg2) {
         return Optional.empty();
     }
 
@@ -327,7 +327,7 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public Optional<SanctionInfo> mutePlayer(String arg0, long arg1, APIPlayerModerator arg2) {
+    public Optional<SanctionInfo> mutePlayer(String arg0, Timestamp arg1, APIPlayerModerator arg2) {
         return Optional.empty();
     }
 

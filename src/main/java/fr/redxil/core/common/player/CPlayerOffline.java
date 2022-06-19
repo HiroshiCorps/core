@@ -334,7 +334,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public Optional<SanctionInfo> banPlayer(String reason, long time, APIPlayerModerator author) {
+    public Optional<SanctionInfo> banPlayer(String reason, Timestamp time, APIPlayerModerator author) {
 
         if (isBan() || !CoreAPI.getInstance().isOnlineMod()) return Optional.empty();
 
@@ -355,7 +355,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public Optional<SanctionInfo> mutePlayer(String reason, long time, APIPlayerModerator author) {
+    public Optional<SanctionInfo> mutePlayer(String reason, Timestamp time, APIPlayerModerator author) {
 
         if (isMute() || !CoreAPI.getInstance().isOnlineMod()) return Optional.empty();
 

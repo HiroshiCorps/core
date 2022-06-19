@@ -26,11 +26,11 @@ import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public class BanCmd extends BrigadierAPI<CommandSource> {
 
@@ -39,27 +39,30 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
     }
 
     public static void banPlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator apiPlayerModerator, String reason) {
-        long durationTime = DateUtility.toTimeStamp(timeArgs);
 
         Optional<Player> playerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerModerator.getUUID());
         if (playerOptional.isEmpty()) return;
         Player proxiedPlayer = playerOptional.get();
 
-        long end = DateUtility.addToCurrentTimeStamp(durationTime);
+        Optional<Timestamp> durationTime = DateUtility.toTimeStamp(timeArgs);
 
-        CoreAPI.getInstance().getAPIEnabler().printLog(Level.INFO, "End: " + end);
+        if (durationTime.isEmpty() && !timeArgs.equals("perm")) {
+            TextComponentBuilder.createTextComponent("Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED)
+                    .sendTo(proxiedPlayer.getUniqueId());
+            return;
+        }
+
+        Timestamp end = durationTime.map(DateUtility::addToCurrentTimeStamp).orElse(null);
 
         String format = DateUtility.getMessage(end);
 
-        if (durationTime != -2L) {
+        Optional<SanctionInfo> sm = apiPlayerTarget.banPlayer(reason, end, apiPlayerModerator);
+        if (sm.isPresent()) {
 
-            Optional<SanctionInfo> sm = apiPlayerTarget.banPlayer(reason, end, apiPlayerModerator);
-            if (sm.isPresent()) {
-
-                TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
-                        "Le modérateur §d" +
-                                apiPlayerModerator.getName() +
-                                " §7à ban l'utilisateur §a" +
+            TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
+                    "Le modérateur §d" +
+                            apiPlayerModerator.getName() +
+                            " §7à ban l'utilisateur §a" +
                                 apiPlayerTarget.getName() + " §7jusqu'au " +
                                 format + " pour raison: "
                                 + reason + ".");
@@ -74,10 +77,6 @@ public class BanCmd extends BrigadierAPI<CommandSource> {
                 TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                         .sendTo(proxiedPlayer.getUniqueId());
 
-        } else {
-            TextComponentBuilder.createTextComponent("Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED)
-                    .sendTo(proxiedPlayer.getUniqueId());
-        }
 
     }
 

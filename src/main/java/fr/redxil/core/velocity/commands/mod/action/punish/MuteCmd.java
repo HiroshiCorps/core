@@ -26,6 +26,7 @@ import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import fr.redxil.core.velocity.commands.BrigadierAPI;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,46 +38,45 @@ public class MuteCmd extends BrigadierAPI<CommandSource> {
         super("mute");
     }
 
-    public static void mutePlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator APIPlayerModAuthor, String reason) {
+    public static void mutePlayer(APIOfflinePlayer apiPlayerTarget, String timeArgs, APIPlayerModerator apiPlayerModerator, String reason) {
 
-        long durationTime = DateUtility.toTimeStamp(timeArgs);
+        Optional<Player> playerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerModerator.getUUID());
+        if (playerOptional.isEmpty()) return;
+        Player proxiedPlayer = playerOptional.get();
 
-        Optional<Player> proxiedPlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(APIPlayerModAuthor.getName());
+        Optional<Timestamp> durationTime = DateUtility.toTimeStamp(timeArgs);
 
-        if (proxiedPlayerOptional.isEmpty()) return;
-
-        Player proxiedPlayer = proxiedPlayerOptional.get();
-
-        long end = DateUtility.addToCurrentTimeStamp(DateUtility.toTimeStamp(timeArgs));
-
-        String endDate = DateUtility.getMessage(end);
-
-        if (durationTime != -2L) {
-
-            Optional<SanctionInfo> sm = apiPlayerTarget.mutePlayer(reason, end, APIPlayerModAuthor);
-
-            if (sm.isPresent()) {
-                CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName()).ifPresent((onlinePlayer) -> onlinePlayer.sendMessage(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
-
-                TextComponentBuilder muteMessage = TextComponentBuilder.createTextComponent(
-                        "Le modérateur §d" +
-                                APIPlayerModAuthor.getName() +
-                                " §7à mute l'utilisateur §a" +
-                                apiPlayerTarget.getName() + " §7jusqu'au " +
-                                endDate + " pour raison: "
-                                + reason + ".");
-
-                CoreAPI.getInstance().getModeratorManager().sendToModerators(muteMessage);
-
-            } else
-                TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
-                        .sendTo(proxiedPlayer.getUniqueId());
-        } else {
-            TextComponentBuilder tcb = TextComponentBuilder.createTextComponent(
-                    "Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED);
-
-            tcb.sendTo(proxiedPlayer.getUniqueId());
+        if (durationTime.isEmpty() && !timeArgs.equals("perm")) {
+            TextComponentBuilder.createTextComponent("Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED)
+                    .sendTo(proxiedPlayer.getUniqueId());
+            return;
         }
+
+        Timestamp end = durationTime.map(DateUtility::addToCurrentTimeStamp).orElse(null);
+
+        String format = DateUtility.getMessage(end);
+
+        Optional<SanctionInfo> sm = apiPlayerTarget.mutePlayer(reason, end, apiPlayerModerator);
+        if (sm.isPresent()) {
+
+            TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
+                    "Le modérateur §d" +
+                            apiPlayerModerator.getName() +
+                            " §7à mute l'utilisateur §a" +
+                            apiPlayerTarget.getName() + " §7jusqu'au " +
+                            format + " pour raison: "
+                            + reason + ".");
+
+            CoreAPI.getInstance().getModeratorManager().sendToModerators(banMessage);
+
+            Optional<Player> onlinePlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
+
+            onlinePlayerOptional.ifPresent(player -> player.disconnect(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
+
+        } else
+            TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
+                    .sendTo(proxiedPlayer.getUniqueId());
+
 
     }
 

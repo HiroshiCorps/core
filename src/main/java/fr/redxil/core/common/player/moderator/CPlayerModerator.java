@@ -223,13 +223,13 @@ public class CPlayerModerator implements APIPlayerModerator {
                 tcb.appendNewComponentBuilder("\n§r     §7Sanction ID: §d" + sanction.getSanctionID());
                 tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + sanction.getAuthorID());
                 tcb.appendNewComponentBuilder("\n§r     §7Le: §d" + DateUtility.getMessage(sanction.getSanctionDateTS()));
-                tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS()));
+                tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS().orElse(null)));
                 tcb.appendNewComponentBuilder("\n§r     §7Pour: §d" + sanction.getReason());
 
                 String cancelledString = "§aPas cancel";
-                Long longID = sanction.getCanceller();
-                if (longID != null)
-                    cancelledString = longID.toString();
+                Optional<Long> longID = sanction.getCanceller();
+                if (longID.isPresent())
+                    cancelledString = longID.get().toString();
 
                 tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
 

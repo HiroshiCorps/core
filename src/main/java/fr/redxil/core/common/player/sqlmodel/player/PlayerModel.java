@@ -23,15 +23,15 @@ public class PlayerModel extends SQLModel {
     }
 
     public long getPowerRank() {
-        return Integer.valueOf(this.getInt(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns())).longValue();
+        return this.getInt(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns()).longValue();
     }
 
     public Rank getRank() {
         return Rank.getRank(getPowerRank());
     }
 
-    public int getMemberID() {
-        return this.getInt(PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns());
+    public long getMemberID() {
+        return this.getInt(PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns()).longValue();
     }
 
     public String getName() {
