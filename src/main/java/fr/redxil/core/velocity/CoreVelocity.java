@@ -16,7 +16,6 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.API;
 import fr.redxil.api.common.APIEnabler;
@@ -93,8 +92,6 @@ public class CoreVelocity implements APIEnabler {
         registerEvents();
         assert getProxyServer() != null;
         getProxyServer().getEventManager().fire(new CoreEnabledEvent(this));
-        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", CoreAPI.getInstance().getServerID()));
     }
 
     @Override
