@@ -103,13 +103,13 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
 
         String sanc = commandContext.getArgument("sanc", String.class);
 
-        SanctionType sanctionType = SanctionType.getSanctionType(sanc);
-        if (sanctionType == null || sanc.equalsIgnoreCase("info")) {
+        Optional<SanctionType> sanctionType = SanctionType.getSanctionType(sanc);
+        if (sanctionType.isEmpty() || sanc.equalsIgnoreCase("info")) {
             playerModerator.get().printInfo(target.get());
             return;
         }
 
-        playerModerator.get().printSanction(target.get(), sanctionType);
+        playerModerator.get().printSanction(target.get(), sanctionType.get());
 
     }
 

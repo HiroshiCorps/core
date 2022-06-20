@@ -9,6 +9,8 @@
 
 package fr.redxil.core.common.data.utils;
 
+import java.util.Optional;
+
 public enum DataType {
 
     GLOBAL("GLOBAL"),
@@ -22,12 +24,12 @@ public enum DataType {
         this.type = type;
     }
 
-    public static DataType getDataType(String type) {
+    public static Optional<DataType> getDataType(String type) {
         for (DataType dataType : DataType.values()) {
             if (dataType.getType().equals(type))
-                return dataType;
+                return Optional.of(dataType);
         }
-        return null;
+        return Optional.empty();
     }
 
     public String toString() {

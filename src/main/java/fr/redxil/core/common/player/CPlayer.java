@@ -275,7 +275,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Rank getRealRank() {
-        return Rank.getRank(getRealRankPower());
+        return Rank.getRank(getRealRankPower()).orElse(null);
     }
 
     @Override
@@ -318,7 +318,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
     @Override
     public Rank getRank() {
-        return Rank.getRank(getRankPower());
+        return Rank.getRank(getRankPower()).orElse(null);
     }
 
     @Override

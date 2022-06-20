@@ -63,7 +63,7 @@ public class CHost extends CGame implements Host {
     @Override
     public HostAccess getHostAccess() {
         initAccessReminder();
-        return HostAccess.getStatus(accessReminder.getData());
+        return HostAccess.getStatus(accessReminder.getData()).orElse(null);
     }
 
     @Override

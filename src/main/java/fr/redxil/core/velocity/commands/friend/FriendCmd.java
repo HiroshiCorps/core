@@ -52,11 +52,13 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             return;
         }
 
-        FriendCmd.ListCmd usedCmd = FriendCmd.ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
-        if (usedCmd == null) {
+        Optional<FriendCmd.ListCmd> usedCmdOpt = FriendCmd.ListCmd.getCommand(commandContext.getArgument("cmd", String.class));
+        if (usedCmdOpt.isEmpty()) {
             this.sendCommandList(commandContext);
             return;
         }
+
+        FriendCmd.ListCmd usedCmd = usedCmdOpt.get();
 
         if (!FriendCmd.ListCmd.getCommand(2).contains(usedCmd)) {
             player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /friend " + usedCmd.getName()).setColor(Color.RED).getTextComponent());
@@ -261,14 +263,14 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             this.argument = argument;
         }
 
-        public static FriendCmd.ListCmd getCommand(String name) {
+        public static Optional<FriendCmd.ListCmd> getCommand(String name) {
 
             for (FriendCmd.ListCmd cmd : FriendCmd.ListCmd.values()) {
                 if (cmd.getName().equalsIgnoreCase(name)) {
-                    return cmd;
+                    return Optional.of(cmd);
                 }
             }
-            return null;
+            return Optional.empty();
         }
 
         public static List<FriendCmd.ListCmd> getCommand(int argument) {

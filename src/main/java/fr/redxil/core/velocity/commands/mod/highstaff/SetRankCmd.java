@@ -98,7 +98,7 @@ public class SetRankCmd extends BrigadierAPI<CommandSource> {
             }
         } else {
 
-            newRank = Rank.getRank(Long.parseLong(rankArg));
+            newRank = Rank.getRank(Long.parseLong(rankArg)).orElse(null);
 
         }
 

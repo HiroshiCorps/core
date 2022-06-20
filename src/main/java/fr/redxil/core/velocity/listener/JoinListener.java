@@ -36,7 +36,7 @@ public class JoinListener {
 
         String[] splittedIP = player.getRemoteAddress().toString().split(":");
 
-        CoreVelocity.getInstance().printLog(Level.INFO, player.getRemoteAddress().toString());
+        CoreVelocity.getInstance().getLogger().log(Level.INFO, player.getRemoteAddress().toString());
 
         CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUsername()).ifPresent(APIPlayer::restoreRealData);
 

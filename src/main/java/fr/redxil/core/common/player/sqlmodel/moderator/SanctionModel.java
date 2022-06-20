@@ -42,23 +42,26 @@ public class SanctionModel extends SQLModel implements SanctionInfo {
     }
 
     @Override
-    public Integer getSanctionID() {
-        return this.getInt(SanctionDataSql.SANCTION_ID.getSQLColumns());
+    public Optional<Long> getSanctionID() {
+        Integer sanctionID = this.getInt(SanctionDataSql.SANCTION_ID.getSQLColumns());
+        if (sanctionID != null)
+            return Optional.of(sanctionID.longValue());
+        return Optional.empty();
     }
 
     @Override
-    public long getTargetID() {
+    public Long getTargetID() {
         return this.getInt(SanctionDataSql.SANCTION_TARGET.getSQLColumns()).longValue();
     }
 
     @Override
-    public long getAuthorID() {
+    public Long getAuthorID() {
         return this.getInt(SanctionDataSql.SANCTION_AUTHOR.getSQLColumns()).longValue();
     }
 
     @Override
     public SanctionType getSanctionType() {
-        return SanctionType.getSanctionType(this.getInt(SanctionDataSql.SANCTION_TYPE.getSQLColumns()));
+        return SanctionType.getSanctionType(this.getInt(SanctionDataSql.SANCTION_TYPE.getSQLColumns())).orElse(SanctionType.KICK);
     }
 
     @Override
@@ -115,14 +118,13 @@ public class SanctionModel extends SQLModel implements SanctionInfo {
     @Override
     public TextComponentBuilder getSancMessage() {
 
-        if (getSanctionID() == null) return null;
-
         TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§4§lSERVER MC");
         tcb.appendText("\n§r§cVous avez été " + getSanctionType().getName());
         tcb.appendText("\n\n§r§7Raison: §e" + getReason());
         tcb.appendText("\n§r§7Expiration: §c" + DateUtility.getMessage(getSanctionEndTS().orElse(null)));
         tcb.appendText("\n\n§r§7Sagit-il d'une erreur ? Faites une réclamation");
-        tcb.appendNewComponentBuilder("\n§r§bredxil.net/reclam").setOnClickExecCommand("redxil.net/reclam").appendNewComponentBuilder("\n§7ID Sanction: " + getSanctionID());
+        TextComponentBuilder tcb2 = tcb.appendNewComponentBuilder("\n§r§bredxil.net/reclam").setOnClickExecCommand("redxil.net/reclam");
+        getSanctionID().ifPresent(aLong -> tcb2.appendNewComponentBuilder("\n§7ID Sanction: " + aLong));
 
         return tcb;
 

@@ -106,7 +106,7 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
                 }
             }
         } else {
-            nickRank = Rank.getRank(Integer.parseInt(argRank));
+            nickRank = Rank.getRank(Integer.parseInt(argRank)).orElse(null);
         }
 
         if (nickRank == null) {

@@ -27,7 +27,7 @@ public class PlayerModel extends SQLModel {
     }
 
     public Rank getRank() {
-        return Rank.getRank(getPowerRank());
+        return Rank.getRank(getPowerRank()).orElse(null);
     }
 
     public long getMemberID() {

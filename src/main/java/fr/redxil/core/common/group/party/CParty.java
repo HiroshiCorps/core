@@ -84,7 +84,7 @@ public class CParty implements Party {
     public boolean kickParty(UUID kicker, UUID apiPlayer1) {
         if (!hisInParty(kicker) || !hisInParty(apiPlayer1))
             return false;
-        if (!getPartyRank(kicker).isOver(getPartyRank(apiPlayer1)))
+        if (!getPartyRank(kicker).orElse(PartyRank.PLAYER).isOver(getPartyRank(apiPlayer1).orElse(PartyRank.ADMIN)))
             return false;
         initRankMapReminder();
         rankMapReminder.getData().remove(apiPlayer1);
@@ -104,7 +104,7 @@ public class CParty implements Party {
     }
 
     @Override
-    public PartyRank getPartyRank(UUID apiPlayer) {
+    public Optional<PartyRank> getPartyRank(UUID apiPlayer) {
         initRankMapReminder();
         return PartyRank.getPartyRank(rankMapReminder.getData().get(apiPlayer));
     }
@@ -117,7 +117,7 @@ public class CParty implements Party {
     @Override
     public PartyAccess getPartyAccess() {
         initPartyAccess();
-        return PartyAccess.getPartyAccess(accessReminder.getData());
+        return PartyAccess.getPartyAccess(accessReminder.getData()).orElse(null);
     }
 
     @Override
@@ -141,8 +141,8 @@ public class CParty implements Party {
 
     @Override
     public boolean deleteParty(UUID apiPlayer) {
-        PartyRank pr = getPartyRank(apiPlayer);
-        if (!pr.equals(PartyRank.ADMIN)) return false;
+        Optional<PartyRank> pr = getPartyRank(apiPlayer);
+        if (pr.isEmpty() || !pr.get().equals(PartyRank.ADMIN)) return false;
         for (UUID apiPlayers : getPlayerList())
             quitParty(apiPlayers);
         PartyDataRedis.clearRedisData(DataType.PLAYER, getPartyID());
@@ -201,7 +201,7 @@ public class CParty implements Party {
         initRankMapReminder();
         return new HashMap<>() {{
             for (Entry<UUID, String> entry : rankMapReminder.getData().entrySet()) {
-                put(entry.getKey(), PartyRank.getPartyRank(entry.getValue()));
+                put(entry.getKey(), PartyRank.getPartyRank(entry.getValue()).orElse(PartyRank.PLAYER));
             }
         }};
     }
