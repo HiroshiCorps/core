@@ -28,6 +28,9 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> loadModerator(long id, UUID uuid, String name) {
+        if (id == -5L) {
+            return Optional.empty();
+        }
         if (CoreAPI.getInstance().getPlayerManager().getServerPlayer().getMemberID() == id)
             return Optional.empty();
         if (isLoaded(id)) return Optional.empty();
@@ -78,7 +81,7 @@ public class CModeratorManager implements ModeratorManager {
 
     @Override
     public Optional<APIPlayerModerator> getModerator(long result) {
-        if (CoreAPI.getInstance().getPlayerManager().getServerPlayer().getMemberID() == result)
+        if (-5L == result)
             return Optional.of(new CServerModerator());
         if (isLoaded(result))
             return Optional.empty();

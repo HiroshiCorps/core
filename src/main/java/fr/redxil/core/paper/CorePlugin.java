@@ -10,7 +10,6 @@
 package fr.redxil.core.paper;
 
 import fr.redline.invinteract.event.EventInventory;
-import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.SystemColor;
 import fr.redxil.api.paper.PaperAPI;
 import fr.redxil.core.common.CoreAPI;
@@ -41,6 +40,7 @@ public class CorePlugin extends PaperAPI {
     public CorePlugin(JavaStarter javaPlugin) {
         CorePlugin.instance = this;
         this.javaPlugin = javaPlugin;
+        onLoad();
         new CoreAPI();
     }
 
@@ -83,8 +83,6 @@ public class CorePlugin extends PaperAPI {
 
         Bukkit.getLogger().log(Level.INFO, SystemColor.GREEN + "Command registered" + SystemColor.RESET);
 
-        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIEnabled", CoreAPI.getInstance().getServerID()));
     }
 
     public VanishGestion getVanish() {

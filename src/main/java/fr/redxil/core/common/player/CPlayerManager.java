@@ -48,6 +48,8 @@ public class CPlayerManager implements APIPlayerManager {
         Long value = getNameToLongMap().get(name);
         if (value == null)
             return Optional.empty();
+        if (value == -5L)
+            return Optional.of(getServerPlayer());
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.ofNullable(playerMap.get(value));
         return Optional.of(new CPlayer(value));
@@ -65,6 +67,8 @@ public class CPlayerManager implements APIPlayerManager {
         Long value = getUUIDToLongMap().get(uuid.toString());
         if (value == null)
             return Optional.empty();
+        if (value == -5L)
+            return Optional.of(getServerPlayer());
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.ofNullable(playerMap.get(value));
         return Optional.of(new CPlayer(value));
@@ -79,6 +83,8 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public Optional<APIPlayer> getPlayer(long id) {
+        if (id == -5L)
+            return Optional.of(getServerPlayer());
         if (!isLoadedPlayer(id)) {
             return Optional.empty();
         }
