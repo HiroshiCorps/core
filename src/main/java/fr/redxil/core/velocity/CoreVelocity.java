@@ -25,6 +25,8 @@ import fr.redxil.api.common.APIPhaseInit;
 import fr.redxil.api.common.event.CoreEnabledEvent;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.creator.ServerInfo;
+import fr.redxil.api.common.server.creator.VelocityServerInfo;
+import fr.redxil.api.common.server.type.ServerStatus;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.commands.NickCmd;
 import fr.redxil.core.velocity.commands.PartyCMD;
@@ -121,16 +123,9 @@ public class CoreVelocity implements APIEnabler {
         cm.unregister(new ShutdownCmd().getName());
         cm.unregister(new RCmd().getName());
         cm.unregister(new MsgCmd().getName());
-
-        CoreAPI.getInstance().getRedisManager().ifPresent(redis ->
-                RedisPMManager.sendRedissonPluginMessage(redis.getRedissonClient(), "onAPIDisabled", CoreAPI.getInstance().getServerID()));
     }
 
-    @Override
-    public void onAPIInitPhaseEnded(APIPhaseInit apiPhaseInit) {
-        if (apiPhaseInit == APIPhaseInit.PART_1)
-            API.getInstance().initPhase(APIPhaseInit.PART_2, this);
-    }
+    ServerInfo serverInfo = null;
 
     @Override
     public void onAPILoadFail(APIPhaseInit apiPhaseInit, APILoadError apiLoadError) {
@@ -242,8 +237,16 @@ public class CoreVelocity implements APIEnabler {
     }
 
     @Override
+    public void onAPIInitPhaseEnded(APIPhaseInit apiPhaseInit) {
+        if (apiPhaseInit == APIPhaseInit.PART_1) {
+            serverInfo = new VelocityServerInfo(API.getInstance().getServerName(), ipInfo, ServerStatus.ONLINE, false, "Lobby", 20);
+            API.getInstance().initPhase(APIPhaseInit.PART_2, this);
+        }
+    }
+
+    @Override
     public ServerInfo getServerInfo() {
-        return null;
+        return serverInfo;
     }
 
     @Subscribe

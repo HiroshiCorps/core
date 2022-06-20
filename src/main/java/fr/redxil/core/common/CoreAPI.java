@@ -165,11 +165,11 @@ public class CoreAPI extends API {
     }
 
     public void loadServerInfo() {
-        File onlineModFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "onlinemod.json");
-        File serverIDFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "serverid.json");
-        File serverNameFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "servername.json");
+        File onlineModFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "onlinemod.json");
+        File serverIDFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "serverid.json");
+        File serverNameFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "servername.json");
 
-        File serverAccessIP = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "serverip.json");
+        File serverAccessIP = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "serverip.json");
 
         this.serverName = GSONSaver.loadGSON(serverNameFile, String.class);
         this.onlineMod = GSONSaver.loadGSON(onlineModFile, Boolean.class);
@@ -209,13 +209,13 @@ public class CoreAPI extends API {
         if (!isOnlineMod())
             return;
 
-        File sqlUserFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "user.json");
-        File sqlPassFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "pass.json");
-        File sqlIpFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "ip.json");
+        File sqlUserFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "user.json");
+        File sqlPassFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "pass.json");
+        File sqlIpFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "service" + File.separator + "sql" + File.separator + "ip.json");
 
-        File redisPassFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "pass.json");
-        File redisUserFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
-        File redisIpFile = new File(getAPIEnabler().getPluginDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
+        File redisPassFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "pass.json");
+        File redisUserFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "user.json");
+        File redisIpFile = new File(getAPIEnabler().getCoreDataFolder() + File.separator + "service" + File.separator + "redis" + File.separator + "ip.json");
 
         String sqlUser = GSONSaver.loadGSON(sqlUserFile, String.class);
         String sqlPass = GSONSaver.loadGSON(sqlPassFile, String.class);
@@ -304,7 +304,7 @@ public class CoreAPI extends API {
             this.serverID = this.server.getServerID();
         }
 
-        GSONSaver.writeGSON(new File(getAPIEnabler().getPluginDataFolder() + File.separator + "serverid.json"), Long.valueOf(this.server.getServerID()).toString());
+        GSONSaver.writeGSON(new File(getAPIEnabler().getCoreDataFolder() + File.separator + "serverid.json"), Long.valueOf(this.server.getServerID()).toString());
 
         getAPIEnabler().getLogger().log(Level.INFO, "Server id: " + this.server.getServerID());
 
