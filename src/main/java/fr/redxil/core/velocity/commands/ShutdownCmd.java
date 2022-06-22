@@ -11,7 +11,6 @@ package fr.redxil.core.velocity.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -19,29 +18,27 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class ShutdownCmd extends BrigadierAPI<CommandSource> {
+public class ShutdownCmd extends LiteralArgumentCreator<CommandSource> {
 
 
     public ShutdownCmd() {
         super("shutdown");
+        super.setExecutor(this::onMissingArgument);
+        super.createThen("server", StringArgumentType.word(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+    public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         TextComponentBuilder.createTextComponent("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(playerUUID);
     }
 
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
-        this.onMissingArgument(commandExecutor);
-    }
-
-    public int execute(CommandContext<CommandSource> commandContext) {
+    public int execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player)) return 1;
         Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer.isEmpty())
@@ -59,10 +56,5 @@ public class ShutdownCmd extends BrigadierAPI<CommandSource> {
         ///server.sendShutdownOrder();
         TextComponentBuilder.createTextComponent("L'ordre de shutdown est désactivé").setColor(Color.GREEN).sendTo(apiPlayer.get());
         return 1;
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        this.addArgumentCommand(literalCommandNode, "server", StringArgumentType.word(), this::execute);
     }
 }

@@ -1,7 +1,6 @@
 package fr.redxil.core.velocity.commands;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.group.party.Party;
@@ -13,7 +12,22 @@ import net.kyori.adventure.text.Component;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PartyCMD {
+public class PartyCMD extends LiteralArgumentCreator<CommandSource> {
+
+    public PartyCMD() {
+        super("party");
+        super.setExecutor(this::emptyCommand);
+
+        super.createLiteralArgument("invite", this::missingPlayer).createLiteralThen("player", this::inviteCommand);
+        super.createLiteralArgument("revokeinvite", this::missingPlayer).createLiteralThen("player", this::revokeCommand);
+        super.createLiteralArgument("join", this::missingPlayer).createLiteralThen("player", this::joinCommand);
+        super.createLiteralArgument("kick", this::missingPlayer).createLiteralThen("player", this::kickCommand);
+
+        super.createLiteralArgument("info", this::infoCommand);
+        super.createLiteralArgument("create", this::createCommand);
+        super.createLiteralArgument("leave", this::leaveCommand);
+        super.createLiteralArgument("help", this::helpCommand);
+    }
 
     public void emptyCommand(CommandContext<CommandSource> command, String args) {
         command.getSource().sendMessage(Component.text("Merci de faire /party help"));
@@ -156,24 +170,6 @@ public class PartyCMD {
             party.quitParty(opPlayer.get().getUniqueId());
             opPlayer.get().sendMessage(Component.text("Vous avez quitté la partie"));
         }, () -> opPlayer.get().sendMessage(Component.text("Tu n'est pas dans une partie")));
-    }
-
-    public BrigadierCommand buildCommand() {
-
-        LiteralArgumentCreator<CommandSource> literalArgumentCreator = new LiteralArgumentCreator<>("party", this::emptyCommand);
-
-        literalArgumentCreator.createLiteralArgument("invite", this::missingPlayer).createLiteralThen("player", this::inviteCommand);
-        literalArgumentCreator.createLiteralArgument("revokeinvite", this::missingPlayer).createLiteralThen("player", this::revokeCommand);
-        literalArgumentCreator.createLiteralArgument("join", this::missingPlayer).createLiteralThen("player", this::joinCommand);
-        literalArgumentCreator.createLiteralArgument("kick", this::missingPlayer).createLiteralThen("player", this::kickCommand);
-
-        literalArgumentCreator.createLiteralArgument("info", this::infoCommand);
-        literalArgumentCreator.createLiteralArgument("create", this::createCommand);
-        literalArgumentCreator.createLiteralArgument("leave", this::leaveCommand);
-        literalArgumentCreator.createLiteralArgument("help", this::helpCommand);
-
-        return new BrigadierCommand(literalArgumentCreator.build());
-
     }
 
 }

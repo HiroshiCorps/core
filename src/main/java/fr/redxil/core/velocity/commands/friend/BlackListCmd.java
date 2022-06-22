@@ -11,8 +11,6 @@ package fr.redxil.core.velocity.commands.friend;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -21,33 +19,28 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.velocity.CoreVelocity;
-import fr.redxil.core.velocity.commands.BrigadierAPI;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class BlackListCmd extends BrigadierAPI<CommandSource> {
+public class BlackListCmd extends LiteralArgumentCreator<CommandSource> {
 
 
     public BlackListCmd() {
         super("bl");
+        super.setExecutor(this::onMissingArgument);
+        super.createThen("cmd", StringArgumentType.word(), this::onMissingArgument)
+                .createThen("target", StringArgumentType.word(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+    public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         TextComponentBuilder.createTextComponent("Merci de faire /bl (add|remove) (pseudo)").setColor(Color.RED).sendTo(playerUUID);
     }
 
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
-        this.onMissingArgument(commandExecutor);
-    }
-
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
@@ -94,17 +87,5 @@ public class BlackListCmd extends BrigadierAPI<CommandSource> {
         }
 
         TextComponentBuilder.createTextComponent("Merci de faire /bl (add|remove) (pseudo)").setColor(Color.RED).sendTo(playerUUID);
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        List<String> playerName = new ArrayList<>();
-
-        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
-            playerName.add(player.getUsername());
-        }
-
-        CommandNode<CommandSource> cmd = this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), this::onMissingArgument, "add", "remove");
-        this.addArgumentCommand(cmd, "target", StringArgumentType.word(), this::execute, playerName.toArray(new String[0]));
     }
 }

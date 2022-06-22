@@ -153,29 +153,29 @@ public class CoreVelocity implements APIEnabler {
 
         CommandManager cm = commandManager;
 
-        cm.register(new BrigadierCommand(new BanCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new WarnCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new KickCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new MuteCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new BanCmd().build()));
+        cm.register(new BrigadierCommand(new WarnCmd().build()));
+        cm.register(new BrigadierCommand(new KickCmd().build()));
+        cm.register(new BrigadierCommand(new MuteCmd().build()));
 
-        cm.register(new BrigadierCommand(new UnBanCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new UnMuteCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new UnBanCmd().build()));
+        cm.register(new BrigadierCommand(new UnMuteCmd().build()));
 
-        cm.register(new BrigadierCommand(new StaffCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new CibleCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new NickCheckCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new SetRankCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new InfoCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new StaffCmd().build()));
+        cm.register(new BrigadierCommand(new CibleCmd().build()));
+        cm.register(new BrigadierCommand(new NickCheckCmd().build()));
+        cm.register(new BrigadierCommand(new SetRankCmd().build()));
+        cm.register(new BrigadierCommand(new InfoCmd().build()));
 
-        cm.register(new BrigadierCommand(new BlackListCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new FriendCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new NickCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new BlackListCmd().build()));
+        cm.register(new BrigadierCommand(new FriendCmd().build()));
+        cm.register(new BrigadierCommand(new NickCmd().build()));
 
-        cm.register(new BrigadierCommand(new ShutdownCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new RCmd().buildCommands()));
-        cm.register(new BrigadierCommand(new MsgCmd().buildCommands()));
+        cm.register(new BrigadierCommand(new ShutdownCmd().build()));
+        cm.register(new BrigadierCommand(new RCmd().build()));
+        cm.register(new BrigadierCommand(new MsgCmd().build()));
 
-        cm.register(new PartyCMD().buildCommand());
+        cm.register(new BrigadierCommand(new PartyCMD().build()));
 
     }
 

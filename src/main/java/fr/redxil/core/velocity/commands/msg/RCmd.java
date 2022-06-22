@@ -11,36 +11,32 @@ package fr.redxil.core.velocity.commands.msg;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
-import fr.redxil.core.velocity.commands.BrigadierAPI;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class RCmd extends BrigadierAPI<CommandSource> {
+public class RCmd extends LiteralArgumentCreator<CommandSource> {
 
     public RCmd() {
         super("r");
+        super.setExecutor(this::onMissingArgument);
+        super.createThen("message", StringArgumentType.greedyString(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+    public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         TextComponentBuilder.createTextComponent("Merci de faire /r (message)").setColor(Color.RED).sendTo(playerUUID);
     }
 
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
-        this.onMissingArgument(commandExecutor);
-    }
-
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
@@ -58,10 +54,5 @@ public class RCmd extends BrigadierAPI<CommandSource> {
 
         CoreVelocity.getInstance().getProxyServer().getCommandManager().executeImmediatelyAsync(commandContext.getSource(), "/msg " + targetName.get() + " " + commandContext.getArgument("message", String.class));
 
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        this.addArgumentCommand(literalCommandNode, "message", StringArgumentType.greedyString(), this::execute);
     }
 }

@@ -11,8 +11,6 @@ package fr.redxil.core.velocity.commands.mod;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -20,23 +18,23 @@ import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.utils.SanctionType;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.velocity.CoreVelocity;
-import fr.redxil.core.velocity.commands.BrigadierAPI;
 import net.kyori.adventure.text.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class InfoCmd extends BrigadierAPI<CommandSource> {
+public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
 
     public InfoCmd() {
         super("info");
+        super.setExecutor(this::onCommandWithoutArgs);
+        super.createThen("target", StringArgumentType.word(), this::onMissingSanc)
+                .createThen("sanc", StringArgumentType.word(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+    public void onMissingSanc(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
@@ -67,13 +65,12 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         playerModerator.get().printInfo(target.get());
     }
 
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext, String s) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         TextComponentBuilder.createTextComponent("Syntax: /info (joueur) (info|ban|other)").setColor(Color.RED).sendTo(playerUUID);
     }
 
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player))
             return;
 
@@ -110,27 +107,6 @@ public class InfoCmd extends BrigadierAPI<CommandSource> {
         }
 
         playerModerator.get().printSanction(target.get(), sanctionType.get());
-
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-
-        List<String> playerName = new ArrayList<>();
-
-        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
-            playerName.add(player.getUsername());
-        }
-
-        List<String> sanctionName = new ArrayList<>();
-
-        for (SanctionType sanctionType : SanctionType.values()) {
-            sanctionName.add(sanctionType.getName());
-        }
-
-        CommandNode<CommandSource> sanc = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
-
-        this.addArgumentCommand(sanc, "sanc", StringArgumentType.word(), this::execute, sanctionName.toArray(new String[0]));
 
     }
 }

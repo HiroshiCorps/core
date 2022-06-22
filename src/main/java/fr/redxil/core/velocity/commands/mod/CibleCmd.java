@@ -11,32 +11,26 @@ package fr.redxil.core.velocity.commands.mod;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.velocity.commands.BrigadierAPI;
 
-import java.util.*;
+import java.util.Optional;
 
-public class CibleCmd extends BrigadierAPI<CommandSource> {
-
+public class CibleCmd extends LiteralArgumentCreator<CommandSource> {
 
     public CibleCmd() {
         super("nickcheck");
+        super.setExecutor(this::onCommandWithoutArgs);
+        super.createArgument("player", StringArgumentType.word(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Syntax: /cible <pseudo>").setColor(Color.RED).sendTo(playerUUID);
-    }
-
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext, String s) {
         CommandSource sender = commandContext.getSource();
 
         if (!(sender instanceof Player player)) return;
@@ -62,7 +56,7 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
 
     }
 
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         CommandSource sender = commandContext.getSource();
 
         if (!(sender instanceof Player player)) return;
@@ -99,18 +93,5 @@ public class CibleCmd extends BrigadierAPI<CommandSource> {
         TextComponentBuilder.createTextComponent(
                         "Nouvelle cible: " + playerTarget.get().getName()).setColor(Color.GREEN)
                 .sendTo(player.getUniqueId());
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> command) {
-
-        List<String> playerName = new ArrayList<>();
-        Collection<Long> availablePlayer = new ArrayList<>(CoreAPI.getInstance().getPlayerManager().getLoadedPlayer());
-        availablePlayer.removeAll(CoreAPI.getInstance().getModeratorManager().getLoadedModerator());
-        for (Long id : availablePlayer)
-            CoreAPI.getInstance().getPlayerManager().getPlayer(id).ifPresent(player -> playerName.add(player.getName()));
-
-        this.addArgumentCommand(command, "player", StringArgumentType.word(), this::execute, playerName.toArray(new String[0]));
-
     }
 }

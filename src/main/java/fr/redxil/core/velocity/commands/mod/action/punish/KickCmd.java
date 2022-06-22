@@ -11,8 +11,6 @@ package fr.redxil.core.velocity.commands.mod.action.punish;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -21,32 +19,28 @@ import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
-import fr.redxil.core.velocity.commands.BrigadierAPI;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class KickCmd extends BrigadierAPI<CommandSource> {
+public class KickCmd extends LiteralArgumentCreator<CommandSource> {
 
     public KickCmd() {
         super("kick");
+        super.setExecutor(this::onMissingArgument);
+        super.createThen("target", StringArgumentType.word(), this::onMissingArgument)
+                .createThen("reason", StringArgumentType.greedyString(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+    public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         TextComponentBuilder.createTextComponent("Syntax: /kick <pseudo> <raison>").setColor(Color.RED).sendTo(playerUUID);
     }
 
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
-        this.onMissingArgument(commandExecutor);
-    }
-
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player player)) return;
 
         Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId());
@@ -89,18 +83,5 @@ public class KickCmd extends BrigadierAPI<CommandSource> {
             TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
                     .sendTo(player.getUniqueId());
 
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-
-        List<String> playerName = new ArrayList<>();
-
-        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
-            playerName.add(player.getUsername());
-        }
-
-        CommandNode<CommandSource> target = this.addArgumentCommand(literalCommandNode, "target", StringArgumentType.word(), this::onMissingArgument, playerName.toArray(new String[0]));
-        this.addArgumentCommand(target, "reason", StringArgumentType.greedyString(), this::execute);
     }
 }

@@ -11,32 +11,26 @@ package fr.redxil.core.velocity.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
 import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 
 import java.util.Optional;
-import java.util.UUID;
 
-public class NickCmd extends BrigadierAPI<CommandSource> {
+public class NickCmd extends LiteralArgumentCreator<CommandSource> {
 
     public NickCmd() {
         super("nick");
+        super.setExecutor(this::onCommandWithoutArgs);
+        super.createThen("newNick", StringArgumentType.word(), this::execute).createThen("newRank", StringArgumentType.word(), this::executeSR);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Merci de faire /r (message)").setColor(Color.RED).sendTo(playerUUID);
-    }
-
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext) {
+    public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext, String s) {
         Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
 
         if (apiPlayer.isEmpty())
@@ -66,14 +60,14 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
         }
     }
 
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
         Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer.isEmpty())
             return;
 
-        String nick = commandContext.getArgument("nick", String.class);
+        String nick = commandContext.getArgument("newNick", String.class);
         Rank nickRank = Rank.JOUEUR;
 
         if (apiPlayer.get().setName(nick)) {
@@ -86,17 +80,17 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
         }
     }
 
-    public void executeSR(CommandContext<CommandSource> commandContext) {
+    public void executeSR(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player)) return;
 
         Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
         if (apiPlayer.isEmpty())
             return;
 
-        String nick = commandContext.getArgument("nick", String.class);
+        String nick = commandContext.getArgument("newNick", String.class);
         Rank nickRank = Rank.JOUEUR;
 
-        String argRank = commandContext.getArgument("rank", String.class);
+        String argRank = commandContext.getArgument("newRank", String.class);
 
         if (!isInt(argRank)) {
             for (Rank Rank : Rank.values()) {
@@ -129,11 +123,5 @@ public class NickCmd extends BrigadierAPI<CommandSource> {
             TextComponentBuilder.createTextComponent("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").setColor(Color.RED)
                     .sendTo(((Player) commandContext.getSource()).getUniqueId());
         }
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        CommandNode<CommandSource> nick = this.addArgumentCommand(literalCommandNode, "nick", StringArgumentType.word(), this::execute);
-        this.addArgumentCommand(nick, "rank", StringArgumentType.word(), this::executeSR);
     }
 }

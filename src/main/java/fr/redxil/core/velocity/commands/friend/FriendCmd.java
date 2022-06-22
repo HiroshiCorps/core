@@ -11,8 +11,6 @@ package fr.redxil.core.velocity.commands.friend;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.message.Color;
@@ -21,9 +19,8 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
-import fr.redxil.core.velocity.CoreVelocity;
-import fr.redxil.core.velocity.commands.BrigadierAPI;
 import net.kyori.adventure.text.TextComponent;
 
 import java.util.ArrayList;
@@ -31,23 +28,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class FriendCmd extends BrigadierAPI<CommandSource> {
+public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
 
     public FriendCmd() {
         super("friend");
+        super.setExecutor(this::onMissingArgument);
+        super.createThen("cmd", StringArgumentType.word(), this::onMissingArgument)
+                .createThen("target", StringArgumentType.greedyString(), this::execute);
     }
 
-    public void onMissingArgument(CommandContext<CommandSource> commandContext) {
+    public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
         UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
         TextComponentBuilder.createTextComponent("Merci de faire /friend list").setColor(Color.RED).sendTo(playerUUID);
     }
 
-    @Override
-    public void onCommandWithoutArgs(CommandContext<CommandSource> commandExecutor) {
-        this.onMissingArgument(commandExecutor);
-    }
-
-    public void execute(CommandContext<CommandSource> commandContext) {
+    public void execute(CommandContext<CommandSource> commandContext, String s) {
         if (!(commandContext.getSource() instanceof Player player)) {
             return;
         }
@@ -75,26 +70,6 @@ public class FriendCmd extends BrigadierAPI<CommandSource> {
             case ACCEPT -> this.acceptCmd(commandContext, player, nameArg);
             case LIST -> this.listCmd(commandContext, player, null);
         }
-    }
-
-    @Override
-    public void registerArgs(LiteralCommandNode<CommandSource> literalCommandNode) {
-        List<String> cmdName = new ArrayList<>();
-
-        for (ListCmd listCmd : ListCmd.values()) {
-
-            cmdName.add(listCmd.getName());
-
-        }
-
-        List<String> playerName = new ArrayList<>();
-
-        for (Player player : CoreVelocity.getInstance().getProxyServer().getAllPlayers()) {
-            playerName.add(player.getUsername());
-        }
-
-        CommandNode<CommandSource> cmd = this.addArgumentCommand(literalCommandNode, "cmd", StringArgumentType.word(), this::onMissingArgument, cmdName.toArray(new String[0]));
-        this.addArgumentCommand(cmd, "target", StringArgumentType.greedyString(), this::execute, playerName.toArray(new String[0]));
     }
 
 
