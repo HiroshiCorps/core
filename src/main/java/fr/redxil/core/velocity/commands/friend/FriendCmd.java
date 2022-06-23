@@ -13,20 +13,19 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -38,8 +37,7 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Merci de faire /friend list").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Merci de faire /friend list").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -56,7 +54,7 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
         FriendCmd.ListCmd usedCmd = usedCmdOpt.get();
 
         if (!FriendCmd.ListCmd.getCommand(2).contains(usedCmd)) {
-            player.sendMessage((TextComponent) TextComponentBuilder.createTextComponent("Merci de faire /friend " + usedCmd.getName()).setColor(Color.RED).getTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Merci de faire /friend " + usedCmd.getName()).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
@@ -75,12 +73,11 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
 
     public void sendCommandList(CommandContext<CommandSource> commandContext) {
         CommandSource commandSource = commandContext.getSource();
-        TextComponentBuilder textComponentBuilder = TextComponentBuilder.createTextComponent("Veuillez utiliser l'une des composantes suivantes:");
+        StringBuilder stringBuilder = new StringBuilder("Veuillez utiliser l'une des composantes suivantes:");
         for (FriendCmd.ListCmd cmd : FriendCmd.ListCmd.values()) {
-            textComponentBuilder.appendNewComponentBuilder("\n" + Color.GRAY + "> /friend " +
-                    cmd.getName() + ": " + Color.BLUE + " " + cmd.getUtility());
+            stringBuilder.append("\n" + Color.GRAY + "> /friend ").append(cmd.getName()).append(": ").append(Color.BLUE).append(" ").append(cmd.getUtility());
         }
-        commandSource.sendMessage((TextComponent) textComponentBuilder.getFinalTextComponent());
+        commandContext.getSource().sendMessage(Component.text(stringBuilder.toString()));
     }
 
     public void inviteCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
@@ -90,17 +87,17 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         Optional<APIOfflinePlayer> target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Erreur, la personne n'est pas connue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (apiPlayer.get().hasLinkWith(LinkUsage.BOTH, target.get(), "friend", "friendInvite")) {
-            TextComponentBuilder.createTextComponent("Une ou un semblant de relation existe déjà entre vous").sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Une ou un semblant de relation existe déjà entre vous").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
-        apiPlayer.get().createLink(target.get(), "friendInvite");
-        TextComponentBuilder.createTextComponent("Demande d'amis envoyée").setColor(Color.GREEN).sendTo(apiPlayer.get());
 
+        apiPlayer.get().createLink(target.get(), "friendInvite");
+        commandContext.getSource().sendMessage(Component.text("Demande d'amis envoyée").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
     }
 
     public void acceptCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
@@ -110,18 +107,17 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         Optional<APIOfflinePlayer> target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Erreur, la personne n'est pas connue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friendInvite");
         if (linkData.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Il n'y a aucune demande en cours de sa part").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
         linkData.get().setLinkType("friend");
-        TextComponentBuilder.createTextComponent("Sa demande d'amis à été accepté").setColor(Color.GREEN).sendTo(apiPlayer.get());
-
+        commandContext.getSource().sendMessage(Component.text("Sa demande d'amis à été accepté").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
     }
 
     public void refuseCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
@@ -131,17 +127,17 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         Optional<APIOfflinePlayer> target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Erreur, la personne n'est pas connue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friendInvite");
         if (linkData.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Il n'y a aucune demande en cours de sa part").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
         linkData.get().setLinkType("friendRefused");
-        TextComponentBuilder.createTextComponent("Sa demande d'amis à été refusée").setColor(Color.GREEN).sendTo(apiPlayer.get());
+        commandContext.getSource().sendMessage(Component.text("Sa demande d'amis à été refusée").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
 
     }
 
@@ -152,19 +148,18 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         Optional<APIOfflinePlayer> target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Erreur, la personne n'est pas connue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.TO, target.get(), "friendInvite");
         if (linkData.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Il n'y a aucune demande en cours de sa part").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Il n'y a aucune demande en cours de sa part").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         linkData.get().setLinkType("friendRevoke");
-        TextComponentBuilder.createTextComponent("Votre demande d'amis à été retiré").setColor(Color.GREEN).sendTo(apiPlayer.get());
-
+        commandContext.getSource().sendMessage(Component.text("Votre demande d'amis à été retiré").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
     }
 
     public void removeCmd(CommandContext<CommandSource> commandContext, Player player, String argument) {
@@ -173,18 +168,18 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         Optional<APIOfflinePlayer> target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(argument);
         if (target.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur, la personne n'est pas connue").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Erreur, la personne n'est pas connue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friend");
         if (linkData.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Cette personne n'est pas dans vos amis").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Cette personne n'est pas dans vos amis").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         linkData.get().setLinkType("friendRemove");
-        TextComponentBuilder.createTextComponent("Joueur retiré de vos Amis").setColor(Color.GREEN).sendTo(apiPlayer.get());
+        commandContext.getSource().sendMessage(Component.text("Joueur retiré de vos Amis").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
 
     }
 
@@ -196,11 +191,11 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
         List<LinkData> amisList = apiPlayer.get().getLinks(LinkUsage.BOTH, null, "friend");
 
         if (amisList.size() == 0) {
-            TextComponentBuilder.createTextComponent("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").setColor(Color.GREEN).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Je suis désolée de te l'apprendre, mais tu n'a pas d'amis, en espérant que tu en ais dans la vrai vie").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
-        TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("Heuresement pour toi, tu as ").setColor(Color.GREEN).appendNewComponentBuilder(Integer.valueOf(amisList.size()).toString()).setColor(Color.BLUE).appendNewComponentBuilder(" amis").setColor(Color.GREEN);
+        StringBuilder tcb = new StringBuilder("Heuresement pour toi, tu as " + amisList.size() + " amis");
 
         for (LinkData ami : amisList) {
             String connect = "Déconnecté";
@@ -211,11 +206,11 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
                     connect = "Connecté";
                     bc = Color.GREEN;
                 }
-                tcb.appendNewComponentBuilder("\n" + amis.get().getName() + " ").setColor(Color.WHITE).appendNewComponentBuilder(connect).setColor(bc);
+                tcb.append("\n").append(amis.get().getName()).append(" ").append(bc.getMOTD()).append(connect);
             }
         }
 
-        tcb.sendTo(apiPlayer.get());
+        commandContext.getSource().sendMessage(Component.text(tcb.toString()));
 
     }
 
