@@ -86,14 +86,16 @@ public class BanCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
-        if (!(commandContext.getSource() instanceof Player player)) return;
 
-        Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId());
-
+        Optional<APIPlayerModerator> apiPlayerModerator;
+        if (commandContext.getSource() instanceof Player)
+            apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
+        else apiPlayerModerator = Optional.of(CoreAPI.getInstance().getModeratorManager().getServerModerator());
 
         if (apiPlayerModerator.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+
+            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED).getFinalTextComponent();
+                    .sendTo(commandContext.getSource().se.getUniqueId());
             return;
         }
 

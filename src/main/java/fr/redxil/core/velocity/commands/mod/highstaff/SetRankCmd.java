@@ -51,9 +51,12 @@ public class SetRankCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
-        if (!(commandContext.getSource() instanceof Player)) return;
 
-        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        Optional<APIPlayer> apiPlayer;
+        if (commandContext.getSource() instanceof Player)
+            apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(((Player) commandContext.getSource()).getUniqueId());
+        else apiPlayer = Optional.of(CoreAPI.getInstance().getPlayerManager().getServerPlayer());
+
         if (apiPlayer.isEmpty()) return;
 
         if (!apiPlayer.get().hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
