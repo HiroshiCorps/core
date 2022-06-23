@@ -9,7 +9,7 @@
 
 package fr.redxil.core.common.player.moderator;
 
-import fr.redxil.api.common.message.TextComponentBuilder;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.moderators.ModeratorManager;
@@ -130,9 +130,11 @@ public class CModeratorManager implements ModeratorManager {
     }
 
     @Override
-    public void sendToModerators(TextComponentBuilder textComponentBuilder) {
+    public void sendToModerators(String textComponentBuilder) {
 
-        textComponentBuilder.sendToIDS(getLoadedModerator());
+        getLoadedModerator().forEach(moderatorID -> {
+            API.getInstance().getPlayerManager().getPlayer(moderatorID).ifPresent(apiPlayer -> apiPlayer.sendMessage(textComponentBuilder));
+        });
 
     }
 

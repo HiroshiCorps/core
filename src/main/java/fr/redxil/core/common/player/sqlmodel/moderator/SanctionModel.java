@@ -9,7 +9,6 @@
 
 package fr.redxil.core.common.player.sqlmodel.moderator;
 
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
@@ -116,17 +115,19 @@ public class SanctionModel extends SQLModel implements SanctionInfo {
     }
 
     @Override
-    public TextComponentBuilder getSancMessage() {
+    public String getSancMessage() {
 
-        TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§4§lSERVER MC");
-        tcb.appendText("\n§r§cVous avez été " + getSanctionType().getName());
-        tcb.appendText("\n\n§r§7Raison: §e" + getReason());
-        tcb.appendText("\n§r§7Expiration: §c" + DateUtility.getMessage(getSanctionEndTS().orElse(null)));
-        tcb.appendText("\n\n§r§7Sagit-il d'une erreur ? Faites une réclamation");
-        TextComponentBuilder tcb2 = tcb.appendNewComponentBuilder("\n§r§bredxil.net/reclam").setOnClickExecCommand("redxil.net/reclam");
-        getSanctionID().ifPresent(aLong -> tcb2.appendNewComponentBuilder("\n§7ID Sanction: " + aLong));
+        String message = "§4§lSERVER MC";
+        message += "\n§r§cVous avez été " + getSanctionType().getName();
+        message += "\n\n§r§7Raison: §e" + getReason();
+        message += "\n§r§7Expiration: §c" + DateUtility.getMessage(getSanctionEndTS().orElse(null));
+        message += "\n\n§r§7Sagit-il d'une erreur ? Faites une réclamation";
+        message += "\n§r§bredxil.net/reclam";
+        Optional<Long> sanctionID = getSanctionID();
+        if (sanctionID.isPresent())
+            message += "\n§7ID Sanction: " + sanctionID.get();
 
-        return tcb;
+        return message;
 
     }
 

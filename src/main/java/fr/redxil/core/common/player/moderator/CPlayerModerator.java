@@ -9,7 +9,6 @@
 
 package fr.redxil.core.common.player.moderator;
 
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
@@ -213,33 +212,34 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         if (!sanctionInfos.isEmpty()) {
 
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer.get());
+            String start = "§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size();
+            apiPlayer.get().sendMessage(start);
 
             for (int i = sanctionInfos.size() - 1; i >= 0; i--) {
 
                 SanctionInfo sanction = sanctionInfos.get(i);
 
-                TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("\nSanction n°§r§6" + (sanctionInfos.size() - i) + ":");
-                tcb.appendNewComponentBuilder("\n§r     §7Sanction ID: §d" + sanction.getSanctionID());
-                tcb.appendNewComponentBuilder("\n§r     §7Par: §d" + sanction.getAuthorID());
-                tcb.appendNewComponentBuilder("\n§r     §7Le: §d" + DateUtility.getMessage(sanction.getSanctionDateTS()));
-                tcb.appendNewComponentBuilder("\n§r     §7Jusqu'au: §d" + DateUtility.getMessage(sanction.getSanctionEndTS().orElse(null)));
-                tcb.appendNewComponentBuilder("\n§r     §7Pour: §d" + sanction.getReason());
+                StringBuilder message = new StringBuilder("\nSanction n°§r§6" + (sanctionInfos.size() - i) + ":");
+                message.append("\n§r     §7Sanction ID: §d").append(sanction.getSanctionID());
+                message.append("\n§r     §7Par: §d").append(sanction.getAuthorID());
+                message.append("\n§r     §7Le: §d").append(DateUtility.getMessage(sanction.getSanctionDateTS()));
+                message.append("\n§r     §7Jusqu'au: §d").append(DateUtility.getMessage(sanction.getSanctionEndTS().orElse(null)));
+                message.append("\n§r     §7Pour: §d").append(sanction.getReason());
 
                 String cancelledString = "§aPas cancel";
                 Optional<Long> longID = sanction.getCanceller();
                 if (longID.isPresent())
                     cancelledString = longID.get().toString();
 
-                tcb.appendNewComponentBuilder("\n§r     §7Cancelled: §d" + cancelledString);
+                message.append("\n§r     §7Cancelled: §d").append(cancelledString);
 
-                tcb.sendTo(apiPlayer.get());
+                apiPlayer.get().sendMessage(message.toString());
 
             }
 
-            TextComponentBuilder.createTextComponent("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size()).sendTo(apiPlayer.get());
+            apiPlayer.get().sendMessage("§4 APIPlayer: " + apiOfflinePlayer.getName() + " Sanctions: " + sanctionInfos.size());
         } else
-            TextComponentBuilder.createTextComponent("§4Aucune sanction listée").sendTo(apiPlayer.get());
+            apiPlayer.get().sendMessage("§4Aucune sanction listée");
 
     }
 
@@ -250,13 +250,13 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (moderator.isEmpty())
             return;
 
-        TextComponentBuilder tcb = TextComponentBuilder.createTextComponent("§m                    \n");
+        String message = "§m                    \n";
 
         if (apiOfflinePlayer instanceof APIPlayer && ((APIPlayer) apiOfflinePlayer).isNick()) {
-            tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + ((APIPlayer) apiOfflinePlayer).getRealName() + "§r\n");
-            tcb.appendNewComponentBuilder("§7→ §rNick§7・§a" + apiOfflinePlayer.getName() + "§r\n");
+            message += "§7→ §rPseudo§7・" + ((APIPlayer) apiOfflinePlayer).getRealName() + "§r\n";
+            message += "§7→ §rNick§7・§a" + apiOfflinePlayer.getName() + "§r\n";
         } else {
-            tcb.appendNewComponentBuilder("§7→ §rPseudo§7・" + apiOfflinePlayer.getName() + "§r\n");
+            message += "§7→ §rPseudo§7・" + apiOfflinePlayer.getName() + "§r\n";
         }
 
         String connectedMsg = "§c✘", server = null;
@@ -268,12 +268,12 @@ public class CPlayerModerator implements APIPlayerModerator {
                 server = player.get().getServerID().toString();
         }
 
-        tcb.appendNewComponentBuilder("§7→ §rConnecté§7・" + connectedMsg + "§r\n");
+        message += "§7→ §rConnecté§7・" + connectedMsg + "§r\n";
 
-        tcb.appendNewComponentBuilder("§7→ §rRank§7・" + apiOfflinePlayer.getRank().getRankName() + "§r\n");
+        message += "§7→ §rRank§7・" + apiOfflinePlayer.getRank().getRankName() + "§r\n";
 
         if (server != null)
-            tcb.appendNewComponentBuilder("§7→ §rServeur§7・§a" + server + "§r\n");
+            message += "§7→ §rServeur§7・§a" + server + "§r\n";
 
         String ip = "Déconnecté";
         if (apiOfflinePlayer instanceof APIPlayer) {
@@ -281,7 +281,7 @@ public class CPlayerModerator implements APIPlayerModerator {
             ip = redis.map(redisManager -> String.valueOf(redisManager.getRedissonClient().getList("ip/" + apiOfflinePlayer.getIP().getIp()).size() - 1)).orElse("Error: Redis disconnected");
         }
 
-        tcb.appendNewComponentBuilder("§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n");
+        message += "§7→ §rComptes sur la même ip§7・§c" + ip + "§r\n";
 
         String mute = "§c✘";
         if (apiOfflinePlayer.isMute())
@@ -291,10 +291,10 @@ public class CPlayerModerator implements APIPlayerModerator {
         if (apiOfflinePlayer.isBan())
             ban = "§a✓";
 
-        tcb.appendNewComponentBuilder("§7→ §rEtat§7・Banni: " + ban + " §7Mute: " + mute + "§r\n");
-        tcb.appendNewComponentBuilder("§m                    \n");
+        message += "§7→ §rEtat§7・Banni: " + ban + " §7Mute: " + mute + "§r\n";
+        message += "§m                    \n";
 
-        tcb.sendTo(moderator.get());
+        moderator.get().sendMessage(message);
 
     }
 

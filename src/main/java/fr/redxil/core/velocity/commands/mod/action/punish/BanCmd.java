@@ -13,20 +13,19 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.sql.Timestamp;
 import java.util.Optional;
-import java.util.UUID;
 
 public class BanCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -47,8 +46,7 @@ public class BanCmd extends LiteralArgumentCreator<CommandSource> {
         Optional<Timestamp> durationTime = DateUtility.toTimeStamp(timeArgs);
 
         if (durationTime.isEmpty() && !timeArgs.equals("perm")) {
-            TextComponentBuilder.createTextComponent("Erreur: " + timeArgs + " n'est pas une durée valide").setColor(Color.RED)
-                    .sendTo(proxiedPlayer.getUniqueId());
+            proxiedPlayer.sendMessage(Component.text("Erreur: " + timeArgs + " n'est pas une durée valide").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
@@ -59,30 +57,27 @@ public class BanCmd extends LiteralArgumentCreator<CommandSource> {
         Optional<SanctionInfo> sm = apiPlayerTarget.banPlayer(reason, end, apiPlayerModerator);
         if (sm.isPresent()) {
 
-            TextComponentBuilder banMessage = TextComponentBuilder.createTextComponent(
+            String banMessage =
                     "Le modérateur §d" +
                             apiPlayerModerator.getName() +
                             " §7à ban l'utilisateur §a" +
-                                apiPlayerTarget.getName() + " §7jusqu'au " +
-                                format + " pour raison: "
-                                + reason + ".");
+                            apiPlayerTarget.getName() + " §7jusqu'au " +
+                            format + " pour raison: "
+                            + reason + ".";
 
                 CoreAPI.getInstance().getModeratorManager().sendToModerators(banMessage);
 
                 Optional<Player> onlinePlayerOptional = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.getName());
 
-                onlinePlayerOptional.ifPresent(player -> player.disconnect(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
+            onlinePlayerOptional.ifPresent(player -> player.disconnect(Component.text(sm.get().getSancMessage())));
 
             } else
-                TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
-                        .sendTo(proxiedPlayer.getUniqueId());
-
+            proxiedPlayer.sendMessage(Component.text("Désolé, une erreur est survenue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
 
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Syntax: /ban <pseudo> <temps> <raison>").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Syntax: /ban <pseudo> <temps> <raison>").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -93,9 +88,7 @@ public class BanCmd extends LiteralArgumentCreator<CommandSource> {
         else apiPlayerModerator = Optional.of(CoreAPI.getInstance().getModeratorManager().getServerModerator());
 
         if (apiPlayerModerator.isEmpty()) {
-
-            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED).getFinalTextComponent();
-                    .sendTo(commandContext.getSource().se.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Vous n'avez pas la permission d'effectuer cette commande.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
@@ -103,20 +96,17 @@ public class BanCmd extends LiteralArgumentCreator<CommandSource> {
         Optional<APIOfflinePlayer> apiPlayerTarget = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget.isEmpty()) {
-            TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("La target ne s'est jamais connecté.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (apiPlayerTarget.get().getRank().isModeratorRank()) {
-            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Vous n'avez pas la permission d'effectuer cette commande.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (apiPlayerTarget.get().isBan()) {
-            TextComponentBuilder.createTextComponent("Erreur, le joueur est déjà ban.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Erreur, le joueur est déjà ban.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
@@ -125,8 +115,7 @@ public class BanCmd extends LiteralArgumentCreator<CommandSource> {
         String reason = commandContext.getArgument("reason", String.class);
 
         if (reason.contains("{") || reason.contains("}")) {
-            TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Les caractéres { et } sont interdit d'utilisation dans les raisons").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
