@@ -13,18 +13,17 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class KickCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -36,8 +35,7 @@ public class KickCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Syntax: /kick <pseudo> <raison>").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Syntax: /kick <pseudo> <raison>").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -46,42 +44,36 @@ public class KickCmd extends LiteralArgumentCreator<CommandSource> {
         Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
         if (apiPlayerModerator.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Vous n'avez pas la permission d'effectuer cette commande.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         String targetArgs = commandContext.getArgument("target", String.class);
         Optional<APIPlayer> apiPlayerTarget = CoreAPI.getInstance().getPlayerManager().getPlayer(targetArgs);
         if (apiPlayerTarget.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur: Le joueur: " + targetArgs + " n'a pas était trouvé").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Erreur: Le joueur: " + targetArgs + " n'a pas était trouvé").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (apiPlayerTarget.get().getRank().isModeratorRank()) {
-            TextComponentBuilder.createTextComponent("Erreur vous n'avez pas la permission.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Erreur vous n'avez pas la permission.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         String reason = commandContext.getArgument("reason", String.class);
 
         if (reason.contains("{") || reason.contains("}")) {
-            TextComponentBuilder.createTextComponent("Les caractéres { et } sont interdit d'utilisation dans les raisons").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Les caractéres { et } sont interdit d'utilisation dans les raisons").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<SanctionInfo> sm = apiPlayerTarget.get().kickPlayer(reason, apiPlayerModerator.get());
         if (sm.isPresent()) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + apiPlayerTarget.get().getName() + " à été kick.")
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Le joueur: " + apiPlayerTarget.get().getName() + " à été kick.").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
             Optional<Player> proxiedPlayer = CoreVelocity.getInstance().getProxyServer().getPlayer(apiPlayerTarget.get().getName());
-            proxiedPlayer.ifPresent((player2) -> player2.disconnect(((TextComponentBuilderVelocity) sm.get().getSancMessage()).getFinalTextComponent()));
+            proxiedPlayer.ifPresent((player2) -> player2.disconnect(Component.text(sm.get().getSancMessage())));
         } else
-            TextComponentBuilder.createTextComponent("Désolé, une erreur est survenue").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Désolé, une erreur est survenue").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
 
     }
 }

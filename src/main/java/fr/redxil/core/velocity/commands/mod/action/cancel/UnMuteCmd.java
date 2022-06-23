@@ -13,15 +13,15 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class UnMuteCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -32,8 +32,7 @@ public class UnMuteCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Syntax: /unmute <pseudo>").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Syntax: /unmute <pseudo>").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -43,8 +42,7 @@ public class UnMuteCmd extends LiteralArgumentCreator<CommandSource> {
         Optional<APIPlayerModerator> apiPlayerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId());
 
         if (apiPlayerModerator.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Vous n'avez pas la permission d'effectuer cette commande.").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Vous n'avez pas la permission d'effectuer cette commande.").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
@@ -52,17 +50,14 @@ public class UnMuteCmd extends LiteralArgumentCreator<CommandSource> {
         Optional<APIOfflinePlayer> apiPlayerTarget = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetArgs);
 
         if (apiPlayerTarget.isEmpty()) {
-            TextComponentBuilder.createTextComponent("La target ne s'est jamais connecté").setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("La target ne s'est jamais connecté").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
-        if (apiPlayerTarget.get().unMute(apiPlayerModerator.get())) {
-            TextComponentBuilder.createTextComponent("La personne se nommant: " + apiPlayerTarget.get().getName() + " est maintenant unMute.")
-                    .sendTo(player.getUniqueId());
-        } else {
-            TextComponentBuilder.createTextComponent("Impossible de unmute: " + apiPlayerTarget.get().getName()).setColor(Color.RED)
-                    .sendTo(player.getUniqueId());
-        }
+        if (apiPlayerTarget.get().unMute(apiPlayerModerator.get()))
+            commandContext.getSource().sendMessage(Component.text("La personne se nommant: " + apiPlayerTarget.get().getName() + " est maintenant unMute.").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
+        else
+            commandContext.getSource().sendMessage(Component.text("Impossible de unmute: " + apiPlayerTarget.get().getName()).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
+
     }
 }
