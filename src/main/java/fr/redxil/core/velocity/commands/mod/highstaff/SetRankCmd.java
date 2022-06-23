@@ -13,18 +13,17 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class SetRankCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -46,8 +45,7 @@ public class SetRankCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Merci de faire /setrank (joueur) (rank)").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Merci de faire /setrank (joueur) (rank)").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -60,49 +58,33 @@ public class SetRankCmd extends LiteralArgumentCreator<CommandSource> {
         if (apiPlayer.isEmpty()) return;
 
         if (!apiPlayer.get().hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
-            commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                    "Seulement un adminnistrateur peut executer cette commande"
-            ).setColor(Color.RED)).getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Seulement un administrateur peut executer cette commande").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<APIOfflinePlayer> offlineTarget = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(commandContext.getArgument("target", String.class));
         if (offlineTarget.isEmpty()) {
-            commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                    "Le joueur: " + commandContext.getArgument("target", String.class) + " ne s'est jamais connecté").setColor(Color.RED)
-            ).getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Le joueur: " + commandContext.getArgument("target", String.class) + " ne s'est jamais connecté").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (offlineTarget.get().hasPermission(Rank.ADMINISTRATEUR.getRankPower())) {
-            commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                    "Impossible d'affecter un nouveau rank à ce joueur"
-            ).setColor(Color.RED)).getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Impossible d'affecter un nouveau rank à ce joueur").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         String rankArg = commandContext.getArgument("rank", String.class);
-        Rank newRank = null;
+        Rank newRank;
 
 
-        if (!isInt(rankArg)) {
-            for (Rank Rank : Rank.values()) {
-                if (Rank.getRankName().equalsIgnoreCase(rankArg)) {
-                    newRank = Rank;
-                    break;
-                }
-            }
-        } else {
-
+        if (!isInt(rankArg))
+            newRank = Rank.getRank(rankArg).orElse(null);
+        else
             newRank = Rank.getRank(Long.parseLong(rankArg)).orElse(null);
-
-        }
 
 
         if (newRank == null) {
-            commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                    "Aucun rank avec le power ou le nom: " + commandContext.getArgument("rank", String.class)
-            ).setColor(Color.RED)).getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Aucun rank avec le power ou le nom: " + commandContext.getArgument("rank", String.class)).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
@@ -115,12 +97,10 @@ public class SetRankCmd extends LiteralArgumentCreator<CommandSource> {
         } else
             offlineTarget.get().setRank(newRank);
 
-        commandContext.getSource().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent(
-                        "La personne §d" +
-                                offlineTarget.get().getName() +
-                                " §7à été rank: §a" +
-                                newRank.getRankName()
-                )).getFinalTextComponent()
+        commandContext.getSource().sendMessage(Component.text("La personne §d" +
+                offlineTarget.get().getName() +
+                " §7à été rank: §a" +
+                newRank.getRankName()).color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue()))
         );
     }
 }

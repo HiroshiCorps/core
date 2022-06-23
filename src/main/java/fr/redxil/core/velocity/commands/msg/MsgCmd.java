@@ -13,12 +13,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -35,8 +36,7 @@ public class MsgCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Merci de faire /msg (pseudo) (message)").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Merci de faire /msg (pseudo) (message)").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -49,27 +49,26 @@ public class MsgCmd extends LiteralArgumentCreator<CommandSource> {
 
         Optional<APIPlayer> target = CoreAPI.getInstance().getPlayerManager().getPlayer(commandContext.getArgument("target.get()", String.class));
         if (target.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Le joueur: " + commandContext.getArgument("target.get()", String.class) + " n'est pas connecté").setColor(Color.RED).sendTo(playerUUID);
+            commandContext.getSource().sendMessage(Component.text("Le joueur: " + commandContext.getArgument("target.get()", String.class) + " n'est pas connecté").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (sp.get().hasLinkWith(LinkUsage.TO, target.get(), "blacklist")) {
-            TextComponentBuilder.createTextComponent("Vous ne pouvez pas mp un joueur que vous avez blacklisté").setColor(Color.RED).sendTo(playerUUID);
+            commandContext.getSource().sendMessage(Component.text("Vous ne pouvez pas mp un joueur que vous avez blacklisté").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         String message = commandContext.getArgument("message", String.class);
 
-        if (!target.get().hasLinkWith(LinkUsage.TO, sp.get(), "blacklist"))
-            TextComponentBuilder.createTextComponent(sp.get().getName()).setColor(Color.GREEN).setHover("N'oubliez pas le /blacklist add en cas d'harcélement")
-                    .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                    .appendNewComponentBuilder(message).sendTo(target.get().getUUID());
+        if (!target.get().hasLinkWith(LinkUsage.TO, sp.get(), "blacklist")) {
+            target.get().sendMessage(
+                    Color.RED.getMOTD() + "N'oubliez pas le /blacklist add en cas d'harcélement" +
+                            "\n" + sp.get() + Color.WHITE.getBlue() + ": " + message
+            );
+            target.get().setLastMSGPlayer(sp.get().getName());
+        }
 
-        TextComponentBuilder.createTextComponent(target.get().getName()).setColor(Color.RED)
-                .appendNewComponentBuilder(": ").setColor(Color.WHITE)
-                .appendNewComponentBuilder(message).sendTo(sp.get().getUUID());
-
+        commandContext.getSource().sendMessage(Component.text(Color.WHITE.getMOTD() + target.get().getName() + Color.WHITE.getMOTD() + ": " + message));
         sp.get().setLastMSGPlayer(target.get().getName());
-        target.get().setLastMSGPlayer(sp.get().getName());
     }
 }

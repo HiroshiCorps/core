@@ -11,14 +11,13 @@ package fr.redxil.core.velocity.listener;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
-import fr.redxil.api.common.message.TextComponentBuilder;
-import fr.redxil.api.common.message.TextComponentBuilderVelocity;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.time.DateUtility;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +58,7 @@ public class PlayerListener {
 
         if (model.isPresent() && model.get().isEffective()) {
 
-            chatEvent.getPlayer().sendMessage(((TextComponentBuilderVelocity) TextComponentBuilder.createTextComponent("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.get().getSanctionEndTS().orElse(null)))).getFinalTextComponent());
+            chatEvent.getPlayer().sendMessage((Component.text("Vous êtes mute jusqu'au " + DateUtility.getMessage(model.get().getSanctionEndTS().orElse(null)))));
             chatEvent.setResult(PlayerChatEvent.ChatResult.denied());
 
         }

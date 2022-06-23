@@ -15,7 +15,6 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import fr.redline.pms.utils.IpInfo;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.data.SanctionInfo;
@@ -58,10 +57,10 @@ public class JoinListener {
     @Subscribe
     public void connection(PreLoginEvent event) {
         if (event.getUsername().contains(" ")) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Illegal Name detected").getFinalTextComponent()));
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Component.text("Illegal Name detected")));
         }
         if (CoreAPI.getInstance().getServer().getServerStatus() != ServerStatus.ONLINE) {
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Connection refusée").getFinalTextComponent()));
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Component.text("Connection refusée")));
         }
     }
 
@@ -70,14 +69,14 @@ public class JoinListener {
 
         Player player = e.getPlayer();
         if (CoreAPI.getInstance().getPlayerManager().isLoadedPlayer(player.getUniqueId())) {
-            e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent(
+            e.setResult(ResultedEvent.ComponentResult.denied(Component.text(
                     """
                                     §4§lSERVER NETWORK§r
                                     §cConnexion non autorisé§r
 
                                     §7Raison: Une personne est déjà connecté avec votre UUID§e§r
                             """
-            ).getFinalTextComponent()));
+            )));
             return;
         }
 
@@ -87,7 +86,7 @@ public class JoinListener {
 
             Optional<SanctionInfo> model = apiOfflinePlayer.get().getLastSanction(SanctionType.BAN);
             if (model.isPresent() && model.get().isEffective()) {
-                e.setResult(ResultedEvent.ComponentResult.denied((Component) model.get().getSancMessage().getFinalTextComponent()));
+                e.setResult(ResultedEvent.ComponentResult.denied(Component.text(model.get().getSancMessage())));
                 return;
             }
 
@@ -97,7 +96,7 @@ public class JoinListener {
 
         Server velocityServer = CoreAPI.getInstance().getServer();
         if (!velocityServer.getServerAccess().canAccess(velocityServer, player.getUniqueId(), playerRank)) {
-            e.setResult(ResultedEvent.ComponentResult.denied((Component) TextComponentBuilder.createTextComponent("Vous ne pouvez pas acceder au server").getFinalTextComponent()));
+            e.setResult(ResultedEvent.ComponentResult.denied(Component.text("Vous ne pouvez pas acceder au server")));
             return;
         }
 

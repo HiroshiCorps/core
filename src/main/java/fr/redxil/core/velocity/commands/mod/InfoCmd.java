@@ -13,17 +13,16 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.SanctionType;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -40,7 +39,7 @@ public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
 
         Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
         if (playerModerator.isEmpty()) {
-            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Vous n'êtes pas modérateur"));
             return;
         }
 
@@ -58,7 +57,7 @@ public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
         else target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
         if (target.isEmpty()) {
-            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Cible non trouvé"));
             return;
         }
 
@@ -66,8 +65,7 @@ public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onCommandWithoutArgs(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Syntax: /info (joueur) (info|ban|other)").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Syntax: /info (joueur) (info|ban|other)").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void execute(CommandContext<CommandSource> commandContext, String s) {
@@ -76,7 +74,7 @@ public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
 
         Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(((Player) commandContext.getSource()).getUniqueId());
         if (playerModerator.isEmpty()) {
-            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Vous n'êtes pas modérateur").getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Vous n'êtes pas modérateur"));
             return;
         }
 
@@ -94,7 +92,7 @@ public class InfoCmd extends LiteralArgumentCreator<CommandSource> {
         else target = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(targetID);
 
         if (target.isEmpty()) {
-            commandContext.getSource().sendMessage((Component) TextComponentBuilder.createTextComponent("Cible non trouvé").getFinalTextComponent());
+            commandContext.getSource().sendMessage(Component.text("Cible non trouvé"));
             return;
         }
 

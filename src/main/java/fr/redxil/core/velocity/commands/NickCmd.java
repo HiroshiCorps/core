@@ -13,12 +13,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
 
@@ -36,16 +37,12 @@ public class NickCmd extends LiteralArgumentCreator<CommandSource> {
         if (apiPlayer.isEmpty())
             return;
 
-        if (!apiPlayer.get().isNick()) {
-
-            TextComponentBuilder.createTextComponent("Syntax: /nick <nick>").setColor(Color.RED)
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
-
-        } else {
+        if (!apiPlayer.get().isNick())
+            commandContext.getSource().sendMessage(Component.text("Syntax: /nick <nick>").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
+        else {
 
             apiPlayer.get().setName(apiPlayer.get().getRealName());
-            TextComponentBuilder.createTextComponent("Vous avez retrouvé votre Pseudo: " + apiPlayer.get().getName())
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Vous avez retrouvé votre Pseudo: " + apiPlayer.get().getName()));
 
         }
 
@@ -72,12 +69,9 @@ public class NickCmd extends LiteralArgumentCreator<CommandSource> {
 
         if (apiPlayer.get().setName(nick)) {
             apiPlayer.get().setRank(nickRank);
-            TextComponentBuilder.createTextComponent("Nick changé")
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
-        } else {
-            TextComponentBuilder.createTextComponent("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").setColor(Color.RED)
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
-        }
+            commandContext.getSource().sendMessage(Component.text("Nick changé"));
+        } else
+            commandContext.getSource().sendMessage(Component.text("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public void executeSR(CommandContext<CommandSource> commandContext, String s) {
@@ -104,24 +98,20 @@ public class NickCmd extends LiteralArgumentCreator<CommandSource> {
         }
 
         if (nickRank == null) {
-            TextComponentBuilder.createTextComponent("Erreur, " + argRank + " doit être un power de grade" + apiPlayer.get().getName()).setColor(Color.RED)
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Erreur, " + argRank + " doit être un power de grade" + apiPlayer.get().getName()).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (nickRank.getRankPower() > apiPlayer.get().getRealRankPower()) {
-            TextComponentBuilder.createTextComponent("Erreur, " + argRank + " vous ne pouvez pas vous nick en " + nickRank.getRankName()).setColor(Color.RED)
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
+            commandContext.getSource().sendMessage(Component.text("Erreur, " + argRank + " vous ne pouvez pas vous nick en " + nickRank.getRankName()).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         if (apiPlayer.get().setName(nick)) {
             apiPlayer.get().setRank(nickRank);
-            TextComponentBuilder.createTextComponent("Nick changé")
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
-        } else {
-            TextComponentBuilder.createTextComponent("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").setColor(Color.RED)
-                    .sendTo(((Player) commandContext.getSource()).getUniqueId());
-        }
+            commandContext.getSource().sendMessage(Component.text("Nick changé"));
+        } else
+            commandContext.getSource().sendMessage(Component.text("Impossible de changer le nick, veuillez vérifier que le pseudo n'est pas déjà utilisé").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
+
     }
 }

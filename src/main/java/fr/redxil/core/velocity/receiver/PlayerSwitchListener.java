@@ -13,11 +13,12 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.redline.pms.pm.PMReceiver;
 import fr.redline.pms.pm.RedisPMManager;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.velocity.CoreVelocity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
 
@@ -41,23 +42,23 @@ public class PlayerSwitchListener implements PMReceiver {
 
         Optional<Server> server = CoreAPI.getInstance().getServerManager().getServer(Long.parseLong(dataList[1]));
         if (server.isEmpty()) {
-            player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
+            player.sendMessage(Component.text("Cannot connect you to server: " + dataList[1]).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<String> serverName = server.get().getServerName();
         if (serverName.isEmpty()) {
-            player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
+            player.sendMessage(Component.text("Cannot connect you to server: " + dataList[1]).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         Optional<RegisteredServer> serverInfo = CoreVelocity.getInstance().getProxyServer().getServer(serverName.get());
         if (serverInfo.isEmpty()) {
-            player.sendMessage((Component) TextComponentBuilder.createTextComponent("Cannot connect you to server: " + dataList[1]).getFinalTextComponent());
+            player.sendMessage(Component.text("Cannot connect you to server: " + dataList[1]).color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
-        player.sendMessage((Component) TextComponentBuilder.createTextComponent("Le système me dits que vous êtes en cours de transfert").getFinalTextComponent());
+        player.sendMessage(Component.text("Le système me dits que vous êtes en cours de transfert"));
         player.createConnectionRequest(serverInfo.get()).connect();
 
     }

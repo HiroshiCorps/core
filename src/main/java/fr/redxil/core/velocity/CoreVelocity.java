@@ -22,7 +22,6 @@ import fr.redxil.api.common.APIEnabler;
 import fr.redxil.api.common.APILoadError;
 import fr.redxil.api.common.APIPhaseInit;
 import fr.redxil.api.common.event.CoreEnabledEvent;
-import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.server.creator.ServerInfo;
 import fr.redxil.api.common.server.creator.VelocityServerInfo;
 import fr.redxil.api.common.server.type.ServerStatus;
@@ -209,28 +208,23 @@ public class CoreVelocity implements APIEnabler {
     }
 
     @Override
-    public void sendMessage(APIPlayer apiPlayer, String s) {
-        Optional<Player> optionalPlayer = this.getProxyServer().getPlayer(apiPlayer.getUUID());
-        optionalPlayer.ifPresentOrElse(
-                player -> player.sendMessage(Component.text(s)),
-                () -> apiPlayer.sendMessage(s)
-        );
+    public boolean sendMessage(String s, String s1) {
+        Optional<Player> player = this.proxyServer.getPlayer(s);
+        if (player.isPresent()) {
+            player.get().sendMessage(Component.text(s1));
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void sendMessage(String s, String s1) {
-        this.getProxyServer().getPlayer(s).ifPresentOrElse(
-                player -> player.sendMessage(Component.text(s)),
-                () -> CoreAPI.getInstance().getPlayerManager().getPlayer(s).ifPresent(player -> player.sendMessage(s1))
-        );
-    }
-
-    @Override
-    public void sendMessage(UUID uuid, String s) {
-        this.getProxyServer().getPlayer(uuid).ifPresentOrElse(
-                player -> player.sendMessage(Component.text(s)),
-                () -> CoreAPI.getInstance().getPlayerManager().getPlayer(uuid).ifPresent(player -> player.sendMessage(s))
-        );
+    public boolean sendMessage(UUID uuid, String s) {
+        Optional<Player> player = this.proxyServer.getPlayer(uuid);
+        if (player.isPresent()) {
+            player.get().sendMessage(Component.text(s));
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -13,16 +13,16 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import fr.redxil.api.common.message.Color;
-import fr.redxil.api.common.message.TextComponentBuilder;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.server.Server;
+import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class ShutdownCmd extends LiteralArgumentCreator<CommandSource> {
 
@@ -34,8 +34,7 @@ public class ShutdownCmd extends LiteralArgumentCreator<CommandSource> {
     }
 
     public void onMissingArgument(CommandContext<CommandSource> commandContext, String s) {
-        UUID playerUUID = ((Player) commandContext.getSource()).getUniqueId();
-        TextComponentBuilder.createTextComponent("Erreur, merci de faire /shutdown (server)").setColor(Color.RED).sendTo(playerUUID);
+        commandContext.getSource().sendMessage(Component.text("Erreur, merci de faire /shutdown (server)").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
     }
 
     public int execute(CommandContext<CommandSource> commandContext, String s) {
@@ -49,12 +48,12 @@ public class ShutdownCmd extends LiteralArgumentCreator<CommandSource> {
 
         Optional<Server> server = CoreAPI.getInstance().getServerManager().getServer(commandContext.getArgument("server", String.class));
         if (server.isEmpty()) {
-            TextComponentBuilder.createTextComponent("Erreur, le server exists pas").setColor(Color.RED).sendTo(apiPlayer.get());
+            commandContext.getSource().sendMessage(Component.text("Erreur, le server exists pas").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return 1;
         }
 
         ///server.sendShutdownOrder();
-        TextComponentBuilder.createTextComponent("L'ordre de shutdown est désactivé").setColor(Color.GREEN).sendTo(apiPlayer.get());
+        commandContext.getSource().sendMessage(Component.text("L'ordre de shutdown est désactivé").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
         return 1;
     }
 }
