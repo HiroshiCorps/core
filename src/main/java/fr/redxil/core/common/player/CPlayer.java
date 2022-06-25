@@ -78,7 +78,7 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         setIP(ipInfo);
 
         if (CoreAPI.getInstance().isOnlineMod()) {
-            this.playerModel = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
+            Optional<PlayerModel> playerModel1 = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
                 this.put(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), name);
                 this.put(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns(), uuid.toString());
                 this.put(PlayerDataSql.PLAYER_RANK_SQL.getSQLColumns(), Rank.JOUEUR.getRankPower().intValue());

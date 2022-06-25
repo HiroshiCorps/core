@@ -11,10 +11,11 @@ package fr.redxil.core.common.sql;
 
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.sql.utils.SQLColumns;
-import fr.redxil.core.common.sql.utils.SQLJoin;
 import fr.redxil.core.common.utils.TripletData;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,18 +42,14 @@ public class SQLModels<T extends SQLModel> {
         if (model == null)
             return false;
 
-        StringBuilder query = new StringBuilder("SELECT * FROM " + model.getTable()
-                + " WHERE " + model.getPrimaryKey() + " = " + primaryKey);
-
-        SQLJoin SQLJoin = model.getJoinData();
-        if (SQLJoin != null)
-            query.append(" ").append(SQLJoin.toSQL());
+        String query = "SELECT * FROM " + model.getTable()
+                + " WHERE " + model.getPrimaryKey().toSQL() + " = " + primaryKey;
 
         Optional<SQLConnection> sqlConnection = CoreAPI.getInstance().getSQLConnection();
         if (sqlConnection.isEmpty())
             return false;
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-        sqlConnection.get().query(query.toString(), resultSet -> {
+        sqlConnection.get().query(query, resultSet -> {
             try {
                 if (resultSet.first()) {
                     model.populate(resultSet);
@@ -66,15 +63,15 @@ public class SQLModels<T extends SQLModel> {
         return atomicBoolean.get();
     }
 
-    public Optional<T> getFirst(String query, Object... vars) {
-        List<T> results = this.get(query, vars);
+    public Optional<T> getFirst(@Nullable T firstModel, String query, Object... vars) {
+        List<T> results = this.get(firstModel, query, vars);
         return results.size() > 0 ? Optional.of(results.get(0)) : Optional.empty();
     }
 
-    public List<T> get(String query, Object... vars) {
+    public List<T> get(@Nullable T firstModel, @Nullable String query, Object... vars) {
         ArrayList<T> results = new ArrayList<>();
         try {
-            T model = generateInstance();
+            final T model = firstModel == null ? generateInstance() : firstModel;
             if (model == null)
                 return null;
 
@@ -83,18 +80,19 @@ public class SQLModels<T extends SQLModel> {
             if (query != null)
                 query2.append(" ").append(query);
 
-            SQLJoin SQLJoin = model.getJoinData();
-            if (SQLJoin != null)
-                query2.append(" ").append(SQLJoin.toSQL());
-
             CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query2.toString(),
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
-                                T newModel = generateInstance();
-                                assert newModel != null;
-                                newModel.populate(resultSet);
-                                results.add(newModel);
+                                T newModel;
+                                if (model.exists())
+                                    newModel = generateInstance();
+                                else newModel = model;
+
+                                if (newModel != null) {
+                                    newModel.populate(resultSet);
+                                    results.add(newModel);
+                                }
                             }
                         } catch (Exception exception) {
                             exception.printStackTrace();
@@ -109,57 +107,45 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public List<T> all() {
-        return this.get(null);
+        return this.get(null, null);
     }
 
-    public Optional<T> getOrInsert(int primaryKey) {
-        return this.getOrInsert(new HashMap<>(), primaryKey);
-    }
-
-    public Optional<T> getOrInsert(HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
-        T model = generateInstance();
-        if (model == null || !this.getOrInsert(model, defaultValues, primaryKey))
-            return Optional.empty();
-        return Optional.of(model);
-    }
-
-    public boolean getOrInsert(T model, int primaryKey) {
-        return this.getOrInsert(model, null, primaryKey);
-    }
-
-    public boolean getOrInsert(T model, HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
+    public Optional<T> getOrInsert(@Nullable T model, @Nullable HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         try {
-            this.get(model, primaryKey);
-            if (!model.exists()) {
-                model.set(model.getPrimaryKey(), primaryKey);
-                if (defaultValues != null) {
-                    model.set(defaultValues);
-                }
-                this.insert(model);
-                this.get(model, primaryKey);
-                return true;
+            T modelUse = model == null ? this.generateInstance() : model;
+            this.get(modelUse, primaryKey);
+            if (modelUse.exists())
+                return Optional.of(modelUse);
+            modelUse.set(modelUse.getPrimaryKey(), primaryKey);
+            if (defaultValues != null) {
+                modelUse.set(defaultValues);
             }
+            this.insert(modelUse);
+            return Optional.of(modelUse);
         } catch (Exception exception) {
             exception.printStackTrace();
             this.logs.severe("Error SQL getOrInsert() #2 = " + exception.getMessage());
         }
-        return false;
+        return Optional.empty();
     }
 
-    public Optional<T> getOrInsert(HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
+    public Optional<T> getOrInsert(@Nullable T model, @Nullable HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
         try {
-            Optional<T> foundRow = this.getFirst(query, vars);
-            if (foundRow.isPresent()) {
-                return foundRow;
+            T modelUse = model == null ? this.generateInstance() : model;
+
+            this.get(modelUse, query, vars);
+            if (modelUse.exists())
+                return Optional.of(modelUse);
+
+            this.getFirst(modelUse, query, vars);
+            if (modelUse.exists()) {
+                return Optional.of(modelUse);
             }
-            T model = generateInstance();
-            if (model == null)
-                return Optional.empty();
             if (defaultValues != null) {
-                model.set(defaultValues);
+                modelUse.set(defaultValues);
             }
-            this.insert(model);
-            return this.getOrInsert(defaultValues, query, vars);
+            this.insert(modelUse);
+            return Optional.of(modelUse);
         } catch (Exception exception) {
             exception.printStackTrace();
             this.logs.severe("Error SQL getOrInsert() #3 = " + exception.getMessage());
@@ -220,34 +206,30 @@ public class SQLModels<T extends SQLModel> {
 
     public boolean insert(T model) {
 
-        String query;
-        SQLJoin SQLJoin = model.getJoinData();
-
         TripletData<String, String, Collection<Object>> listNecString = listCreator(model, model.getTable());
         Collection<Object> objectList = listNecString.getThird();
 
-        if (SQLJoin == null || !model.containsDataForTable(SQLJoin.getColumnsPair().getTwo().getTable())) {
+        String query = "BEGIN TRANSACTION" +
+                "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ");" +
+                "SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY];  " +
+                "COMMIT";
 
-            query = "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ")";
-
-        } else {
-
-            TripletData<String, String, Collection<Object>> listNecString2 = listCreator(model, SQLJoin.getColumnsPair().getTwo().getTable());
-            objectList.addAll(listNecString2.getThird());
-            query = "BEGIN TRANSACTION" +
-                    "DECLARE @DataID int;" +
-                    "INSERT INTO " + model.getTable() + "(" + listNecString.getFirst() + ") VALUES (" + listNecString.getSecond() + ");" +
-                    "SELECT @DataID = scope_identity();" +
-                    "INSERT INTO " + SQLJoin.getColumnsPair().getTwo().getTable() + "(" + SQLJoin.getColumnsPair().getTwo().getColumns() + ", " + listNecString2.getFirst() + ") VALUES (@DataID, " + listNecString2.getSecond() + ");" +
-                    "COMMIT";
-
-        }
 
         this.logs.info(query);
 
         Optional<SQLConnection> sqlConnection = CoreAPI.getInstance().getSQLConnection();
-        return sqlConnection.map(connection -> connection.execute(query, objectList.toArray()).isPresent()).orElse(false);
-
+        if (sqlConnection.isPresent()) {
+            Optional<ResultSet> resultSet = sqlConnection.get().execute(query, objectList.toArray());
+            if (resultSet.isPresent()) {
+                try {
+                    model.getDataMap().put(model.getPrimaryKey().toSQL(), resultSet.get().getObject("SCOPE_IDENTITY"));
+                    return true;
+                } catch (SQLException e) {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     public T generateInstance() {

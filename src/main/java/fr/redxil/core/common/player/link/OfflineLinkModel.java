@@ -77,13 +77,13 @@ public class OfflineLinkModel extends SQLModel implements LinkData {
         RedisManager redisManager = redisManagerOptional.get();
         if (getLinkUsage() == LinkUsage.BOTH) {
             if (connectedPlayer == getPlayerSender())
-                redisManager.getRedisMap("link/" + getPlayerSender() + LinkUsage.BOTH + getLinkType()).put(getPlayerReceiver(), getLinkID());
+                redisManager.getRedisMap("link/" + getPlayerSender() + LinkUsage.BOTH + getLinkType()).put(getLinkID(), getPlayerReceiver());
             else
-                redisManager.getRedisMap("link/" + getPlayerReceiver() + LinkUsage.BOTH + getLinkType()).put(getPlayerSender(), getLinkID());
+                redisManager.getRedisMap("link/" + getPlayerReceiver() + LinkUsage.BOTH + getLinkType()).put(getLinkID(), getPlayerSender());
         } else if (getLinkUsage() == LinkUsage.RECEIVER) {
-            redisManager.getRedisMap("link/" + getPlayerReceiver() + LinkUsage.RECEIVER + getLinkType()).put(getPlayerSender(), getLinkID());
+            redisManager.getRedisMap("link/" + getPlayerReceiver() + LinkUsage.RECEIVER + getLinkType()).put(getLinkID(), getPlayerSender());
         } else
-            redisManager.getRedisMap("link/" + getPlayerSender() + LinkUsage.SENDER + getLinkType()).put(getPlayerReceiver(), getLinkID());
+            redisManager.getRedisMap("link/" + getPlayerSender() + LinkUsage.SENDER + getLinkType()).put(getLinkID(), getPlayerReceiver());
     }
 
 }
