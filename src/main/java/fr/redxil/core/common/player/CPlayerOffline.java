@@ -59,12 +59,12 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
     private void initPlayerModel() {
         if (this.playerModel == null && CoreAPI.getInstance().isOnlineMod())
-            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
+            this.playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID).orElse(null);
     }
 
     private void initMoneyModel() {
         if (this.moneyModel == null && CoreAPI.getInstance().isOnlineMod())
-            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
+            this.moneyModel = new SQLModels<>(MoneyModel.class).getFirst("WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID).orElse(null);
     }
 
     public PlayerModel getPlayerModel() {
@@ -299,16 +299,18 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public Optional<LinkData> createLink(APIOfflinePlayer apiOfflinePlayer, String s) {
+    public Optional<LinkData> createLink(LinkUsage linkUsage, APIOfflinePlayer apiOfflinePlayer, String s) {
 
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
-        OfflineLinkModel linkData = new OfflineLinkModel(this, apiOfflinePlayer, s);
+        OfflineLinkModel linkData = new OfflineLinkModel(this, apiOfflinePlayer, s, linkUsage);
 
         new SQLModels<>(OfflineLinkModel.class).insert(linkData);
 
-        return getLink(LinkUsage.TO, apiOfflinePlayer, s);
+        linkData.setLinkUsage(getMemberID());
+
+        return getLink(linkUsage, apiOfflinePlayer, s);
 
     }
 
@@ -468,10 +470,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (player2 != null)
             id2 = Long.valueOf(player2.getMemberID()).intValue();
         switch (linkUsage) {
-            case FROM -> {
-                String queries = LinkDataSql.TO_ID_SQL.getSQLColumns() + " = ?";
+            case SENDER -> {
+                String queries = LinkDataSql.RECEIVED_ID_SQL.getSQLColumns() + " = ?";
                 if (id2 != null)
-                    queries += " AND " + LinkDataSql.FROM_ID_SQL.getSQLColumns() + " = ?";
+                    queries += " AND " + LinkDataSql.SENDER_ID_SQL.getSQLColumns() + " = ?";
                 Integer finalID = id2;
                 return new Pair<>(queries, new ArrayList<>() {{
                     add(id1);
@@ -479,10 +481,10 @@ public class CPlayerOffline implements APIOfflinePlayer {
                         add(finalID);
                 }});
             }
-            case TO -> {
-                String queries = LinkDataSql.FROM_ID_SQL.getSQLColumns() + " = ?";
+            case RECEIVER -> {
+                String queries = LinkDataSql.SENDER_ID_SQL.getSQLColumns() + " = ?";
                 if (id2 != null)
-                    queries += " AND " + LinkDataSql.TO_ID_SQL.getSQLColumns() + " = ?";
+                    queries += " AND " + LinkDataSql.RECEIVED_ID_SQL.getSQLColumns() + " = ?";
                 Integer finalID = id2;
                 return new Pair<>(queries, new ArrayList<>() {{
                     add(id1);
@@ -491,8 +493,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
                 }});
             }
             case BOTH -> {
-                Pair<String, List<Object>> one = getWhereString(LinkUsage.FROM, player2);
-                Pair<String, List<Object>> two = getWhereString(LinkUsage.TO, player2);
+                Pair<String, List<Object>> one = getWhereString(LinkUsage.SENDER, player2);
+                Pair<String, List<Object>> two = getWhereString(LinkUsage.RECEIVER, player2);
                 return new Pair<>("(" + one.getOne() + ") OR (" + two.getOne() + ")", new ArrayList<>(one.getTwo()) {{
                     add(two.getTwo());
                 }});

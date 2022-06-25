@@ -254,7 +254,7 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public Optional<LinkData> createLink(APIOfflinePlayer arg0, String arg1) {
+    public Optional<LinkData> createLink(LinkUsage linkUsage, APIOfflinePlayer arg0, String arg1) {
         return Optional.empty();
     }
 

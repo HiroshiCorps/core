@@ -15,6 +15,7 @@ import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.CoreAPI;
+import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
 import fr.redxil.core.common.player.link.OfflineLinkModel;
@@ -109,13 +110,9 @@ public class CPlayerManager implements APIPlayerManager {
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
+        Optional<PlayerModel> playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
 
-        if (playerModel != null) {
-            return Optional.of(new CPlayerOffline(playerModel));
-        }
-
-        return Optional.empty();
+        return playerModel.map(CPlayerOffline::new);
 
     }
 
@@ -135,12 +132,7 @@ public class CPlayerManager implements APIPlayerManager {
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name);
-
-        if (playerModel != null) {
-            return Optional.of(new CPlayerOffline(playerModel));
-        }
-        return Optional.empty();
+        return new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns().toSQL() + " = ?", name).map(CPlayerOffline::new);
     }
 
     /**
@@ -158,10 +150,7 @@ public class CPlayerManager implements APIPlayerManager {
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
-        PlayerModel playerModel = new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
-        if (playerModel == null)
-            return Optional.empty();
-        return Optional.of(new CPlayerOffline(playerModel));
+        return new SQLModels<>(PlayerModel.class).getFirst("WHERE " + PlayerDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID).map(CPlayerOffline::new);
     }
 
     @Override
@@ -219,7 +208,11 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public Optional<LinkData> getLink(int i) {
-        return Optional.ofNullable(new SQLModels<>(OfflineLinkModel.class).get(i));
+        Optional<OfflineLinkModel> opt = new SQLModels<>(OfflineLinkModel.class).getFirst("WHERE " + LinkDataSql.LINK_ID_SQL.getSQLColumns().toSQL() + " = ?", i);
+        if (opt.isPresent()) {
+            LinkData linkData = opt.get();
+            return Optional.of(linkData);
+        } else return Optional.empty();
     }
 
     @Override

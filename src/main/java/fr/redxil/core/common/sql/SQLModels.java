@@ -14,13 +14,10 @@ import fr.redxil.core.common.sql.utils.SQLColumns;
 import fr.redxil.core.common.sql.utils.SQLJoin;
 import fr.redxil.core.common.utils.TripletData;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class SQLModels<T extends SQLModel> {
@@ -33,15 +30,16 @@ public class SQLModels<T extends SQLModel> {
         this.logs = Logger.getLogger("SQLModels<" + method.getSimpleName() + ">");
     }
 
-    public T get(int primaryKey) {
+    public Optional<T> get(int primaryKey) {
         T model = generateInstance();
-        this.get(model, primaryKey);
-        return model;
+        if (this.get(model, primaryKey))
+            return Optional.of(model);
+        else return Optional.empty();
     }
 
-    public void get(T model, int primaryKey) {
+    public boolean get(T model, int primaryKey) {
         if (model == null)
-            return;
+            return false;
 
         StringBuilder query = new StringBuilder("SELECT * FROM " + model.getTable()
                 + " WHERE " + model.getPrimaryKey() + " = " + primaryKey);
@@ -50,21 +48,27 @@ public class SQLModels<T extends SQLModel> {
         if (SQLJoin != null)
             query.append(" ").append(SQLJoin.toSQL());
 
-        CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.query(query.toString(), resultSet -> {
+        Optional<SQLConnection> sqlConnection = CoreAPI.getInstance().getSQLConnection();
+        if (sqlConnection.isEmpty())
+            return false;
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+        sqlConnection.get().query(query.toString(), resultSet -> {
             try {
                 if (resultSet.first()) {
                     model.populate(resultSet);
+                    atomicBoolean.set(true);
                 }
             } catch (SQLException exception) {
                 exception.printStackTrace();
                 this.logs.severe("Error SQL get() = " + exception.getMessage());
             }
-        }));
+        });
+        return atomicBoolean.get();
     }
 
-    public T getFirst(String query, Object... vars) {
+    public Optional<T> getFirst(String query, Object... vars) {
         List<T> results = this.get(query, vars);
-        return results.size() > 0 ? results.get(0) : null;
+        return results.size() > 0 ? Optional.of(results.get(0)) : Optional.empty();
     }
 
     public List<T> get(String query, Object... vars) {
@@ -108,23 +112,22 @@ public class SQLModels<T extends SQLModel> {
         return this.get(null);
     }
 
-    public T getOrInsert(int primaryKey) {
+    public Optional<T> getOrInsert(int primaryKey) {
         return this.getOrInsert(new HashMap<>(), primaryKey);
     }
 
-    public T getOrInsert(HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
+    public Optional<T> getOrInsert(HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         T model = generateInstance();
-        if (model == null)
-            return null;
-        this.getOrInsert(model, defaultValues, primaryKey);
-        return model;
+        if (model == null || !this.getOrInsert(model, defaultValues, primaryKey))
+            return Optional.empty();
+        return Optional.of(model);
     }
 
-    public void getOrInsert(T model, int primaryKey) {
-        this.getOrInsert(model, null, primaryKey);
+    public boolean getOrInsert(T model, int primaryKey) {
+        return this.getOrInsert(model, null, primaryKey);
     }
 
-    public void getOrInsert(T model, HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
+    public boolean getOrInsert(T model, HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         try {
             this.get(model, primaryKey);
             if (!model.exists()) {
@@ -134,22 +137,24 @@ public class SQLModels<T extends SQLModel> {
                 }
                 this.insert(model);
                 this.get(model, primaryKey);
+                return true;
             }
         } catch (Exception exception) {
             exception.printStackTrace();
             this.logs.severe("Error SQL getOrInsert() #2 = " + exception.getMessage());
         }
+        return false;
     }
 
-    public T getOrInsert(HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
+    public Optional<T> getOrInsert(HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
         try {
-            T foundRow = this.getFirst(query, vars);
-            if (foundRow != null) {
+            Optional<T> foundRow = this.getFirst(query, vars);
+            if (foundRow.isPresent()) {
                 return foundRow;
             }
             T model = generateInstance();
             if (model == null)
-                return null;
+                return Optional.empty();
             if (defaultValues != null) {
                 model.set(defaultValues);
             }
@@ -159,16 +164,17 @@ public class SQLModels<T extends SQLModel> {
             exception.printStackTrace();
             this.logs.severe("Error SQL getOrInsert() #3 = " + exception.getMessage());
         }
-        return null;
+        return Optional.empty();
     }
 
-    public void delete(String query, Object... vars) {
+    public boolean delete(String query, Object... vars) {
         T model = generateInstance();
         if (model == null)
-            return;
+            return false;
         String queryString = "DELETE FROM " + model.getTable() + " " + query;
         this.logs.info(queryString);
-        CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(queryString, vars));
+        Optional<SQLConnection> sqlConnection = CoreAPI.getInstance().getSQLConnection();
+        return sqlConnection.map(connection -> connection.execute(queryString, vars).isPresent()).orElse(false);
     }
 
     private String listCreator(Collection<Object> collection, boolean value) {
@@ -212,7 +218,7 @@ public class SQLModels<T extends SQLModel> {
 
     }
 
-    public void insert(T model) {
+    public boolean insert(T model) {
 
         String query;
         SQLJoin SQLJoin = model.getJoinData();
@@ -239,14 +245,14 @@ public class SQLModels<T extends SQLModel> {
 
         this.logs.info(query);
 
-        CoreAPI.getInstance().getSQLConnection().ifPresent(sql -> sql.execute(query, objectList.toArray()));
+        Optional<SQLConnection> sqlConnection = CoreAPI.getInstance().getSQLConnection();
+        return sqlConnection.map(connection -> connection.execute(query, objectList.toArray()).isPresent()).orElse(false);
 
     }
 
     public T generateInstance() {
         try {
-            Constructor<T> constructors = this.method.getDeclaredConstructor();
-            return constructors.newInstance();
+            return this.method.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
             e.printStackTrace();

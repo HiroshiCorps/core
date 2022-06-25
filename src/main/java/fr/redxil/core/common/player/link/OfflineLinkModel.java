@@ -21,12 +21,13 @@ import java.util.Optional;
 
 public class OfflineLinkModel extends SQLModel implements LinkData {
 
-    LinkUsage linkUsage = null;
+    LinkUsage linkUsage;
 
     @Override
     public int getLinkID() {
         return getInt(LinkDataSql.LINK_ID_SQL.getSQLColumns());
     }
+
 
     public OfflineLinkModel(APIOfflinePlayer creator, APIOfflinePlayer target, String type, LinkUsage linkUsage) {
         super("link", LinkDataSql.LINK_ID_SQL.getSQLColumns());

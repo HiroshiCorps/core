@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,7 +83,7 @@ public class SQLConnection {
     }
 
 
-    public PreparedStatement prepareStatement(Connection conn, String query, Object... vars) {
+    public Optional<PreparedStatement> prepareStatement(Connection conn, String query, Object... vars) {
         try {
             PreparedStatement ps = conn.prepareStatement(query);
             CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.INFO, "Preparing statement for query: " + query);
@@ -96,101 +97,94 @@ public class SQLConnection {
                 }
             } else {
                 CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.SEVERE, "Problem with argument: Waited argument: " + num + " Gived: " + vars.length);
-                return null;
+                return Optional.empty();
             }
-            return ps;
+            return Optional.of(ps);
 
         } catch (SQLException exception) {
             this.logs.severe("MySQL error: " + exception.getMessage());
         }
 
-        return null;
+        return Optional.empty();
     }
 
 
-    public void asyncQuery(final String query, final Callback<SQLRowSet> callback, final Object... vars) {
+    public void asyncQuery(final String query, final Callback<Optional<SQLRowSet>> callback, final Object... vars) {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
-                try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                    if (ps == null) return;
-                    try (ResultSet rs = ps.executeQuery()) {
-                        SQLRowSet SQLRowSet = new SQLRowSet(rs);
-                        this.closeRessources(rs, ps);
-                        if (callback != null) {
-                            callback.run(SQLRowSet);
-                        }
+                Optional<PreparedStatement> ps = this.prepareStatement(conn, query, vars);
+                if (ps.isEmpty()) {
+                    callback.run(Optional.empty());
+                    return;
+                }
+                try (ResultSet rs = ps.get().executeQuery()) {
+                    SQLRowSet sqlRowSet = new SQLRowSet(rs);
+                    this.closeRessources(rs, ps.get());
+                    if (callback != null) {
+                        callback.run(Optional.of(sqlRowSet));
                     }
-                } catch (SQLException e) {
-                    this.logs.severe("MySQL error: " + e.getMessage());
-                    e.printStackTrace();
                 }
             } catch (SQLException exception) {
-                this.logs.severe("Error when getting pool connection !");
+                this.logs.severe("MySQL error: " + exception.getMessage());
                 exception.printStackTrace();
             }
         });
     }
 
 
-    public SQLRowSet query(final String query, final Object... vars) {
+    public Optional<SQLRowSet> query(final String query, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
-            try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                if (ps == null) return null;
-                try (ResultSet rs = ps.executeQuery()) {
-                    SQLRowSet SQLRowSet = new SQLRowSet(rs);
-                    this.closeRessources(rs, ps);
-                    return SQLRowSet;
-                }
-            } catch (SQLException e) {
-                this.logs.severe("MySQL error: " + e.getMessage());
-                e.printStackTrace();
+            Optional<PreparedStatement> ps = this.prepareStatement(conn, query, vars);
+            if (ps.isEmpty()) {
+                return Optional.empty();
+            }
+            try (ResultSet rs = ps.get().executeQuery()) {
+                SQLRowSet sqlRowSet = new SQLRowSet(rs);
+                this.closeRessources(rs, ps.get());
+                return Optional.of(sqlRowSet);
             }
         } catch (SQLException exception) {
-            this.logs.severe("Error when getting pool connection !");
+            this.logs.severe("MySQL error: " + exception.getMessage());
             exception.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
 
-    public void query(final String query, final Callback<ResultSet> callback, final Object... vars) {
+    public boolean query(final String query, final Callback<ResultSet> callback, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
-            try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                if (ps == null) return;
-                try (ResultSet rs = ps.executeQuery()) {
-                    callback.run(rs);
-                    this.closeRessources(rs, ps);
-                }
-            } catch (SQLException e) {
-                this.logs.severe("MySQL error: " + e.getMessage());
-                e.printStackTrace();
+            Optional<PreparedStatement> ps = this.prepareStatement(conn, query, vars);
+            if (ps.isEmpty()) {
+                return false;
+            }
+            try (ResultSet rs = ps.get().executeQuery()) {
+                callback.run(rs);
+                this.closeRessources(rs, ps.get());
+                return true;
             }
         } catch (SQLException exception) {
-            this.logs.severe("Error when getting pool connection !");
+            this.logs.severe("MySQL error: " + exception.getMessage());
             exception.printStackTrace();
         }
+        return false;
     }
 
 
     public void asyncExecuteCallback(final String query, final Callback<Integer> callback, final Object... vars) {
         Scheduler.runTask(() -> {
             try (Connection conn = this.pool.getConnection()) {
-                try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                    if (ps == null) return;
-                    ps.execute();
-                    this.closeRessources(null, ps);
-                    if (callback != null) {
-                        callback.run(-1);
-                    }
-                } catch (SQLException exception) {
-                    if (exception.getErrorCode() == 1060) {
-                        return;
-                    }
-                    this.logs.severe("MySQL error: " + exception.getMessage());
-                    exception.printStackTrace();
+                Optional<PreparedStatement> ps = this.prepareStatement(conn, query, vars);
+                if (ps.isEmpty()) return;
+                ps.get().execute();
+                this.closeRessources(null, ps.get());
+                if (callback != null) {
+                    callback.run(-1);
                 }
             } catch (SQLException exception) {
-                this.logs.severe("Error when getting pool connection !");
+                if (exception.getErrorCode() == 1060) {
+                    return;
+                }
+                this.logs.severe("MySQL error: " + exception.getMessage());
                 exception.printStackTrace();
             }
         });
@@ -202,21 +196,17 @@ public class SQLConnection {
     }
 
 
-    public ResultSet execute(final String query, final Object... vars) {
+    public Optional<ResultSet> execute(final String query, final Object... vars) {
         try (Connection conn = this.pool.getConnection()) {
-            try (PreparedStatement ps = this.prepareStatement(conn, query, vars)) {
-                if (ps == null) return null;
-                ps.execute();
-                return ps.getResultSet();
-            } catch (SQLException exception) {
-                this.logs.severe("MySQL error: " + exception.getMessage());
-                exception.printStackTrace();
-            }
+            Optional<PreparedStatement> ps = this.prepareStatement(conn, query, vars);
+            if (ps.isEmpty()) return Optional.empty();
+            ps.get().execute();
+            return Optional.of(ps.get().getResultSet());
         } catch (SQLException exception) {
-            this.logs.severe("Error when getting pool connection !");
+            this.logs.severe("MySQL error: " + exception.getMessage());
             exception.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
 }
