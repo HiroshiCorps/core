@@ -13,13 +13,11 @@ import fr.redxil.api.common.utils.Pair;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.sql.utils.SQLColumns;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 public abstract class SQLModel {
@@ -187,6 +185,17 @@ public abstract class SQLModel {
 
     public boolean tablesAccept(SQLColumns sqlColumns) {
         return this.getTable().equalsIgnoreCase(sqlColumns.getTable());
+    }
+
+    public static <T> Optional<T> generateInstance(Class<T> tClass) {
+        T inst = null;
+        try {
+            inst = tClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return Optional.ofNullable(inst);
     }
 
 }

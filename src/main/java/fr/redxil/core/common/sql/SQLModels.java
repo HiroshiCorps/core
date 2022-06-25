@@ -14,7 +14,6 @@ import fr.redxil.core.common.sql.utils.SQLColumns;
 import fr.redxil.core.common.utils.TripletData;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -27,14 +26,16 @@ public class SQLModels<T extends SQLModel> {
     private final Logger logs;
 
     public SQLModels(Class<T> method) {
-        this.method = method;
         this.logs = Logger.getLogger("SQLModels<" + method.getSimpleName() + ">");
+        this.method = method;
     }
 
     public Optional<T> get(int primaryKey) {
-        T model = generateInstance();
-        if (this.get(model, primaryKey))
-            return Optional.of(model);
+        Optional<T> model = SQLModel.generateInstance(method);
+        if (model.isEmpty())
+            return model;
+        if (this.get(model.get(), primaryKey))
+            return model;
         else return Optional.empty();
     }
 
@@ -71,9 +72,9 @@ public class SQLModels<T extends SQLModel> {
     public List<T> get(@Nullable T firstModel, @Nullable String query, Object... vars) {
         ArrayList<T> results = new ArrayList<>();
         try {
-            final T model = firstModel == null ? generateInstance() : firstModel;
+            final T model = firstModel == null ? SQLModel.generateInstance(method).orElse(null) : firstModel;
             if (model == null)
-                return null;
+                return results;
 
             StringBuilder query2 = new StringBuilder("SELECT * FROM " + model.getTable());
 
@@ -84,14 +85,14 @@ public class SQLModels<T extends SQLModel> {
                     resultSet -> {
                         try {
                             while (resultSet.next()) {
-                                T newModel;
+                                Optional<T> newModel;
                                 if (model.exists())
-                                    newModel = generateInstance();
-                                else newModel = model;
+                                    newModel = SQLModel.generateInstance(method);
+                                else newModel = Optional.of(model);
 
-                                if (newModel != null) {
-                                    newModel.populate(resultSet);
-                                    results.add(newModel);
+                                if (newModel.isPresent()) {
+                                    newModel.get().populate(resultSet);
+                                    results.add(newModel.get());
                                 }
                             }
                         } catch (Exception exception) {
@@ -112,7 +113,11 @@ public class SQLModels<T extends SQLModel> {
 
     public Optional<T> getOrInsert(@Nullable T model, @Nullable HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
         try {
-            T modelUse = model == null ? this.generateInstance() : model;
+            Optional<T> modelOpt = model == null ? SQLModel.generateInstance(method) : Optional.of(model);
+            if (modelOpt.isEmpty())
+                return modelOpt;
+
+            T modelUse = modelOpt.get();
             this.get(modelUse, primaryKey);
             if (modelUse.exists())
                 return Optional.of(modelUse);
@@ -131,7 +136,11 @@ public class SQLModels<T extends SQLModel> {
 
     public Optional<T> getOrInsert(@Nullable T model, @Nullable HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
         try {
-            T modelUse = model == null ? this.generateInstance() : model;
+            Optional<T> modelOpt = model == null ? SQLModel.generateInstance(method) : Optional.of(model);
+            if (modelOpt.isEmpty())
+                return modelOpt;
+
+            T modelUse = modelOpt.get();
 
             this.get(modelUse, query, vars);
             if (modelUse.exists())
@@ -154,10 +163,10 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public boolean delete(String query, Object... vars) {
-        T model = generateInstance();
-        if (model == null)
+        Optional<T> model = SQLModel.generateInstance(method);
+        if (model.isEmpty())
             return false;
-        String queryString = "DELETE FROM " + model.getTable() + " " + query;
+        String queryString = "DELETE FROM " + model.get().getTable() + " " + query;
         this.logs.info(queryString);
         Optional<SQLConnection> sqlConnection = CoreAPI.getInstance().getSQLConnection();
         return sqlConnection.map(connection -> connection.execute(queryString, vars).isPresent()).orElse(false);
@@ -230,16 +239,6 @@ public class SQLModels<T extends SQLModel> {
             }
         }
         return false;
-    }
-
-    public T generateInstance() {
-        try {
-            return this.method.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
 }
