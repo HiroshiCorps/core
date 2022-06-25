@@ -136,26 +136,19 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
         CoreAPI.getInstance().getAPIEnabler().getLogger().log(Level.FINE, "Player Data creation finished");
     }
 
-    static void loadLink(CPlayer cPlayer) {
+    void loadLink(CPlayer cPlayer) {
 
         if (!CoreAPI.getInstance().isOnlineMod())
             return;
 
         APIPlayerManager cpm = CoreAPI.getInstance().getPlayerManager();
-        List<String> linkTypeList = cpm.getLinkTypeList();
-        if (linkTypeList.isEmpty())
-            return;
 
-        StringBuilder queryToAdd = new StringBuilder();
-        for (String linkType : linkTypeList) {
-            if (queryToAdd.length() != 0)
-                queryToAdd.append(" OR ");
-            queryToAdd.append(LinkDataSql.LINK_TYPE_SQL.getSQLColumns().toSQL()).append(" = ").append(linkType);
-        }
-
-        List<OfflineLinkModel> offlineLinkModelList = new SQLModels<>(OfflineLinkModel.class).get("SELECT * FROM link WHERE (" + LinkDataSql.FROM_ID_SQL.getSQLColumns().toSQL() + " = ? OR " + LinkDataSql.TO_ID_SQL.getSQLColumns().toSQL() + " = ?) AND (" + queryToAdd + ")", cPlayer.getMemberID(), cPlayer.getMemberID());
-        for (OfflineLinkModel offlineLinkModel : offlineLinkModelList)
+        List<OfflineLinkModel> offlineLinkModelList = new SQLModels<>(OfflineLinkModel.class).get("SELECT * FROM link WHERE " + LinkDataSql.RECEIVED_ID_SQL.getSQLColumns().toSQL() + " = ? OR " + LinkDataSql.SENDER_ID_SQL.getSQLColumns().toSQL() + " = ?", cPlayer.getMemberID(), cPlayer.getMemberID());
+        for (OfflineLinkModel offlineLinkModel : offlineLinkModelList) {
             cpm.getLinkOnConnectAction(offlineLinkModel.getLinkType()).accept(cPlayer, offlineLinkModel);
+            offlineLinkModel.setLinkUsage(cPlayer.getMemberID());
+            offlineLinkModel.redisRegister(cPlayer.getMemberID());
+        }
     }
 
     @Override
