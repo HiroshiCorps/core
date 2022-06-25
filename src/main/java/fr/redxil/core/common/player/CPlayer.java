@@ -25,9 +25,9 @@ import fr.redxil.core.common.data.money.MoneyDataSql;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
 import fr.redxil.core.common.data.utils.DataType;
+import fr.redxil.core.common.player.link.OfflineLinkModel;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
-import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.utils.DataReminder;
@@ -153,9 +153,9 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
             queryToAdd.append(LinkDataSql.LINK_TYPE_SQL.getSQLColumns().toSQL()).append(" = ").append(linkType);
         }
 
-        List<PlayerLinkModel> playerLinkModelList = new SQLModels<>(PlayerLinkModel.class).get("SELECT * FROM link WHERE (" + LinkDataSql.FROM_ID_SQL.getSQLColumns().toSQL() + " = ? OR " + LinkDataSql.TO_ID_SQL.getSQLColumns().toSQL() + " = ?) AND (" + queryToAdd + ")", cPlayer.getMemberID(), cPlayer.getMemberID());
-        for (PlayerLinkModel playerLinkModel : playerLinkModelList)
-            cpm.getLinkOnConnectAction(playerLinkModel.getLinkType()).accept(cPlayer, playerLinkModel);
+        List<OfflineLinkModel> offlineLinkModelList = new SQLModels<>(OfflineLinkModel.class).get("SELECT * FROM link WHERE (" + LinkDataSql.FROM_ID_SQL.getSQLColumns().toSQL() + " = ? OR " + LinkDataSql.TO_ID_SQL.getSQLColumns().toSQL() + " = ?) AND (" + queryToAdd + ")", cPlayer.getMemberID(), cPlayer.getMemberID());
+        for (OfflineLinkModel offlineLinkModel : offlineLinkModelList)
+            cpm.getLinkOnConnectAction(offlineLinkModel.getLinkType()).accept(cPlayer, offlineLinkModel);
     }
 
     @Override

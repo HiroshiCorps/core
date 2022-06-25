@@ -17,7 +17,7 @@ import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.player.PlayerDataRedis;
 import fr.redxil.core.common.data.player.PlayerDataSql;
-import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
+import fr.redxil.core.common.player.link.OfflineLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.sql.SQLModels;
 import fr.redxil.core.common.utils.DataReminder;
@@ -219,7 +219,7 @@ public class CPlayerManager implements APIPlayerManager {
 
     @Override
     public Optional<LinkData> getLink(int i) {
-        return Optional.ofNullable(new SQLModels<>(PlayerLinkModel.class).get(i));
+        return Optional.ofNullable(new SQLModels<>(OfflineLinkModel.class).get(i));
     }
 
     @Override

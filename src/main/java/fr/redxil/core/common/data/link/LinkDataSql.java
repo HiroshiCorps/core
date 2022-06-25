@@ -14,9 +14,11 @@ import fr.redxil.core.common.sql.utils.SQLColumns;
 public enum LinkDataSql {
 
     LINK_ID_SQL("link", "link_id"),
-    FROM_ID_SQL("link", "from_id"),
-    TO_ID_SQL("link", "to_id"),
-    LINK_TYPE_SQL("link", "link_state");
+    RECEIVED_ID_SQL("link", "receiver_id"),
+    SENDER_ID_SQL("link", "sender_id"),
+    LINK_TYPE_SQL("link", "link_state"),
+
+    LINK_USAGE_SQL("link", "link_usage");
 
     final SQLColumns sqlColumns;
 

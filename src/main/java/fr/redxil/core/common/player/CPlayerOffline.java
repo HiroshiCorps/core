@@ -23,9 +23,9 @@ import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.data.money.MoneyDataSql;
 import fr.redxil.core.common.data.player.PlayerDataSql;
+import fr.redxil.core.common.player.link.OfflineLinkModel;
 import fr.redxil.core.common.player.sqlmodel.moderator.SanctionModel;
 import fr.redxil.core.common.player.sqlmodel.player.MoneyModel;
-import fr.redxil.core.common.player.sqlmodel.player.PlayerLinkModel;
 import fr.redxil.core.common.player.sqlmodel.player.PlayerModel;
 import fr.redxil.core.common.player.sqlmodel.player.SettingsModel;
 import fr.redxil.core.common.sql.SQLModels;
@@ -286,7 +286,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
         Pair<String, List<Object>> pair = getWhereString(linkUsage, apiOfflinePlayer);
         pair.getTwo().add(s);
         return new ArrayList<>() {{
-            this.addAll(new SQLModels<>(PlayerLinkModel.class).get("(" + pair.getOne() + ") AND " + getStringSQL(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), s.length) + " ORDER BY " + LinkDataSql.LINK_ID_SQL.getSQLColumns().toSQL() + " DESC", pair.getTwo().toArray(), s));
+            this.addAll(new SQLModels<>(OfflineLinkModel.class).get("(" + pair.getOne() + ") AND " + getStringSQL(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), s.length) + " ORDER BY " + LinkDataSql.LINK_ID_SQL.getSQLColumns().toSQL() + " DESC", pair.getTwo().toArray(), s));
         }};
     }
 
@@ -304,9 +304,9 @@ public class CPlayerOffline implements APIOfflinePlayer {
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
-        PlayerLinkModel linkData = new PlayerLinkModel(this, apiOfflinePlayer, s);
+        OfflineLinkModel linkData = new OfflineLinkModel(this, apiOfflinePlayer, s);
 
-        new SQLModels<>(PlayerLinkModel.class).insert(linkData);
+        new SQLModels<>(OfflineLinkModel.class).insert(linkData);
 
         return getLink(LinkUsage.TO, apiOfflinePlayer, s);
 
