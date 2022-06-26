@@ -64,9 +64,17 @@ public class SQLModels<T extends SQLModel> {
         return atomicBoolean.get();
     }
 
+    public Optional<T> getFirst(String query, Object... vars) {
+        return getFirst(null, query, vars);
+    }
+
     public Optional<T> getFirst(@Nullable T firstModel, String query, Object... vars) {
         List<T> results = this.get(firstModel, query, vars);
         return results.size() > 0 ? Optional.of(results.get(0)) : Optional.empty();
+    }
+
+    public List<T> get(@Nullable String query, Object... vars) {
+        return get(null, query, vars);
     }
 
     public List<T> get(@Nullable T firstModel, @Nullable String query, Object... vars) {
@@ -108,7 +116,15 @@ public class SQLModels<T extends SQLModel> {
     }
 
     public List<T> all() {
-        return this.get(null, null);
+        return this.get(null);
+    }
+
+    public Optional<T> getOrInsert(@Nullable HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
+        return getOrInsert(null, defaultValues, primaryKey);
+    }
+
+    public Optional<T> getOrInsert(@Nullable HashMap<SQLColumns, Object> defaultValues, String query, Object... vars) {
+        return getOrInsert(null, defaultValues, query, vars);
     }
 
     public Optional<T> getOrInsert(@Nullable T model, @Nullable HashMap<SQLColumns, Object> defaultValues, int primaryKey) {
@@ -117,16 +133,7 @@ public class SQLModels<T extends SQLModel> {
             if (modelOpt.isEmpty())
                 return modelOpt;
 
-            T modelUse = modelOpt.get();
-            this.get(modelUse, primaryKey);
-            if (modelUse.exists())
-                return Optional.of(modelUse);
-            modelUse.set(modelUse.getPrimaryKey(), primaryKey);
-            if (defaultValues != null) {
-                modelUse.set(defaultValues);
-            }
-            this.insert(modelUse);
-            return Optional.of(modelUse);
+            return getOrInsert(modelOpt.get(), defaultValues, "WHERE " + modelOpt.get().getPrimaryKey().toSQL() + " = ?", primaryKey);
         } catch (Exception exception) {
             exception.printStackTrace();
             this.logs.severe("Error SQL getOrInsert() #2 = " + exception.getMessage());
@@ -146,10 +153,6 @@ public class SQLModels<T extends SQLModel> {
             if (modelUse.exists())
                 return Optional.of(modelUse);
 
-            this.getFirst(modelUse, query, vars);
-            if (modelUse.exists()) {
-                return Optional.of(modelUse);
-            }
             if (defaultValues != null) {
                 modelUse.set(defaultValues);
             }

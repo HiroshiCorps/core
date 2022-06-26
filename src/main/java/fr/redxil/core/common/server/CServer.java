@@ -47,7 +47,7 @@ public class CServer implements Server {
     }
 
     public CServer(ServerInfo serverCreator) {
-        ServerModel serverModel = null;
+        Optional<ServerModel> serverModel = Optional.empty();
 
         if (CoreAPI.getInstance().isOnlineMod())
             serverModel = new SQLModels<>(ServerModel.class).getOrInsert(new HashMap<>() {{
@@ -61,13 +61,12 @@ public class CServer implements Server {
                 put(ServerDataSql.SERVER_PORT_SQL.getSQLColumns(), serverCreator.getIpInfo().getPort().toString());
             }}, "WHERE " + ServerDataSql.SERVER_NAME_SQL.getSQLColumns().toSQL() + " = ?", serverCreator.getServerName());
 
-        initServer(serverCreator.getServerType(), serverCreator.getServerAccess(), serverCreator.getRankAccess(), (serverModel == null ? null : Integer.valueOf(serverModel.getServerID()).longValue()), serverCreator.getServerName(), serverCreator.getIpInfo(), serverCreator.getMaxPlayer());
+        initServer(serverCreator.getServerType(), serverCreator.getServerAccess(), serverCreator.getRankAccess(), serverModel.isEmpty() ? null : Integer.valueOf(serverModel.get().getServerID()).longValue(), serverCreator.getServerName(), serverCreator.getIpInfo(), serverCreator.getMaxPlayer());
 
     }
 
     public CServer(Long serverID) {
-        ServerModel serverModel = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", serverID);
-        initServer(serverModel.getServerType(), ServerAccess.valueOf(serverModel.getString(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns())), Rank.getRank(serverModel.getInt(ServerDataSql.SERVER_NEEDRANK_SQL.getSQLColumns())).orElse(null), serverID, serverModel.getServerName(), new IpInfo(serverModel.getString(ServerDataSql.SERVER_IP_SQL.getSQLColumns()), Integer.valueOf(serverModel.getString(ServerDataSql.SERVER_PORT_SQL.getSQLColumns()))), serverModel.getMaxPlayers());
+        this.serverID = serverID;
     }
 
     private void initServer(ServerType serverType, ServerAccess serverAccess, Rank rank, Long serverID, String serverName, IpInfo ipInfo, int maxPlayer) {
@@ -180,9 +179,9 @@ public class CServer implements Server {
 
         if (CoreAPI.getInstance().isOnlineMod()) {
 
-            ServerModel model = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", id);
+            Optional<ServerModel> modelOpt = new SQLModels<>(ServerModel.class).getFirst("WHERE " + ServerDataSql.SERVER_ID_SQL.getSQLColumns().toSQL() + " = ?", id);
 
-            model.set(
+            modelOpt.ifPresent(serverModel -> serverModel.set(
                     new HashMap<>() {{
                         put(ServerDataSql.SERVER_STATUS_SQL.getSQLColumns(), ServerStatus.OFFLINE.toString());
                         put(ServerDataSql.SERVER_ACCESS_SQL.getSQLColumns(), getServerAccess().toString());
@@ -190,7 +189,7 @@ public class CServer implements Server {
                         put(ServerDataSql.SERVER_TYPE_SQL.getSQLColumns(), getServerType().toString());
                         serverName.ifPresentOrElse((name) -> put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), name), () -> put(ServerDataSql.SERVER_NAME_SQL.getSQLColumns(), null));
                     }}
-            );
+            ));
 
             ServerDataRedis.clearRedisData(DataType.SERVER, id);
 

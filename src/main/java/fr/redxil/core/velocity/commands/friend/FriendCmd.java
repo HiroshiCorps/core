@@ -72,7 +72,6 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
 
 
     public void sendCommandList(CommandContext<CommandSource> commandContext) {
-        CommandSource commandSource = commandContext.getSource();
         StringBuilder stringBuilder = new StringBuilder("Veuillez utiliser l'une des composantes suivantes:");
         for (FriendCmd.ListCmd cmd : FriendCmd.ListCmd.values()) {
             stringBuilder.append("\n" + Color.GRAY + "> /friend ").append(cmd.getName()).append(": ").append(Color.BLUE).append(" ").append(cmd.getUtility());
@@ -96,7 +95,7 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        apiPlayer.get().createLink(target.get(), "friendInvite");
+        apiPlayer.get().createLink(LinkUsage.SENDER, target.get(), "friendInvite");
         commandContext.getSource().sendMessage(Component.text("Demande d'amis envoyée").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
     }
 
@@ -111,12 +110,13 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friendInvite");
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.RECEIVER, target.get(), "friendInvite");
         if (linkData.isEmpty()) {
             commandContext.getSource().sendMessage(Component.text("Il n'y a aucune demande en cours de sa part").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
-        linkData.get().setLinkType("friend");
+        linkData.get().deleteLink();
+        apiPlayer.get().createLink(LinkUsage.BOTH, target.get(), "friend");
         commandContext.getSource().sendMessage(Component.text("Sa demande d'amis à été accepté").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
     }
 
@@ -131,12 +131,12 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friendInvite");
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.RECEIVER, target.get(), "friendInvite");
         if (linkData.isEmpty()) {
             commandContext.getSource().sendMessage(Component.text("Il n'y a aucune demande en cours de sa part").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
-        linkData.get().setLinkType("friendRefused");
+        linkData.get().deleteLink();
         commandContext.getSource().sendMessage(Component.text("Sa demande d'amis à été refusée").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
 
     }
@@ -152,13 +152,13 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.TO, target.get(), "friendInvite");
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.SENDER, target.get(), "friendInvite");
         if (linkData.isEmpty()) {
             commandContext.getSource().sendMessage(Component.text("Il n'y a aucune demande en cours de sa part").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
-        linkData.get().setLinkType("friendRevoke");
+        linkData.get().deleteLink();
         commandContext.getSource().sendMessage(Component.text("Votre demande d'amis à été retiré").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
     }
 
@@ -172,13 +172,13 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.FROM, target.get(), "friend");
+        Optional<LinkData> linkData = apiPlayer.get().getLink(LinkUsage.BOTH, target.get(), "friend");
         if (linkData.isEmpty()) {
             commandContext.getSource().sendMessage(Component.text("Cette personne n'est pas dans vos amis").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
-        linkData.get().setLinkType("friendRemove");
+        linkData.get().deleteLink();
         commandContext.getSource().sendMessage(Component.text("Joueur retiré de vos Amis").color(TextColor.color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue())));
 
     }
@@ -200,7 +200,7 @@ public class FriendCmd extends LiteralArgumentCreator<CommandSource> {
         for (LinkData ami : amisList) {
             String connect = "Déconnecté";
             Color bc = Color.RED;
-            Optional<APIOfflinePlayer> amis = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(ami.getFromPlayer() == apiPlayer.get().getMemberID() ? ami.getToPlayer() : ami.getFromPlayer());
+            Optional<APIOfflinePlayer> amis = CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(ami.getPlayerReceiver());
             if (amis.isPresent()) {
                 if (amis.get() instanceof Player) {
                     connect = "Connecté";

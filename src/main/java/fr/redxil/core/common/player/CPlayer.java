@@ -77,7 +77,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         setIP(ipInfo);
 
+        boolean onlineEnded = false;
+
         if (CoreAPI.getInstance().isOnlineMod()) {
+            onlineEnded = true;
             Optional<PlayerModel> playerModel1 = new SQLModels<>(PlayerModel.class).getOrInsert(new HashMap<>() {{
                 this.put(PlayerDataSql.PLAYER_NAME_SQL.getSQLColumns(), name);
                 this.put(PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns(), uuid.toString());
@@ -85,33 +88,43 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
                 this.put(PlayerDataSql.PLAYER_IP_SQL.getSQLColumns(), ipInfo.getIp());
             }}, "WHERE " + PlayerDataSql.PLAYER_UUID_SQL.getSQLColumns().toSQL() + " = ?", uuid.toString());
 
-            this.memberID = playerModel.getMemberID();
+            if (playerModel1.isEmpty())
+                onlineEnded = false;
+            else {
 
-            this.moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<>() {{
+                this.playerModel = playerModel1.get();
+
+                Timestamp timestamp = (Timestamp) playerModel1.get().get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns());
+
+                String timeStampString = timestamp == null ? null : timestamp.toString();
+                initRankTimeReminder();
+                initRankReminder();
+                rankReminder.setData(playerModel1.get().getRank().getRankPower());
+                rankTimerReminder.setData(timeStampString);
+
+                initRealRankReminder();
+                initRealRankTimeReminder();
+                realRankReminder.setData(playerModel1.get().getRank().getRankPower());
+                realRankTimerReminder.setData(timeStampString);
+
+                this.memberID = playerModel1.get().getMemberID();
+
+            }
+
+            Optional<MoneyModel> moneyModel = new SQLModels<>(MoneyModel.class).getOrInsert(new HashMap<>() {{
                 this.put(MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns(), memberID);
                 this.put(MoneyDataSql.PLAYER_SOLDE_SQL.getSQLColumns(), 0);
                 this.put(MoneyDataSql.PLAYER_COINS_SQL.getSQLColumns(), 0);
             }}, "WHERE " + MoneyDataSql.PLAYER_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", Long.valueOf(memberID).intValue());
 
-            PlayerDataRedis.clearRedisData(DataType.PLAYER, memberID);
+            if (moneyModel.isPresent()) {
+                setCoins(moneyModel.get().getCoins());
+                setSolde(moneyModel.get().getSolde());
+            } else onlineEnded = false;
 
-            setCoins(moneyModel.getCoins());
-            setSolde(moneyModel.getSolde());
+        }
 
-            Timestamp timestamp = (Timestamp) playerModel.get(PlayerDataSql.PLAYER_RANK_TIME_SQL.getSQLColumns());
-
-            String timeStampString = timestamp == null ? null : timestamp.toString();
-            initRankTimeReminder();
-            initRankReminder();
-            rankReminder.setData(playerModel.getRank().getRankPower());
-            rankTimerReminder.setData(timeStampString);
-
-            initRealRankReminder();
-            initRealRankTimeReminder();
-            realRankReminder.setData(playerModel.getRank().getRankPower());
-            realRankTimerReminder.setData(timeStampString);
-
-        } else {
+        if (!onlineEnded) {
             initRankTimeReminder();
             initRankReminder();
             rankReminder.setData(Rank.JOUEUR.getRankPower());

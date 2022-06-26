@@ -64,22 +64,22 @@ public class BlackListCmd extends LiteralArgumentCreator<CommandSource> {
             boolean remove = cmd.equalsIgnoreCase("remove");
             if (remove) {
 
-                Optional<LinkData> linkData = sp.get().getLink(LinkUsage.TO, osp.get(), "blacklist");
+                Optional<LinkData> linkData = sp.get().getLink(LinkUsage.SENDER, osp.get(), "blacklist");
                 if (linkData.isEmpty()) {
                     commandContext.getSource().sendMessage(Component.text("Erreur, le joueur: " + target + " n'est pas BlackList").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
                     return;
                 }
 
-                linkData.get().setLinkType("blacklistRevoked");
+                linkData.get().deleteLink();
 
             } else {
 
-                if (sp.get().hasLinkWith(LinkUsage.TO, osp.get(), "blacklist")) {
+                if (sp.get().hasLinkWith(LinkUsage.SENDER, osp.get(), "blacklist")) {
                     commandContext.getSource().sendMessage(Component.text("Erreur, le joueur: " + target + " est déjà BlackList").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
                     return;
                 }
 
-                sp.get().createLink(osp.get(), "blacklist");
+                sp.get().createLink(LinkUsage.SENDER, osp.get(), "blacklist");
 
             }
 

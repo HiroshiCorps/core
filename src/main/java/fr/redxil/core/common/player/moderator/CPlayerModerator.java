@@ -54,15 +54,17 @@ public class CPlayerModerator implements APIPlayerModerator {
         nameReminder.setData(name);
 
         if (CoreAPI.getInstance().isOnlineMod()) {
-            ModeratorModel model = new SQLModels<>(ModeratorModel.class).getOrInsert(new HashMap<>() {{
+            Optional<ModeratorModel> model = new SQLModels<>(ModeratorModel.class).getOrInsert(null, new HashMap<>() {{
                 this.put(ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns(), memberID.intValue());
                 this.put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
                 this.put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(false).toString());
             }}, "WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID.intValue());
 
-            setModeratorMod(Boolean.parseBoolean(model.getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns())));
-            setVanish(Boolean.parseBoolean(model.getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns())));
-            setCible(model.getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
+            if (model.isPresent()) {
+                setModeratorMod(Boolean.parseBoolean(model.get().getString(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns())));
+                setVanish(Boolean.parseBoolean(model.get().getString(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns())));
+                setCible(model.get().getString(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns()));
+            }
 
         } else
             CoreAPI.getInstance().getModeratorManager().getMap().put(memberID, this);
@@ -85,13 +87,13 @@ public class CPlayerModerator implements APIPlayerModerator {
 
         if (CoreAPI.getInstance().isOnlineMod()) {
 
-            ModeratorModel model = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
+            Optional<ModeratorModel> modelOpt = new SQLModels<>(ModeratorModel.class).getFirst("WHERE " + ModeratorDataSql.MODERATOR_MEMBERID_SQL.getSQLColumns().toSQL() + " = ?", memberID);
 
-            model.set(new HashMap<>() {{
+            modelOpt.ifPresent(model -> model.set(new HashMap<>() {{
                 put(ModeratorDataSql.MODERATOR_MOD_SQL.getSQLColumns(), Boolean.valueOf(isModeratorMod()).toString());
                 put(ModeratorDataSql.MODERATOR_VANISH_SQL.getSQLColumns(), Boolean.valueOf(isVanish()).toString());
                 put(ModeratorDataSql.MODERATOR_CIBLE_SQL.getSQLColumns(), getCible());
-            }});
+            }}));
 
             ModeratorDataRedis.clearRedisData(DataType.PLAYER, this.getMemberID());
 

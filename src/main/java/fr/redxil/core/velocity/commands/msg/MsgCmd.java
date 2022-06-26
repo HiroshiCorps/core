@@ -53,14 +53,14 @@ public class MsgCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        if (sp.get().hasLinkWith(LinkUsage.TO, target.get(), "blacklist")) {
+        if (sp.get().hasLinkWith(LinkUsage.SENDER, target.get(), "blacklist")) {
             commandContext.getSource().sendMessage(Component.text("Vous ne pouvez pas mp un joueur que vous avez blacklisté").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         String message = commandContext.getArgument("message", String.class);
 
-        if (!target.get().hasLinkWith(LinkUsage.TO, sp.get(), "blacklist")) {
+        if (!target.get().hasLinkWith(LinkUsage.SENDER, sp.get(), "blacklist")) {
             target.get().sendMessage(
                     Color.RED.getMOTD() + "N'oubliez pas le /blacklist add en cas d'harcélement" +
                             "\n" + sp.get() + Color.WHITE.getBlue() + ": " + message
