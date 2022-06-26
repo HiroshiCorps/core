@@ -188,11 +188,6 @@ public class CoreVelocity implements APIEnabler {
     }
 
     @Override
-    public String getPluginVersion() {
-        return getProxyServer().getVersion().getVersion();
-    }
-
-    @Override
     public File getPluginDataFolder() {
         return folder;
     }

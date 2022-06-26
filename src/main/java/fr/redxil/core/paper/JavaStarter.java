@@ -14,7 +14,7 @@ public class JavaStarter extends JavaPlugin {
     public void onDisable() {
         if (CoreAPI.isAPIEnabled()) {
             CoreAPI.getInstance().getGameManager().getGameByServerID(CoreAPI.getInstance().getServerID()).ifPresent(Game::clearData);
-            CoreAPI.getInstance().getServer().shutdown();
+            CoreAPI.getInstance().shutdown();
         }
     }
 
