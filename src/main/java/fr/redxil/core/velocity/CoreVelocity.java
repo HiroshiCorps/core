@@ -65,7 +65,6 @@ public class CoreVelocity implements APIEnabler {
     final File folder;
     final CommandManager commandManager;
     final IpInfo ipInfo;
-    boolean enabled = false;
 
     public CoreVelocity(ProxyServer server, CommandManager commandManager, Logger logger, File folder) {
 
@@ -126,16 +125,6 @@ public class CoreVelocity implements APIEnabler {
     @Override
     public void onAPILoadFail(APIPhaseInit apiPhaseInit, APILoadError apiLoadError) {
 
-    }
-
-    @Override
-    public boolean isPluginEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public void setPluginEnable(boolean b) {
-        enabled = b;
     }
 
     public void registerEvents() {

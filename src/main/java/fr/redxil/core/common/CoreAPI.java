@@ -104,7 +104,7 @@ public class CoreAPI extends API {
     @Override
     public void shutdown() {
 
-        if (!getAPIEnabler().isPluginEnabled())
+        if (!API.enabled)
             return;
 
         API.enabled = false;
