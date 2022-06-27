@@ -43,6 +43,8 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         Player player = event.getPlayer();
 
         Optional<APIPlayer> apiPlayerOptional = CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        Optional<APIPlayerModerator> apiPlayerModeratorOptional = Optional.empty();
+
         if (apiPlayerOptional.isEmpty() && CoreAPI.getInstance().isOnlineMod()) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
             return;
@@ -62,11 +64,24 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
                 return;
             }
 
-            apiPlayerOptional.ifPresent(apiPlayer1 -> CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer1.getMemberID(), apiPlayer1.getUUID(), apiPlayer1.getRealName()));
+            APIPlayer apiPlayer = apiPlayerOptional.get();
+            apiPlayerModeratorOptional = CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer.getMemberID(), apiPlayer.getUUID(), apiPlayer.getRealName());
 
         }
 
-        Bukkit.getPluginManager().callEvent(new PlayerLoggedEvent(apiPlayerOptional.get()));
+        APIPlayer apiPlayer = apiPlayerOptional.get();
+
+        Bukkit.getPluginManager().callEvent(new PlayerLoggedEvent(apiPlayer));
+        Nick.applyNick(player, apiPlayer);
+        corePlugin.getVanish().applyVanish(player);
+
+        apiPlayerModeratorOptional = apiPlayerModeratorOptional.isEmpty() ? CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID()) : apiPlayerModeratorOptional;
+
+        if (apiPlayerModeratorOptional.isPresent()) {
+            APIPlayerModerator playerModerator = apiPlayerModeratorOptional.get();
+            corePlugin.getModeratorMain().setModerator(playerModerator, playerModerator.isModeratorMod(), true);
+            corePlugin.getVanish().setVanish(playerModerator, playerModerator.isVanish());
+        }
 
     }
 
@@ -89,17 +104,8 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
             event.setJoinMessage(getJoinMessage(apiPlayer));
         }
 
-        Nick.applyNick(player, apiPlayer);
-        corePlugin.getVanish().applyVanish(player);
-
         CoreAPI.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
         apiPlayer.setServerID(CoreAPI.getInstance().getServerID());
-        Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
-
-        if (playerModerator.isPresent()) {
-            corePlugin.getModeratorMain().setModerator(playerModerator.get(), playerModerator.get().isModeratorMod(), true);
-            corePlugin.getVanish().setVanish(playerModerator.get(), playerModerator.get().isVanish());
-        }
 
         Bukkit.getPluginManager().callEvent(new PlayerConnectedEvent(apiPlayer));
 
