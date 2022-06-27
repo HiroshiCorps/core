@@ -3,8 +3,8 @@ package fr.redxil.core.common.player;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.LinkCheck;
 import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.data.Setting;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
@@ -254,7 +254,7 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public Optional<LinkData> createLink(LinkUsage linkUsage, APIOfflinePlayer arg0, String arg1) {
+    public Optional<LinkData> createLink(LinkCheck linkUsage, APIOfflinePlayer arg0, String arg1) {
         return Optional.empty();
     }
 
@@ -269,12 +269,12 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public Optional<LinkData> getLink(LinkUsage arg0, APIOfflinePlayer arg1, String... arg2) {
+    public Optional<LinkData> getLink(LinkCheck arg0, APIOfflinePlayer arg1, String... arg2) {
         return Optional.empty();
     }
 
     @Override
-    public List<LinkData> getLinks(LinkUsage arg0, APIOfflinePlayer arg1, String... arg2) {
+    public List<LinkData> getLinks(LinkCheck arg0, APIOfflinePlayer arg1, String... arg2) {
         return new ArrayList<>();
     }
 
@@ -304,7 +304,7 @@ public class CServerPlayer implements APIPlayer {
     }
 
     @Override
-    public boolean hasLinkWith(LinkUsage arg0, APIOfflinePlayer arg1, String... arg2) {
+    public boolean hasLinkWith(LinkCheck arg0, APIOfflinePlayer arg1, String... arg2) {
         return false;
     }
 

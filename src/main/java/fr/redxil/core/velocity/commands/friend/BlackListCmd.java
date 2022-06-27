@@ -15,8 +15,8 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
+import fr.redxil.api.common.player.data.LinkCheck;
 import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.api.common.player.data.LinkUsage;
 import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
@@ -64,7 +64,7 @@ public class BlackListCmd extends LiteralArgumentCreator<CommandSource> {
             boolean remove = cmd.equalsIgnoreCase("remove");
             if (remove) {
 
-                Optional<LinkData> linkData = sp.get().getLink(LinkUsage.SENDER, osp.get(), "blacklist");
+                Optional<LinkData> linkData = sp.get().getLink(LinkCheck.SENDER, osp.get(), "blacklist");
                 if (linkData.isEmpty()) {
                     commandContext.getSource().sendMessage(Component.text("Erreur, le joueur: " + target + " n'est pas BlackList").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
                     return;
@@ -74,12 +74,12 @@ public class BlackListCmd extends LiteralArgumentCreator<CommandSource> {
 
             } else {
 
-                if (sp.get().hasLinkWith(LinkUsage.SENDER, osp.get(), "blacklist")) {
+                if (sp.get().hasLinkWith(LinkCheck.SENDER, osp.get(), "blacklist")) {
                     commandContext.getSource().sendMessage(Component.text("Erreur, le joueur: " + target + " est déjà BlackList").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
                     return;
                 }
 
-                sp.get().createLink(LinkUsage.SENDER, osp.get(), "blacklist");
+                sp.get().createLink(LinkCheck.SENDER, osp.get(), "blacklist");
 
             }
 

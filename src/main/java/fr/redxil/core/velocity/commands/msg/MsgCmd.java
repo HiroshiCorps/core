@@ -14,7 +14,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import fr.redxil.api.common.player.APIPlayer;
-import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.api.common.player.data.LinkCheck;
 import fr.redxil.api.common.utils.Color;
 import fr.redxil.api.common.utils.cmd.LiteralArgumentCreator;
 import fr.redxil.core.common.CoreAPI;
@@ -53,14 +53,14 @@ public class MsgCmd extends LiteralArgumentCreator<CommandSource> {
             return;
         }
 
-        if (sp.get().hasLinkWith(LinkUsage.SENDER, target.get(), "blacklist")) {
+        if (sp.get().hasLinkWith(LinkCheck.SENDER, target.get(), "blacklist")) {
             commandContext.getSource().sendMessage(Component.text("Vous ne pouvez pas mp un joueur que vous avez blacklisté").color(TextColor.color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue())));
             return;
         }
 
         String message = commandContext.getArgument("message", String.class);
 
-        if (!target.get().hasLinkWith(LinkUsage.SENDER, sp.get(), "blacklist")) {
+        if (!target.get().hasLinkWith(LinkCheck.SENDER, sp.get(), "blacklist")) {
             target.get().sendMessage(
                     Color.RED.getMOTD() + "N'oubliez pas le /blacklist add en cas d'harcélement" +
                             "\n" + sp.get() + Color.WHITE.getBlue() + ": " + message

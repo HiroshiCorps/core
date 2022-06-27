@@ -11,10 +11,7 @@ package fr.redxil.core.common.player;
 
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.player.APIOfflinePlayer;
-import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.api.common.player.data.LinkUsage;
-import fr.redxil.api.common.player.data.SanctionInfo;
-import fr.redxil.api.common.player.data.Setting;
+import fr.redxil.api.common.player.data.*;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
 import fr.redxil.api.common.utils.Pair;
@@ -277,21 +274,21 @@ public class CPlayerOffline implements APIOfflinePlayer {
 
 
     @Override
-    public boolean hasLinkWith(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... strings) {
+    public boolean hasLinkWith(LinkCheck linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... strings) {
         return getLink(linkUsage, apiOfflinePlayer, strings).isPresent();
     }
 
     @Override
-    public List<LinkData> getLinks(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
+    public List<LinkData> getLinks(LinkCheck linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
         Pair<String, List<Object>> pair = getWhereString(linkUsage, apiOfflinePlayer);
         pair.getTwo().add(s);
         return new ArrayList<>() {{
-            this.addAll(new SQLModels<>(OfflineLinkModel.class).get("(" + pair.getOne() + ") AND " + getStringSQL(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), s.length) + " ORDER BY " + LinkDataSql.LINK_ID_SQL.getSQLColumns().toSQL() + " DESC", pair.getTwo().toArray(), s));
+            this.addAll(new SQLModels<>(OfflineLinkModel.class).get("WHERE (" + pair.getOne() + ") AND " + getStringSQL(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), s.length) + " ORDER BY " + LinkDataSql.LINK_ID_SQL.getSQLColumns().toSQL() + " DESC", pair.getTwo().toArray(), s));
         }};
     }
 
     @Override
-    public Optional<LinkData> getLink(LinkUsage linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
+    public Optional<LinkData> getLink(LinkCheck linkUsage, @Nullable APIOfflinePlayer apiOfflinePlayer, String... s) {
         List<LinkData> linkList = getLinks(linkUsage, apiOfflinePlayer, s);
         if (linkList.isEmpty())
             return Optional.empty();
@@ -299,16 +296,14 @@ public class CPlayerOffline implements APIOfflinePlayer {
     }
 
     @Override
-    public Optional<LinkData> createLink(LinkUsage linkUsage, APIOfflinePlayer apiOfflinePlayer, String s) {
+    public Optional<LinkData> createLink(LinkCheck linkUsage, APIOfflinePlayer apiOfflinePlayer, String s) {
 
         if (!CoreAPI.getInstance().isOnlineMod())
             return Optional.empty();
 
-        OfflineLinkModel linkData = new OfflineLinkModel(this, apiOfflinePlayer, s, linkUsage);
+        OfflineLinkModel linkData = new OfflineLinkModel(this, apiOfflinePlayer, s, linkUsage == LinkCheck.BOTH ? LinkType.BOTH : LinkType.SENDER_RECEIVER);
 
         new SQLModels<>(OfflineLinkModel.class).insert(linkData);
-
-        linkData.setLinkUsage(getMemberID());
 
         return getLink(linkUsage, apiOfflinePlayer, s);
 
@@ -464,7 +459,7 @@ public class CPlayerOffline implements APIOfflinePlayer {
         return false;
     }
 
-    public Pair<String, List<Object>> getWhereString(LinkUsage linkUsage, @Nullable APIOfflinePlayer player2) {
+    public Pair<String, List<Object>> getWhereString(LinkCheck linkUsage, @Nullable APIOfflinePlayer player2) {
         int id1 = Long.valueOf(getMemberID()).intValue();
         Integer id2 = null;
         if (player2 != null)
@@ -493,8 +488,8 @@ public class CPlayerOffline implements APIOfflinePlayer {
                 }});
             }
             case BOTH -> {
-                Pair<String, List<Object>> one = getWhereString(LinkUsage.SENDER, player2);
-                Pair<String, List<Object>> two = getWhereString(LinkUsage.RECEIVER, player2);
+                Pair<String, List<Object>> one = getWhereString(LinkCheck.SENDER, player2);
+                Pair<String, List<Object>> two = getWhereString(LinkCheck.RECEIVER, player2);
                 return new Pair<>("(" + one.getOne() + ") OR (" + two.getOne() + ")", new ArrayList<>(one.getTwo()) {{
                     add(two.getTwo());
                 }});

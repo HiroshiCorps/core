@@ -16,9 +16,9 @@ public enum LinkDataSql {
     LINK_ID_SQL("link", "link_id"),
     RECEIVED_ID_SQL("link", "receiver_id"),
     SENDER_ID_SQL("link", "sender_id"),
-    LINK_TYPE_SQL("link", "link_state"),
+    LINK_NAME_SQL("link", "link_name"),
 
-    LINK_USAGE_SQL("link", "link_usage");
+    LINK_TYPE_SQL("link", "link_type");
 
     final SQLColumns sqlColumns;
 

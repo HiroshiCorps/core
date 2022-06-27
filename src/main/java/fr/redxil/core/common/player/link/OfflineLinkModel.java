@@ -10,8 +10,9 @@
 package fr.redxil.core.common.player.link;
 
 import fr.redxil.api.common.player.APIOfflinePlayer;
+import fr.redxil.api.common.player.data.LinkCheck;
 import fr.redxil.api.common.player.data.LinkData;
-import fr.redxil.api.common.player.data.LinkUsage;
+import fr.redxil.api.common.player.data.LinkType;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.common.data.link.LinkDataSql;
 import fr.redxil.core.common.redis.RedisManager;
@@ -20,23 +21,18 @@ import fr.redxil.core.common.sql.SQLModel;
 import java.util.Optional;
 
 public class OfflineLinkModel extends SQLModel implements LinkData {
-
-    LinkUsage linkUsage;
-
     @Override
     public int getLinkID() {
         return getInt(LinkDataSql.LINK_ID_SQL.getSQLColumns());
     }
 
 
-    public OfflineLinkModel(APIOfflinePlayer creator, APIOfflinePlayer target, String type, LinkUsage linkUsage) {
+    public OfflineLinkModel(APIOfflinePlayer sender, APIOfflinePlayer receiver, String type, LinkType linkType) {
         super("link", LinkDataSql.LINK_ID_SQL.getSQLColumns());
-        this.set(LinkDataSql.SENDER_ID_SQL.getSQLColumns(), Long.valueOf(creator.getMemberID()).intValue());
-        this.set(LinkDataSql.RECEIVED_ID_SQL.getSQLColumns(), Long.valueOf(target.getMemberID()).intValue());
-        this.set(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), type);
-        if (linkUsage == LinkUsage.BOTH)
-            this.set(LinkDataSql.LINK_USAGE_SQL.getSQLColumns(), linkUsage.name());
-        else this.set(LinkDataSql.LINK_USAGE_SQL.getSQLColumns(), "SENDER_RECEIVER");
+        this.set(LinkDataSql.SENDER_ID_SQL.getSQLColumns(), Long.valueOf(sender.getMemberID()).intValue());
+        this.set(LinkDataSql.RECEIVED_ID_SQL.getSQLColumns(), Long.valueOf(receiver.getMemberID()).intValue());
+        this.set(LinkDataSql.LINK_NAME_SQL.getSQLColumns(), type);
+        this.set(LinkDataSql.LINK_TYPE_SQL.getSQLColumns(), linkType);
     }
 
     @Override
@@ -45,8 +41,8 @@ public class OfflineLinkModel extends SQLModel implements LinkData {
     }
 
     @Override
-    public String getLinkType() {
-        return getString(LinkDataSql.LINK_TYPE_SQL.getSQLColumns());
+    public LinkType getLinkType() {
+        return LinkType.valueOf(this.getString(LinkDataSql.LINK_TYPE_SQL.getSQLColumns()));
     }
 
     @Override
@@ -55,14 +51,8 @@ public class OfflineLinkModel extends SQLModel implements LinkData {
     }
 
     @Override
-    public LinkUsage getLinkUsage() {
-        return linkUsage;
-    }
-
-    public void setLinkUsage(long connectedPlayer) {
-        if (!this.getString(LinkDataSql.LINK_USAGE_SQL.getSQLColumns()).equals(LinkUsage.BOTH.name()))
-            this.linkUsage = connectedPlayer == getPlayerSender() ? LinkUsage.SENDER : LinkUsage.RECEIVER;
-        else this.linkUsage = LinkUsage.BOTH;
+    public String getLinkName() {
+        return this.getString(LinkDataSql.LINK_NAME_SQL.getSQLColumns());
     }
 
     @Override
@@ -75,15 +65,13 @@ public class OfflineLinkModel extends SQLModel implements LinkData {
         if (redisManagerOptional.isEmpty())
             return;
         RedisManager redisManager = redisManagerOptional.get();
-        if (getLinkUsage() == LinkUsage.BOTH) {
-            if (connectedPlayer == getPlayerSender())
-                redisManager.getRedisMap("link/" + getPlayerSender() + LinkUsage.BOTH + getLinkType()).put(getLinkID(), getPlayerReceiver());
-            else
-                redisManager.getRedisMap("link/" + getPlayerReceiver() + LinkUsage.BOTH + getLinkType()).put(getLinkID(), getPlayerSender());
-        } else if (getLinkUsage() == LinkUsage.RECEIVER) {
-            redisManager.getRedisMap("link/" + getPlayerReceiver() + LinkUsage.RECEIVER + getLinkType()).put(getLinkID(), getPlayerSender());
-        } else
-            redisManager.getRedisMap("link/" + getPlayerSender() + LinkUsage.SENDER + getLinkType()).put(getLinkID(), getPlayerReceiver());
+        boolean sender = connectedPlayer == getPlayerSender();
+        if (getLinkType() == LinkType.BOTH) {
+            redisManager.getRedisMap("link/" + connectedPlayer + "/" + LinkCheck.BOTH + "/" + getLinkType()).put(getLinkID(), sender ? getPlayerReceiver() : getPlayerSender());
+        } else {
+            LinkCheck linkCheck = sender ? LinkCheck.SENDER : LinkCheck.RECEIVER;
+            redisManager.getRedisMap("link/" + getPlayerSender() + "/" + linkCheck + "/" + getLinkType()).put(getLinkID(), getPlayerReceiver());
+        }
     }
 
 }

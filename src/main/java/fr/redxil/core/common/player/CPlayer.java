@@ -13,6 +13,7 @@ import fr.redline.pms.pm.RedisPMManager;
 import fr.redline.pms.utils.IpInfo;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
+import fr.redxil.api.common.player.data.LinkData;
 import fr.redxil.api.common.player.data.SanctionInfo;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
 import fr.redxil.api.common.player.rank.Rank;
@@ -36,6 +37,7 @@ import fr.redxil.core.common.utils.IDGenerator;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 
 public class CPlayer extends CPlayerOffline implements APIPlayer {
@@ -158,9 +160,10 @@ public class CPlayer extends CPlayerOffline implements APIPlayer {
 
         List<OfflineLinkModel> offlineLinkModelList = new SQLModels<>(OfflineLinkModel.class).get("SELECT * FROM link WHERE " + LinkDataSql.RECEIVED_ID_SQL.getSQLColumns().toSQL() + " = ? OR " + LinkDataSql.SENDER_ID_SQL.getSQLColumns().toSQL() + " = ?", cPlayer.getMemberID(), cPlayer.getMemberID());
         for (OfflineLinkModel offlineLinkModel : offlineLinkModelList) {
-            cpm.getLinkOnConnectAction(offlineLinkModel.getLinkType()).accept(cPlayer, offlineLinkModel);
-            offlineLinkModel.setLinkUsage(cPlayer.getMemberID());
             offlineLinkModel.redisRegister(cPlayer.getMemberID());
+            BiConsumer<APIPlayer, LinkData> te = cpm.getLinkOnConnectAction(offlineLinkModel.getLinkName());
+            if (te != null)
+                te.accept(cPlayer, offlineLinkModel);
         }
     }
 
