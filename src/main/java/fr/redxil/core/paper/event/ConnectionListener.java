@@ -10,6 +10,7 @@
 package fr.redxil.core.paper.event;
 
 import fr.redline.pms.utils.IpInfo;
+import fr.redxil.api.common.API;
 import fr.redxil.api.common.game.Game;
 import fr.redxil.api.common.game.utils.GameState;
 import fr.redxil.api.common.game.utils.PlayerState;
@@ -17,10 +18,14 @@ import fr.redxil.api.common.player.APIOfflinePlayer;
 import fr.redxil.api.common.player.APIPlayer;
 import fr.redxil.api.common.player.APIPlayerManager;
 import fr.redxil.api.common.player.moderators.APIPlayerModerator;
+import fr.redxil.api.paper.event.connection.PlayerConnectedEvent;
+import fr.redxil.api.paper.event.connection.PlayerDisconnectedEvent;
+import fr.redxil.api.paper.event.connection.PlayerLoggedEvent;
 import fr.redxil.api.paper.game.GameBuilder;
 import fr.redxil.core.common.CoreAPI;
 import fr.redxil.core.paper.CorePlugin;
 import fr.redxil.core.paper.utils.Nick;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,12 +40,33 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
     @EventHandler
     public void playerJoinEvent(PlayerLoginEvent event) {
 
-        Player p = event.getPlayer();
+        Player player = event.getPlayer();
 
-        Optional<APIPlayer> apiPlayer = CoreAPI.getInstance().getPlayerManager().getPlayer(p.getUniqueId());
-        if (apiPlayer.isPresent() && CoreAPI.getInstance().isOnlineMod()) {
+        Optional<APIPlayer> apiPlayerOptional = CoreAPI.getInstance().getPlayerManager().getPlayer(player.getUniqueId());
+        if (apiPlayerOptional.isEmpty() && CoreAPI.getInstance().isOnlineMod()) {
             event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+            return;
         }
+
+        if (apiPlayerOptional.isEmpty()) {
+
+            if (player.getAddress() == null) {
+                event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+                return;
+            }
+
+            apiPlayerOptional = API.getInstance().getPlayerManager().loadPlayer(player.getDisplayName(), player.getUniqueId(), new IpInfo(player.getAddress().getHostName(), player.getAddress().getPort()));
+
+            if (apiPlayerOptional.isEmpty()) {
+                event.setResult(PlayerLoginEvent.Result.KICK_OTHER);
+                return;
+            }
+
+            apiPlayerOptional.ifPresent(apiPlayer1 -> CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer1.getMemberID(), apiPlayer1.getUUID(), apiPlayer1.getRealName()));
+
+        }
+
+        Bukkit.getPluginManager().callEvent(new PlayerLoggedEvent(apiPlayerOptional.get()));
 
     }
 
@@ -50,38 +76,32 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
         APIPlayerManager apiPlayerManager = CoreAPI.getInstance().getPlayerManager();
         Player player = event.getPlayer();
 
-        Optional<APIPlayer> apiPlayer;
-        if (CoreAPI.getInstance().isOnlineMod())
-            apiPlayer = apiPlayerManager.getPlayer(player.getUniqueId());
-        else {
-            if (player.getAddress() == null) {
-                player.kickPlayer("No ip data");
-                return;
-            }
-            apiPlayer = apiPlayerManager.loadPlayer(player.getDisplayName(), player.getUniqueId(), new IpInfo(player.getAddress().getHostName(), player.getAddress().getPort()));
-            apiPlayer.ifPresent(apiPlayer1 -> CoreAPI.getInstance().getModeratorManager().loadModerator(apiPlayer1.getMemberID(), apiPlayer1.getUUID(), apiPlayer1.getRealName()));
-        }
+        Optional<APIPlayer> apiPlayerOptional = apiPlayerManager.getPlayer(player.getUniqueId());
 
-        if (apiPlayer.isEmpty()) {
+        if (apiPlayerOptional.isEmpty()) {
             player.kickPlayer("No data");
             return;
         }
 
+        APIPlayer apiPlayer = apiPlayerOptional.get();
+
         if (event.getJoinMessage() != null) {
-            event.setJoinMessage(getJoinMessage(apiPlayer.get()));
+            event.setJoinMessage(getJoinMessage(apiPlayer));
         }
 
-        Nick.applyNick(player, apiPlayer.get());
+        Nick.applyNick(player, apiPlayer);
         corePlugin.getVanish().applyVanish(player);
 
         CoreAPI.getInstance().getServer().setPlayerConnected(player.getUniqueId(), true);
-        apiPlayer.get().setServerID(CoreAPI.getInstance().getServerID());
-        Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.get().getMemberID());
+        apiPlayer.setServerID(CoreAPI.getInstance().getServerID());
+        Optional<APIPlayerModerator> playerModerator = CoreAPI.getInstance().getModeratorManager().getModerator(apiPlayer.getMemberID());
 
         if (playerModerator.isPresent()) {
             corePlugin.getModeratorMain().setModerator(playerModerator.get(), playerModerator.get().isModeratorMod(), true);
             corePlugin.getVanish().setVanish(playerModerator.get(), playerModerator.get().isVanish());
         }
+
+        Bukkit.getPluginManager().callEvent(new PlayerConnectedEvent(apiPlayer));
 
         Optional<GameBuilder> gameBuilderOptional = GameBuilder.getGameBuilder();
         if (gameBuilderOptional.isEmpty())
@@ -122,7 +142,10 @@ public record ConnectionListener(CorePlugin corePlugin) implements Listener {
             CoreAPI.getInstance().getModeratorManager().getModerator(player.getUniqueId()).ifPresent(APIPlayerModerator::disconnectModerator);
         }
 
-        CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> event.setQuitMessage(getQuitMessage(apiOfflinePlayer)));
+        CoreAPI.getInstance().getPlayerManager().getOfflinePlayer(player.getUniqueId()).ifPresent(apiOfflinePlayer -> {
+            event.setQuitMessage(getQuitMessage(apiOfflinePlayer));
+            Bukkit.getPluginManager().callEvent(new PlayerDisconnectedEvent(apiOfflinePlayer));
+        });
 
         Optional<Game> gameOptional = CoreAPI.getInstance().getGameManager().getGameByServerID(CoreAPI.getInstance().getServerID());
         if (gameOptional.isEmpty())
