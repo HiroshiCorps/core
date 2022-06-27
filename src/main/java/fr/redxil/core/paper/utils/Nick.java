@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 public class Nick {
 
     public static void applyNick(Player p, APIPlayer apiPlayer) {
-
         EntityPlayer craftPlayerP = ((CraftPlayer) p).getHandle();
 
         JavaUtils.setDeclaredField(craftPlayerP, "listName", CraftChatMessage.fromString(apiPlayer.getTabString())[0]);

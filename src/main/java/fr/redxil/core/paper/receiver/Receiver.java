@@ -43,5 +43,6 @@ public class Receiver implements PMReceiver {
         if (player == null) return;
 
         Nick.applyNick(player, apiPlayer.get());
+
     }
 }
